@@ -132,6 +132,12 @@ namespace Maxwell
             swap(val_, other.val_);
         }
 
+        constexpr operator Rep() const noexcept
+            requires DimensionlessUnit<Unit>
+        {
+            return val_;
+        }
+
         // Arithmetic operators
         constexpr Quantity& operator+=(Quantity q) noexcept 
         {
@@ -291,14 +297,28 @@ namespace Maxwell
         if constexpr (!LHSType::isInCoherentUnits())
             valUsedLhs = lhs.toCoherentUnits().value();
         else 
-            valUsedRhs = lhs.value();
+            valUsedLhs = lhs.value();
 
         if constexpr(!RHSType::isInCoherentUnits())
-            valUsedRhs = rhs.toCoherentUnits().valu();
+            valUsedRhs = rhs.toCoherentUnits().value();
         else  
             valUsedRhs = rhs.value();
 
         return Quantity<ProductRep, ProductUnits>(valUsedLhs * valUsedRhs);
+    }
+
+    template<Arithmetic Rep, UnitLike Unit> 
+    constexpr auto operator*(Arithmetic auto lhs, Quantity<Rep, Unit> rhs) noexcept 
+    {
+        rhs *= lhs; 
+        return rhs;
+    }
+    
+    template<Arithmetic Rep, UnitLike Unit> 
+    constexpr auto operator*(Quantity<Rep, Unit> lhs, Arithmetic auto rhs) noexcept 
+    {
+        lhs *= rhs; 
+        return lhs;
     }
 
     template<Arithmetic Rep1, UnitLike Unit1, Arithmetic Rep2, UnitLike Unit2> 
@@ -318,11 +338,25 @@ namespace Maxwell
             valUsedRhs = lhs.value();
 
         if constexpr(!RHSType::isInCoherentUnits())
-            valUsedRhs = rhs.toCoherentUnits().valu();
+            valUsedRhs = rhs.toCoherentUnits().value();
         else  
             valUsedRhs = rhs.value();
 
         return Quantity<ProductRep, ProductUnits>(valUsedLhs / valUsedRhs);
+    }
+
+    template<Arithmetic Rep, UnitLike Unit> 
+    constexpr auto operator/(Arithmetic auto lhs, Quantity<Rep, Unit> rhs) noexcept 
+    {
+        using OutputUnits = unit_inverse_t<Unit>;
+        return Quantity<Rep, OutputUnits>(1/rhs.value());
+    }
+    
+    template<Arithmetic Rep, UnitLike Unit> 
+    constexpr auto operator/(Quantity<Rep, Unit> lhs, Arithmetic auto rhs) noexcept 
+    {
+        lhs /= rhs; 
+        return lhs;
     }
 
     template<Arithmetic Rep1, UnitLike Unit1, Arithmetic Rep2, UnitLike Unit2>
@@ -348,5 +382,19 @@ namespace Maxwell
             valUsedRhs = rhs.value();
         
         return Quantity<ProductRep, ProductUnits>(valUsedLhs % valUsedRhs);
+    }
+
+    template<Arithmetic Rep1, UnitLike Unit1, Arithmetic Rep2, UnitLike Unit2> 
+        requires UnitAssignable<Unit1, Unit2>
+    constexpr auto operator<=>(Quantity<Rep1, Unit1> lhs, Quantity<Rep2, Unit2> rhs) noexcept 
+    {
+        return lhs.toCoherentUnits().value() <=> rhs.toCoherentUnits().value();
+    }
+
+    template<Arithmetic Rep1, UnitLike Unit1, Arithmetic Rep2, UnitLike Unit2> 
+        requires UnitAssignable<Unit1, Unit2>
+    constexpr bool operator==(Quantity<Rep1, Unit1> lhs, Quantity<Rep2, Unit2> rhs) noexcept 
+    {
+        return lhs.toCoherentUnits().value() == rhs.toCoherentUnits().value();
     }
 }

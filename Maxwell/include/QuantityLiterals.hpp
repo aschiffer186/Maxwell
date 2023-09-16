@@ -4,6 +4,7 @@
 #include "QuantityCore.hpp"
 #include "UnitCore.hpp"
 #include "UnitTypes.hpp"
+#include <sys/types.h>
 
 #define MAKE_QUANTITY_LITERAL(Unit, literal)\
     consteval Quantity<unsigned long long, Unit> operator ""_##literal(unsigned long long x)\
@@ -17,7 +18,32 @@
 
 namespace Maxwell::Literals 
 {
+    MAKE_QUANTITY_LITERAL(Quectosecond, qs)
+    MAKE_QUANTITY_LITERAL(Rontosecond, rs)
+    MAKE_QUANTITY_LITERAL(Yoctosecond, ys)
+    MAKE_QUANTITY_LITERAL(Zeptosecond, zs)
+    MAKE_QUANTITY_LITERAL(Attosecond, as)
+    MAKE_QUANTITY_LITERAL(Femtosecond, fs)
+    MAKE_QUANTITY_LITERAL(Picosecond, ps)
+    MAKE_QUANTITY_LITERAL(Nanosecond, ns)
+    MAKE_QUANTITY_LITERAL(Microsecond, us)
+    MAKE_QUANTITY_LITERAL(Millisecond, ms)
+    MAKE_QUANTITY_LITERAL(Centisecond, cs)
+    MAKE_QUANTITY_LITERAL(Decisecond, ds)
     MAKE_QUANTITY_LITERAL(Second, s)
+    MAKE_QUANTITY_LITERAL(Decasecond, das)
+    MAKE_QUANTITY_LITERAL(Hectosecond, hs)
+    MAKE_QUANTITY_LITERAL(Kilosecond, ks)
+    MAKE_QUANTITY_LITERAL(Megasecond, Ms)
+    MAKE_QUANTITY_LITERAL(Gigasecond, Gs)
+    MAKE_QUANTITY_LITERAL(Terasecond, Ts)
+    MAKE_QUANTITY_LITERAL(Petasecond, Ps)
+    MAKE_QUANTITY_LITERAL(Exasecond, Es)
+    MAKE_QUANTITY_LITERAL(Zettasecond, Zs)
+    MAKE_QUANTITY_LITERAL(Yottasecond, Ys)
+    MAKE_QUANTITY_LITERAL(Ronnasecond, Rs)
+    MAKE_QUANTITY_LITERAL(Quettasecond, quad_t)
+
     MAKE_QUANTITY_LITERAL(Meter, m)
     MAKE_QUANTITY_LITERAL(Kilogram, kg)
     MAKE_QUANTITY_LITERAL(Ampere, A)
@@ -37,6 +63,8 @@ namespace Maxwell::Literals
     MAKE_QUANTITY_LITERAL(Weber, Wb)
     MAKE_QUANTITY_LITERAL(Tesla, T)
     MAKE_QUANTITY_LITERAL(Henry, H)
+
+    
 }
 
 #endif

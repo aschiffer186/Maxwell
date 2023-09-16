@@ -95,6 +95,15 @@ namespace Maxwell
         return unit_base_quotient_t<Unit1, Unit2>{};
     }
 
+    template<UnitBaseLike U> 
+    struct unit_base_inverse 
+    {
+        using type = UnitBase<U::Prefix, -1*U::Pow>;
+    };
+
+    template<UnitBaseLike U> 
+    using unit_base_inverse_t = unit_base_inverse<U>;
+
     // Metric prefixes
     inline constexpr std::integral auto quetta = 30;
     inline constexpr std::integral auto ronna = 27;
@@ -258,6 +267,22 @@ namespace Maxwell
     {
         return unit_quotient_t<Unit1, Unit2>{};
     }
+
+    template<UnitLike U> 
+    struct unit_inverse 
+    {
+        using type = Unit<unit_base_inverse<typename U::Time>,
+                          unit_base_inverse<typename U::Length>,
+                          unit_base_inverse<typename U::Mass>,
+                          unit_base_inverse<typename U::Current>,
+                          unit_base_inverse<typename U::Temperature>,
+                          unit_base_inverse<typename U::Amount>,
+                          unit_base_inverse<typename U::Luminosity>>;
+                          
+    };
+
+    template<UnitLike U> 
+    using unit_inverse_t = unit_inverse<U>::type;
 
     template<typename LHS, typename RHS> 
     concept UnitAddable = UnitLike<LHS> && UnitLike<RHS> &&

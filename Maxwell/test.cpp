@@ -1,6 +1,9 @@
 #include "include/QuantityCore.hpp"
 #include "include/Unit.hpp"
 #include "include/Quantity.hpp"
+#include "include/UnitCore.hpp"
+
+#include <cmath>
 #include <compare>
 #include <concepts>
 #include <type_traits>
@@ -17,6 +20,7 @@ int main()
     static_assert(q3.units() == Maxwell::Second{}*Maxwell::Meter{});
     static_assert(q4.value() == 1);
 
+    double d = std::pow(1.0_m/2.0_m, 2);
     // bool b = q == comp;
 
     // static_assert(std::is_trivially_default_constructible_v<decltype(q2)>);
