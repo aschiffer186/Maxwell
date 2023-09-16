@@ -51,6 +51,10 @@ namespace Maxwell
     template<UnitBaseLike UnitBase1, UnitBaseLike UnitBase2> 
     inline constexpr bool is_unit_base_not_equal_v = is_unit_base_not_equal<UnitBase1, UnitBase2>::value;
 
+    template<typename LHS, typename RHS> 
+    concept UnitBaseAddable = UnitBaseLike<LHS> && UnitBaseLike<RHS> &&
+        LHS::Pow == RHS::Pow;
+
     template<UnitBaseLike Unit> 
     struct coherent_unit_base 
     {
@@ -112,8 +116,8 @@ namespace Maxwell
     inline constexpr std::integral auto pico = -12;
     inline constexpr std::integral auto femto = -15;
     inline constexpr std::integral auto atto = -18;
-    inline constexpr std::integral auto zepto = -24;
-    inline constexpr std::integral auto yocto = -21; 
+    inline constexpr std::integral auto zepto = -21;
+    inline constexpr std::integral auto yocto = -24; 
     inline constexpr std::integral auto ronto = -27;
     inline constexpr std::integral auto quecto = -30;
 
@@ -153,8 +157,23 @@ namespace Maxwell
     template<typename Tp> 
     concept UnitLike = is_unit_v<Tp>;
 
+    template<UnitLike Tp> 
+    struct is_dimensionless_unit : std::bool_constant<Tp::Time::Pow == 0 &&
+                                                      Tp::Length::Pow == 0 &&
+                                                      Tp::Mass::Pow == 0 &&
+                                                      Tp::Current::Pow == 0 &&
+                                                      Tp::Temperature::Pow == 0 &&
+                                                      Tp::Amount::Pow == 0 &&
+                                                      Tp::Luminosity::Pow == 0>{};
+
+    template<UnitLike Tp> 
+    inline constexpr bool is_dimensionless_unit_v = is_dimensionless_unit<Tp>::value;
+
+    template<typename Tp> 
+    concept DimensionlessUnit = is_dimensionless_unit_v<Tp>;
+
     template<UnitLike Unit1, UnitLike Unit2> 
-    struct is_unit_equal : std::bool_constant<is_unit_base_equal_v<typename Unit1::Length, typename Unit2::Length> &&
+    struct is_unit_equal : std::bool_constant<is_unit_base_equal_v<typename Unit1::Time, typename Unit2::Time> &&
                                               is_unit_base_equal_v<typename Unit1::Length, typename Unit2::Length> &&
                                               is_unit_base_equal_v<typename Unit1::Mass, typename Unit2::Mass> && 
                                               is_unit_base_equal_v<typename Unit1::Current, typename Unit2::Current> && 
@@ -240,13 +259,20 @@ namespace Maxwell
         return unit_quotient_t<Unit1, Unit2>{};
     }
 
-    template<typename Tp1, typename Tp2> 
-    concept UnitAddable = UnitLike<Tp1> && UnitLike<Tp2>;
+    template<typename LHS, typename RHS> 
+    concept UnitAddable = UnitLike<LHS> && UnitLike<RHS> &&
+        UnitBaseAddable<typename LHS::Time, typename RHS::Time> &&
+        UnitBaseAddable<typename LHS::Length, typename RHS::Length> &&
+        UnitBaseAddable<typename LHS::Mass, typename RHS::Mass> &&
+        UnitBaseAddable<typename LHS::Current, typename RHS::Current> &&
+        UnitBaseAddable<typename LHS::Temperature, typename RHS::Temperature> &&
+        UnitBaseAddable<typename LHS::Amount, typename RHS::Amount> &&
+        UnitBaseAddable<typename LHS::Luminosity, typename RHS::Luminosity>;
 
     template<UnitLike From, UnitLike To> 
-    struct is_unit_assignable : std::true_type
+    struct is_unit_assignable
     {
-
+        static constexpr bool value = UnitAddable<From, To>;
     };
 
     template<UnitLike From, UnitLike To> 
@@ -254,6 +280,36 @@ namespace Maxwell
 
     template<typename From, typename To> 
     concept UnitAssignable = UnitLike<From> && UnitLike<To> && is_unit_assignable_v<From, To>;
+
+    template<UnitLike U, std::integral auto Amt> 
+    struct scale_unit_time 
+    {
+        using type = Unit<scale_unit_base_t<typename U::Time, Amt>,
+                          typename U::Length, 
+                          typename U::Mass, 
+                          typename U::Current, 
+                          typename U::Temperature, 
+                          typename U::Amount,
+                          typename U::Luminosity>;
+    };
+
+    template<UnitLike U, std::integral auto Amt>
+    using scale_unit_time_t = scale_unit_time<U, Amt>::type;
+
+    template<UnitLike U, std::integral auto Amt> 
+    struct scale_unit_length
+    {
+        using type = Unit<typename U::Time,
+                          scale_unit_base_t<typename U::Length, Amt>, 
+                          typename U::Mass, 
+                          typename U::Current, 
+                          typename U::Temperature, 
+                          typename U::Amount,
+                          typename U::Luminosity>;
+    };
+
+    template<UnitLike U, std::integral auto Amt>
+    using scale_unit_length_t = scale_unit_length<U, Amt>::type;
 
     //Base Units 
     using Second = Unit<UnitBase<0, 1>, NullUnit, NullUnit, NullUnit, NullUnit, NullUnit, NullUnit>;
