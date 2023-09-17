@@ -122,8 +122,8 @@ namespace Maxwell
     using Tesla = decltype(Weber{}/(Meter{}*Meter{}));
     using Henry = decltype(Weber{}/Ampere{}); 
 
-    using Radian = Dimensionless;
-    using Degree = Meter;
+    using Radian = Unit<NullUnit, NullUnit, NullUnit, NullUnit, NullUnit, NullUnit, NullUnit, UnitBase<0, 1>>;
+    using Degree = Unit<NullUnit, NullUnit, NullUnit, NullUnit, NullUnit, NullUnit, NullUnit, UnitBase<0, 1, 5729577951, 100'100'100>>;
 }
 
 #endif

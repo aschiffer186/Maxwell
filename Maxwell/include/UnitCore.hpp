@@ -33,8 +33,9 @@ namespace Maxwell
     template<typename>
     struct is_unit_base : std::false_type {};
 
-    template<std::integral auto Prefix_, std::integral auto Pow_>
-    struct is_unit_base<UnitBase<Prefix_, Pow_>> : std::true_type{};
+    template<std::integral auto Prefix_, std::integral auto Pow_, std::signed_integral auto ScaleNum_, 
+             std::signed_integral auto ScaleDenom_ >
+    struct is_unit_base<UnitBase<Prefix_, Pow_, ScaleNum_, ScaleDenom_>> : std::true_type{};
 
     template<typename Tp>
     inline constexpr bool is_unit_base_v = is_unit_base<Tp>::value;
@@ -140,7 +141,8 @@ namespace Maxwell
              UnitBaseLike Current_, 
              UnitBaseLike Temperature_, 
              UnitBaseLike Amount_, 
-             UnitBaseLike Luminosity_>
+             UnitBaseLike Luminosity_, 
+             UnitBaseLike Angle_ = NullUnit>
     struct Unit 
     {
         using Time = Time_;
@@ -150,6 +152,7 @@ namespace Maxwell
         using Temperature = Temperature_;
         using Amount = Amount_; 
         using Luminosity = Luminosity_;
+        using Angle = Angle_;
     };
 
     template<typename> 
@@ -161,8 +164,9 @@ namespace Maxwell
              UnitBaseLike Current_, 
              UnitBaseLike Temperature_, 
              UnitBaseLike Amount_, 
-             UnitBaseLike Luminosity_>
-    struct is_unit<Unit<Time_, Length_, Mass_, Current_, Temperature_, Amount_, Luminosity_>> : std::true_type {};
+             UnitBaseLike Luminosity_,
+             UnitBaseLike Angle_>
+    struct is_unit<Unit<Time_, Length_, Mass_, Current_, Temperature_, Amount_, Luminosity_, Angle_>> : std::true_type {};
 
     template<typename Tp> 
     inline constexpr bool is_unit_v = is_unit<Tp>::value;
