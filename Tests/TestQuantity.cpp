@@ -2,11 +2,14 @@
 #include <type_traits>
 
 #include "Quantity.hpp"
+#include "QuantityCore.hpp"
+#include "UnitCore.hpp"
+#include "UnitTypes.hpp"
 
 TEST(TestQuantity, TestLanguageProperties)
 {
-    using Q1 = Maxwell::Quantity<int, Maxwell::Meter>;
-    using Q2 = Maxwell::Quantity<double, Maxwell::Meter>;
+    using Q1 = Maxwell::Basic_Quantity<int, Maxwell::MeterUnit>;
+    using Q2 = Maxwell::Basic_Quantity<double, Maxwell::MeterUnit>;
 
     EXPECT_EQ(sizeof(Q1), sizeof(int));
     EXPECT_EQ(sizeof(Q2), sizeof(double));
@@ -52,27 +55,40 @@ TEST(TestQuantity, TestLanguageProperties)
 
 TEST(TestQuantity, TestQuantityConstructors)
 {
-    using Q1 = Maxwell::Quantity<int, Maxwell::Meter>;
-    using Q2 = Maxwell::Quantity<double, Maxwell::Meter>; 
+    using Q1 = Maxwell::Basic_Quantity<int, Maxwell::MeterUnit>;
+    using Q2 = Maxwell::Basic_Quantity<double, Maxwell::MeterUnit>; 
 
     Q1 q1; 
     Q2 q2; 
 
     EXPECT_EQ(q1.value(), 0);
-    EXPECT_EQ(q1.units(), Maxwell::Meter{});
+    EXPECT_EQ(q1.units(), Maxwell::MeterUnit{});
     EXPECT_FLOAT_EQ(q2.value(), 0.0);
-    EXPECT_EQ(q2.units(), Maxwell::Meter{});
+    EXPECT_EQ(q2.units(), Maxwell::MeterUnit{});
 
     Q1 q3{1};
     Q2 q4{1.0};
 
     EXPECT_EQ(q3.value(), 1);
-    EXPECT_EQ(q3.units(), Maxwell::Meter{});
+    EXPECT_EQ(q3.units(), Maxwell::MeterUnit{});
     EXPECT_FLOAT_EQ(q4.value(), 1.0);
-    EXPECT_EQ(q4.units(), Maxwell::Meter{});
+    EXPECT_EQ(q4.units(), Maxwell::MeterUnit{});
 
-    Maxwell::Quantity q5{q3};
+    //Test copy constructor
+    Maxwell::Basic_Quantity<int, Maxwell::MeterUnit> q5{q3};
     EXPECT_EQ(q5.value(), 1);
-    EXPECT_EQ(q5.units(), Maxwell::Meter{});
+    EXPECT_EQ(q5.units(), Maxwell::MeterUnit{});
     EXPECT_TRUE((std::same_as<decltype(q5)::Rep, int>));
+
+    // Test converting constructor
+    Maxwell::Basic_Quantity<double, Maxwell::KilometerUnit> q6{q5};
+    EXPECT_FLOAT_EQ(q6.value(), 1e-3);
+    EXPECT_EQ(q6.units(), Maxwell::KilometerUnit{});
+
+    Maxwell::Basic_Quantity<double, decltype(Maxwell::MeterUnit{}*Maxwell::SecondUnit{})> q7{10.0};
+    Maxwell::Basic_Quantity<double, decltype(Maxwell::KilometerUnit{}*Maxwell::NanosecondUnit{})> q8{q7};
+    EXPECT_FLOAT_EQ(q8.value(), 10.0*1e-3*1e9);
+    EXPECT_EQ(q8.units(), Maxwell::KilometerUnit{}*Maxwell::NanosecondUnit{});
+
+    Maxwell::Quantity<decltype(Maxwell::KilometerUnit{}*Maxwell::NanosecondUnit{})> q;
 }

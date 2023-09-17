@@ -21,7 +21,7 @@ namespace Maxwell
     /**
      * @brief A construct with a value and a unit
      * 
-     * A Quantity represents a physical quantity that has both 
+     * A Basic_Quantity represents a physical quantity that has both 
      * a value and units. Quantities behave like the built in 
      * arithmetic types except that they are strongly typed based 
      * on their units. All operatins between Quantities are checked at 
@@ -29,22 +29,22 @@ namespace Maxwell
      * operation is performed because the units are incompatible, the 
      * program is ill-formed.
      *
-     * Where appropriate, it is possible to convert a Quantity with units A 
+     * Where appropriate, it is possible to convert a Basic_Quantity with units A 
      * to a quantity with units B. The conversion factor is calculated at 
      * compile time. If a conversin that is not possible is request, the 
      * program is ill-formed. 
      *
-     * Thus, a program that works with Quantities is well-formed if the 
+     * Thus, a program that works with Basic_Quantities is well-formed if the 
      * units are all correct.
      *
-     * Class template Quantity satisfies the following: TriviallyCopyableType, StandardLayoutType,
+     * Class template Basic_Quantity satisfies the following: TriviallyCopyableType, StandardLayoutType,
      * ImplicitLifetimeType, LiteralType, Swappable, Regular, TotallyOrdered
      *
      * @tparam Tp_ the type representing the value of the Quantity.
      * @tparam Unit_ the type representing the units of the Quantity.
      */
     template<Arithmetic Tp_, UnitLike Unit_>
-    struct Quantity
+    struct Basic_Quantity
     {
         /// The type used to represent the value of the Quantity.
         using Rep = Tp_;
@@ -57,7 +57,7 @@ namespace Maxwell
          * Value initalizes the underlying value of the 
          * Quantity.
          */
-        constexpr Quantity() noexcept = default;
+        constexpr Basic_Quantity() noexcept = default;
 
         /**
          * @brief Constructor
@@ -67,32 +67,60 @@ namespace Maxwell
          * 
          * @param val the value of the Quatity
          */
-        constexpr explicit Quantity(Rep val) noexcept
+        constexpr explicit Basic_Quantity(Rep val) noexcept
         : val_{val}
         {
 
         }
 
+        /**
+         * @brief Converting Constructor
+         * 
+         * Constructs a Quantity whose value will be the same as the specified value 
+         * after converting to Rep. The value of the Quantity is intialized as if by 
+         * Rep{static_cast<Rep>(o)}
+         *
+         * @tparam Up_ the type of the value 
+         * @param o the value of the quantity
+         */
         template<Arithmetic Up_>
-        constexpr explicit Quantity(Up_ o) noexcept 
+        constexpr explicit Basic_Quantity(Up_ o) noexcept 
         : val_{static_cast<Rep>(o)}
         {
 
         }
 
+        /**
+         * @brief Converting constructor
+         * 
+         * Constructs a Quantity from the specified Quantity with a different value representation 
+         * or different units. The value of the quantity is automatically adjusted so that the value 
+         * of *this is the same if it were expressed in the units of the specified quantity. The conversion 
+         * factor is calculated at compile-time.
+         *
+         * This constructor can only be called if the units of specified quantity are convertible to 
+         * Unit. This requires that the powers of the base-units of Unit and OtherUnit be the same. 
+         * This function does not participate in overload resolution if this is not the case.
+         * 
+         * @tparam Up_ the value representation of the specified quantity
+         * @tparam OtherUnit the units of the specified quantity
+         * @param o the specified Quantity
+         */
         template<Arithmetic Up_, UnitLike OtherUnit>
             requires UnitAssignable<OtherUnit, Unit>
-        constexpr Quantity(Quantity<Up_, OtherUnit> o) noexcept 
+        constexpr Basic_Quantity(Basic_Quantity<Up_, OtherUnit> o) noexcept 
         : val_{static_cast<Rep>(o.value())}
         {
-
+            val_ *= static_cast<Rep>(conversionPrefix(OtherUnit{}, Unit{}));
         }
 
         template<typename Up_, typename OtherUnit>
             requires UnitAssignable<OtherUnit, Unit>
-        constexpr Quantity& operator=(Quantity<Up_, OtherUnit> o) noexcept 
+        constexpr Basic_Quantity& operator=(Basic_Quantity<Up_, OtherUnit> o) noexcept 
         {
             val_ = static_cast<Rep>(o.val_);
+            val_ *= static_cast<Rep>(conversionPrefix(OtherUnit{}, Unit{}));
+
             return *this;
         }
 
@@ -116,22 +144,51 @@ namespace Maxwell
             return Unit{};
         }
 
-        constexpr Quantity<Rep, coherent_unit_t<Unit>> toCoherentUnits() const noexcept 
+        /**
+         * @brief Returns a Basic_Quantity whose value is the same as *this expressed in coherent units.
+         * 
+         * Returns a Basic_Quantity whose value is the same as *this expressed in coherent units. Coherent units 
+         * are units are SI units with no prefixes. 
+         *
+         * @return constexpr Basic_Quantity<Rep, coherent_unit_t<Unit>> 
+         */
+        constexpr Basic_Quantity<Rep, coherent_unit_t<Unit>> toCoherentUnits() const noexcept 
         {
-            return Quantity<Rep, coherent_unit_t<Unit>>{val_};
+            double scale = conversionPrefix(Unit{}, coherent_unit_t<Unit>{});
+            return Basic_Quantity<Rep, coherent_unit_t<Unit>>{val_*scale};
         }
 
+        /**
+         * @brief Returns true if the units of the Basic_Quantity are coherent units.
+         * 
+         * @return trrue if the units of the Basic_Quantity are coherent units.
+         */
         static constexpr bool isInCoherentUnits() noexcept 
         {
             return is_unit_equal_v<Unit, coherent_unit_t<Unit>>;
         }
 
-        constexpr void swap(Quantity& other) noexcept
+        /**
+         * @brief Swaps the values of two Basic_Quantities.
+         * 
+         * @param other the Basici_Quantity to swap with
+         */
+        constexpr void swap(Basic_Quantity& other) noexcept
         {
             using std::swap; 
             swap(val_, other.val_);
         }
 
+        /**
+         * @brief Conversion function
+         * 
+         * Converts the value of *this to Rep{this->value()}. This function  
+         * only participle in overload resolution if the Basic_Quantity is 
+         * dimensionless. A common use of this conversion is invoking standard 
+         * math library functions on ratios of units e.g. std::pow(1_m/1_m, 2);
+         *
+         * @return Rep{this->value()}
+         */
         constexpr operator Rep() const noexcept
             requires DimensionlessUnit<Unit>
         {
@@ -139,60 +196,60 @@ namespace Maxwell
         }
 
         // Arithmetic operators
-        constexpr Quantity& operator+=(Quantity q) noexcept 
+        constexpr Basic_Quantity& operator+=(Basic_Quantity q) noexcept 
         {
             val_ += q.val_;
             return *this;
         }
 
-        constexpr Quantity& operator-=(Quantity q) noexcept 
+        constexpr Basic_Quantity& operator-=(Basic_Quantity q) noexcept 
         {
             val_ -= q.val_;
         }
 
-        constexpr Quantity& operator*=(Quantity q) noexcept 
+        constexpr Basic_Quantity& operator*=(Basic_Quantity q) noexcept 
         {
             val_ *= q.val_;
         }
 
-        constexpr Quantity& operator/=(Quantity q) noexcept 
+        constexpr Basic_Quantity& operator/=(Basic_Quantity q) noexcept 
         {
             val_ /= q.val_;
         }
 
-        constexpr Quantity& operator%=(Quantity q) noexcept requires std::integral<Rep>
+        constexpr Basic_Quantity& operator%=(Basic_Quantity q) noexcept requires std::integral<Rep>
         {
             return val_ %= q.val_;
         }
 
         //Dimensioness value arithmetic operators
-        constexpr Quantity& operator+=(Arithmetic auto val) noexcept 
+        constexpr Basic_Quantity& operator+=(Arithmetic auto val) noexcept 
             requires DimensionlessUnit<Unit>
         {
             val_ += val;
             return *this;
         }
 
-        constexpr Quantity& operator-=(Arithmetic auto val) noexcept 
+        constexpr Basic_Quantity& operator-=(Arithmetic auto val) noexcept 
             requires DimensionlessUnit<Unit>
         {
             val_ -= val;
             return *this;
         }
 
-        constexpr Quantity& operator*=(Arithmetic auto val) noexcept 
+        constexpr Basic_Quantity& operator*=(Arithmetic auto val) noexcept 
         {
             val_ *= val; 
             return *this;
         }
 
-        constexpr Quantity& operator/=(Arithmetic auto val) noexcept 
+        constexpr Basic_Quantity& operator/=(Arithmetic auto val) noexcept 
         {
             val_ /= val; 
             return *this;
         }
 
-        constexpr Quantity& operator%=(Arithmetic auto val) noexcept 
+        constexpr Basic_Quantity& operator%=(Arithmetic auto val) noexcept 
             requires std::integral<Rep> 
         {
             val_ %= val; 
@@ -202,46 +259,46 @@ namespace Maxwell
         //Converting arithmetic operators
         template<Arithmetic Up, UnitLike OtherUnit> 
             requires UnitAssignable<Unit, OtherUnit>
-        constexpr Quantity& operator+=(Quantity<Up, OtherUnit> other) noexcept 
+        constexpr Basic_Quantity& operator+=(Basic_Quantity<Up, OtherUnit> other) noexcept 
         {
             return *this;
         }
 
         template<Arithmetic Up, UnitLike OtherUnit>
             requires UnitAssignable<Unit, OtherUnit>
-        constexpr Quantity& operator-=(Quantity<Up, OtherUnit> other) noexcept 
+        constexpr Basic_Quantity& operator-=(Basic_Quantity<Up, OtherUnit> other) noexcept 
         {
             return *this;
         }
 
-        friend constexpr std::compare_three_way_result_t<Rep> operator<=>(const Quantity& lhs, const Quantity& rhs) noexcept = default;
+        friend constexpr std::compare_three_way_result_t<Rep> operator<=>(const Basic_Quantity& lhs, const Basic_Quantity& rhs) noexcept = default;
     private:
         Rep val_{};
     };
 
     template<Arithmetic Tp, UnitLike Unit> 
-    Quantity(Quantity<Tp, Unit>) -> Quantity<Tp, Unit>;
+    Basic_Quantity(Basic_Quantity<Tp, Unit>) -> Basic_Quantity<Tp, Unit>;
 
     template<typename Tp_, typename Unit_> 
-    std::ostream& operator<<(std::ostream& os, Quantity<Tp_, Unit_> q)
+    std::ostream& operator<<(std::ostream& os, Basic_Quantity<Tp_, Unit_> q)
     {
         os << q.value();
         return os;
     }
 
     template<typename Tp_, typename Unit_> 
-    constexpr void swap(Quantity<Tp_, Unit_>& q1, Quantity<Tp_, Unit_>& q2) noexcept 
+    constexpr void swap(Basic_Quantity<Tp_, Unit_>& q1, Basic_Quantity<Tp_, Unit_>& q2) noexcept 
     {
         q1.swap(q2);
     }
 
     template<Arithmetic Rep1, UnitLike Unit1, Arithmetic Rep2, UnitLike Unit2> 
         requires UnitAddable<Unit1, Unit2>
-    constexpr auto operator+(Quantity<Rep1, Unit1> lhs, Quantity<Rep2, Unit2> rhs) noexcept 
+    constexpr auto operator+(Basic_Quantity<Rep1, Unit1> lhs, Basic_Quantity<Rep2, Unit2> rhs) noexcept 
     {
         using SumRep = decltype(lhs.value() + rhs.value());
-        using LHSType = Quantity<Rep1, Unit1>;
-        using RHSType = Quantity<Rep2, Unit2>;
+        using LHSType = Basic_Quantity<Rep1, Unit1>;
+        using RHSType = Basic_Quantity<Rep2, Unit2>;
 
         Rep1 valUsedLhs{};
         Rep2 valUsedRhs{};
@@ -256,16 +313,16 @@ namespace Maxwell
         else  
             valUsedRhs = rhs.value();
 
-        return Quantity<SumRep, coherent_unit_t<Unit1>>(valUsedLhs + valUsedRhs);
+        return Basic_Quantity<SumRep, coherent_unit_t<Unit1>>(valUsedLhs + valUsedRhs);
     }
 
     template<Arithmetic Rep1, UnitLike Unit1, Arithmetic Rep2, UnitLike Unit2> 
         requires UnitAddable<Unit1, Unit2>
-    constexpr auto operator-(Quantity<Rep1, Unit1> lhs, Quantity<Rep2, Unit2> rhs) noexcept 
+    constexpr auto operator-(Basic_Quantity<Rep1, Unit1> lhs, Basic_Quantity<Rep2, Unit2> rhs) noexcept 
     {
         using MinusRep = decltype(lhs.value() - rhs.value());
-        using LHSType = Quantity<Rep1, Unit1>;
-        using RHSType = Quantity<Rep2, Unit2>;
+        using LHSType = Basic_Quantity<Rep1, Unit1>;
+        using RHSType = Basic_Quantity<Rep2, Unit2>;
 
         Rep1 valUsedLhs{};
         Rep2 valUsedRhs{};
@@ -280,14 +337,14 @@ namespace Maxwell
         else  
             valUsedRhs = rhs.value();
 
-        return Quantity<MinusRep, coherent_unit_t<Unit1>>(valUsedLhs - valUsedRhs);
+        return Basic_Quantity<MinusRep, coherent_unit_t<Unit1>>(valUsedLhs - valUsedRhs);
     }
 
     template<Arithmetic Rep1, UnitLike Unit1, Arithmetic Rep2, UnitLike Unit2> 
-    constexpr auto operator*(Quantity<Rep1, Unit1> lhs, Quantity<Rep2, Unit2> rhs) noexcept 
+    constexpr auto operator*(Basic_Quantity<Rep1, Unit1> lhs, Basic_Quantity<Rep2, Unit2> rhs) noexcept 
     {
-        using LHSType = Quantity<Rep1, Unit1>;
-        using RHSType = Quantity<Rep2, Unit2>;
+        using LHSType = Basic_Quantity<Rep1, Unit1>;
+        using RHSType = Basic_Quantity<Rep2, Unit2>;
         using ProductUnits = decltype(lhs.toCoherentUnits().units() * rhs.toCoherentUnits().units());
         using ProductRep = decltype(lhs.value() * rhs.value());
 
@@ -304,28 +361,28 @@ namespace Maxwell
         else  
             valUsedRhs = rhs.value();
 
-        return Quantity<ProductRep, ProductUnits>(valUsedLhs * valUsedRhs);
+        return Basic_Quantity<ProductRep, ProductUnits>(valUsedLhs * valUsedRhs);
     }
 
     template<Arithmetic Rep, UnitLike Unit> 
-    constexpr auto operator*(Arithmetic auto lhs, Quantity<Rep, Unit> rhs) noexcept 
+    constexpr auto operator*(Arithmetic auto lhs, Basic_Quantity<Rep, Unit> rhs) noexcept 
     {
         rhs *= lhs; 
         return rhs;
     }
     
     template<Arithmetic Rep, UnitLike Unit> 
-    constexpr auto operator*(Quantity<Rep, Unit> lhs, Arithmetic auto rhs) noexcept 
+    constexpr auto operator*(Basic_Quantity<Rep, Unit> lhs, Arithmetic auto rhs) noexcept 
     {
         lhs *= rhs; 
         return lhs;
     }
 
     template<Arithmetic Rep1, UnitLike Unit1, Arithmetic Rep2, UnitLike Unit2> 
-    constexpr auto operator/(Quantity<Rep1, Unit1> lhs, Quantity<Rep2, Unit2> rhs) noexcept 
+    constexpr auto operator/(Basic_Quantity<Rep1, Unit1> lhs, Basic_Quantity<Rep2, Unit2> rhs) noexcept 
     {
-        using LHSType = Quantity<Rep1, Unit1>;
-        using RHSType = Quantity<Rep2, Unit2>;
+        using LHSType = Basic_Quantity<Rep1, Unit1>;
+        using RHSType = Basic_Quantity<Rep2, Unit2>;
         using ProductUnits = decltype(lhs.toCoherentUnits().units() / rhs.toCoherentUnits().units());
         using ProductRep = decltype(lhs.value() / rhs.value());
 
@@ -342,18 +399,18 @@ namespace Maxwell
         else  
             valUsedRhs = rhs.value();
 
-        return Quantity<ProductRep, ProductUnits>(valUsedLhs / valUsedRhs);
+        return Basic_Quantity<ProductRep, ProductUnits>(valUsedLhs / valUsedRhs);
     }
 
     template<Arithmetic Rep, UnitLike Unit> 
-    constexpr auto operator/(Arithmetic auto lhs, Quantity<Rep, Unit> rhs) noexcept 
+    constexpr auto operator/(Arithmetic auto lhs, Basic_Quantity<Rep, Unit> rhs) noexcept 
     {
         using OutputUnits = unit_inverse_t<Unit>;
-        return Quantity<Rep, OutputUnits>(1/rhs.value());
+        return Basic_Quantity<Rep, OutputUnits>(1/rhs.value());
     }
     
     template<Arithmetic Rep, UnitLike Unit> 
-    constexpr auto operator/(Quantity<Rep, Unit> lhs, Arithmetic auto rhs) noexcept 
+    constexpr auto operator/(Basic_Quantity<Rep, Unit> lhs, Arithmetic auto rhs) noexcept 
     {
         lhs /= rhs; 
         return lhs;
@@ -361,10 +418,10 @@ namespace Maxwell
 
     template<Arithmetic Rep1, UnitLike Unit1, Arithmetic Rep2, UnitLike Unit2>
         requires std::integral<Rep1> && std::integral<Rep2> 
-    constexpr auto operator%(Quantity<Rep1, Unit1> lhs, Quantity<Rep2, Unit2> rhs) noexcept 
+    constexpr auto operator%(Basic_Quantity<Rep1, Unit1> lhs, Basic_Quantity<Rep2, Unit2> rhs) noexcept 
     {
-        using LHSType = Quantity<Rep1, Unit1>;
-        using RHSType = Quantity<Rep2, Unit2>;
+        using LHSType = Basic_Quantity<Rep1, Unit1>;
+        using RHSType = Basic_Quantity<Rep2, Unit2>;
         using ProductUnits = decltype(lhs.toCoherentUnits().units() / rhs.toCoherentUnits().units());
         using ProductRep = decltype(lhs.value() / rhs.value());
 
@@ -381,20 +438,24 @@ namespace Maxwell
         else  
             valUsedRhs = rhs.value();
         
-        return Quantity<ProductRep, ProductUnits>(valUsedLhs % valUsedRhs);
+        return Basic_Quantity<ProductRep, ProductUnits>(valUsedLhs % valUsedRhs);
     }
 
     template<Arithmetic Rep1, UnitLike Unit1, Arithmetic Rep2, UnitLike Unit2> 
         requires UnitAssignable<Unit1, Unit2>
-    constexpr auto operator<=>(Quantity<Rep1, Unit1> lhs, Quantity<Rep2, Unit2> rhs) noexcept 
+    constexpr auto operator<=>(Basic_Quantity<Rep1, Unit1> lhs, Basic_Quantity<Rep2, Unit2> rhs) noexcept 
     {
         return lhs.toCoherentUnits().value() <=> rhs.toCoherentUnits().value();
     }
 
     template<Arithmetic Rep1, UnitLike Unit1, Arithmetic Rep2, UnitLike Unit2> 
         requires UnitAssignable<Unit1, Unit2>
-    constexpr bool operator==(Quantity<Rep1, Unit1> lhs, Quantity<Rep2, Unit2> rhs) noexcept 
+    constexpr bool operator==(Basic_Quantity<Rep1, Unit1> lhs, Basic_Quantity<Rep2, Unit2> rhs) noexcept 
     {
         return lhs.toCoherentUnits().value() == rhs.toCoherentUnits().value();
     }
+
+    /// Type alias where the value representation is double
+    template<UnitLike U> 
+    using Quantity = Basic_Quantity<double, U>;
 }

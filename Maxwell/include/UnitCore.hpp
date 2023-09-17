@@ -1,5 +1,7 @@
-#pragma once 
+#ifndef UNIT_CORE_HPP 
+#define UNIT_CORE_HPP
 
+#include <array>
 #include <concepts>
 #include <ratio>
 #include <type_traits>
@@ -359,13 +361,118 @@ namespace Maxwell
     template<UnitLike U, std::integral auto Amt>
     using scale_unit_mass_t = scale_unit_mass<U, Amt>::type;
 
+    inline constexpr std::array powsOfTen{1e-30,
+                         1e-29, 
+                         1e-28, 
+                         1e-27, 
+                         1e-26, 
+                         1e-25, 
+                         1e-24, 
+                         1e-23, 
+                         1e-22, 
+                         1e-21, 
+                         1e-20, 
+                         1e-19, 
+                         1e-18, 
+                         1e-17, 
+                         1e-16, 
+                         1e-15, 
+                         1e-14, 
+                         1e-13, 
+                         1e-12, 
+                         1e-11, 
+                         1e-10, 
+                         1e-9, 
+                         1e-8, 
+                         1e-7, 
+                         1e-6, 
+                         1e-5, 
+                         1e-4, 
+                         1e-3, 
+                         1e-2, 
+                         1e-1,
+                         1.0,
+                         1e1, 
+                         1e2, 
+                         1e3, 
+                         1e4, 
+                         1e5, 
+                         1e6, 
+                         1e7, 
+                         1e8, 
+                         1e9, 
+                         1e10, 
+                         1e11, 
+                         1e12, 
+                         1e13, 
+                         1e14, 
+                         1e15, 
+                         1e16, 
+                         1e17, 
+                         1e18, 
+                         1e19, 
+                         1e20, 
+                         1e21, 
+                         1e22, 
+                         1e23, 
+                         1e24, 
+                         1e25, 
+                         1e26, 
+                         1e27, 
+                         1e28, 
+                         1e29, 
+                         1e30};
+    
+    constexpr double pow10(int pow)
+    {
+        if (pow >= -30 && pow <= 30)
+        {
+            return powsOfTen[pow + 30];
+        }
+        else 
+        {
+            if (pow < 0)
+                return 1.0 / pow10(-1*pow);
+            double retVal = 1;
+            double multiplicand = 10;
+            while (true) 
+            {
+                retVal *= (pow & 1) ? multiplicand : 1;
+                pow = pow / 2;
+                if (pow == 0)
+                    break;
+                multiplicand *= multiplicand;
+            }
+            return retVal;
+        }
+    }
+
+    double consteval conversionPrefix(UnitLike auto from, UnitLike auto to) noexcept 
+    {
+        using LHSType = decltype(from);
+        using RHSType = decltype(to);
+
+        double scale = 1.0;
+        scale *= pow10(LHSType::Time::Prefix - RHSType::Time::Prefix);
+        scale *= pow10(LHSType::Length::Prefix - RHSType::Length::Prefix);
+        scale *= pow10(LHSType::Mass::Prefix - RHSType::Mass::Prefix);
+        scale *= pow10(LHSType::Current::Prefix - RHSType::Current::Prefix);
+        scale *= pow10(LHSType::Temperature::Prefix - RHSType::Temperature::Prefix);
+        scale *= pow10(LHSType::Amount::Prefix - RHSType::Amount::Prefix);
+        scale *= pow10(LHSType::Luminosity::Prefix - RHSType::Luminosity::Prefix);
+
+        return scale;
+    }
+
     //Base Units 
-    using Second = Unit<UnitBase<0, 1>, NullUnit, NullUnit, NullUnit, NullUnit, NullUnit, NullUnit>;
-    using Meter = Unit<NullUnit, UnitBase<0, 1>, NullUnit, NullUnit, NullUnit, NullUnit, NullUnit>;
-    using Kilogram = Unit<NullUnit, NullUnit, UnitBase<3, 1>, NullUnit, NullUnit, NullUnit, NullUnit>; 
-    using Ampere = Unit<NullUnit, NullUnit, NullUnit, UnitBase<0, 1>, NullUnit, NullUnit, NullUnit>; 
-    using Kelvin = Unit<NullUnit, NullUnit, NullUnit, NullUnit, UnitBase<0, 1>, NullUnit, NullUnit>; 
-    using Mole = Unit<NullUnit, NullUnit, NullUnit, NullUnit, NullUnit, UnitBase<0, 1>, NullUnit>;
-    using Candela = Unit<NullUnit, NullUnit, NullUnit, NullUnit, NullUnit, NullUnit, UnitBase<0, 1>>;
-    using Dimensionless = Unit<NullUnit, NullUnit, NullUnit, NullUnit, NullUnit, NullUnit, NullUnit>;
+    using SecondUnit = Unit<UnitBase<0, 1>, NullUnit, NullUnit, NullUnit, NullUnit, NullUnit, NullUnit>;
+    using MeterUnit = Unit<NullUnit, UnitBase<0, 1>, NullUnit, NullUnit, NullUnit, NullUnit, NullUnit>;
+    using KilogramUnit = Unit<NullUnit, NullUnit, UnitBase<3, 1>, NullUnit, NullUnit, NullUnit, NullUnit>; 
+    using AmpereUnit = Unit<NullUnit, NullUnit, NullUnit, UnitBase<0, 1>, NullUnit, NullUnit, NullUnit>; 
+    using KelvinUnit = Unit<NullUnit, NullUnit, NullUnit, NullUnit, UnitBase<0, 1>, NullUnit, NullUnit>; 
+    using MoleUnit = Unit<NullUnit, NullUnit, NullUnit, NullUnit, NullUnit, UnitBase<0, 1>, NullUnit>;
+    using CandelaUnit = Unit<NullUnit, NullUnit, NullUnit, NullUnit, NullUnit, NullUnit, UnitBase<0, 1>>;
+    using Dimensionless_Unit = Unit<NullUnit, NullUnit, NullUnit, NullUnit, NullUnit, NullUnit, NullUnit>;
 }
+
+#endif

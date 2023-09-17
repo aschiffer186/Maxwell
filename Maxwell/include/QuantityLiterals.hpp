@@ -6,14 +6,14 @@
 #include "UnitTypes.hpp"
 #include <sys/types.h>
 
-#define MAKE_QUANTITY_LITERAL(Unit, literal)\
-    consteval Quantity<unsigned long long, Unit> operator ""_##literal(unsigned long long x)\
+#define MAKE_QUANTITY_LITERAL(unit, literal)\
+    consteval Basic_Quantity<unsigned long long, unit##Unit> operator ""_##literal(unsigned long long x)\
     {\
-        return Quantity<unsigned long long, Unit>(x);\
+        return Basic_Quantity<unsigned long long, unit##Unit>(x);\
     }\
-    consteval Quantity<long double, Unit> operator ""_##literal(long double x)\
+    consteval Basic_Quantity<long double, unit##Unit> operator ""_##literal(long double x)\
     {\
-        return Quantity<double, Unit>(x);\
+        return Basic_Quantity<double, unit##Unit>(x);\
     }
 
 namespace Maxwell::Literals 
