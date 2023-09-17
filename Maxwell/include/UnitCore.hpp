@@ -1,16 +1,20 @@
 #pragma once 
 
-#include <type_traits>
 #include <concepts>
+#include <ratio>
+#include <type_traits>
 
 namespace Maxwell 
 {
     template<std::signed_integral auto Prefix_, 
-             std::signed_integral auto Pow_>
+             std::signed_integral auto Pow_,
+             std::signed_integral auto ScaleNum_ = 1, 
+             std::signed_integral auto ScaleDenom_ = 1>
     struct UnitBase
     {
         static constexpr auto Prefix = Prefix_;
         static constexpr auto Pow = Pow_;
+        using Scale = std::ratio<ScaleNum_, ScaleDenom_>;
     };
 
     // Unit base type aliases
@@ -68,7 +72,7 @@ namespace Maxwell
     template<UnitBaseLike Unit1, UnitBaseLike Unit2> 
     struct unit_base_product 
     {
-        using type = UnitBase<0, Unit1::Pow + Unit2::Pow>;
+        using type = UnitBase<Unit1::Prefix + Unit2::Prefix, Unit1::Pow + Unit2::Pow>;
     };
 
     template<UnitBaseLike Unit1, UnitBaseLike Unit2> 
@@ -83,7 +87,7 @@ namespace Maxwell
     template<UnitBaseLike Unit1, UnitBaseLike Unit2> 
     struct unit_base_quotient
     {
-        using type = UnitBase<0, Unit1::Pow - Unit2::Pow>;
+        using type = UnitBase<Unit1::Prefix - Unit2::Prefix, Unit1::Pow - Unit2::Pow>;
     };
 
     template<UnitBaseLike Unit1, UnitBaseLike Unit2> 
@@ -335,6 +339,21 @@ namespace Maxwell
 
     template<UnitLike U, std::integral auto Amt>
     using scale_unit_length_t = scale_unit_length<U, Amt>::type;
+
+    template<UnitLike U, std::integral auto Amt> 
+    struct scale_unit_mass
+    {
+        using type = Unit<typename U::Time,
+                          typename U::Length, 
+                          scale_unit_base_t<typename U::Mass, Amt>, 
+                          typename U::Current, 
+                          typename U::Temperature, 
+                          typename U::Amount,
+                          typename U::Luminosity>;
+    };
+
+    template<UnitLike U, std::integral auto Amt>
+    using scale_unit_mass_t = scale_unit_mass<U, Amt>::type;
 
     //Base Units 
     using Second = Unit<UnitBase<0, 1>, NullUnit, NullUnit, NullUnit, NullUnit, NullUnit, NullUnit>;

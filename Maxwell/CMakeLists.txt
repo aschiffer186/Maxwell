@@ -8,3 +8,4 @@ add_library(Maxwell INTERFACE
             ${MAXWELL_INCLUDE}/UnitTypes.hpp)
             
 target_compile_features(Maxwell INTERFACE cxx_std_20)
+target_include_directories(Maxwell INTERFACE ${MAXWELL_INCLUDE})

@@ -3,5 +3,6 @@
 
 #include "QuantityCore.hpp"
 #include "QuantityLiterals.hpp"
+#include "QuantityMath.hpp"
 
 #endif
