@@ -122,8 +122,10 @@ namespace Maxwell
     using TeslaUnit = decltype(WeberUnit{}/(MeterUnit{}*MeterUnit{}));
     using HenryUnit = decltype(WeberUnit{}/AmpereUnit{}); 
 
+    //using CelsiusUnit = Unit<NullUnit, NullUnit, NullUnit, NullUnit
+
     using RadianUnit = Unit<NullUnit, NullUnit, NullUnit, NullUnit, NullUnit, NullUnit, NullUnit, UnitBase<0, 1>>;
-    using DegreeUnit = Unit<NullUnit, NullUnit, NullUnit, NullUnit, NullUnit, NullUnit, NullUnit, UnitBase<0, 1, 5729577951, 100'100'100>>;
+    using DegreeUnit = Unit<NullUnit, NullUnit, NullUnit, NullUnit, NullUnit, NullUnit, NullUnit, UnitBase<0, 1, 572'957'795'131, 10'000'000'000>>;
 }
 
 #endif

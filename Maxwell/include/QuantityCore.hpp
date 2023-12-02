@@ -112,14 +112,16 @@ namespace Maxwell
         : val_{static_cast<Rep>(o.value())}
         {
             val_ *= static_cast<Rep>(conversionPrefix(OtherUnit{}, Unit{}));
+            val_ *= static_cast<Rep>(conversionScale(OtherUnit{}, Unit{}));
         }
 
         template<typename Up_, typename OtherUnit>
             requires UnitAssignable<OtherUnit, Unit>
         constexpr Basic_Quantity& operator=(Basic_Quantity<Up_, OtherUnit> o) noexcept 
         {
-            val_ = static_cast<Rep>(o.val_);
+            val_ = static_cast<Rep>(o.value());
             val_ *= static_cast<Rep>(conversionPrefix(OtherUnit{}, Unit{}));
+            val_ *= static_cast<Rep>(conversionScale(OtherUnit{}, Unit{}));
 
             return *this;
         }

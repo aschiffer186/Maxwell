@@ -447,7 +447,7 @@ namespace Maxwell
         }
     }
 
-    double consteval conversionPrefix(UnitLike auto from, UnitLike auto to) noexcept 
+    consteval double conversionPrefix(UnitLike auto from, UnitLike auto to) noexcept 
     {
         using LHSType = decltype(from);
         using RHSType = decltype(to);
@@ -462,6 +462,25 @@ namespace Maxwell
         scale *= pow10(LHSType::Luminosity::Prefix - RHSType::Luminosity::Prefix);
 
         return scale;
+    }
+
+    consteval double conversionScale(UnitLike auto from, UnitLike auto to) noexcept 
+    {
+        using LHSType = decltype(from);
+        using RHSType = decltype(to);
+
+        using LHSScale = LHSType::Angle::Scale;
+        using RHSScale = RHSType::Angle::Scale;
+
+        //Rad scale = 1
+        //Deg scale = 180/pi
+        //Rad --> deg divide = deg scale / 1
+        //Deg --> Rad = 1 / scale scale 
+        // to scale / from scale
+
+        double conversion = 1.0;
+        conversion *= static_cast<double>(RHSScale::num*LHSScale::den)/static_cast<double>(RHSScale::den*LHSScale::num);
+        return conversion;
     }
 
     //Base Units 

@@ -13,6 +13,7 @@ namespace Maxwell
     using Ampere   = Quantity<AmpereUnit>; 
     using Mole     = Quantity<MoleUnit>; 
     using Candela  = Quantity<CandelaUnit>;
+    using Radian   = Quantity<RadianUnit>;
 
     //Area 
     using SqMeter = Quantity<decltype(MeterUnit{}*MeterUnit{})>;
@@ -20,6 +21,10 @@ namespace Maxwell
     //Volume 
     using CuMeter = Quantity<decltype(SqMeter::Unit{}*MeterUnit{})>;
 
+    //Angle
+    using Degree = Quantity<DegreeUnit>;
+
+    // Others
     using Newton   = Quantity<NewtonUnit>;
     using Joule    = Quantity<JouleUnit>; 
     using Watt     = Quantity<WattUnit>; 

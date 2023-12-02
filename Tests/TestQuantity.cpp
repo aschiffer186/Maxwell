@@ -3,6 +3,7 @@
 
 #include "Quantity.hpp"
 #include "QuantityCore.hpp"
+#include "QuantityTypes.hpp"
 #include "UnitCore.hpp"
 #include "UnitTypes.hpp"
 
@@ -90,5 +91,13 @@ TEST(TestQuantity, TestQuantityConstructors)
     EXPECT_FLOAT_EQ(q8.value(), 10.0*1e-3*1e9);
     EXPECT_EQ(q8.units(), Maxwell::KilometerUnit{}*Maxwell::NanosecondUnit{});
 
-    Maxwell::Quantity<decltype(Maxwell::KilometerUnit{}*Maxwell::NanosecondUnit{})> q;
+    Maxwell::Radian r{M_PI};
+    Maxwell::Degree d{r};
+    EXPECT_EQ(d.units(), Maxwell::DegreeUnit{});
+    EXPECT_FLOAT_EQ(d.value(), 180);
+
+    Maxwell::Degree d2{90.0};
+    Maxwell::Radian r2{d2};
+    EXPECT_EQ(r2.units(), Maxwell::RadianUnit{});
+    EXPECT_FLOAT_EQ(r2.value(), M_PI/2);
 }
