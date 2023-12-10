@@ -6,8 +6,11 @@
 namespace Maxwell
 {
     // Scaled versions of second
+    /// Unit representing 1 quectosecond (1*10^-30 sec)
     using QuectosecondUnit = scale_unit_time_t<SecondUnit, -30>;
+    /// Unit representing 1 rontosecond (1*10^-27 sec)
     using RontosecondUnit  = scale_unit_time_t<SecondUnit, -27>; 
+    /// Unit representing 1 yoctosecond (1*10^-24 sec)
     using YoctosecondUnit  = scale_unit_time_t<SecondUnit, -24>;
     using ZeptosecondUnit  = scale_unit_time_t<SecondUnit, -21>;
     using AttosecondUnit   = scale_unit_time_t<SecondUnit, -18>;
@@ -57,6 +60,7 @@ namespace Maxwell
     using RonnameterUnit  = scale_unit_length_t<MeterUnit, 27>;
     using QuettameterUnit = scale_unit_length_t<MeterUnit, 30>;
 
+    // Scaled version liter
     using LiterUnit = decltype(MillimeterUnit{}*MeterUnit{}*MeterUnit{});
     using QuectoliterUnit = scale_unit_length_t<LiterUnit, -30>;
     using RontoliterUnit  = scale_unit_length_t<LiterUnit, -27>; 
@@ -83,6 +87,13 @@ namespace Maxwell
     using RonnaliterUnit  = scale_unit_length_t<LiterUnit, 27>;
     using QuettaliterUnit = scale_unit_length_t<LiterUnit, 30>;
 
+    using SqMeterUnit = decltype(MeterUnit{}*MeterUnit{});
+    using CuMeterUnit = decltype(MeterUnit{}*MeterUnit{}*MeterUnit{});
+
+    using MeterPerSecondUnit = decltype(MeterUnit{}/SecondUnit{});
+    using MeterPerSecondPerSecondUnit = decltype(MeterPerSecondUnit{}/SecondUnit{});
+
+    // Scaled version of gram
     using QuectogramUnit = scale_unit_length_t<KilogramUnit, -33>;
     using RontogramUnit  = scale_unit_length_t<KilogramUnit, -30>; 
     using YoctogramUnit  = scale_unit_length_t<KilogramUnit, -27>;
@@ -107,6 +118,56 @@ namespace Maxwell
     using YottagramUnit  = scale_unit_length_t<KilogramUnit, 21>; 
     using RonnagramUnit  = scale_unit_length_t<KilogramUnit, 24>;
     using QuettagramUnit = scale_unit_length_t<KilogramUnit, 37>;
+
+    using QuectoampereUnit = scale_unit_current_t<AmpereUnit, -30>;
+    using RontoampereUnit  = scale_unit_current_t<AmpereUnit, -27>; 
+    using YoctoampereUnit  = scale_unit_current_t<AmpereUnit, -24>;
+    using ZeptoampereUnit  = scale_unit_current_t<AmpereUnit, -21>;
+    using AttoampereUnit   = scale_unit_current_t<AmpereUnit, -18>;
+    using FemtoampereUnit  = scale_unit_current_t<AmpereUnit, -15>;
+    using PicoampereUnit   = scale_unit_current_t<AmpereUnit, -12>;
+    using NanoampereUnit   = scale_unit_current_t<AmpereUnit, -9>;
+    using MicroampereUnit  = scale_unit_current_t<AmpereUnit, -6>;
+    using MilliampereUnit  = scale_unit_current_t<AmpereUnit, -3>;
+    using CentiampereUnit  = scale_unit_current_t<AmpereUnit, -2>;
+    using DeciampereUnit   = scale_unit_current_t<AmpereUnit, -1>;
+    using DecaampereUnit   = scale_unit_current_t<AmpereUnit, 1>;
+    using HectoampereUnit  = scale_unit_current_t<AmpereUnit, 2>;
+    using KiloampereUnit   = scale_unit_current_t<AmpereUnit, 3>;
+    using MegaampereUnit   = scale_unit_current_t<AmpereUnit, 6>;
+    using GigaampereUnit   = scale_unit_current_t<AmpereUnit, 9>;
+    using TeraampereUnit   = scale_unit_current_t<AmpereUnit, 12>;
+    using PetaampereUnit   = scale_unit_current_t<AmpereUnit, 15>;
+    using ExaampereUnit    = scale_unit_current_t<AmpereUnit, 18>; 
+    using ZettaampereUnit  = scale_unit_current_t<AmpereUnit, 21>;
+    using YottaampereUnit  = scale_unit_current_t<AmpereUnit, 24>; 
+    using RonnaampereUnit  = scale_unit_current_t<AmpereUnit, 27>;
+    using QuettaampereUnit = scale_unit_current_t<AmpereUnit, 30>;
+
+    using QuectokelvinUnit = scale_unit_temperature_t<KelvinUnit, -30>;
+    using RontokelvinUnit  = scale_unit_temperature_t<KelvinUnit, -27>; 
+    using YoctokelvinUnit  = scale_unit_temperature_t<KelvinUnit, -24>;
+    using ZeptokelvinUnit  = scale_unit_temperature_t<KelvinUnit, -21>;
+    using AttokelvinUnit   = scale_unit_temperature_t<KelvinUnit, -18>;
+    using FemtokelvinUnit  = scale_unit_temperature_t<KelvinUnit, -15>;
+    using PicokelvinUnit   = scale_unit_temperature_t<KelvinUnit, -12>;
+    using NanokelvinUnit   = scale_unit_temperature_t<KelvinUnit, -9>;
+    using MicrokelvinUnit  = scale_unit_temperature_t<KelvinUnit, -6>;
+    using MillikelvinUnit  = scale_unit_temperature_t<KelvinUnit, -3>;
+    using CentikelvinUnit  = scale_unit_temperature_t<KelvinUnit, -2>;
+    using DecikelvinUnit   = scale_unit_temperature_t<KelvinUnit, -1>;
+    using DecakelvinUnit   = scale_unit_temperature_t<KelvinUnit, 1>;
+    using HectokelvinUnit  = scale_unit_temperature_t<KelvinUnit, 2>;
+    using KilokelvinUnit   = scale_unit_temperature_t<KelvinUnit, 3>;
+    using MegakelvinUnit   = scale_unit_temperature_t<KelvinUnit, 6>;
+    using GigakelvinUnit   = scale_unit_temperature_t<KelvinUnit, 9>;
+    using TerakelvinUnit   = scale_unit_temperature_t<KelvinUnit, 12>;
+    using PetakelvinUnit   = scale_unit_temperature_t<KelvinUnit, 15>;
+    using ExakelvinUnit    = scale_unit_temperature_t<KelvinUnit, 18>; 
+    using ZettakelvinUnit  = scale_unit_temperature_t<KelvinUnit, 21>;
+    using YottakelvinUnit  = scale_unit_temperature_t<KelvinUnit, 24>; 
+    using RonnakelvinUnit  = scale_unit_temperature_t<KelvinUnit, 27>;
+    using QuettakelvinUnit = scale_unit_temperature_t<KelvinUnit, 30>;
 
     using NewtonUnit = decltype(KilogramUnit{}*MeterUnit{}/(SecondUnit{}*SecondUnit{}));
     using JouleUnit = decltype(NewtonUnit{}*MeterUnit{});

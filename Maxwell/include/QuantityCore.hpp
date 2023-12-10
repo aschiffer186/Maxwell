@@ -115,6 +115,19 @@ namespace Maxwell
             val_ *= static_cast<Rep>(conversionScale(OtherUnit{}, Unit{}));
         }
 
+        /**
+         * @brief Assigns the value of the specified quantity to this
+         * 
+         *
+         * Assigns the value of the specified Basic_Quantity to *this, converting from 
+         * the units o the other quantity to the units of *this if necessary. If the units 
+         * of the other quantity cannot be assigned to *this, the program is ill-formed. 
+         *
+         * @tparam Up_ the representation type of the other quantity
+         * @tparam OtherUnit the units of the other quantity
+         * @param o the other quantity
+         * @return a reference to *this
+         */
         template<typename Up_, typename OtherUnit>
             requires UnitAssignable<OtherUnit, Unit>
         constexpr Basic_Quantity& operator=(Basic_Quantity<Up_, OtherUnit> o) noexcept 
@@ -198,27 +211,76 @@ namespace Maxwell
         }
 
         // Arithmetic operators
+        /**
+         * @brief Adds the value of the quantity to *this
+         * 
+         * Adds the value of the quantity to *this.
+         * @post this->value() == this->value() + q.value()
+         * 
+         * @param q the other quantity
+         * @return a reference to *this
+         */
         constexpr Basic_Quantity& operator+=(Basic_Quantity q) noexcept 
         {
             val_ += q.val_;
             return *this;
         }
 
+        /** @brief Subtracts the value of the quantity from *this
+         * 
+         * Subtracts the value of the quantity frm *this.
+         * @post this->value() == this->value() - q.value()
+         *
+         * @param q the other quantity
+         * @return a reference to *this
+         */
         constexpr Basic_Quantity& operator-=(Basic_Quantity q) noexcept 
         {
             val_ -= q.val_;
         }
 
+        /** @brief Multiplies the value of the other quantity by *this
+         * 
+         * Multiples the value of the other quantity by *this and stores it 
+         * it in *this
+         * @post this->value() == this->value() * q.value()
+         * 
+         * @param q the other quantity
+         * @return a reference to *this
+         */
         constexpr Basic_Quantity& operator*=(Basic_Quantity q) noexcept 
         {
             val_ *= q.val_;
         }
 
+        /** @brief Divides the value of *this by the other quantity
+         * 
+         * Divides the value of *this by the other quantity and stores it 
+         * it in *this
+         * @pre q.value() != 0
+         * @post this->value() == this->value() / q.value()
+         * 
+         * @param q the other quantity
+         * @return a reference to *this
+         */
         constexpr Basic_Quantity& operator/=(Basic_Quantity q) noexcept 
         {
             val_ /= q.val_;
         }
 
+         /** @brief Computes the module of *this with the other quantity
+         * 
+         * Computes the module of *this with the other quantity and stores it 
+         * it in *this. This function only participates in overload resolution 
+         * if the represenation type of the quantity is an integere type.
+         *
+         * @pre q.value() != 0
+         * @pre std::integral<Rep>
+         * @post this->value() == this->value() % q.value()
+         * 
+         * @param q the other quantity
+         * @return a reference to *this
+         */
         constexpr Basic_Quantity& operator%=(Basic_Quantity q) noexcept requires std::integral<Rep>
         {
             return val_ %= q.val_;
@@ -263,6 +325,8 @@ namespace Maxwell
             requires UnitAssignable<Unit, OtherUnit>
         constexpr Basic_Quantity& operator+=(Basic_Quantity<Up, OtherUnit> other) noexcept 
         {
+            Basic_Quantity{other};
+            val_ += other.val_;
             return *this;
         }
 
@@ -270,6 +334,8 @@ namespace Maxwell
             requires UnitAssignable<Unit, OtherUnit>
         constexpr Basic_Quantity& operator-=(Basic_Quantity<Up, OtherUnit> other) noexcept 
         {
+            Basic_Quantity{other};
+            val_ -= other.val_;
             return *this;
         }
 

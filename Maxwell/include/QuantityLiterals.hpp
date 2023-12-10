@@ -7,11 +7,11 @@
 #include <sys/types.h>
 
 #define MAKE_QUANTITY_LITERAL(unit, literal)\
-    consteval Basic_Quantity<unsigned long long, unit##Unit> operator ""_##literal(unsigned long long x)\
+    consteval Basic_Quantity<unsigned long long, unit##Unit> operator ""_##literal(unsigned long long x) noexcept\
     {\
         return Basic_Quantity<unsigned long long, unit##Unit>(x);\
     }\
-    consteval Basic_Quantity<long double, unit##Unit> operator ""_##literal(long double x)\
+    consteval Basic_Quantity<long double, unit##Unit> operator ""_##literal(long double x) noexcept\
     {\
         return Basic_Quantity<double, unit##Unit>(x);\
     }
@@ -72,6 +72,13 @@ namespace Maxwell::Literals
 
     MAKE_QUANTITY_LITERAL(Liter, L)
 
+    MAKE_QUANTITY_LITERAL(MeterPerSecond, m_s)
+    MAKE_QUANTITY_LITERAL(MeterPerSecondPerSecond, m_s2)
+
+    MAKE_QUANTITY_LITERAL(SqMeter, m2)
+
+    MAKE_QUANTITY_LITERAL(CuMeter, m3)
+
     MAKE_QUANTITY_LITERAL(Quectogram, qg)
     MAKE_QUANTITY_LITERAL(Rontogram, rg)
     MAKE_QUANTITY_LITERAL(Yoctogram, yg)
@@ -84,7 +91,7 @@ namespace Maxwell::Literals
     MAKE_QUANTITY_LITERAL(Milligram, mg)
     MAKE_QUANTITY_LITERAL(Centigram, cg)
     MAKE_QUANTITY_LITERAL(Decigram, dg)
-    MAKE_QUANTITY_LITERAL(Meter, g)
+    MAKE_QUANTITY_LITERAL(Gram, g)
     MAKE_QUANTITY_LITERAL(Decagram, dag)
     MAKE_QUANTITY_LITERAL(Hectogram, hg)
     MAKE_QUANTITY_LITERAL(Kilogram, kg)
@@ -115,6 +122,7 @@ namespace Maxwell::Literals
     MAKE_QUANTITY_LITERAL(Weber, Wb)
     MAKE_QUANTITY_LITERAL(Tesla, T)
     MAKE_QUANTITY_LITERAL(Henry, H)
+    MAKE_QUANTITY_LITERAL(Degree, deg)
 }
 
 #endif

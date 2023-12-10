@@ -7,6 +7,8 @@
 #include "UnitCore.hpp"
 #include "UnitTypes.hpp"
 
+using namespace Maxwell::Literals;
+
 TEST(TestQuantity, TestLanguageProperties)
 {
     using Q1 = Maxwell::Basic_Quantity<int, Maxwell::MeterUnit>;
@@ -100,4 +102,25 @@ TEST(TestQuantity, TestQuantityConstructors)
     Maxwell::Radian r2{d2};
     EXPECT_EQ(r2.units(), Maxwell::RadianUnit{});
     EXPECT_FLOAT_EQ(r2.value(), M_PI/2);
+}
+
+TEST(TestQuantity, TestAssignmentOperator)
+{
+
+}
+
+TEST(TestQuantity, TestConversionOperator)
+{
+    Maxwell::Radian r;
+    EXPECT_FALSE((std::is_convertible_v<decltype(r), double>));
+
+    Maxwell::Quantity<Maxwell::Dimensionless_Unit> q{10.0};
+    double d1 = q;
+    EXPECT_TRUE((std::is_convertible_v<decltype(q), double>));
+    EXPECT_FLOAT_EQ(d1, 10.0);
+
+    auto val = 1.0_kg/2.0_kg;
+    EXPECT_TRUE((std::is_convertible_v<decltype(val), double>));
+    double d2 = val; 
+    EXPECT_FLOAT_EQ(d2, 0.5);
 }

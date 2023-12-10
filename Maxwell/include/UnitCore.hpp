@@ -8,23 +8,62 @@
 
 namespace Maxwell 
 {
+    /**
+     * @brief Represents one "dimension"
+     * 
+     * The base unit class template represents one "dimension" 
+     * e.g. length, time, mass, etc. and how it is scaled relative 
+     * to the SI coherent unit of that dimension. The scaling is expressed 
+     * through template parameters, allowing it to be queried at compile-time. 
+     * 
+     * The UnitBase can be related to the coherent unit through the following equation:
+     *
+     * UB = 10^Prefix * ScaleNum/ScaleDenom * U ^ Pow 
+     *
+     * where UB is the modified unit and U is the coherent unit.
+     *
+     * The cohrent unit will have a prefix of 0, pow of 1 and scale numerato/denominator 
+     * of one. 
+     *
+     * @tparam Prefix_ the metric prefix
+     * @tparam Pow_ the power of the unit
+     * @tparam ScaleNum_ the numerator of the scale factor
+     * @tparam ScaleDenom_ the denominator of the scale factor
+     */
     template<std::signed_integral auto Prefix_, 
              std::signed_integral auto Pow_,
-             std::signed_integral auto ScaleNum_ = 1, 
-             std::signed_integral auto ScaleDenom_ = 1>
+             std::intmax_t ScaleNum_ = 1, 
+             std::intmax_t ScaleDenom_ = 1>
     struct UnitBase
     {
+        /// The metric prefix of the unit
         static constexpr auto Prefix = Prefix_;
+        /// The power of the unit
         static constexpr auto Pow = Pow_;
+        /// The scale factor of th unit 
         using Scale = std::ratio<ScaleNum_, ScaleDenom_>;
     };
 
     // Unit base type aliases
+    /// The NullUnit represents a dimension not part of the overall unit
     using NullUnit = UnitBase<0, 0>;
 
+    /**
+     * @brief Scales the unit's prefix
+     * 
+     * Scales the unit's prefix by the specified power of 10. The scaled 
+     * unit is representged by the member type "type". It is related to the 
+     * original unit by the following formula: 
+     *
+     * type = 10^amt * UnitBaseT
+     *
+     * @tparam UnitBaseT the original unit
+     * @tparam Amt the power of 10 to scale by
+     */
     template<typename UnitBaseT, std::signed_integral auto Amt> 
     struct scale_unit_base
     {
+        /// The scaled unit
         using type = UnitBase<UnitBaseT::Prefix + Amt, UnitBaseT::Pow>;
     };
 
@@ -35,20 +74,35 @@ namespace Maxwell
     template<typename>
     struct is_unit_base : std::false_type {};
 
-    template<std::integral auto Prefix_, std::integral auto Pow_, std::signed_integral auto ScaleNum_, 
-             std::signed_integral auto ScaleDenom_ >
+    template<std::integral auto Prefix_, 
+             std::integral auto Pow_, 
+             std::intmax_t ScaleNum_, 
+             std::intmax_t ScaleDenom_>
     struct is_unit_base<UnitBase<Prefix_, Pow_, ScaleNum_, ScaleDenom_>> : std::true_type{};
 
+    /// True if the template parameter is an instantiation of class template UnitBase
     template<typename Tp>
     inline constexpr bool is_unit_base_v = is_unit_base<Tp>::value;
 
+    /// Concept that is true if the type is an instantiation of class template UnitBase
     template<typename Tp>
     concept UnitBaseLike = is_unit_base_v<Tp>;
 
     template<UnitBaseLike UnitBase1, UnitBaseLike UnitBase2> 
     struct is_unit_base_equal : std::bool_constant<UnitBase1::Prefix == UnitBase2::Prefix &&
-                                                   UnitBase1::Pow == UnitBase2::Pow> {};
+                                                   UnitBase1::Pow == UnitBase2::Pow &&
+                                                   UnitBase1::Scale::num == UnitBase2::Scale::num &&
+                                                   UnitBase1::Scale::den == UnitBase2::Scale::den> {};
 
+    /**
+     * @brief Variable template that is true if two unit bases are equal
+     * 
+     * Variable template that is true if two unit bases are equal. Two unit bases are equal 
+     * if and only if they have the same prefix, power, and scale.
+     *
+     * @tparam UnitBase1 one unit to compare for equality
+     * @tparam UnitBase2 the other unit to compare for equality
+     */
     template<UnitBaseLike UnitBase1, UnitBaseLike UnitBase2> 
     inline constexpr bool is_unit_base_equal_v = is_unit_base_equal<UnitBase1, UnitBase2>::value;
     
@@ -109,7 +163,7 @@ namespace Maxwell
     };
 
     template<UnitBaseLike U> 
-    using unit_base_inverse_t = unit_base_inverse<U>;
+    using unit_base_inverse_t = unit_base_inverse<U>::type;
 
     // Metric prefixes
     inline constexpr std::integral auto quetta = 30;
@@ -183,7 +237,8 @@ namespace Maxwell
                                                       Tp::Current::Pow == 0 &&
                                                       Tp::Temperature::Pow == 0 &&
                                                       Tp::Amount::Pow == 0 &&
-                                                      Tp::Luminosity::Pow == 0>{};
+                                                      Tp::Luminosity::Pow == 0 &&
+                                                      Tp::Angle::Pow == 0>{};
 
     template<UnitLike Tp> 
     inline constexpr bool is_dimensionless_unit_v = is_dimensionless_unit<Tp>::value;
@@ -281,13 +336,13 @@ namespace Maxwell
     template<UnitLike U> 
     struct unit_inverse 
     {
-        using type = Unit<unit_base_inverse<typename U::Time>,
-                          unit_base_inverse<typename U::Length>,
-                          unit_base_inverse<typename U::Mass>,
-                          unit_base_inverse<typename U::Current>,
-                          unit_base_inverse<typename U::Temperature>,
-                          unit_base_inverse<typename U::Amount>,
-                          unit_base_inverse<typename U::Luminosity>>;
+        using type = Unit<unit_base_inverse_t<typename U::Time>,
+                          unit_base_inverse_t<typename U::Length>,
+                          unit_base_inverse_t<typename U::Mass>,
+                          unit_base_inverse_t<typename U::Current>,
+                          unit_base_inverse_t<typename U::Temperature>,
+                          unit_base_inverse_t<typename U::Amount>,
+                          unit_base_inverse_t<typename U::Luminosity>>;
                           
     };
 
@@ -345,6 +400,36 @@ namespace Maxwell
 
     template<UnitLike U, std::integral auto Amt>
     using scale_unit_length_t = scale_unit_length<U, Amt>::type;
+
+    template<UnitLike U, std::integral auto Amt> 
+    struct scale_unit_current
+    {
+        using type = Unit<typename U::Time,
+                          typename U::Length,
+                          typename U::Mass, 
+                          scale_unit_base_t<typename U::Current, Amt>, 
+                          typename U::Temperature, 
+                          typename U::Amount,
+                          typename U::Luminosity>;
+    };
+
+    template<UnitLike U, std::integral auto Amt>
+    using scale_unit_current_t = scale_unit_current<U, Amt>::type;
+
+    template<UnitLike U, std::integral auto Amt> 
+    struct scale_unit_temperature
+    {
+        using type = Unit<typename U::Time,
+                          typename U::Length,
+                          typename U::Mass, 
+                          typename U::Current, 
+                          scale_unit_base_t<typename U::Temperature, Amt>,
+                          typename U::Amount,
+                          typename U::Luminosity>;
+    };
+
+    template<UnitLike U, std::integral auto Amt>
+    using scale_unit_temperature_t = scale_unit_temperature<U, Amt>::type;
 
     template<UnitLike U, std::integral auto Amt> 
     struct scale_unit_mass
@@ -479,7 +564,7 @@ namespace Maxwell
         // to scale / from scale
 
         double conversion = 1.0;
-        conversion *= static_cast<double>(RHSScale::num*LHSScale::den)/static_cast<double>(RHSScale::den*LHSScale::num);
+        conversion *= static_cast<double>(RHSScale::num)/static_cast<double>(RHSScale::den)*static_cast<double>(LHSScale::den)/static_cast<double>(LHSScale::num);
         return conversion;
     }
 
