@@ -272,7 +272,7 @@ namespace Maxwell
          * 
          * Computes the module of *this with the other quantity and stores it 
          * it in *this. This function only participates in overload resolution 
-         * if the represenation type of the quantity is an integere type.
+         * if the represenation type of the quantity is an integer type.
          *
          * @pre q.value() != 0
          * @pre std::integral<Rep>
@@ -281,12 +281,25 @@ namespace Maxwell
          * @param q the other quantity
          * @return a reference to *this
          */
-        constexpr Basic_Quantity& operator%=(Basic_Quantity q) noexcept requires std::integral<Rep>
+        constexpr Basic_Quantity& operator%=(Basic_Quantity q) noexcept 
+            requires std::integral<Rep>
         {
             return val_ %= q.val_;
         }
 
         //Dimensioness value arithmetic operators
+        /**
+         * @brief Adds the scalar value to *this
+         * 
+         * Adds the scalar value to *this. This function only particpates in overload 
+         * resolution if Unit is dimensionless.
+         *
+         * @pre DimensionlessUnit<Unit>
+         * @post this->value() == this->value() + val
+         *
+         * @param val the value to add to *this
+         * @return *this
+         */
         constexpr Basic_Quantity& operator+=(Arithmetic auto val) noexcept 
             requires DimensionlessUnit<Unit>
         {
@@ -294,6 +307,18 @@ namespace Maxwell
             return *this;
         }
 
+         /**
+         * @brief Subtracts the scalar value from *this
+         * 
+         * Adds the scalar value to *this. This function only particpates in overload 
+         * resolution if Unit is dimensionless.
+         *
+         * @pre DimensionlessUnit<Unit>
+         * @post this->value() == this->value() - val
+         *
+         * @param val the value to subtract from *this
+         * @return *this
+         */
         constexpr Basic_Quantity& operator-=(Arithmetic auto val) noexcept 
             requires DimensionlessUnit<Unit>
         {
@@ -301,18 +326,53 @@ namespace Maxwell
             return *this;
         }
 
+        /**
+         * @brief Multiplies *this by the scalar value
+         * 
+         * Multiples the value of *this by the scalar value.
+         *
+         * @post this->value() == this->value() * val
+         *
+         * @param val the value to multply by
+         * @return *this
+         */
         constexpr Basic_Quantity& operator*=(Arithmetic auto val) noexcept 
         {
             val_ *= val; 
             return *this;
         }
 
+        /**
+         * @brief Divides *this by the scalar value
+         * 
+         * Divides the value of *this by the scalar value.
+         *
+         * @pre this->value() != 0
+         * @post this->value() == this->value() / val
+         *
+         * @param val the value to divide by
+         * @return *this
+         */
         constexpr Basic_Quantity& operator/=(Arithmetic auto val) noexcept 
         {
             val_ /= val; 
             return *this;
         }
 
+        /**
+         * @brief Compules the modulo of *this and the specified value
+         * 
+         * Compules the modulo of *this and the specified value. This function 
+         * only participates in overload resolution if Rep is an integer type. The 
+         * behavior is undefined if this->value() == 0
+         *
+         * @pre std::integral<Rep>
+         * @pre this->value() != 0
+         * @post this->value() == this->value() / val
+         *
+         * @param val the value to modulo by
+         * @return *this
+         */
         constexpr Basic_Quantity& operator%=(Arithmetic auto val) noexcept 
             requires std::integral<Rep> 
         {
@@ -351,6 +411,7 @@ namespace Maxwell
     std::ostream& operator<<(std::ostream& os, Basic_Quantity<Tp_, Unit_> q)
     {
         os << q.value();
+        os << q.units();
         return os;
     }
 

@@ -76,6 +76,28 @@ namespace Maxwell
     {
         return Basic_Quantity<double, DegreeUnit>{std::atan2(x, y)*Rad_To_Deg};
     }
+
+    template<typename Rep, typename Unit, int Exp>
+    constexpr auto pow(Basic_Quantity<Rep, Unit> base) noexcept
+    {
+        if constexpr (Exp < 0)
+        {
+            return 1/pow<-Exp>(base);
+        }
+        else if constexpr(Exp == 0)
+        {
+            return Basic_Quantity<Rep, Unit>(1);
+        }
+        else if constexpr (Exp == 2)
+        {
+            return pow<Exp/2>(base*base);
+        }
+        else 
+        {
+            constexpr int N = (Exp - 1)/2;
+            return base * pow<N>(base*base);
+        }
+    }
 }
 
 #endif
