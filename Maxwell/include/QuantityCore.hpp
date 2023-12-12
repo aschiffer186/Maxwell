@@ -2,21 +2,31 @@
 
 #include <compare>
 #include <concepts> 
+#include <initializer_list>
 #include <ostream>
 #include <type_traits>
+#include <utility>
 
 #include "UnitCore.hpp"
 
 namespace Maxwell 
 {
-    template<typename Tp> 
-    concept Arithmetic = (std::integral<Tp> || std::floating_point<Tp>) && 
-                         !(std::same_as<Tp, bool>     || 
-                           std::same_as<Tp, char>     ||
-                           std::same_as<Tp, char8_t>  ||
-                           std::same_as<Tp, char16_t> ||
-                           std::same_as<Tp, char32_t> || 
-                           std::same_as<Tp, wchar_t>);
+    template<typename T> 
+    concept Arithmetic = requires(const T& a, const T& b)
+    {
+        a + b;
+        a - b;
+        a * b;
+    };
+
+    template<Arithmetic, UnitLike> 
+    class Basic_Quantity;
+
+    template<typename> 
+    struct _is_quantity : std::false_type {};
+
+    template<Arithmetic R, UnitLike U> 
+    struct _is_quantity<Basic_Quantity<R, U>> : std::true_type {};
 
     /**
      * @brief A construct with a value and a unit
@@ -59,33 +69,59 @@ namespace Maxwell
          */
         constexpr Basic_Quantity() noexcept = default;
 
+
         /**
          * @brief Constructor
          * 
-         * Constructs a Quantity whose value will be the same 
-         * as the specified value.
-         * 
-         * @param val the value of the Quatity
-         */
-        constexpr explicit Basic_Quantity(Rep val) noexcept
-        : val_{val}
-        {
-
-        }
-
-        /**
-         * @brief Converting Constructor
-         * 
-         * Constructs a Quantity whose value will be the same as the specified value 
-         * after converting to Rep. The value of the Quantity is intialized as if by 
-         * Rep{static_cast<Rep>(o)}
+         * Constructs a Basic_Quantity with the specified units whose value 
+         * will be constructed from o as if by direct initializing via the 
+         * expression Rep(std::forward<U>(o)). This function only participates 
+         * in overload resolution if std::constructible_from<Rep, Up_&&> is true.
          *
          * @tparam Up_ the type of the value 
          * @param o the value of the quantity
          */
-        template<Arithmetic Up_>
-        constexpr explicit Basic_Quantity(Up_ o) noexcept 
-        : val_{static_cast<Rep>(o)}
+        template<typename Up_>
+            requires std::constructible_from<Rep, Up_&&>
+        constexpr explicit Basic_Quantity(Up_&& o) noexcept 
+        : val_(std::forward<Up_>(o))
+        {
+
+        }
+        
+        /**
+         * @brief Consructor
+         * 
+         * Constructs a Basic_Quantity with the specified units whose value 
+         * will be constructed from o as if by direct initializing via the 
+         * expression Rep(std::forward<U>(o)). This function only participates 
+         * in overload resolution if std::constructible_from<Rep, Up_&&> is true.
+         *
+         * The additional units parameter is ignored, but is used for the create of 
+         * a template argument deductiion guide
+         *
+         * @tparam Up_ the type of the value 
+         * @param o the value of the quantity
+         */
+        template<typename U = Rep>
+        constexpr Basic_Quantity(U&& val, Unit) noexcept 
+        : val_{std::forward<U>(val)}
+        {
+
+        }
+
+        template<typename... Tps> 
+            requires std::constructible_from<Rep, Tps...>
+        constexpr Basic_Quantity(std::in_place_t, Tps&&... args) noexcept 
+        : val_(std::forward<Tps>(args)...)
+        {
+
+        }
+
+        template<typename U, typename... Tps> 
+            requires std::constructible_from<Rep, U, Tps...>
+        constexpr Basic_Quantity(std::in_place_t, std::initializer_list<U> il, Tps&&... args) noexcept 
+        : val_(il, std::forward<Tps>(args)...)
         {
 
         }
@@ -169,8 +205,9 @@ namespace Maxwell
          */
         constexpr Basic_Quantity<Rep, coherent_unit_t<Unit>> toCoherentUnits() const noexcept 
         {
-            double scale = conversionPrefix(Unit{}, coherent_unit_t<Unit>{});
-            return Basic_Quantity<Rep, coherent_unit_t<Unit>>{val_*scale};
+            const double prefixScale = conversionPrefix(Unit{}, coherent_unit_t<Unit>{});
+            const double scale = conversionScale(Unit{}, coherent_unit_t<Unit>{});
+            return Basic_Quantity<Rep, coherent_unit_t<Unit>>{val_*prefixScale};
         }
 
         /**
@@ -407,6 +444,9 @@ namespace Maxwell
     template<Arithmetic Tp, UnitLike Unit> 
     Basic_Quantity(Basic_Quantity<Tp, Unit>) -> Basic_Quantity<Tp, Unit>;
 
+    template<Arithmetic Tp, UnitLike Unit> 
+    Basic_Quantity(Tp, Unit) -> Basic_Quantity<Tp, Unit>;
+
     template<typename Tp_, typename Unit_> 
     std::ostream& operator<<(std::ostream& os, Basic_Quantity<Tp_, Unit_> q)
     {
@@ -462,7 +502,7 @@ namespace Maxwell
             valUsedRhs = lhs.value();
 
         if constexpr(!RHSType::isInCoherentUnits())
-            valUsedRhs = rhs.toCoherentUnits().valu();
+            valUsedRhs = rhs.toCoherentUnits().value();
         else  
             valUsedRhs = rhs.value();
 
@@ -493,15 +533,17 @@ namespace Maxwell
         return Basic_Quantity<ProductRep, ProductUnits>(valUsedLhs * valUsedRhs);
     }
 
-    template<Arithmetic Rep, UnitLike Unit> 
-    constexpr auto operator*(Arithmetic auto lhs, Basic_Quantity<Rep, Unit> rhs) noexcept 
+    template<typename Tp, Arithmetic Rep, UnitLike Unit> 
+         requires (!_is_quantity<Tp>::value && Arithmetic<Tp>)
+    constexpr auto operator*(Tp lhs, Basic_Quantity<Rep, Unit> rhs) noexcept 
     {
         rhs *= lhs; 
         return rhs;
     }
     
-    template<Arithmetic Rep, UnitLike Unit> 
-    constexpr auto operator*(Basic_Quantity<Rep, Unit> lhs, Arithmetic auto rhs) noexcept 
+    template<typename Tp, Arithmetic Rep, UnitLike Unit> 
+        requires (!_is_quantity<Tp>::value && Arithmetic<Tp>)
+    constexpr auto operator*(Basic_Quantity<Rep, Unit> lhs, Tp rhs) noexcept 
     {
         lhs *= rhs; 
         return lhs;
@@ -531,15 +573,18 @@ namespace Maxwell
         return Basic_Quantity<ProductRep, ProductUnits>(valUsedLhs / valUsedRhs);
     }
 
-    template<Arithmetic Rep, UnitLike Unit> 
-    constexpr auto operator/(Arithmetic auto lhs, Basic_Quantity<Rep, Unit> rhs) noexcept 
+    template<typename Tp, Arithmetic Rep, UnitLike Unit> 
+        requires (!_is_quantity<Tp>::value && Arithmetic<Tp>)
+    constexpr auto operator/(Tp lhs, Basic_Quantity<Rep, Unit> rhs) noexcept 
+        requires (!_is_quantity<decltype(lhs)>::value)
     {
         using OutputUnits = unit_inverse_t<Unit>;
         return Basic_Quantity<Rep, OutputUnits>(1/rhs.value());
     }
     
-    template<Arithmetic Rep, UnitLike Unit> 
-    constexpr auto operator/(Basic_Quantity<Rep, Unit> lhs, Arithmetic auto rhs) noexcept 
+    template<typename Tp, Arithmetic Rep, UnitLike Unit> 
+        requires (!_is_quantity<Tp>::value && Arithmetic<Tp>)
+    constexpr auto operator/(Basic_Quantity<Rep, Unit> lhs, Tp rhs) noexcept 
     {
         lhs /= rhs; 
         return lhs;

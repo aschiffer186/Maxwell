@@ -102,6 +102,8 @@ TEST(TestQuantity, TestQuantityConstructors)
     Maxwell::Radian r2{d2};
     EXPECT_EQ(r2.units(), Maxwell::RadianUnit{});
     EXPECT_FLOAT_EQ(r2.value(), M_PI/2);
+
+    Maxwell::Basic_Quantity<int, Maxwell::MeterUnit> q100{1LL};
 }
 
 TEST(TestQuantity, TestAssignmentOperator)

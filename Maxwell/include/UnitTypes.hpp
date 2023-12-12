@@ -87,10 +87,15 @@ namespace Maxwell
     using RonnaliterUnit  = scale_unit_length_t<LiterUnit, 27>;
     using QuettaliterUnit = scale_unit_length_t<LiterUnit, 30>;
 
+    // Area units
     using SqMeterUnit = decltype(MeterUnit{}*MeterUnit{});
+
+    // Volume units
     using CuMeterUnit = decltype(MeterUnit{}*MeterUnit{}*MeterUnit{});
 
+    // Velocity units
     using MeterPerSecondUnit = decltype(MeterUnit{}/SecondUnit{});
+    // Acceleration units
     using MeterPerSecondPerSecondUnit = decltype(MeterPerSecondUnit{}/SecondUnit{});
 
     // Scaled version of gram
