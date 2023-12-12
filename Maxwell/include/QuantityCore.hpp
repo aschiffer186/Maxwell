@@ -67,7 +67,7 @@ namespace Maxwell
          * Value initalizes the underlying value of the 
          * Quantity.
          */
-        constexpr Basic_Quantity() noexcept = default;
+        constexpr Basic_Quantity() noexcept(std::is_nothrow_default_constructible_v<Rep>)= default;
 
 
         /**
@@ -83,7 +83,7 @@ namespace Maxwell
          */
         template<typename Up_>
             requires std::constructible_from<Rep, Up_&&>
-        constexpr explicit Basic_Quantity(Up_&& o) noexcept 
+        constexpr explicit Basic_Quantity(Up_&& o) noexcept(std::is_nothrow_constructible_v<Rep, U&&>)
         : val_(std::forward<Up_>(o))
         {
 
@@ -104,7 +104,8 @@ namespace Maxwell
          * @param o the value of the quantity
          */
         template<typename U = Rep>
-        constexpr Basic_Quantity(U&& val, Unit) noexcept 
+            requires std::constructible_from<Rep, U&&>
+        constexpr Basic_Quantity(U&& val, Unit) noexcept(std::is_nothrow_constructible_v<Rep, U&&>)
         : val_{std::forward<U>(val)}
         {
 
@@ -112,7 +113,7 @@ namespace Maxwell
 
         template<typename... Tps> 
             requires std::constructible_from<Rep, Tps...>
-        constexpr Basic_Quantity(std::in_place_t, Tps&&... args) noexcept 
+        constexpr Basic_Quantity(std::in_place_t, Tps&&... args) noexcept(std::is_nothrow_constructible_v<Rep, Tps...>)
         : val_(std::forward<Tps>(args)...)
         {
 
@@ -120,7 +121,8 @@ namespace Maxwell
 
         template<typename U, typename... Tps> 
             requires std::constructible_from<Rep, U, Tps...>
-        constexpr Basic_Quantity(std::in_place_t, std::initializer_list<U> il, Tps&&... args) noexcept 
+        constexpr Basic_Quantity(std::in_place_t, std::initializer_list<U> il, Tps&&... args) 
+            noexcept(std::is_nothrow_constructible_v<Rep, std::initializer_list<U>, Tps...>)
         : val_(il, std::forward<Tps>(args)...)
         {
 
@@ -144,8 +146,17 @@ namespace Maxwell
          */
         template<Arithmetic Up_, UnitLike OtherUnit>
             requires UnitAssignable<OtherUnit, Unit>
-        constexpr Basic_Quantity(Basic_Quantity<Up_, OtherUnit> o) noexcept 
-        : val_{static_cast<Rep>(o.value())}
+        constexpr Basic_Quantity(const Basic_Quantity<Up_, OtherUnit>& o) noexcept(std::is_nothrow_copy_constructible_v<Rep>)
+        : val_(o.value())
+        {
+            val_ *= static_cast<Rep>(conversionPrefix(OtherUnit{}, Unit{}));
+            val_ *= static_cast<Rep>(conversionScale(OtherUnit{}, Unit{}));
+        }
+
+        template<Arithmetic Up_, UnitLike OtherUnit>
+            requires UnitAssignable<OtherUnit, Unit>
+        constexpr Basic_Quantity(Basic_Quantity<Up_, OtherUnit>&& o) noexcept(std::is_nothrow_move_constructible_v<Rep>)
+        : val_(std::move(o.value()))
         {
             val_ *= static_cast<Rep>(conversionPrefix(OtherUnit{}, Unit{}));
             val_ *= static_cast<Rep>(conversionScale(OtherUnit{}, Unit{}));
@@ -166,9 +177,20 @@ namespace Maxwell
          */
         template<typename Up_, typename OtherUnit>
             requires UnitAssignable<OtherUnit, Unit>
-        constexpr Basic_Quantity& operator=(Basic_Quantity<Up_, OtherUnit> o) noexcept 
+        constexpr Basic_Quantity& operator=(const Basic_Quantity<Up_, OtherUnit>& o) noexcept(std::is_nothrow_copy_assignable_v<Rep>)
         {
-            val_ = static_cast<Rep>(o.value());
+            val_ = o.value();
+            val_ *= static_cast<Rep>(conversionPrefix(OtherUnit{}, Unit{}));
+            val_ *= static_cast<Rep>(conversionScale(OtherUnit{}, Unit{}));
+
+            return *this;
+        }
+
+        template<typename Up_, typename OtherUnit>
+            requires UnitAssignable<OtherUnit, Unit>
+        constexpr Basic_Quantity& operator=(Basic_Quantity<Up_, OtherUnit>&& o) noexcept(std::is_nothrow_move_assignable_v<Rep>)
+        {
+            val_ = std::move(o.value());
             val_ *= static_cast<Rep>(conversionPrefix(OtherUnit{}, Unit{}));
             val_ *= static_cast<Rep>(conversionScale(OtherUnit{}, Unit{}));
 
@@ -180,7 +202,7 @@ namespace Maxwell
          * 
          * @return the value of the Quantity
          */
-        constexpr Rep value() const noexcept 
+        constexpr const Rep& value() const noexcept 
         {
             return val_;
         }
