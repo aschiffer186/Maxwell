@@ -83,7 +83,7 @@ namespace Maxwell
          */
         template<typename Up_>
             requires std::constructible_from<Rep, Up_&&>
-        constexpr explicit Basic_Quantity(Up_&& o) noexcept(std::is_nothrow_constructible_v<Rep, U&&>)
+        constexpr explicit Basic_Quantity(Up_&& o) noexcept(std::is_nothrow_constructible_v<Rep, Up_&&>)
         : val_(std::forward<Up_>(o))
         {
 
