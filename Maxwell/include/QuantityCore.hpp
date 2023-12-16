@@ -2,6 +2,7 @@
 
 #include <compare>
 #include <concepts> 
+#include <functional>
 #include <initializer_list>
 #include <ostream>
 #include <type_traits>
@@ -12,11 +13,13 @@
 namespace Maxwell 
 {
     template<typename T> 
-    concept Arithmetic = requires(const T& a, const T& b)
+    concept Arithmetic = requires(const T& a, const T& b, double d)
     {
         a + b;
         a - b;
         a * b;
+        a / b;
+        a * d;
     };
 
     template<Arithmetic, UnitLike> 
@@ -111,6 +114,17 @@ namespace Maxwell
 
         }
 
+        /**
+         * @brief Constructor
+         * 
+         * Constructs whose a Basic_Quantity whose stored value is constructed from 
+         * the specified arguments as if by calling Rep(std::forward<Tps>(args)...). 
+         * This function only participates in in overload resolution if 
+         * std::constructible_from<Rep, Tps...> is satisified.
+         *
+         * @tparam Tps the argument types used to construct the value
+         * @param args the arguments used to construct the value of *this
+         */
         template<typename... Tps> 
             requires std::constructible_from<Rep, Tps...>
         constexpr Basic_Quantity(std::in_place_t, Tps&&... args) noexcept(std::is_nothrow_constructible_v<Rep, Tps...>)
@@ -119,6 +133,20 @@ namespace Maxwell
 
         }
 
+          /**
+         * @brief Constructor
+         * 
+         * Constructs whose a Basic_Quantity whose stored value is constructed from 
+         * the specified initializer list and arguments as if by calling
+         * Rep(il, std::forward<Tps>(args)...). 
+         * This function only participates in in overload resolution if 
+         * std::constructible_from<Rep, std::initializer_list<U>, Tps...> is satisified.
+         *
+         * @tparam U the type of the elements of the initializer list
+         * @tparam Tps the argument types used to construct the value
+         * @param il the initializer list used to construct the value of *this
+         * @param args the arguments used to construct the value of *this
+         */
         template<typename U, typename... Tps> 
             requires std::constructible_from<Rep, U, Tps...>
         constexpr Basic_Quantity(std::in_place_t, std::initializer_list<U> il, Tps&&... args) 
@@ -149,8 +177,8 @@ namespace Maxwell
         constexpr Basic_Quantity(const Basic_Quantity<Up_, OtherUnit>& o) noexcept(std::is_nothrow_copy_constructible_v<Rep>)
         : val_(o.value())
         {
-            val_ *= static_cast<Rep>(conversionPrefix(OtherUnit{}, Unit{}));
-            val_ *= static_cast<Rep>(conversionScale(OtherUnit{}, Unit{}));
+            val_ *= conversionPrefix(OtherUnit{}, Unit{});
+            val_ *= conversionScale(OtherUnit{}, Unit{});
         }
 
         template<Arithmetic Up_, UnitLike OtherUnit>
@@ -158,8 +186,8 @@ namespace Maxwell
         constexpr Basic_Quantity(Basic_Quantity<Up_, OtherUnit>&& o) noexcept(std::is_nothrow_move_constructible_v<Rep>)
         : val_(std::move(o.value()))
         {
-            val_ *= static_cast<Rep>(conversionPrefix(OtherUnit{}, Unit{}));
-            val_ *= static_cast<Rep>(conversionScale(OtherUnit{}, Unit{}));
+            val_ *= conversionPrefix(OtherUnit{}, Unit{});
+            val_ *= conversionScale(OtherUnit{}, Unit{});
         }
 
         /**
@@ -180,8 +208,8 @@ namespace Maxwell
         constexpr Basic_Quantity& operator=(const Basic_Quantity<Up_, OtherUnit>& o) noexcept(std::is_nothrow_copy_assignable_v<Rep>)
         {
             val_ = o.value();
-            val_ *= static_cast<Rep>(conversionPrefix(OtherUnit{}, Unit{}));
-            val_ *= static_cast<Rep>(conversionScale(OtherUnit{}, Unit{}));
+            val_ *= conversionPrefix(OtherUnit{}, Unit{});
+            val_ *= conversionScale(OtherUnit{}, Unit{});
 
             return *this;
         }
@@ -191,8 +219,8 @@ namespace Maxwell
         constexpr Basic_Quantity& operator=(Basic_Quantity<Up_, OtherUnit>&& o) noexcept(std::is_nothrow_move_assignable_v<Rep>)
         {
             val_ = std::move(o.value());
-            val_ *= static_cast<Rep>(conversionPrefix(OtherUnit{}, Unit{}));
-            val_ *= static_cast<Rep>(conversionScale(OtherUnit{}, Unit{}));
+            val_ *= conversionPrefix(OtherUnit{}, Unit{});
+            val_ *= conversionScale(OtherUnit{}, Unit{});
 
             return *this;
         }
@@ -463,6 +491,7 @@ namespace Maxwell
         Rep val_{};
     };
 
+    // Deduction guides
     template<Arithmetic Tp, UnitLike Unit> 
     Basic_Quantity(Basic_Quantity<Tp, Unit>) -> Basic_Quantity<Tp, Unit>;
 
@@ -654,4 +683,16 @@ namespace Maxwell
     /// Type alias where the value representation is double
     template<UnitLike U> 
     using Quantity = Basic_Quantity<double, U>;
+}
+
+namespace std 
+{
+    template<Maxwell::Arithmetic Rep, Maxwell::UnitLike Unit> 
+    struct hash<Maxwell::Basic_Quantity<Rep, Unit>>
+    {
+        std::uint64_t operator()(const Maxwell::Basic_Quantity<Rep, Unit>& q) noexcept 
+        {
+            return hash<Rep>{}(q.value());
+        }
+    };
 }

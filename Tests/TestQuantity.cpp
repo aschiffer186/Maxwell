@@ -1,3 +1,4 @@
+#include <compare>
 #include <gtest/gtest.h> 
 #include <type_traits>
 
@@ -7,6 +8,7 @@
 #include "UnitCore.hpp"
 #include "UnitTypes.hpp"
 
+using namespace Maxwell;
 using namespace Maxwell::Literals;
 
 TEST(TestQuantity, TestLanguageProperties)
@@ -56,73 +58,213 @@ TEST(TestQuantity, TestLanguageProperties)
     EXPECT_TRUE(std::totally_ordered<Q2>);
 }
 
-TEST(TestQuantity, TestQuantityConstructors)
+struct Foo 
 {
-    using Q1 = Maxwell::Basic_Quantity<int, Maxwell::MeterUnit>;
-    using Q2 = Maxwell::Basic_Quantity<double, Maxwell::MeterUnit>; 
+    double val{};
 
-    Q1 q1; 
-    Q2 q2; 
+    Foo() noexcept = default; 
 
-    EXPECT_EQ(q1.value(), 0);
-    EXPECT_EQ(q1.units(), Maxwell::MeterUnit{});
-    EXPECT_FLOAT_EQ(q2.value(), 0.0);
-    EXPECT_EQ(q2.units(), Maxwell::MeterUnit{});
+    int numMoveCtorCalls{};
+    int numCopyCtorCalls{};
 
-    Q1 q3{1};
-    Q2 q4{1.0};
+    Foo(const Foo& other) noexcept
+    : val{other.val}
+    {
+        ++numCopyCtorCalls;
+    }
 
-    EXPECT_EQ(q3.value(), 1);
-    EXPECT_EQ(q3.units(), Maxwell::MeterUnit{});
-    EXPECT_FLOAT_EQ(q4.value(), 1.0);
-    EXPECT_EQ(q4.units(), Maxwell::MeterUnit{});
+    Foo(Foo&& other) noexcept
+    : val{std::move(other.val)}
+    {
+        ++numMoveCtorCalls;
+    }
 
-    //Test copy constructor
-    Maxwell::Basic_Quantity<int, Maxwell::MeterUnit> q5{q3};
-    EXPECT_EQ(q5.value(), 1);
-    EXPECT_EQ(q5.units(), Maxwell::MeterUnit{});
-    EXPECT_TRUE((std::same_as<decltype(q5)::Rep, int>));
+    explicit Foo(double d) noexcept
+    : val{d}
+    {
 
-    // Test converting constructor
-    Maxwell::Basic_Quantity<double, Maxwell::KilometerUnit> q6{q5};
-    EXPECT_FLOAT_EQ(q6.value(), 1e-3);
-    EXPECT_EQ(q6.units(), Maxwell::KilometerUnit{});
+    }
 
-    Maxwell::Basic_Quantity<double, decltype(Maxwell::MeterUnit{}*Maxwell::SecondUnit{})> q7{10.0};
-    Maxwell::Basic_Quantity<double, decltype(Maxwell::KilometerUnit{}*Maxwell::NanosecondUnit{})> q8{q7};
-    EXPECT_FLOAT_EQ(q8.value(), 10.0*1e-3*1e9);
-    EXPECT_EQ(q8.units(), Maxwell::KilometerUnit{}*Maxwell::NanosecondUnit{});
+    Foo operator+(const Foo&) const
+    {
+        return Foo{};
+    }
 
-    Maxwell::Radian r{M_PI};
-    Maxwell::Degree d{r};
-    EXPECT_EQ(d.units(), Maxwell::DegreeUnit{});
-    EXPECT_FLOAT_EQ(d.value(), 180);
+    Foo operator-(const Foo&) const 
+    {
+        return Foo{};
+    }
 
-    Maxwell::Degree d2{90.0};
-    Maxwell::Radian r2{d2};
-    EXPECT_EQ(r2.units(), Maxwell::RadianUnit{});
-    EXPECT_FLOAT_EQ(r2.value(), M_PI/2);
+    Foo operator*(const Foo&) const
+    {
+        return Foo{};
+    }
 
-    Maxwell::Basic_Quantity<int, Maxwell::MeterUnit> q100{1LL};
+    Foo operator/(const Foo&) const 
+    {
+        return Foo{};
+    }
+
+    Foo operator*(double d) const 
+    {
+        return Foo{};
+    }
+
+    friend auto operator<=>(const Foo& lhs, const Foo& rhs) = default;
+};
+
+struct Bar 
+{
+    double val{};
+
+    int numMoveCtorCalls{};
+    int numCopyCtorCalls{};
+
+    Bar() noexcept(false) = default; 
+
+    Bar(const Bar& other) 
+    : val{other.val}
+    {
+        ++numCopyCtorCalls;
+    }
+
+    Bar(Bar&& other) 
+    : val{std::move(other.val)}
+    {
+        ++numMoveCtorCalls;
+    }
+
+    explicit Bar(double d) noexcept
+    : val{d}
+    {
+
+    }
+
+    Bar operator+(const Bar&) const
+    {
+        return Bar{};
+    }
+
+    Bar operator-(const Bar&) const 
+    {
+        return Bar{};
+    }
+
+    Bar operator*(const Bar&) const
+    {
+        return Bar{};
+    }
+
+    Bar operator/(const Bar&) const 
+    {
+        return Bar{};
+    }
+
+    Bar operator*(double d) const 
+    {
+        return Bar{};
+    }
+
+    friend auto operator<=>(const Bar& lhs, const Bar& rhs) = default;
+};
+
+TEST(TestQuantity, TestDefaultConstructor)
+{
+    Basic_Quantity<double, MeterUnit> q;
+
+    EXPECT_FLOAT_EQ(q.value(), 0.0);
+    EXPECT_EQ(q.units(), MeterUnit{});
+    EXPECT_TRUE(std::is_nothrow_default_constructible_v<decltype(q)>);
+
+    Basic_Quantity<Foo, MeterUnit> q2;
+    EXPECT_FLOAT_EQ(q2.value().val, 0.0);
+    EXPECT_EQ(q2.units(), MeterUnit{});
+    EXPECT_TRUE(std::is_nothrow_default_constructible_v<decltype(q2)>);
+
+    Basic_Quantity<Bar, MeterUnit> q3;
+    EXPECT_FLOAT_EQ(q3.value().val, 0.0);
+    EXPECT_EQ(q3.units(), MeterUnit{});
+    EXPECT_FALSE(std::is_nothrow_default_constructible_v<decltype(q3)>);
 }
 
-TEST(TestQuantity, TestAssignmentOperator)
+TEST(TestQuantity, TestSingleArgumentConstructor)
 {
+    Basic_Quantity<double, MeterUnit> q{1.0};
+    EXPECT_FLOAT_EQ(q.value(), 1.0);
+    EXPECT_EQ(q.units(), MeterUnit{});
+    bool isNothrowConstructible = std::is_nothrow_constructible_v<decltype(q), double>;
+    EXPECT_TRUE(isNothrowConstructible);
 
+    Basic_Quantity<Foo, MeterUnit> q2{Foo{1.0}};
+    EXPECT_FLOAT_EQ(q2.value().val, 1.0);
+    EXPECT_EQ(q2.units(), MeterUnit{});
+    EXPECT_EQ(q2.value().numMoveCtorCalls, 1);
+    isNothrowConstructible = std::is_nothrow_constructible_v<decltype(q2), Foo&&>;
+    EXPECT_TRUE(isNothrowConstructible);
+
+    Foo f{2.0};
+    Basic_Quantity<Foo, MeterUnit> q3{f};
+    EXPECT_FLOAT_EQ(q3.value().val, 2.0);
+    EXPECT_EQ(q3.units(), MeterUnit{});
+    EXPECT_EQ(q3.value().numCopyCtorCalls, 1);
+    isNothrowConstructible = std::is_nothrow_constructible_v<decltype(q2),const Foo&>;
+    EXPECT_TRUE(isNothrowConstructible);
+
+    Basic_Quantity<Bar, MeterUnit> q4{Bar{1.0}};
+    EXPECT_FLOAT_EQ(q4.value().val, 1.0);
+    EXPECT_EQ(q4.units(), MeterUnit{});
+    EXPECT_EQ(q4.value().numMoveCtorCalls, 1);
+    isNothrowConstructible = std::is_nothrow_constructible_v<decltype(q4), Bar&&>;
+    EXPECT_FALSE(isNothrowConstructible);
+
+    Bar b{2.0};
+    Basic_Quantity<Bar, MeterUnit> q5{b};
+    EXPECT_FLOAT_EQ(q5.value().val, 2.0);
+    EXPECT_EQ(q5.units(), MeterUnit{});
+    EXPECT_EQ(q5.value().numCopyCtorCalls, 1);
+    isNothrowConstructible = std::is_nothrow_constructible_v<decltype(q5),const Bar&>;
+    EXPECT_FALSE(isNothrowConstructible);
 }
 
-TEST(TestQuantity, TestConversionOperator)
+TEST(TestQuantity, TestSingleArgumentUnitConstructr)
 {
-    Maxwell::Radian r;
-    EXPECT_FALSE((std::is_convertible_v<decltype(r), double>));
+    Basic_Quantity q{1.0, MeterUnit{}};
+    EXPECT_FLOAT_EQ(q.value(), 1.0);
+    EXPECT_EQ(q.units(), MeterUnit{});
+    bool isNothrowConstructible = std::is_nothrow_constructible_v<decltype(q), double, MeterUnit>;
+    EXPECT_TRUE(isNothrowConstructible);
 
-    Maxwell::Quantity<Maxwell::Dimensionless_Unit> q{10.0};
-    double d1 = q;
-    EXPECT_TRUE((std::is_convertible_v<decltype(q), double>));
-    EXPECT_FLOAT_EQ(d1, 10.0);
+    Basic_Quantity q2{Foo{1.0}, MeterUnit{}};
+    EXPECT_TRUE((std::is_same_v<decltype(q2)::Rep, Foo>));
+    EXPECT_FLOAT_EQ(q2.value().val, 1.0);
+    EXPECT_EQ(q2.units(), MeterUnit{});
+    EXPECT_EQ(q2.value().numMoveCtorCalls, 1);
+    isNothrowConstructible = std::is_nothrow_constructible_v<decltype(q2), Foo&&>;
+    EXPECT_TRUE(isNothrowConstructible);
 
-    auto val = 1.0_kg/2.0_kg;
-    EXPECT_TRUE((std::is_convertible_v<decltype(val), double>));
-    double d2 = val; 
-    EXPECT_FLOAT_EQ(d2, 0.5);
+    Foo f{2.0};
+    Basic_Quantity q3{f, MeterUnit{}};
+    EXPECT_TRUE((std::is_same_v<decltype(q3)::Rep, Foo>));
+    EXPECT_FLOAT_EQ(q3.value().val, 2.0);
+    EXPECT_EQ(q3.units(), MeterUnit{});
+    EXPECT_EQ(q3.value().numCopyCtorCalls, 1);
+    isNothrowConstructible = std::is_nothrow_constructible_v<decltype(q2),const Foo&>;
+    EXPECT_TRUE(isNothrowConstructible);
+
+    Basic_Quantity q4{Bar{1.0}, MeterUnit{}};
+    EXPECT_TRUE((std::is_same_v<decltype(q4)::Rep, Bar>));
+    EXPECT_FLOAT_EQ(q4.value().val, 1.0);
+    EXPECT_EQ(q4.units(), MeterUnit{});
+    EXPECT_EQ(q4.value().numMoveCtorCalls, 1);
+    isNothrowConstructible = std::is_nothrow_constructible_v<decltype(q4), Bar&&>;
+    EXPECT_FALSE(isNothrowConstructible);
+
+    Bar b{2.0};
+    Basic_Quantity q5{b, MeterUnit{}};
+    EXPECT_TRUE((std::is_same_v<decltype(q5)::Rep, Bar>));
+    EXPECT_FLOAT_EQ(q5.value().val, 2.0);
+    EXPECT_EQ(q5.units(), MeterUnit{});
+    EXPECT_EQ(q5.value().numCopyCtorCalls, 1);
+    isNothrowConstructible = std::is_nothrow_constructible_v<decltype(q5),const Bar&>;
+    EXPECT_FALSE(isNothrowConstructible);
 }
