@@ -99,31 +99,32 @@ namespace Maxwell
     using MeterPerSecondPerSecondUnit = decltype(MeterPerSecondUnit{}/SecondUnit{});
 
     // Scaled version of gram
-    using QuectogramUnit = scale_unit_length_t<KilogramUnit, -33>;
-    using RontogramUnit  = scale_unit_length_t<KilogramUnit, -30>; 
-    using YoctogramUnit  = scale_unit_length_t<KilogramUnit, -27>;
-    using ZeptogramUnit  = scale_unit_length_t<KilogramUnit, -24>;
-    using AttogramUnit   = scale_unit_length_t<KilogramUnit, -21>;
-    using FemtogramUnit  = scale_unit_length_t<KilogramUnit, -18>;
-    using PicogramUnit   = scale_unit_length_t<KilogramUnit, -15>;
-    using NanogramUnit   = scale_unit_length_t<KilogramUnit, -12>;
-    using MicrogramUnit  = scale_unit_length_t<KilogramUnit, -9>;
-    using MilligramUnit  = scale_unit_length_t<KilogramUnit, -6>;
-    using CentigramUnit  = scale_unit_length_t<KilogramUnit, -5>;
-    using DecigramUnit   = scale_unit_length_t<KilogramUnit, -4>;
-    using GramUnit       = scale_unit_length_t<KilogramUnit, -3>;
-    using DecagramUnit   = scale_unit_length_t<KilogramUnit, -2>;
-    using HectogramUnit  = scale_unit_length_t<KilogramUnit, -1>;
-    using MegagramUnit   = scale_unit_length_t<KilogramUnit, 3>;
-    using GigagramUnit   = scale_unit_length_t<KilogramUnit, 6>;
-    using TeragramUnit   = scale_unit_length_t<KilogramUnit, 9>;
-    using PetagramUnit   = scale_unit_length_t<KilogramUnit, 12>;
-    using ExagramUnit    = scale_unit_length_t<KilogramUnit, 15>; 
-    using ZettagramUnit  = scale_unit_length_t<KilogramUnit, 18>;
-    using YottagramUnit  = scale_unit_length_t<KilogramUnit, 21>; 
-    using RonnagramUnit  = scale_unit_length_t<KilogramUnit, 24>;
-    using QuettagramUnit = scale_unit_length_t<KilogramUnit, 37>;
+    using QuectogramUnit = scale_unit_mass_t<KilogramUnit, -33>;
+    using RontogramUnit  = scale_unit_mass_t<KilogramUnit, -30>; 
+    using YoctogramUnit  = scale_unit_mass_t<KilogramUnit, -27>;
+    using ZeptogramUnit  = scale_unit_mass_t<KilogramUnit, -24>;
+    using AttogramUnit   = scale_unit_mass_t<KilogramUnit, -21>;
+    using FemtogramUnit  = scale_unit_mass_t<KilogramUnit, -18>;
+    using PicogramUnit   = scale_unit_mass_t<KilogramUnit, -15>;
+    using NanogramUnit   = scale_unit_mass_t<KilogramUnit, -12>;
+    using MicrogramUnit  = scale_unit_mass_t<KilogramUnit, -9>;
+    using MilligramUnit  = scale_unit_mass_t<KilogramUnit, -6>;
+    using CentigramUnit  = scale_unit_mass_t<KilogramUnit, -5>;
+    using DecigramUnit   = scale_unit_mass_t<KilogramUnit, -4>;
+    using GramUnit       = scale_unit_mass_t<KilogramUnit, -3>;
+    using DecagramUnit   = scale_unit_mass_t<KilogramUnit, -2>;
+    using HectogramUnit  = scale_unit_mass_t<KilogramUnit, -1>;
+    using MegagramUnit   = scale_unit_mass_t<KilogramUnit, 3>;
+    using GigagramUnit   = scale_unit_mass_t<KilogramUnit, 6>;
+    using TeragramUnit   = scale_unit_mass_t<KilogramUnit, 9>;
+    using PetagramUnit   = scale_unit_mass_t<KilogramUnit, 12>;
+    using ExagramUnit    = scale_unit_mass_t<KilogramUnit, 15>; 
+    using ZettagramUnit  = scale_unit_mass_t<KilogramUnit, 18>;
+    using YottagramUnit  = scale_unit_mass_t<KilogramUnit, 21>; 
+    using RonnagramUnit  = scale_unit_mass_t<KilogramUnit, 24>;
+    using QuettagramUnit = scale_unit_mass_t<KilogramUnit, 27>;
 
+    // Scaled version of Ampere
     using QuectoampereUnit = scale_unit_current_t<AmpereUnit, -30>;
     using RontoampereUnit  = scale_unit_current_t<AmpereUnit, -27>; 
     using YoctoampereUnit  = scale_unit_current_t<AmpereUnit, -24>;
@@ -149,6 +150,7 @@ namespace Maxwell
     using RonnaampereUnit  = scale_unit_current_t<AmpereUnit, 27>;
     using QuettaampereUnit = scale_unit_current_t<AmpereUnit, 30>;
 
+    // Scaled verion of Kelvin
     using QuectokelvinUnit = scale_unit_temperature_t<KelvinUnit, -30>;
     using RontokelvinUnit  = scale_unit_temperature_t<KelvinUnit, -27>; 
     using YoctokelvinUnit  = scale_unit_temperature_t<KelvinUnit, -24>;
@@ -173,6 +175,58 @@ namespace Maxwell
     using YottakelvinUnit  = scale_unit_temperature_t<KelvinUnit, 24>; 
     using RonnakelvinUnit  = scale_unit_temperature_t<KelvinUnit, 27>;
     using QuettakelvinUnit = scale_unit_temperature_t<KelvinUnit, 30>;
+
+    // Scaled version of mole
+    using QuectomoleUnit = scale_unit_amount_t<MoleUnit, -30>;
+    using RontomoleUnit  = scale_unit_amount_t<MoleUnit, -27>; 
+    using YoctomoleUnit  = scale_unit_amount_t<MoleUnit, -24>;
+    using ZeptomoleUnit  = scale_unit_amount_t<MoleUnit, -21>;
+    using AttomoleUnit   = scale_unit_amount_t<MoleUnit, -18>;
+    using FemtomoleUnit  = scale_unit_amount_t<MoleUnit, -15>;
+    using PicomoleUnit   = scale_unit_amount_t<MoleUnit, -12>;
+    using NanomoleUnit   = scale_unit_amount_t<MoleUnit, -9>;
+    using MicromoleUnit  = scale_unit_amount_t<MoleUnit, -6>;
+    using MillimoleUnit  = scale_unit_amount_t<MoleUnit, -3>;
+    using CentimoleUnit  = scale_unit_amount_t<MoleUnit, -2>;
+    using DecimoleUnit   = scale_unit_amount_t<MoleUnit, -1>;
+    using DecamoleUnit   = scale_unit_amount_t<MoleUnit, 1>;
+    using HectomoleUnit  = scale_unit_amount_t<MoleUnit, 2>;
+    using KilomoleUnit   = scale_unit_amount_t<MoleUnit, 3>;
+    using MegamoleUnit   = scale_unit_amount_t<MoleUnit, 6>;
+    using GigamoleUnit   = scale_unit_amount_t<MoleUnit, 9>;
+    using TeramoleUnit   = scale_unit_amount_t<MoleUnit, 12>;
+    using PetamoleUnit   = scale_unit_amount_t<MoleUnit, 15>;
+    using ExamoleUnit    = scale_unit_amount_t<MoleUnit, 18>; 
+    using ZettamoleUnit  = scale_unit_amount_t<MoleUnit, 21>;
+    using YottamoleUnit  = scale_unit_amount_t<MoleUnit, 24>; 
+    using RonnamoleUnit  = scale_unit_amount_t<MoleUnit, 27>;
+    using QuettamoleUnit = scale_unit_amount_t<MoleUnit, 30>;
+
+    using QuectocandelaUnit = scale_unit_luminosity_t<CandelaUnit, -30>;
+    using RontocandelaUnit  = scale_unit_luminosity_t<CandelaUnit, -27>; 
+    using YoctocandelaUnit  = scale_unit_luminosity_t<CandelaUnit, -24>;
+    using ZeptocandelaUnit  = scale_unit_luminosity_t<CandelaUnit, -21>;
+    using AttocandelaUnit   = scale_unit_luminosity_t<CandelaUnit, -18>;
+    using FemtocandelaUnit  = scale_unit_luminosity_t<CandelaUnit, -15>;
+    using PicocandelaUnit   = scale_unit_luminosity_t<CandelaUnit, -12>;
+    using NanocandelaUnit   = scale_unit_luminosity_t<CandelaUnit, -9>;
+    using MicrocandelaUnit  = scale_unit_luminosity_t<CandelaUnit, -6>;
+    using MillicandelaUnit  = scale_unit_luminosity_t<CandelaUnit, -3>;
+    using CenticandelaUnit  = scale_unit_luminosity_t<CandelaUnit, -2>;
+    using DecicandelaUnit   = scale_unit_luminosity_t<CandelaUnit, -1>;
+    using DecacandelaUnit   = scale_unit_luminosity_t<CandelaUnit, 1>;
+    using HectocandelaUnit  = scale_unit_luminosity_t<CandelaUnit, 2>;
+    using KilocandelaUnit   = scale_unit_luminosity_t<CandelaUnit, 3>;
+    using MegacandelaUnit   = scale_unit_luminosity_t<CandelaUnit, 6>;
+    using GigacandelaUnit   = scale_unit_luminosity_t<CandelaUnit, 9>;
+    using TeracandelaUnit   = scale_unit_luminosity_t<CandelaUnit, 12>;
+    using PetacandelaUnit   = scale_unit_luminosity_t<CandelaUnit, 15>;
+    using ExacandelaUnit    = scale_unit_luminosity_t<CandelaUnit, 18>; 
+    using ZettacandelaUnit  = scale_unit_luminosity_t<CandelaUnit, 21>;
+    using YottacandelaUnit  = scale_unit_luminosity_t<CandelaUnit, 24>; 
+    using RonnacandelaUnit  = scale_unit_luminosity_t<CandelaUnit, 27>;
+    using QuettacandelaUnit = scale_unit_luminosity_t<CandelaUnit, 30>;
+
 
     using NewtonUnit = decltype(KilogramUnit{}*MeterUnit{}/(SecondUnit{}*SecondUnit{}));
     using JouleUnit = decltype(NewtonUnit{}*MeterUnit{});

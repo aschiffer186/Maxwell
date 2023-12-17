@@ -268,3 +268,86 @@ TEST(TestQuantity, TestSingleArgumentUnitConstructr)
     isNothrowConstructible = std::is_nothrow_constructible_v<decltype(q5),const Bar&>;
     EXPECT_FALSE(isNothrowConstructible);
 }
+
+TEST(TestQuantity, TestConvertingConstructorScale)
+{
+    //Test Prefix conversion
+    Basic_Quantity<double, SecondUnit> s{1'000};
+    Basic_Quantity<double, KilosecondUnit> ks{s};
+    Basic_Quantity<double, MillisecondUnit> ms{s};
+
+    EXPECT_FLOAT_EQ(ks.value(), 1.0);
+    EXPECT_EQ(ks.units(), KilosecondUnit{});
+    
+    EXPECT_FLOAT_EQ(ms.value(), 1'000*1'000);
+    EXPECT_EQ(ms.units(), MillisecondUnit{});
+
+    Basic_Quantity<double, MeterUnit> m{1'000};
+    Basic_Quantity<double, KilometerUnit> km{m};
+    Basic_Quantity<double, MillimeterUnit> mm{m};
+
+    EXPECT_FLOAT_EQ(km.value(), 1.0);
+    EXPECT_EQ(km.units(), KilometerUnit{});
+
+    EXPECT_FLOAT_EQ(mm.value(), 1'000*1'000);
+    EXPECT_EQ(mm.units(), MillimeterUnit{});
+
+    Basic_Quantity<double, GramUnit> g{1'000};
+    Basic_Quantity<double, KilogramUnit> kg{g};
+    Basic_Quantity<double, MilligramUnit> mg{g}; 
+
+    EXPECT_FLOAT_EQ(kg.value(), 1.0);
+    EXPECT_EQ(kg.units(), KilogramUnit{});
+
+    EXPECT_FLOAT_EQ(mg.value(), 1'000*1'000);
+    EXPECT_EQ(mg.units(), MilligramUnit{});
+
+    Basic_Quantity<double, AmpereUnit> A{1'000};
+    Basic_Quantity<double, KiloampereUnit> kA{A};
+    Basic_Quantity<double, MilliampereUnit> mA{A};
+
+    EXPECT_FLOAT_EQ(kA.value(), 1.0);
+    EXPECT_EQ(kA.units(), KiloampereUnit{});
+
+    EXPECT_FLOAT_EQ(mA.value(), 1'000*1'000);
+    EXPECT_EQ(mA.units(), MilliampereUnit{});
+
+    Basic_Quantity<double, KelvinUnit> K{1'000};
+    Basic_Quantity<double, KilokelvinUnit> KK{K};
+    Basic_Quantity<double, MillikelvinUnit> mK{K};
+
+    EXPECT_FLOAT_EQ(KK.value(), 1.0);
+    EXPECT_EQ(KK.units(), KilokelvinUnit{});
+
+    EXPECT_FLOAT_EQ(mK.value(), 1'000*1'000);
+    EXPECT_EQ(mK.units(), MillikelvinUnit{});
+
+    Basic_Quantity<double, MoleUnit> mol{1'000};
+    Basic_Quantity<double, KilomoleUnit> kMol{mol};
+    Basic_Quantity<double, MillimoleUnit> mmol{mol};
+
+    EXPECT_FLOAT_EQ(kMol.value(), 1.0);
+    EXPECT_EQ(kMol.units(), KilomoleUnit{});
+
+    EXPECT_FLOAT_EQ(mmol.value(), 1'000*1'000);
+    EXPECT_EQ(mmol.units(), MillimoleUnit{});
+
+    Basic_Quantity<double, CandelaUnit> cd{1'000};
+    Basic_Quantity<double, KilocandelaUnit> kcd{cd};
+    Basic_Quantity<double, MillicandelaUnit> mcd{cd};
+
+    EXPECT_FLOAT_EQ(kcd.value(), 1.0);
+    EXPECT_EQ(kcd.units(), KilocandelaUnit{});
+
+    EXPECT_FLOAT_EQ(mcd.value(), 1'000*1'000);
+    EXPECT_EQ(mcd.units(), MillicandelaUnit{});
+
+    using InputUnit = decltype(SecondUnit{}*MeterUnit{}*GramUnit{}*AmpereUnit{}*KelvinUnit()*MoleUnit{}*CandelaUnit{});
+    using OutputUnit = decltype(PetasecondUnit{}*DecimeterUnit{}*QuettagramUnit{}*YoctoampereUnit{}*FemtokelvinUnit{}*QuectomoleUnit{}*QuettacandelaUnit{});
+
+    Basic_Quantity<double, InputUnit> in{1.0};
+    Basic_Quantity<double, OutputUnit> out{in};
+
+    EXPECT_FLOAT_EQ(out.value(), 1e-5);
+    EXPECT_EQ(out.units(), OutputUnit{});
+}

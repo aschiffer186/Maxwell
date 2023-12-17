@@ -446,6 +446,36 @@ namespace Maxwell
     template<UnitLike U, std::integral auto Amt>
     using scale_unit_mass_t = scale_unit_mass<U, Amt>::type;
 
+    template<UnitLike U, std::integral auto Amt> 
+    struct scale_unit_amount
+    {
+        using type = Unit<typename U::Time,
+                          typename U::Length, 
+                          typename U::Mass,
+                          typename U::Current, 
+                          typename U::Temperature, 
+                          scale_unit_base_t<typename U::Amount, Amt>,
+                          typename U::Luminosity>;
+    };
+
+    template<UnitLike U, std::integral auto Amt>
+    using scale_unit_amount_t = scale_unit_amount<U, Amt>::type;
+
+    template<UnitLike U, std::integral auto Amt> 
+    struct scale_unit_luminosity
+    {
+        using type = Unit<typename U::Time,
+                          typename U::Length, 
+                          typename U::Mass,
+                          typename U::Current, 
+                          typename U::Temperature, 
+                          typename U::Amount,
+                          scale_unit_base_t<typename U::Luminosity, Amt>>;
+    };
+
+    template<UnitLike U, std::integral auto Amt>
+    using scale_unit_luminosity_t = scale_unit_luminosity<U, Amt>::type;
+
     inline constexpr std::array powsOfTen{1e-30,
                          1e-29, 
                          1e-28, 
