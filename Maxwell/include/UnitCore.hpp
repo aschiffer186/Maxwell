@@ -127,9 +127,26 @@ namespace Maxwell
 
     // Unit relations 
     template<UnitBaseLike Unit1, UnitBaseLike Unit2> 
+        requires (Unit1::Prefix == Unit2::Prefix || 
+                 (Unit1::Prefix == 0 || Unit2::Prefix == 0))
     struct unit_base_product 
     {
-        using type = UnitBase<Unit1::Prefix + Unit2::Prefix, Unit1::Pow + Unit2::Pow>;
+    private:
+        static constexpr int prefix(Unit1, Unit2) noexcept
+        {
+            int lhsPrefix = Unit1::Prefix;
+            int rhsPrefix = Unit2::Prefix;
+
+            if (lhsPrefix == 0 && rhsPrefix == 0)
+                return 0;
+            if (lhsPrefix == 0)
+                return rhsPrefix;
+            if (rhsPrefix == 0)
+                return lhsPrefix; 
+            return lhsPrefix;
+        }
+    public:
+        using type = UnitBase<prefix(Unit1{}, Unit2{}), Unit1::Pow + Unit2::Pow>;
     };
 
     template<UnitBaseLike Unit1, UnitBaseLike Unit2> 
@@ -142,9 +159,26 @@ namespace Maxwell
     }
 
     template<UnitBaseLike Unit1, UnitBaseLike Unit2> 
+    requires (Unit1::Prefix == Unit2::Prefix || 
+              (Unit1::Prefix == 0 || Unit2::Prefix == 0))
     struct unit_base_quotient
-    {
-        using type = UnitBase<Unit1::Prefix - Unit2::Prefix, Unit1::Pow - Unit2::Pow>;
+    { 
+    private:
+        static constexpr int prefix(Unit1, Unit2) noexcept
+        {
+            int lhsPrefix = Unit1::Prefix;
+            int rhsPrefix = Unit2::Prefix;
+
+            if (lhsPrefix == 0 && rhsPrefix == 0)
+                return 0;
+            if (lhsPrefix == 0)
+                return rhsPrefix;
+            if (rhsPrefix == 0)
+                return lhsPrefix; 
+            return lhsPrefix;
+        }
+    public:
+        using type = UnitBase<prefix(Unit1{}, Unit2{}), Unit1::Pow - Unit2::Pow>;
     };
 
     template<UnitBaseLike Unit1, UnitBaseLike Unit2> 
@@ -579,20 +613,34 @@ namespace Maxwell
         }
     }
 
+    consteval double ipow(double base, int exp)
+    {
+        if (exp < 0)
+            return ipow(1/base, -exp);
+        if (exp == 0)
+            return 1.0;
+        if (exp == 1)
+            return base;
+        double retVal = 1.0;
+        for(int i = 0; i < exp; ++i)
+            retVal *= base;
+        return retVal;
+    }
+
     consteval double conversionPrefix(UnitLike auto from, UnitLike auto to) noexcept 
     {
         using LHSType = decltype(from);
         using RHSType = decltype(to);
 
         double scale = 1.0;
-        scale *= pow10(LHSType::Time::Prefix        - RHSType::Time::Prefix);
-        scale *= pow10(LHSType::Length::Prefix      - RHSType::Length::Prefix);
-        scale *= pow10(LHSType::Mass::Prefix        - RHSType::Mass::Prefix);
-        scale *= pow10(LHSType::Current::Prefix     - RHSType::Current::Prefix);
-        scale *= pow10(LHSType::Temperature::Prefix - RHSType::Temperature::Prefix);
-        scale *= pow10(LHSType::Amount::Prefix      - RHSType::Amount::Prefix);
-        scale *= pow10(LHSType::Luminosity::Prefix  - RHSType::Luminosity::Prefix);
-        scale *= pow10(LHSType::Angle::Prefix       - RHSType::Angle::Prefix);
+        scale *= ipow(pow10(LHSType::Time::Prefix        - RHSType::Time::Prefix), LHSType::Time::Pow);
+        scale *= ipow(pow10(LHSType::Length::Prefix      - RHSType::Length::Prefix), LHSType::Length::Pow);
+        scale *= ipow(pow10(LHSType::Mass::Prefix        - RHSType::Mass::Prefix), LHSType::Mass::Pow);
+        scale *= ipow(pow10(LHSType::Current::Prefix     - RHSType::Current::Prefix), LHSType::Current::Pow);
+        scale *= ipow(pow10(LHSType::Temperature::Prefix - RHSType::Temperature::Prefix), LHSType::Temperature::Pow);
+        scale *= ipow(pow10(LHSType::Amount::Prefix      - RHSType::Amount::Prefix), LHSType::Amount::Pow);
+        scale *= ipow(pow10(LHSType::Luminosity::Prefix  - RHSType::Luminosity::Prefix), LHSType::Luminosity::Pow);
+        scale *= ipow(pow10(LHSType::Angle::Prefix       - RHSType::Angle::Prefix), LHSType::Angle::Pow);
 
         return scale;
     }
@@ -602,6 +650,8 @@ namespace Maxwell
         using LHSType = decltype(from);
         using RHSType = decltype(to);
 
+        using LHSTimeScale = LHSType::Time::Scale;
+        using RHSTimeScale = RHSType::Time::Scale;
         using LHSLenScale  = LHSType::Length::Scale;
         using RHSLenScale  = RHSType::Length::Scale;
         using LHSMassScale = LHSType::Mass::Scale;
@@ -616,10 +666,15 @@ namespace Maxwell
         // to scale / from scale
 
         double conversion = 1.0;
+        conversion *= static_cast<double>(RHSTimeScale::num)/static_cast<double>(RHSTimeScale::den)*
+                      static_cast<double>(LHSTimeScale::den)/static_cast<double>(LHSTimeScale::num);
+
         conversion *= static_cast<double>(RHSLenScale::num)/static_cast<double>(RHSLenScale::den)*
                       static_cast<double>(LHSLenScale::den)/static_cast<double>(LHSLenScale::num);
+
         conversion *= static_cast<double>(RHSMassScale::num)/static_cast<double>(RHSMassScale::den)*
                       static_cast<double>(LHSMassScale::den)/static_cast<double>(LHSMassScale::num);
+
         conversion *= static_cast<double>(RHSAngScale::num)/static_cast<double>(RHSAngScale::den)*
                       static_cast<double>(LHSAngScale::den)/static_cast<double>(LHSAngScale::num);
         

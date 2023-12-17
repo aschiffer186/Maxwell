@@ -2,17 +2,32 @@
 #define UNIT_TYPES_HPP
 
 #include "UnitCore.hpp"
+#include "BaseUnitScales.hpp"
 
 namespace Maxwell
 {
+    // Derived time units
+    using MinuteUnit = Unit<UnitBase<0, 1, 1, 60>, NullUnit, NullUnit, NullUnit, NullUnit, NullUnit, NullUnit>;
+    using HourUnit = Unit<UnitBase<0, 1, 1, 3'600>, NullUnit, NullUnit, NullUnit, NullUnit, NullUnit, NullUnit>;
+
     // Derived length units
+    using InchUnit = Unit<NullUnit, UnitBase<-2, 1, 254, 100>, NullUnit, NullUnit, NullUnit, NullUnit, NullUnit>;
     using FootUnit = Unit<NullUnit, UnitBase<0, 1, 3'048, 10'000>, NullUnit, NullUnit, NullUnit, NullUnit, NullUnit>;
+    using YardUnit = Unit<NullUnit, UnitBase<0, 1, 9'144, 10'000>, NullUnit, NullUnit, NullUnit, NullUnit, NullUnit>;
 
     // Area units
-    using SqMeterUnit = decltype(MeterUnit{}*MeterUnit{});
+    using SqInchUnit  = decltype(InchUnit{}*InchUnit{});
+    using SqFootUnit  = decltype(FootUnit{}*FootUnit{});
+
+    using SqCentimeterUnit = decltype(CentimeterUnit{}*CentimeterUnit{});
+    using SqMeterUnit      = decltype(MeterUnit{}*MeterUnit{});
 
     // Volume units
-    using CuMeterUnit = decltype(MeterUnit{}*MeterUnit{}*MeterUnit{});
+    using CuInchUnit  = decltype(InchUnit{}*SqInchUnit{});
+    using CuFootUnit  = decltype(FootUnit{}*SqFootUnit{});
+
+    using CuCentimeterUnit = decltype(CentimeterUnit{}*SqCentimeterUnit{});
+    using CuMeterUnit      = decltype(MeterUnit{}*SqMeterUnit{});
 
     // Velocity units
     using MeterPerSecondUnit = decltype(MeterUnit{}/SecondUnit{});

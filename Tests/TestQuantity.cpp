@@ -2,10 +2,13 @@
 #include <gtest/gtest.h> 
 #include <type_traits>
 
+#include "BaseUnitScales.hpp"
 #include "Quantity.hpp"
 #include "QuantityCore.hpp"
 #include "QuantityTypes.hpp"
 #include "Unit.hpp"
+#include "UnitCore.hpp"
+#include "UnitTypes.hpp"
 
 using namespace Maxwell;
 using namespace Maxwell::Literals;
@@ -342,6 +345,14 @@ TEST(TestQuantity, TestConvertingConstructorPrefix)
     EXPECT_EQ(mcd.units(), MillicandelaUnit{});
 
     Basic_Quantity<double, RadianUnit> rad{1'000};
+    Basic_Quantity<double, KiloradianUnit> krad{rad};
+    Basic_Quantity<double, MilliradianUnit> mrad{rad};
+
+    EXPECT_FLOAT_EQ(krad.value(), 1.0);
+    EXPECT_EQ(krad.units(), KiloradianUnit{});
+
+    EXPECT_FLOAT_EQ(mrad.value(), 1'000*1'000);
+    EXPECT_EQ(mrad.units(), MilliradianUnit{});
 
     using InputUnit = decltype(SecondUnit{}*MeterUnit{}*GramUnit{}*AmpereUnit{}*KelvinUnit()*MoleUnit{}*CandelaUnit{}*RadianUnit{});
     using OutputUnit = decltype(PetasecondUnit{}*DecimeterUnit{}*QuettagramUnit{}*YoctoampereUnit{}*FemtokelvinUnit{}*QuectomoleUnit{}*QuettacandelaUnit{}*DecaradianUnit{});
@@ -351,10 +362,24 @@ TEST(TestQuantity, TestConvertingConstructorPrefix)
 
     EXPECT_FLOAT_EQ(out.value(), 1e-6);
     EXPECT_EQ(out.units(), OutputUnit{});
+
+    Basic_Quantity<double, SqMeterUnit> sm{1.0};
+    Basic_Quantity<double, SqCentimeterUnit> scm{sm};
+
+    EXPECT_FLOAT_EQ(scm.value(), 100*100);
+    EXPECT_EQ(scm.units(), SqCentimeterUnit{});
 }
 
 TEST(TestQuantity, TestConvertingConstructorScale)
 {
+    Basic_Quantity<double, SecondUnit> s1{60.0};
+    Basic_Quantity<double, MinuteUnit> min{s1};
+    Basic_Quantity<double, SecondUnit> s2{min};
+
+    constexpr double d = conversionScale(SecondUnit{}, MinuteUnit{});
+    EXPECT_FLOAT_EQ(min.value(), 1.0);
+    EXPECT_FLOAT_EQ(s2.value(), 60.0);
+
     Basic_Quantity<double, RadianUnit> rad1{M_PI};
     Basic_Quantity<double, DegreeUnit> deg{rad1}; 
     Basic_Quantity<double, RadianUnit> rad2{deg};
