@@ -300,7 +300,8 @@ namespace Maxwell
                           unit_base_product_t<typename Unit1::Current, typename Unit2::Current>,
                           unit_base_product_t<typename Unit1::Temperature, typename Unit2::Temperature>,
                           unit_base_product_t<typename Unit1::Amount, typename Unit2::Amount>,
-                          unit_base_product_t<typename Unit1::Luminosity, typename Unit2::Luminosity>>;
+                          unit_base_product_t<typename Unit1::Luminosity, typename Unit2::Luminosity>,
+                          unit_base_product_t<typename Unit1::Angle, typename Unit2::Angle>>;
     };
 
     template<UnitLike Unit1, UnitLike Unit2>
@@ -476,6 +477,22 @@ namespace Maxwell
     template<UnitLike U, std::integral auto Amt>
     using scale_unit_luminosity_t = scale_unit_luminosity<U, Amt>::type;
 
+    template<UnitLike U, std::integral auto Amt> 
+    struct scale_unit_angle
+    {
+        using type = Unit<typename U::Time,
+                          typename U::Length, 
+                          typename U::Mass,
+                          typename U::Current, 
+                          typename U::Temperature, 
+                          typename U::Amount,
+                          typename U::Luminosity,
+                          scale_unit_base_t<typename U::Angle, Amt>>;
+    };
+
+    template<UnitLike U, std::integral auto Amt>
+    using scale_unit_angle_t = scale_unit_angle<U, Amt>::type;
+
     inline constexpr std::array powsOfTen{1e-30,
                          1e-29, 
                          1e-28, 
@@ -568,13 +585,14 @@ namespace Maxwell
         using RHSType = decltype(to);
 
         double scale = 1.0;
-        scale *= pow10(LHSType::Time::Prefix - RHSType::Time::Prefix);
-        scale *= pow10(LHSType::Length::Prefix - RHSType::Length::Prefix);
-        scale *= pow10(LHSType::Mass::Prefix - RHSType::Mass::Prefix);
-        scale *= pow10(LHSType::Current::Prefix - RHSType::Current::Prefix);
+        scale *= pow10(LHSType::Time::Prefix        - RHSType::Time::Prefix);
+        scale *= pow10(LHSType::Length::Prefix      - RHSType::Length::Prefix);
+        scale *= pow10(LHSType::Mass::Prefix        - RHSType::Mass::Prefix);
+        scale *= pow10(LHSType::Current::Prefix     - RHSType::Current::Prefix);
         scale *= pow10(LHSType::Temperature::Prefix - RHSType::Temperature::Prefix);
-        scale *= pow10(LHSType::Amount::Prefix - RHSType::Amount::Prefix);
-        scale *= pow10(LHSType::Luminosity::Prefix - RHSType::Luminosity::Prefix);
+        scale *= pow10(LHSType::Amount::Prefix      - RHSType::Amount::Prefix);
+        scale *= pow10(LHSType::Luminosity::Prefix  - RHSType::Luminosity::Prefix);
+        scale *= pow10(LHSType::Angle::Prefix       - RHSType::Angle::Prefix);
 
         return scale;
     }
@@ -584,8 +602,12 @@ namespace Maxwell
         using LHSType = decltype(from);
         using RHSType = decltype(to);
 
-        using LHSScale = LHSType::Angle::Scale;
-        using RHSScale = RHSType::Angle::Scale;
+        using LHSLenScale  = LHSType::Length::Scale;
+        using RHSLenScale  = RHSType::Length::Scale;
+        using LHSMassScale = LHSType::Mass::Scale;
+        using RHSMassScale = RHSType::Mass::Scale;
+        using LHSAngScale  = LHSType::Angle::Scale;
+        using RHSAngScale  = RHSType::Angle::Scale;
 
         //Rad scale = 1
         //Deg scale = 180/pi
@@ -594,11 +616,17 @@ namespace Maxwell
         // to scale / from scale
 
         double conversion = 1.0;
-        conversion *= static_cast<double>(RHSScale::num)/static_cast<double>(RHSScale::den)*static_cast<double>(LHSScale::den)/static_cast<double>(LHSScale::num);
+        conversion *= static_cast<double>(RHSLenScale::num)/static_cast<double>(RHSLenScale::den)*
+                      static_cast<double>(LHSLenScale::den)/static_cast<double>(LHSLenScale::num);
+        conversion *= static_cast<double>(RHSMassScale::num)/static_cast<double>(RHSMassScale::den)*
+                      static_cast<double>(LHSMassScale::den)/static_cast<double>(LHSMassScale::num);
+        conversion *= static_cast<double>(RHSAngScale::num)/static_cast<double>(RHSAngScale::den)*
+                      static_cast<double>(LHSAngScale::den)/static_cast<double>(LHSAngScale::num);
+        
         return conversion;
     }
 
-    //Base Units 
+    //SI Base Units 
     using SecondUnit = Unit<UnitBase<0, 1>, NullUnit, NullUnit, NullUnit, NullUnit, NullUnit, NullUnit>;
     using MeterUnit = Unit<NullUnit, UnitBase<0, 1>, NullUnit, NullUnit, NullUnit, NullUnit, NullUnit>;
     using KilogramUnit = Unit<NullUnit, NullUnit, UnitBase<3, 1>, NullUnit, NullUnit, NullUnit, NullUnit>; 
@@ -607,6 +635,7 @@ namespace Maxwell
     using MoleUnit = Unit<NullUnit, NullUnit, NullUnit, NullUnit, NullUnit, UnitBase<0, 1>, NullUnit>;
     using CandelaUnit = Unit<NullUnit, NullUnit, NullUnit, NullUnit, NullUnit, NullUnit, UnitBase<0, 1>>;
     using Dimensionless_Unit = Unit<NullUnit, NullUnit, NullUnit, NullUnit, NullUnit, NullUnit, NullUnit>;
+    using RadianUnit = Unit<NullUnit, NullUnit, NullUnit, NullUnit, NullUnit, NullUnit, NullUnit, UnitBase<0, 1>>;
 }
 
 #endif

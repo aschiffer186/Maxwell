@@ -2,9 +2,7 @@
 #define QUANTITY_LITERALS_HPP
 
 #include "QuantityCore.hpp"
-#include "UnitCore.hpp"
-#include "UnitTypes.hpp"
-#include <sys/types.h>
+#include "Unit.hpp"
 
 #define MAKE_QUANTITY_LITERAL(unit, literal)\
     consteval Basic_Quantity<unsigned long long, unit##Unit> operator ""_##literal(unsigned long long x) noexcept\

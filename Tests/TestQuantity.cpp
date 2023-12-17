@@ -5,8 +5,7 @@
 #include "Quantity.hpp"
 #include "QuantityCore.hpp"
 #include "QuantityTypes.hpp"
-#include "UnitCore.hpp"
-#include "UnitTypes.hpp"
+#include "Unit.hpp"
 
 using namespace Maxwell;
 using namespace Maxwell::Literals;
@@ -269,7 +268,7 @@ TEST(TestQuantity, TestSingleArgumentUnitConstructr)
     EXPECT_FALSE(isNothrowConstructible);
 }
 
-TEST(TestQuantity, TestConvertingConstructorScale)
+TEST(TestQuantity, TestConvertingConstructorPrefix)
 {
     //Test Prefix conversion
     Basic_Quantity<double, SecondUnit> s{1'000};
@@ -342,12 +341,38 @@ TEST(TestQuantity, TestConvertingConstructorScale)
     EXPECT_FLOAT_EQ(mcd.value(), 1'000*1'000);
     EXPECT_EQ(mcd.units(), MillicandelaUnit{});
 
-    using InputUnit = decltype(SecondUnit{}*MeterUnit{}*GramUnit{}*AmpereUnit{}*KelvinUnit()*MoleUnit{}*CandelaUnit{});
-    using OutputUnit = decltype(PetasecondUnit{}*DecimeterUnit{}*QuettagramUnit{}*YoctoampereUnit{}*FemtokelvinUnit{}*QuectomoleUnit{}*QuettacandelaUnit{});
+    Basic_Quantity<double, RadianUnit> rad{1'000};
+
+    using InputUnit = decltype(SecondUnit{}*MeterUnit{}*GramUnit{}*AmpereUnit{}*KelvinUnit()*MoleUnit{}*CandelaUnit{}*RadianUnit{});
+    using OutputUnit = decltype(PetasecondUnit{}*DecimeterUnit{}*QuettagramUnit{}*YoctoampereUnit{}*FemtokelvinUnit{}*QuectomoleUnit{}*QuettacandelaUnit{}*DecaradianUnit{});
 
     Basic_Quantity<double, InputUnit> in{1.0};
     Basic_Quantity<double, OutputUnit> out{in};
 
-    EXPECT_FLOAT_EQ(out.value(), 1e-5);
+    EXPECT_FLOAT_EQ(out.value(), 1e-6);
     EXPECT_EQ(out.units(), OutputUnit{});
+}
+
+TEST(TestQuantity, TestConvertingConstructorScale)
+{
+    Basic_Quantity<double, RadianUnit> rad1{M_PI};
+    Basic_Quantity<double, DegreeUnit> deg{rad1}; 
+    Basic_Quantity<double, RadianUnit> rad2{deg};
+
+    EXPECT_FLOAT_EQ(deg.value(), 180.0);
+    EXPECT_FLOAT_EQ(rad2.value(), M_PI);
+
+    Basic_Quantity<double, MeterUnit> m1{1.0};
+    Basic_Quantity<double, FootUnit> ft{m1};
+    Basic_Quantity<double, MeterUnit> m2{ft};
+
+    EXPECT_FLOAT_EQ(ft.value(), 0.3048);
+    EXPECT_FLOAT_EQ(m2.value(), 1.0);
+
+    Basic_Quantity<double, KilogramUnit> kg1{1.0};
+    Basic_Quantity<double, PoundMassUnit> lbm{kg1};
+    Basic_Quantity<double, KilogramUnit> kg2{lbm};
+
+    EXPECT_FLOAT_EQ(lbm.value(), 0.453592);
+    EXPECT_FLOAT_EQ(kg2.value(), 1.0);
 }

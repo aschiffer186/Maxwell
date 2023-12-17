@@ -216,6 +216,31 @@ namespace Maxwell
     using YottacandelaUnit  = scale_unit_luminosity_t<CandelaUnit, 24>; 
     using RonnacandelaUnit  = scale_unit_luminosity_t<CandelaUnit, 27>;
     using QuettacandelaUnit = scale_unit_luminosity_t<CandelaUnit, 30>;
+
+    using QuectoradianUnit = scale_unit_angle_t<RadianUnit, -30>;
+    using RontoradianUnit  = scale_unit_angle_t<RadianUnit, -27>; 
+    using YoctoradianUnit  = scale_unit_angle_t<RadianUnit, -24>;
+    using ZeptoradianUnit  = scale_unit_angle_t<RadianUnit, -21>;
+    using AttoradianUnit   = scale_unit_angle_t<RadianUnit, -18>;
+    using FemtoradianUnit  = scale_unit_angle_t<RadianUnit, -15>;
+    using PicoradianUnit   = scale_unit_angle_t<RadianUnit, -12>;
+    using NanoradianUnit   = scale_unit_angle_t<RadianUnit, -9>;
+    using MicroradianUnit  = scale_unit_angle_t<RadianUnit, -6>;
+    using MilliradianUnit  = scale_unit_angle_t<RadianUnit, -3>;
+    using CentiradianUnit  = scale_unit_angle_t<RadianUnit, -2>;
+    using DeciradianUnit   = scale_unit_angle_t<RadianUnit, -1>;
+    using DecaradianUnit   = scale_unit_angle_t<RadianUnit, 1>;
+    using HectoradianUnit  = scale_unit_angle_t<RadianUnit, 2>;
+    using KiloradianUnit   = scale_unit_angle_t<RadianUnit, 3>;
+    using MegaradianUnit   = scale_unit_angle_t<RadianUnit, 6>;
+    using GigaradianUnit   = scale_unit_angle_t<RadianUnit, 9>;
+    using TeraradianUnit   = scale_unit_angle_t<RadianUnit, 12>;
+    using PetaradianUnit   = scale_unit_angle_t<RadianUnit, 15>;
+    using ExaradianUnit    = scale_unit_angle_t<RadianUnit, 18>; 
+    using ZettaradianUnit  = scale_unit_angle_t<RadianUnit, 21>;
+    using YottaradianUnit  = scale_unit_angle_t<RadianUnit, 24>; 
+    using RonnaradianUnit  = scale_unit_angle_t<RadianUnit, 27>;
+    using QuettaradianUnit = scale_unit_angle_t<RadianUnit, 30>;
 }
 
 #endif
