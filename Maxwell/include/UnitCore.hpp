@@ -132,7 +132,7 @@ namespace Maxwell
     struct unit_base_product 
     {
     private:
-        static constexpr int prefix(Unit1, Unit2) noexcept
+        static constexpr int productPrefix(Unit1, Unit2) noexcept
         {
             int lhsPrefix = Unit1::Prefix;
             int rhsPrefix = Unit2::Prefix;
@@ -146,7 +146,7 @@ namespace Maxwell
             return lhsPrefix;
         }
     public:
-        using type = UnitBase<prefix(Unit1{}, Unit2{}), Unit1::Pow + Unit2::Pow>;
+        using type = UnitBase<productPrefix(Unit1{}, Unit2{}), Unit1::Pow + Unit2::Pow>;
     };
 
     template<UnitBaseLike Unit1, UnitBaseLike Unit2> 
@@ -164,7 +164,7 @@ namespace Maxwell
     struct unit_base_quotient
     { 
     private:
-        static constexpr int prefix(Unit1, Unit2) noexcept
+        static constexpr int quotientPrefix(Unit1, Unit2) noexcept
         {
             int lhsPrefix = Unit1::Prefix;
             int rhsPrefix = Unit2::Prefix;
@@ -178,7 +178,7 @@ namespace Maxwell
             return lhsPrefix;
         }
     public:
-        using type = UnitBase<prefix(Unit1{}, Unit2{}), Unit1::Pow - Unit2::Pow>;
+        using type = UnitBase<quotientPrefix(Unit1{}, Unit2{}), Unit1::Pow - Unit2::Pow>;
     };
 
     template<UnitBaseLike Unit1, UnitBaseLike Unit2> 
@@ -265,29 +265,30 @@ namespace Maxwell
     concept UnitLike = is_unit_v<Tp>;
 
     template<UnitLike Tp> 
-    struct is_dimensionless_unit : std::bool_constant<Tp::Time::Pow == 0 &&
-                                                      Tp::Length::Pow == 0 &&
-                                                      Tp::Mass::Pow == 0 &&
-                                                      Tp::Current::Pow == 0 &&
-                                                      Tp::Temperature::Pow == 0 &&
-                                                      Tp::Amount::Pow == 0 &&
-                                                      Tp::Luminosity::Pow == 0 &&
-                                                      Tp::Angle::Pow == 0>{};
+    struct is_unitless : std::bool_constant<Tp::Time::Pow        == 0 &&
+                                            Tp::Length::Pow      == 0 &&
+                                            Tp::Mass::Pow        == 0 &&
+                                            Tp::Current::Pow     == 0 &&
+                                            Tp::Temperature::Pow == 0 &&
+                                            Tp::Amount::Pow      == 0 &&
+                                            Tp::Luminosity::Pow  == 0 &&
+                                            Tp::Angle::Pow       == 0>{};
 
     template<UnitLike Tp> 
-    inline constexpr bool is_dimensionless_unit_v = is_dimensionless_unit<Tp>::value;
+    inline constexpr bool is_unitless_v = is_unitless<Tp>::value;
 
     template<typename Tp> 
-    concept DimensionlessUnit = is_dimensionless_unit_v<Tp>;
+    concept Unitless = is_unitless_v<Tp>;
 
     template<UnitLike Unit1, UnitLike Unit2> 
-    struct is_unit_equal : std::bool_constant<is_unit_base_equal_v<typename Unit1::Time, typename Unit2::Time> &&
-                                              is_unit_base_equal_v<typename Unit1::Length, typename Unit2::Length> &&
-                                              is_unit_base_equal_v<typename Unit1::Mass, typename Unit2::Mass> && 
-                                              is_unit_base_equal_v<typename Unit1::Current, typename Unit2::Current> && 
+    struct is_unit_equal : std::bool_constant<is_unit_base_equal_v<typename Unit1::Time,        typename Unit2::Time>        &&
+                                              is_unit_base_equal_v<typename Unit1::Length,      typename Unit2::Length>      &&
+                                              is_unit_base_equal_v<typename Unit1::Mass,        typename Unit2::Mass>        && 
+                                              is_unit_base_equal_v<typename Unit1::Current,     typename Unit2::Current>     && 
                                               is_unit_base_equal_v<typename Unit1::Temperature, typename Unit2::Temperature> && 
-                                              is_unit_base_equal_v<typename Unit1::Amount, typename Unit2::Amount> && 
-                                              is_unit_base_equal_v<typename Unit1::Luminosity, typename Unit2::Luminosity>> {};
+                                              is_unit_base_equal_v<typename Unit1::Amount,      typename Unit2::Amount>      && 
+                                              is_unit_base_equal_v<typename Unit1::Luminosity,  typename Unit2::Luminosity>  &&
+                                              is_unit_base_equal_v<typename Unit1::Angle,       typename Unit2::Angle>> {};
     
     template<UnitLike Unit1, UnitLike Unit2> 
     inline constexpr bool is_unit_equal_v = is_unit_equal<Unit1, Unit2>::value;
@@ -328,14 +329,14 @@ namespace Maxwell
     template<UnitLike Unit1, UnitLike Unit2> 
     struct unit_product
     {
-        using type = Unit<unit_base_product_t<typename Unit1::Time, typename Unit2::Time>,
-                          unit_base_product_t<typename Unit1::Length, typename Unit2::Length>,
-                          unit_base_product_t<typename Unit1::Mass, typename Unit2::Mass>,
-                          unit_base_product_t<typename Unit1::Current, typename Unit2::Current>,
+        using type = Unit<unit_base_product_t<typename Unit1::Time,        typename Unit2::Time>,
+                          unit_base_product_t<typename Unit1::Length,      typename Unit2::Length>,
+                          unit_base_product_t<typename Unit1::Mass,        typename Unit2::Mass>,
+                          unit_base_product_t<typename Unit1::Current,     typename Unit2::Current>,
                           unit_base_product_t<typename Unit1::Temperature, typename Unit2::Temperature>,
-                          unit_base_product_t<typename Unit1::Amount, typename Unit2::Amount>,
-                          unit_base_product_t<typename Unit1::Luminosity, typename Unit2::Luminosity>,
-                          unit_base_product_t<typename Unit1::Angle, typename Unit2::Angle>>;
+                          unit_base_product_t<typename Unit1::Amount,      typename Unit2::Amount>,
+                          unit_base_product_t<typename Unit1::Luminosity,  typename Unit2::Luminosity>,
+                          unit_base_product_t<typename Unit1::Angle,       typename Unit2::Angle>>;
     };
 
     template<UnitLike Unit1, UnitLike Unit2>
@@ -350,13 +351,14 @@ namespace Maxwell
     template<UnitLike Unit1, UnitLike Unit2> 
     struct unit_quotient 
     {
-        using type = Unit<unit_base_quotient_t<typename Unit1::Time, typename Unit2::Time>,
-                          unit_base_quotient_t<typename Unit1::Length, typename Unit2::Length>,
-                          unit_base_quotient_t<typename Unit1::Mass, typename Unit2::Mass>,
-                          unit_base_quotient_t<typename Unit1::Current, typename Unit2::Current>,
+        using type = Unit<unit_base_quotient_t<typename Unit1::Time,        typename Unit2::Time>,
+                          unit_base_quotient_t<typename Unit1::Length,      typename Unit2::Length>,
+                          unit_base_quotient_t<typename Unit1::Mass,        typename Unit2::Mass>,
+                          unit_base_quotient_t<typename Unit1::Current,     typename Unit2::Current>,
                           unit_base_quotient_t<typename Unit1::Temperature, typename Unit2::Temperature>,
-                          unit_base_quotient_t<typename Unit1::Amount, typename Unit2::Amount>,
-                          unit_base_quotient_t<typename Unit1::Luminosity, typename Unit2::Luminosity>>;
+                          unit_base_quotient_t<typename Unit1::Amount,      typename Unit2::Amount>,
+                          unit_base_quotient_t<typename Unit1::Luminosity,  typename Unit2::Luminosity>,
+                          unit_base_quotient_t<typename Unit1::Angle,       typename Unit2::Angle>>;
     };
 
     template<UnitLike Unit1, UnitLike Unit2> 
@@ -377,7 +379,8 @@ namespace Maxwell
                           unit_base_inverse_t<typename U::Current>,
                           unit_base_inverse_t<typename U::Temperature>,
                           unit_base_inverse_t<typename U::Amount>,
-                          unit_base_inverse_t<typename U::Luminosity>>;
+                          unit_base_inverse_t<typename U::Luminosity>,
+                          unit_base_inverse_t<typename U::Angle>>;
                           
     };
 
@@ -385,14 +388,15 @@ namespace Maxwell
     using unit_inverse_t = unit_inverse<U>::type;
 
     template<typename LHS, typename RHS> 
-    concept UnitAddable = UnitLike<LHS> && UnitLike<RHS> &&
-        UnitBaseAddable<typename LHS::Time, typename RHS::Time> &&
-        UnitBaseAddable<typename LHS::Length, typename RHS::Length> &&
-        UnitBaseAddable<typename LHS::Mass, typename RHS::Mass> &&
-        UnitBaseAddable<typename LHS::Current, typename RHS::Current> &&
+    concept UnitAddable = UnitLike<LHS> && UnitLike<RHS>                      &&
+        UnitBaseAddable<typename LHS::Time,        typename RHS::Time>        &&
+        UnitBaseAddable<typename LHS::Length,      typename RHS::Length>      &&
+        UnitBaseAddable<typename LHS::Mass,        typename RHS::Mass>        &&
+        UnitBaseAddable<typename LHS::Current,     typename RHS::Current>     &&
         UnitBaseAddable<typename LHS::Temperature, typename RHS::Temperature> &&
-        UnitBaseAddable<typename LHS::Amount, typename RHS::Amount> &&
-        UnitBaseAddable<typename LHS::Luminosity, typename RHS::Luminosity>;
+        UnitBaseAddable<typename LHS::Amount,      typename RHS::Amount>      &&
+        UnitBaseAddable<typename LHS::Luminosity,  typename RHS::Luminosity>  &&
+        UnitBaseAddable<typename LHS::Angle,       typename RHS::Angle>;
 
     template<UnitLike From, UnitLike To> 
     struct is_unit_assignable

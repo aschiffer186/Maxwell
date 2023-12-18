@@ -292,7 +292,7 @@ namespace Maxwell
          * @return Rep{this->value()}
          */
         constexpr operator Rep() const noexcept
-            requires DimensionlessUnit<Unit>
+            requires Unitless<Unit>
         {
             return val_;
         }
@@ -388,7 +388,7 @@ namespace Maxwell
          * @return *this
          */
         constexpr Basic_Quantity& operator+=(Arithmetic auto val) noexcept 
-            requires DimensionlessUnit<Unit>
+            requires Unitless<Unit>
         {
             val_ += val;
             return *this;
@@ -407,7 +407,7 @@ namespace Maxwell
          * @return *this
          */
         constexpr Basic_Quantity& operator-=(Arithmetic auto val) noexcept 
-            requires DimensionlessUnit<Unit>
+            requires Unitless<Unit>
         {
             val_ -= val;
             return *this;

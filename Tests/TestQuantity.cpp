@@ -376,7 +376,6 @@ TEST(TestQuantity, TestConvertingConstructorScale)
     Basic_Quantity<double, MinuteUnit> min{s1};
     Basic_Quantity<double, SecondUnit> s2{min};
 
-    constexpr double d = conversionScale(SecondUnit{}, MinuteUnit{});
     EXPECT_FLOAT_EQ(min.value(), 1.0);
     EXPECT_FLOAT_EQ(s2.value(), 60.0);
 
@@ -400,4 +399,11 @@ TEST(TestQuantity, TestConvertingConstructorScale)
 
     EXPECT_FLOAT_EQ(lbm.value(), 0.453592);
     EXPECT_FLOAT_EQ(kg2.value(), 1.0);
+
+    Basic_Quantity<double, SqFootUnit> sft1{1.0};
+    Basic_Quantity<double, SqInchUnit> sin{sft1};
+    Basic_Quantity<double, SqFootUnit> sft2{sin};
+
+    EXPECT_FLOAT_EQ(sin.value(), 144.0);
+    EXPECT_FLOAT_EQ(sft2.value(), 1.0);
 }
