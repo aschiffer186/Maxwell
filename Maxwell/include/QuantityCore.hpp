@@ -160,7 +160,8 @@ namespace Maxwell
          * @brief Converting constructor
          * 
          * Constructs a Quantity from the specified Quantity with a different value representation 
-         * or different units. The value of the quantity is automatically adjusted so that the value 
+         * or different units. The value of the other other quantity is first copied into *this, then 
+           it is is automatically adjusted so that the value 
          * of *this is the same if it were expressed in the units of the specified quantity. The conversion 
          * factor is calculated at compile-time.
          *
@@ -168,22 +169,87 @@ namespace Maxwell
          * Unit. This requires that the powers of the base-units of Unit and OtherUnit be the same. 
          * This function does not participate in overload resolution if this is not the case.
          * 
-         * @tparam Up_ the value representation of the specified quantity
          * @tparam OtherUnit the units of the specified quantity
          * @param o the specified Quantity
          */
-        template<Arithmetic Up_, UnitLike OtherUnit>
-            requires UnitAssignable<OtherUnit, Unit>
-        constexpr Basic_Quantity(const Basic_Quantity<Up_, OtherUnit>& o) noexcept(std::is_nothrow_copy_constructible_v<Rep>)
+        template<UnitLike OtherUnit>
+            requires UnitAssignable<OtherUnit, Unit> && std::copy_constructible<Rep>
+        constexpr Basic_Quantity(const Basic_Quantity<Rep, OtherUnit>& o) noexcept(std::is_nothrow_copy_constructible_v<Rep>)
         : val_(o.value())
         {
             val_ *= conversionPrefix(OtherUnit{}, Unit{});
             val_ *= conversionScale(OtherUnit{}, Unit{});
         }
 
-        template<Arithmetic Up_, UnitLike OtherUnit>
-            requires UnitAssignable<OtherUnit, Unit>
-        constexpr Basic_Quantity(Basic_Quantity<Up_, OtherUnit>&& o) noexcept(std::is_nothrow_move_constructible_v<Rep>)
+        /**
+         * @brief Converting constructor
+         * 
+         * Constructs a Quantity from the specified Quantity with a different value representation 
+         * or different units. The value of the other other quantity is first moved innto *this, then 
+           it is is automatically adjusted so that the value 
+         * of *this is the same if it were expressed in the units of the specified quantity. The conversion 
+         * factor is calculated at compile-time. 
+         *
+         * This constructor can only be called if the units of specified quantity are convertible to 
+         * Unit. This requires that the powers of the base-units of Unit and OtherUnit be the same. 
+         * This function does not participate in overload resolution if this is not the case.
+         * 
+         * @tparam OtherUnit the units of the specified quantity
+         * @param o the specified Quantity
+         */
+        template<UnitLike OtherUnit>
+            requires UnitAssignable<OtherUnit, Unit> && std::move_constructible<Rep>
+        constexpr Basic_Quantity(Basic_Quantity<Rep, OtherUnit>&& o) noexcept(std::is_nothrow_move_constructible_v<Rep>)
+        : val_(std::move(o.value()))
+        {
+            val_ *= conversionPrefix(OtherUnit{}, Unit{});
+            val_ *= conversionScale(OtherUnit{}, Unit{});
+        }
+
+        /**
+         * @brief Converting constructor
+         * 
+         * Constructs a Quantity from the specified Quantity with a different value representation 
+         * or different units. The value of the other other quantity is first copied into *this, then 
+           it is is automatically adjusted so that the value 
+         * of *this is the same if it were expressed in the units of the specified quantity. The conversion 
+         * factor is calculated at compile-time.
+         *
+         * This constructor can only be called if the units of specified quantity are convertible to 
+         * Unit. This requires that the powers of the base-units of Unit and OtherUnit be the same. 
+         * This function does not participate in overload resolution if this is not the case.
+         * 
+         * @tparam OtherUnit the units of the specified quantity
+         * @param o the specified Quantity
+         */
+        template<Arithmetic Up, UnitLike OtherUnit>
+            requires UnitAssignable<OtherUnit, Unit> && std::constructible_from<Rep, const Up&>
+        constexpr explicit(!std::is_convertible_v<Up, Rep>) Basic_Quantity(const Basic_Quantity<Up, OtherUnit>& o) noexcept(std::is_nothrow_constructible_v<Rep, const Up&>)
+        : val_(o.value())
+        {
+            val_ *= conversionPrefix(OtherUnit{}, Unit{});
+            val_ *= conversionScale(OtherUnit{}, Unit{});
+        }
+
+        /**
+         * @brief Converting constructor
+         * 
+         * Constructs a Quantity from the specified Quantity with a different value representation 
+         * or different units. The value of the other other quantity is first moved innto *this, then 
+           it is is automatically adjusted so that the value 
+         * of *this is the same if it were expressed in the units of the specified quantity. The conversion 
+         * factor is calculated at compile-time. 
+         *
+         * This constructor can only be called if the units of specified quantity are convertible to 
+         * Unit. This requires that the powers of the base-units of Unit and OtherUnit be the same. 
+         * This function does not participate in overload resolution if this is not the case.
+         * 
+         * @tparam OtherUnit the units of the specified quantity
+         * @param o the specified Quantity
+         */
+        template<Arithmetic Up, UnitLike OtherUnit>
+            requires UnitAssignable<OtherUnit, Unit> && std::constructible_from<Rep, std::add_rvalue_reference_t<Up>>
+        constexpr explicit(!std::is_convertible_v<Up, Rep>) Basic_Quantity(Basic_Quantity<Up, OtherUnit>&& o) noexcept(std::is_nothrow_constructible_v<Rep, std::add_rvalue_reference_t<Up>>)
         : val_(std::move(o.value()))
         {
             val_ *= conversionPrefix(OtherUnit{}, Unit{});
@@ -193,35 +259,84 @@ namespace Maxwell
         /**
          * @brief Assigns the value of the specified quantity to this
          * 
-         *
          * Assigns the value of the specified Basic_Quantity to *this, converting from 
-         * the units o the other quantity to the units of *this if necessary. If the units 
+         * the units o the other quantity to the units of *this if necessary. o.value() is first 
+         * copy assigned to this->value(), then is is scaled as necessary. If the units 
          * of the other quantity cannot be assigned to *this, the program is ill-formed. 
          *
-         * @tparam Up_ the representation type of the other quantity
          * @tparam OtherUnit the units of the other quantity
          * @param o the other quantity
          * @return a reference to *this
          */
-        template<typename Up_, typename OtherUnit>
-            requires UnitAssignable<OtherUnit, Unit>
-        constexpr Basic_Quantity& operator=(const Basic_Quantity<Up_, OtherUnit>& o) noexcept(std::is_nothrow_copy_assignable_v<Rep>)
+        template<UnitLike OtherUnit>
+            requires UnitAssignable<OtherUnit, Unit> && std::copy_constructible<Rep>
+        constexpr Basic_Quantity& operator=(const Basic_Quantity<Rep, OtherUnit>& o) noexcept(std::is_nothrow_copy_assignable_v<Rep>)
         {
-            val_ = o.value();
-            val_ *= conversionPrefix(OtherUnit{}, Unit{});
-            val_ *= conversionScale(OtherUnit{}, Unit{});
-
+            Basic_Quantity<Rep, Unit> tmp(o);
+            tmp.swap(*this);
             return *this;
         }
 
-        template<typename Up_, typename OtherUnit>
-            requires UnitAssignable<OtherUnit, Unit>
-        constexpr Basic_Quantity& operator=(Basic_Quantity<Up_, OtherUnit>&& o) noexcept(std::is_nothrow_move_assignable_v<Rep>)
+         /**
+         * @brief Assigns the value of the specified quantity to this
+         * 
+         * Assigns the value of the specified Basic_Quantity to *this, converting from 
+         * the units o the other quantity to the units of *this if necessary. o.value() is first 
+         * move assigned to this->value(), then is is scaled as necessary. If the units 
+         * of the other quantity cannot be assigned to *this, the program is ill-formed. 
+         *
+         * @tparam OtherUnit the units of the other quantity
+         * @param o the other quantity
+         * @return a reference to *this
+         */
+        template<UnitLike OtherUnit>
+            requires UnitAssignable<OtherUnit, Unit> && std::move_constructible<Rep>
+        constexpr Basic_Quantity& operator=(Basic_Quantity<Rep, OtherUnit>&& o) noexcept(std::is_nothrow_move_assignable_v<Rep>)
         {
-            val_ = std::move(o.value());
-            val_ *= conversionPrefix(OtherUnit{}, Unit{});
-            val_ *= conversionScale(OtherUnit{}, Unit{});
+            Basic_Quantity<Rep, Unit> tmp(std::move(o));
+            tmp.swap(*this);
+            return *this;
+        }
 
+         /**
+         * @brief Assigns the value of the specified quantity to this
+         * 
+         * Assigns the value of the specified Basic_Quantity to *this, converting from 
+         * the units o the other quantity to the units of *this if necessary. o.value() is first 
+         * copy assigned to this->value(), then is is scaled as necessary. If the units 
+         * of the other quantity cannot be assigned to *this, the program is ill-formed. 
+         *
+         * @tparam OtherUnit the units of the other quantity
+         * @param o the other quantity
+         * @return a reference to *this
+         */
+        template<Arithmetic Up, UnitLike OtherUnit>
+            requires UnitAssignable<OtherUnit, Unit> && std::constructible_from<Rep, const Up&>
+        constexpr Basic_Quantity& operator=(const Basic_Quantity<Up, OtherUnit>& o) noexcept(std::is_nothrow_constructible_v<Rep, const Up&>)
+        {
+            Basic_Quantity<Rep, Unit> tmp(o);
+            tmp.swap(*this);
+            return *this;
+        }
+
+         /**
+         * @brief Assigns the value of the specified quantity to this
+         * 
+         * Assigns the value of the specified Basic_Quantity to *this, converting from 
+         * the units o the other quantity to the units of *this if necessary. o.value() is first 
+         * move assigned to this->value(), then is is scaled as necessary. If the units 
+         * of the other quantity cannot be assigned to *this, the program is ill-formed. 
+         *
+         * @tparam OtherUnit the units of the other quantity
+         * @param o the other quantity
+         * @return a reference to *this
+         */
+        template<Arithmetic Up, UnitLike OtherUnit>
+            requires UnitAssignable<OtherUnit, Unit> && std::constructible_from<Rep, std::add_rvalue_reference_t<Up>>
+        constexpr Basic_Quantity& operator=(Basic_Quantity<Up, OtherUnit>&& o) noexcept(std::is_nothrow_constructible_v<Rep, std::add_rvalue_reference_t<Up>>)
+        {
+            Basic_Quantity<Rep, Unit> tmp(std::move(o));
+            tmp.swap(*this);
             return *this;
         }
 

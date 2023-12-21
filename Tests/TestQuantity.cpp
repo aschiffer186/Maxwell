@@ -407,5 +407,29 @@ TEST(TestQuantity, TestConvertingConstructorScale)
     EXPECT_FLOAT_EQ(in.value(), 12.0);
     EXPECT_FLOAT_EQ(ft2.value(), 1.0);
 
-    Basic_Quantity<double, SqFootUnit>
+    Basic_Quantity<double, SqFootUnit> sft1{1.0};
+    Basic_Quantity<double, SqInchUnit> sin{sft1};
+    Basic_Quantity<double, SqFootUnit> sft2{sin};
+
+    EXPECT_FLOAT_EQ(sin.value(), 144.0);
+    EXPECT_FLOAT_EQ(sft2.value(), 1.0);
+}
+
+TEST(TestQuantity, TestQuantitySwap)
+{
+    Basic_Quantity<double, MeterUnit> q1{1.0};
+    Basic_Quantity<double, MeterUnit> q2{2.0};
+    q1.swap(q2);
+
+    EXPECT_TRUE(noexcept(q1.swap(q2)));
+    EXPECT_FLOAT_EQ(q1.value(), 2.0);
+    EXPECT_FLOAT_EQ(q2.value(), 1.0);
+
+    Basic_Quantity<double, MeterUnit> q3{1.0};
+    Basic_Quantity<double, MeterUnit> q4{2.0};
+
+    swap(q3, q4);
+    EXPECT_TRUE(noexcept(swap(q3, q4)));
+    EXPECT_FLOAT_EQ(q3.value(), 2.0);
+    EXPECT_FLOAT_EQ(q4.value(), 1.0);
 }

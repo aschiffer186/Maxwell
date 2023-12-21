@@ -596,6 +596,15 @@ namespace Maxwell
                          1e29, 
                          1e30};
     
+    /**
+     * @brief Computes 10^pow
+     * 
+     * Computes 10^po2, delegating to a look-up 
+     * table for common powers of 10
+     *
+     * @param pow the exponent
+     * @return 10^po2
+     */
     consteval double pow10(int pow)
     {
         if (pow >= -30 && pow <= 30)
@@ -620,6 +629,16 @@ namespace Maxwell
         }
     }
 
+    /**
+     * @brief Computes the exponent of a function
+     * 
+     * Computes base^exp where b is an arbitary number 
+     * and exp is an arbitrary integer. 
+     *
+     * @param base the base
+     * @param exp the exponent
+     * @return base^exp
+     */
     consteval double pow(double base, int exp)
     {
         if (exp < 0)
