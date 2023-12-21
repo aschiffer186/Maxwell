@@ -390,20 +390,22 @@ TEST(TestQuantity, TestConvertingConstructorScale)
     Basic_Quantity<double, FootUnit> ft{m1};
     Basic_Quantity<double, MeterUnit> m2{ft};
 
-    EXPECT_FLOAT_EQ(ft.value(), 0.3048);
+    EXPECT_FLOAT_EQ(ft.value(), 1/0.3048);
     EXPECT_FLOAT_EQ(m2.value(), 1.0);
 
     Basic_Quantity<double, KilogramUnit> kg1{1.0};
     Basic_Quantity<double, PoundMassUnit> lbm{kg1};
     Basic_Quantity<double, KilogramUnit> kg2{lbm};
 
-    EXPECT_FLOAT_EQ(lbm.value(), 0.453592);
+    EXPECT_FLOAT_EQ(lbm.value(), 2.204622);
     EXPECT_FLOAT_EQ(kg2.value(), 1.0);
 
-    Basic_Quantity<double, SqFootUnit> sft1{1.0};
-    Basic_Quantity<double, SqInchUnit> sin{sft1};
-    Basic_Quantity<double, SqFootUnit> sft2{sin};
+    Basic_Quantity<double, FootUnit> ft1{1.0};
+    Basic_Quantity<double, InchUnit> in{ft1};
+    Basic_Quantity<double, FootUnit> ft2{in};
 
-    EXPECT_FLOAT_EQ(sin.value(), 144.0);
-    EXPECT_FLOAT_EQ(sft2.value(), 1.0);
+    EXPECT_FLOAT_EQ(in.value(), 12.0);
+    EXPECT_FLOAT_EQ(ft2.value(), 1.0);
+
+    Basic_Quantity<double, SqFootUnit>
 }

@@ -146,7 +146,10 @@ namespace Maxwell
             return lhsPrefix;
         }
     public:
-        using type = UnitBase<productPrefix(Unit1{}, Unit2{}), Unit1::Pow + Unit2::Pow>;
+        using type = UnitBase<productPrefix(Unit1{}, Unit2{}), 
+                              Unit1::Pow + Unit2::Pow, 
+                              Unit1::Scale::num, 
+                              Unit1::Scale::den>;
     };
 
     template<UnitBaseLike Unit1, UnitBaseLike Unit2> 
@@ -178,7 +181,7 @@ namespace Maxwell
             return lhsPrefix;
         }
     public:
-        using type = UnitBase<quotientPrefix(Unit1{}, Unit2{}), Unit1::Pow - Unit2::Pow>;
+        using type = UnitBase<quotientPrefix(Unit1{}, Unit2{}), Unit1::Pow - Unit2::Pow, Unit1::Scale::num, Unit1::Scale::den>;
     };
 
     template<UnitBaseLike Unit1, UnitBaseLike Unit2> 
@@ -593,7 +596,7 @@ namespace Maxwell
                          1e29, 
                          1e30};
     
-    constexpr double pow10(int pow)
+    consteval double pow10(int pow)
     {
         if (pow >= -30 && pow <= 30)
         {
@@ -617,10 +620,10 @@ namespace Maxwell
         }
     }
 
-    consteval double ipow(double base, int exp)
+    consteval double pow(double base, int exp)
     {
         if (exp < 0)
-            return ipow(1/base, -exp);
+            return pow(1/base, -exp);
         if (exp == 0)
             return 1.0;
         if (exp == 1)
@@ -637,50 +640,78 @@ namespace Maxwell
         using RHSType = decltype(to);
 
         double scale = 1.0;
-        scale *= ipow(pow10(LHSType::Time::Prefix        - RHSType::Time::Prefix), LHSType::Time::Pow);
-        scale *= ipow(pow10(LHSType::Length::Prefix      - RHSType::Length::Prefix), LHSType::Length::Pow);
-        scale *= ipow(pow10(LHSType::Mass::Prefix        - RHSType::Mass::Prefix), LHSType::Mass::Pow);
-        scale *= ipow(pow10(LHSType::Current::Prefix     - RHSType::Current::Prefix), LHSType::Current::Pow);
-        scale *= ipow(pow10(LHSType::Temperature::Prefix - RHSType::Temperature::Prefix), LHSType::Temperature::Pow);
-        scale *= ipow(pow10(LHSType::Amount::Prefix      - RHSType::Amount::Prefix), LHSType::Amount::Pow);
-        scale *= ipow(pow10(LHSType::Luminosity::Prefix  - RHSType::Luminosity::Prefix), LHSType::Luminosity::Pow);
-        scale *= ipow(pow10(LHSType::Angle::Prefix       - RHSType::Angle::Prefix), LHSType::Angle::Pow);
+        scale *= pow(pow10(LHSType::Time::Prefix        - RHSType::Time::Prefix), LHSType::Time::Pow);
+        scale *= pow(pow10(LHSType::Length::Prefix      - RHSType::Length::Prefix), LHSType::Length::Pow);
+        scale *= pow(pow10(LHSType::Mass::Prefix        - RHSType::Mass::Prefix), LHSType::Mass::Pow);
+        scale *= pow(pow10(LHSType::Current::Prefix     - RHSType::Current::Prefix), LHSType::Current::Pow);
+        scale *= pow(pow10(LHSType::Temperature::Prefix - RHSType::Temperature::Prefix), LHSType::Temperature::Pow);
+        scale *= pow(pow10(LHSType::Amount::Prefix      - RHSType::Amount::Prefix), LHSType::Amount::Pow);
+        scale *= pow(pow10(LHSType::Luminosity::Prefix  - RHSType::Luminosity::Prefix), LHSType::Luminosity::Pow);
+        scale *= pow(pow10(LHSType::Angle::Prefix       - RHSType::Angle::Prefix), LHSType::Angle::Pow);
 
         return scale;
     }
 
     consteval double conversionScale(UnitLike auto from, UnitLike auto to) noexcept 
     {
-        using LHSType = decltype(from);
-        using RHSType = decltype(to);
+        using FromType = decltype(from);
+        using ToType = decltype(to);
 
-        using LHSTimeScale = LHSType::Time::Scale;
-        using RHSTimeScale = RHSType::Time::Scale;
-        using LHSLenScale  = LHSType::Length::Scale;
-        using RHSLenScale  = RHSType::Length::Scale;
-        using LHSMassScale = LHSType::Mass::Scale;
-        using RHSMassScale = RHSType::Mass::Scale;
-        using LHSAngScale  = LHSType::Angle::Scale;
-        using RHSAngScale  = RHSType::Angle::Scale;
+        using FromTimeScale    = FromType::Time::Scale;
+        using ToTimeScale    = ToType::Time::Scale;
+        using FromLenScale     = FromType::Length::Scale;
+        using ToLenScale     = ToType::Length::Scale;
+        using FromMassScale    = FromType::Mass::Scale;
+        using ToMassScale    = ToType::Mass::Scale;
+        using FromCurrentScale = FromType::Current::Scale; 
+        using ToCurrentScale = ToType::Current::Scale;
+        using ToTempScale    = ToType::Temperature::Scale;
+        using FromTempScale    = FromType::Temperature::Scale; 
+        using FromAmtScale     = FromType::Amount::Scale;
+        using ToAmtScale     = ToType::Amount::Scale; 
+        using FromLumScale     = FromType::Luminosity::Scale; 
+        using ToLumScale     = ToType::Luminosity::Scale;
+        using FromAngScale     = FromType::Angle::Scale;
+        using ToAngScale     = ToType::Angle::Scale;
 
         //Rad scale = 1
         //Deg scale = 180/pi
         //Rad --> deg divide = deg scale / 1
         //Deg --> Rad = 1 / scale scale 
         // to scale / from scale
-
+        
         double conversion = 1.0;
-        conversion *= static_cast<double>(RHSTimeScale::num)/static_cast<double>(RHSTimeScale::den)*
-                      static_cast<double>(LHSTimeScale::den)/static_cast<double>(LHSTimeScale::num);
+        const double timeFromScale = static_cast<double>(FromTimeScale::num)/static_cast<double>(FromTimeScale::den);
+        const double timeToScale   = static_cast<double>(ToTimeScale::num)/static_cast<double>(ToTimeScale::den);
+        conversion *= pow(timeFromScale/timeToScale, FromType::Time::Pow);
 
-        conversion *= static_cast<double>(RHSLenScale::num)/static_cast<double>(RHSLenScale::den)*
-                      static_cast<double>(LHSLenScale::den)/static_cast<double>(LHSLenScale::num);
+        const double lenFromScale = static_cast<double>(FromLenScale::num)/static_cast<double>(FromLenScale::den);
+        const double lenToScale   = static_cast<double>(ToLenScale::num)/static_cast<double>(ToLenScale::den);
+        conversion *= pow(lenFromScale/lenToScale, FromType::Length::Pow);
 
-        conversion *= static_cast<double>(RHSMassScale::num)/static_cast<double>(RHSMassScale::den)*
-                      static_cast<double>(LHSMassScale::den)/static_cast<double>(LHSMassScale::num);
+        const double massFromScale = static_cast<double>(FromMassScale::num)/static_cast<double>(FromMassScale::den);
+        const double massToScale   = static_cast<double>(ToMassScale::num)/static_cast<double>(ToMassScale::den);
+        conversion *= pow(massFromScale/massToScale, FromType::Mass::Pow);
 
-        conversion *= static_cast<double>(RHSAngScale::num)/static_cast<double>(RHSAngScale::den)*
-                      static_cast<double>(LHSAngScale::den)/static_cast<double>(LHSAngScale::num);
+        const double curretFromScale = static_cast<double>(FromCurrentScale::num)/static_cast<double>(FromCurrentScale::den);
+        const double curretToScale   = static_cast<double>(ToCurrentScale::num)/static_cast<double>(ToCurrentScale::den);
+        conversion *= pow(curretFromScale/curretToScale, FromType::Current::Pow);
+
+        const double tempFromScale = static_cast<double>(FromTempScale::num)/static_cast<double>(FromTempScale::den);
+        const double tempToScale   = static_cast<double>(ToTempScale::num)/static_cast<double>(ToTempScale::den);
+        conversion *= pow(tempFromScale/tempToScale, FromType::Temperature::Pow);
+
+        const double amtFromScale = static_cast<double>(FromAmtScale::num)/static_cast<double>(FromAmtScale::den);
+        const double amtToScale   = static_cast<double>(ToAmtScale::num)/static_cast<double>(ToAmtScale::den);
+        conversion *= pow(amtFromScale/amtToScale, FromType::Amount::Pow);
+
+        const double lumFromScale = static_cast<double>(FromLumScale::num)/static_cast<double>(FromLumScale::den);
+        const double lumToScale   = static_cast<double>(ToLumScale::num)/static_cast<double>(ToLumScale::den);
+        conversion *= pow(lumFromScale/lumToScale, FromType::Luminosity::Pow);
+
+        const double angleFromScale = static_cast<double>(FromAngScale::num)/static_cast<double>(FromAngScale::den);
+        const double angToScale     = static_cast<double>(ToAngScale::num)/static_cast<double>(ToAngScale::den);
+        conversion *= pow(angleFromScale/angToScale, FromType::Angle::Pow);
         
         return conversion;
     }
