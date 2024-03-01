@@ -3,8 +3,12 @@
 
 #include <array>
 #include <concepts>
+#include <ostream>
 #include <ratio>
+#include <string_view>
 #include <type_traits>
+
+using namespace std::literals;
 
 namespace Maxwell 
 {
@@ -18,22 +22,26 @@ namespace Maxwell
      * 
      * The UnitBase can be related to the coherent unit through the following equation:
      *
-     * UB = 10^Prefix * ScaleNum/ScaleDenom * U ^ Pow 
+     * UB = 10^Prefix * ScaleNum/ScaleDenom * U ^ Pow  + OffsetNum/OffsetDenom
      *
      * where UB is the modified unit and U is the coherent unit.
      *
      * The cohrent unit will have a prefix of 0, pow of 1 and scale numerato/denominator 
-     * of one. 
+     * of one, an offset numerator of 0 and an offset denominator of 1
      *
      * @tparam Prefix_ the metric prefix
      * @tparam Pow_ the power of the unit
      * @tparam ScaleNum_ the numerator of the scale factor
      * @tparam ScaleDenom_ the denominator of the scale factor
+     * @tparam OffsetNum_ the numerator of the offset 
+     * @tparam OffsetDenom_ the offset of the denominator
      */
     template<std::signed_integral auto Prefix_, 
              std::signed_integral auto Pow_,
              std::intmax_t ScaleNum_ = 1, 
-             std::intmax_t ScaleDenom_ = 1>
+             std::intmax_t ScaleDenom_ = 1,
+             std::intmax_t OffsetNum_ = 0, 
+             std::intmax_t OffsetDenom_ = 1>
     struct UnitBase
     {
         /// The metric prefix of the unit
@@ -42,11 +50,13 @@ namespace Maxwell
         static constexpr auto Pow = Pow_;
         /// The scale factor of th unit 
         using Scale = std::ratio<ScaleNum_, ScaleDenom_>;
+        /// The offset of the unit
+        using Offset = std::ratio<OffsetNum_, OffsetDenom_>;
     };
 
     // Unit base type aliases
     /// The NullUnit represents a dimension not part of the overall unit
-    using NullUnit = UnitBase<0, 0>;
+    using NullUnit = UnitBase<0, 0, 1, 1, 0, 1>;
 
     /**
      * @brief Scales the unit's prefix
@@ -77,8 +87,10 @@ namespace Maxwell
     template<std::integral auto Prefix_, 
              std::integral auto Pow_, 
              std::intmax_t ScaleNum_, 
-             std::intmax_t ScaleDenom_>
-    struct is_unit_base<UnitBase<Prefix_, Pow_, ScaleNum_, ScaleDenom_>> : std::true_type{};
+             std::intmax_t ScaleDenom_, 
+             std::intmax_t OffsetNum_,
+             std::intmax_t OffsetDenom_>
+    struct is_unit_base<UnitBase<Prefix_, Pow_, ScaleNum_, ScaleDenom_, OffsetNum_, OffsetDenom_>> : std::true_type{};
 
     /// True if the template parameter is an instantiation of class template UnitBase
     template<typename Tp>
@@ -92,7 +104,9 @@ namespace Maxwell
     struct is_unit_base_equal : std::bool_constant<UnitBase1::Prefix == UnitBase2::Prefix &&
                                                    UnitBase1::Pow == UnitBase2::Pow &&
                                                    UnitBase1::Scale::num == UnitBase2::Scale::num &&
-                                                   UnitBase1::Scale::den == UnitBase2::Scale::den> {};
+                                                   UnitBase1::Scale::den == UnitBase2::Scale::den && 
+                                                   UnitBase1::Offset::num == UnitBase2::Offset::num &&
+                                                   UnitBase1::Offset::den == UnitBase2::Offset::den> {};
 
     /**
      * @brief Variable template that is true if two unit bases are equal
@@ -323,7 +337,8 @@ namespace Maxwell
                           coherent_unit_base_t<typename U::Current>,
                           coherent_unit_base_t<typename U::Temperature>,
                           coherent_unit_base_t<typename U::Amount>,
-                          coherent_unit_base_t<typename U::Luminosity>>;
+                          coherent_unit_base_t<typename U::Luminosity>,
+                          coherent_unit_base_t<typename U::Angle>>;
     };
 
     template<UnitLike U> 
@@ -735,6 +750,19 @@ namespace Maxwell
         return conversion;
     }
 
+    consteval double conversionOffset(UnitLike auto from, UnitLike auto to) noexcept 
+    {
+        using FromUnit = decltype(from);
+        using ToUnit   = decltype(to);
+
+        const double tempFromOffset = static_cast<double>(FromUnit::Temperature::Offset::num)/static_cast<double>(FromUnit::Temperature::Offset::den);
+        const double tempToOffset   = static_cast<double>(ToUnit::Temperature::Offset::num)/static_cast<double>(ToUnit::Temperature::Offset::den);
+
+        const double offset = (tempFromOffset - tempToOffset);
+
+        return offset;
+    }
+
     //SI Base Units 
     using SecondUnit = Unit<UnitBase<0, 1>, NullUnit, NullUnit, NullUnit, NullUnit, NullUnit, NullUnit>;
     using MeterUnit = Unit<NullUnit, UnitBase<0, 1>, NullUnit, NullUnit, NullUnit, NullUnit, NullUnit>;
@@ -745,6 +773,147 @@ namespace Maxwell
     using CandelaUnit = Unit<NullUnit, NullUnit, NullUnit, NullUnit, NullUnit, NullUnit, UnitBase<0, 1>>;
     using Dimensionless_Unit = Unit<NullUnit, NullUnit, NullUnit, NullUnit, NullUnit, NullUnit, NullUnit>;
     using RadianUnit = Unit<NullUnit, NullUnit, NullUnit, NullUnit, NullUnit, NullUnit, NullUnit, UnitBase<0, 1>>;
+
+    //Formatting units
+    namespace _formatting 
+    {
+        inline constexpr std::array _metricPrefixes 
+            {
+                "q"sv,
+                "r"sv,
+                "r"sv,
+                "r"sv,
+                "y"sv,
+                "y"sv,
+                "y"sv,
+                "z"sv,
+                "z"sv,
+                "z"sv,
+                "a"sv,
+                "a"sv,
+                "a"sv,
+                "f"sv,
+                "f"sv,
+                "f"sv,
+                "p"sv,
+                "p"sv,
+                "p"sv,
+                "n"sv,
+                "n"sv,
+                "n"sv,
+                "μ"sv,
+                "μ"sv,
+                "μ"sv,
+                "m"sv,
+                "m"sv,
+                "m"sv,
+                "c"sv,
+                "d"sv,
+                ""sv,
+                "da"sv,
+                "h"sv,
+                "k"sv,
+                "k"sv,
+                "k"sv,
+                "M"sv,
+                "M"sv,
+                "M"sv,
+                "G"sv,
+                "G"sv,
+                "G"sv,
+                "T"sv,
+                "T"sv,
+                "T"sv,
+                "P"sv,
+                "P"sv,
+                "P"sv,
+                "E"sv,
+                "E"sv,
+                "E"sv,
+                "Z"sv,
+                "Z"sv,
+                "Z"sv,
+                "Y"sv,
+                "Y"sv,
+                "Y"sv,
+                "R"sv,
+                "R"sv,
+                "R"sv,
+                "Q"sv
+            };
+    }
+
+    std::ostream& operator<<(std::ostream& os, UnitLike auto unit)
+    {
+        using UnitType = decltype(unit);
+        constexpr const char* dot = "*";
+        std::string output;
+        if constexpr (UnitType::Mass::Pow != 0)
+        {
+            if (!output.empty())
+                output.append(dot);
+            output.append(_formatting::_metricPrefixes[UnitType::Mass::Prefix + 30]);
+            output.append("g");
+            if constexpr (UnitType::Mass::Pow != 1)
+                output.append("^").append(std::to_string(UnitType::Mass::Pow));
+        }
+        if constexpr (UnitType::Length::Pow != 0)
+        {
+            if (!output.empty())
+                output.append(dot);
+            output.append(_formatting::_metricPrefixes[UnitType::Length::Prefix + 30]);
+            output.append("m");
+            if constexpr (UnitType::Length::Pow != 1)
+                output.append("^").append(std::to_string(UnitType::Length::Pow));
+        }
+        if constexpr (UnitType::Time::Pow != 0)
+        {
+            if (!output.empty())
+                output.append(dot);
+            output.append(_formatting::_metricPrefixes[UnitType::Time::Prefix + 30]);
+            output.append("s");
+            if constexpr (UnitType::Time::Pow != 1)
+                output.append("^").append(std::to_string(UnitType::Time::Pow));
+        }
+        if constexpr (UnitType::Current::Pow != 0)
+        {
+            if (!output.empty())
+                output.append(dot);
+            output.append(_formatting::_metricPrefixes[UnitType::Currnt::Prefix + 30]);
+            output.append("A");
+            if constexpr (UnitType::Current::Pow != 1)
+                output.append("^").append(std::to_string(UnitType::Current::Pow));
+        }
+        if constexpr (UnitType::Temperature::Pow != 0)
+        {
+            if (!output.empty())
+                output.append(dot);
+            output.append(_formatting::_metricPrefixes[UnitType::Temperature::Prefix + 30]);
+            output.append("K");
+            if constexpr (UnitType::Temperature::Pow != 1)
+                output.append("^").append(std::to_string(UnitType::Temperature::Pow));
+        }
+        if constexpr (UnitType::Amount::Pow != 0)
+        {
+            if (!output.empty())
+                output.append(dot);
+            output.append(_formatting::_metricPrefixes[UnitType::Amount::Prefix + 30]);
+            output.append("mol");
+            if constexpr (UnitType::Amount::Pow != 1)
+                output.append("^").append(std::to_string(UnitType::Amount::Pow));
+        }
+        if constexpr (UnitType::Luminosity::Pow != 0)
+        {
+            if (!output.empty())
+                output.append(dot);
+            output.append(_formatting::_metricPrefixes[UnitType::Luminsotiy::Prefix + 30]);
+            output.append("cd");
+            if constexpr (UnitType::Luminosity::Pow != 1)
+                output.append("^").append(std::to_string(UnitType::Luminosity::Pow));
+        }
+        os << output; 
+        return os;
+    }
 }
 
 #endif

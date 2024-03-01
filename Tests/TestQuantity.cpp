@@ -1,4 +1,5 @@
 #include <compare>
+#include <concepts>
 #include <gtest/gtest.h> 
 #include <type_traits>
 
@@ -415,6 +416,58 @@ TEST(TestQuantity, TestConvertingConstructorScale)
     EXPECT_FLOAT_EQ(sft2.value(), 1.0);
 }
 
+TEST(TestQuantity, TestConvertingConstructorOffset)
+{
+    constexpr Basic_Quantity<double, KelvinUnit> q1{273.15};
+    Basic_Quantity<double, CelsiusUnit> q2{q1};
+    constexpr Basic_Quantity<double, FarenheitUnit> q3{q1};
+    constexpr Basic_Quantity<double, CelsiusUnit> q4{q3};
+
+    constexpr double cs = conversionScale(q3.units(), q4.units());
+    constexpr double co = conversionOffset(q3.units(), q4.units());
+    EXPECT_FLOAT_EQ(q2.value(), 0.0);
+    EXPECT_FLOAT_EQ(q3.value(), 32.0);
+    EXPECT_FLOAT_EQ(q4.value(), 0.0);
+}
+
+TEST(TestQuantity, TestBadConversions)
+{
+    using Quantity1 = Basic_Quantity<double, SecondUnit>;
+    using Quantity2 = Basic_Quantity<double, MeterUnit>;
+    using Quantity3 = Basic_Quantity<double, KilogramUnit>;
+    using Quantity4 = Basic_Quantity<double, KelvinUnit>;
+    using Quantity5 = Basic_Quantity<double, AmpereUnit>;
+    using Quantity6 = Basic_Quantity<double, MoleUnit>;
+    using Quantity7 = Basic_Quantity<double, CandelaUnit>;
+    using Quantity8 = Basic_Quantity<double, RadianUnit>;
+
+    using Quantity9 = Basic_Quantity<double, SqMeterUnit>;
+
+    EXPECT_FALSE((std::constructible_from<Quantity1, Quantity2>));
+    EXPECT_FALSE((std::constructible_from<Quantity1, Quantity3>));
+    EXPECT_FALSE((std::constructible_from<Quantity1, Quantity4>));
+    EXPECT_FALSE((std::constructible_from<Quantity1, Quantity5>));
+    EXPECT_FALSE((std::constructible_from<Quantity1, Quantity6>));
+    EXPECT_FALSE((std::constructible_from<Quantity1, Quantity7>));
+    EXPECT_FALSE((std::constructible_from<Quantity1, Quantity8>));
+    EXPECT_FALSE((std::constructible_from<Quantity1, Quantity9>));
+}
+
+TEST(TestQuantity, TestConvertingRepConstructor)
+{
+    Basic_Quantity<int, MeterUnit> q1{1};
+    Basic_Quantity<long double, MeterUnit> q2{q1};
+    Basic_Quantity<double, MeterUnit> q3{q2};
+    Basic_Quantity<short, MeterUnit> q4{q3};
+
+    EXPECT_FLOAT_EQ(q2.value(), 1.0);
+    EXPECT_EQ(q2.units(), MeterUnit{});
+    EXPECT_FLOAT_EQ(q3.value(), 1.0);
+    EXPECT_EQ(q3.units(), MeterUnit{});
+    EXPECT_EQ(q4.value(), 1);
+    EXPECT_EQ(q4.units(), MeterUnit{});
+}
+
 TEST(TestQuantity, TestQuantitySwap)
 {
     Basic_Quantity<double, MeterUnit> q1{1.0};
@@ -432,4 +485,70 @@ TEST(TestQuantity, TestQuantitySwap)
     EXPECT_TRUE(noexcept(swap(q3, q4)));
     EXPECT_FLOAT_EQ(q3.value(), 2.0);
     EXPECT_FLOAT_EQ(q4.value(), 1.0);
+}
+
+TEST(TestQuantity, TestToCoherentUnits)
+{
+    Basic_Quantity<double, MeterUnit> q1{1.0};
+    auto q2 = q1.toCoherentUnits();
+
+    EXPECT_FLOAT_EQ(q2.value(), 1.0);
+    EXPECT_EQ(q2.units(), MeterUnit{});
+
+    Basic_Quantity<double, KilometerUnit> q3{1.0};
+    auto q4 = q3.toCoherentUnits();
+
+    EXPECT_FLOAT_EQ(q4.value(), 1000.0);
+    EXPECT_EQ(q4.units(), MeterUnit{});
+
+    Basic_Quantity<double, InchUnit> q5{1.0};
+    auto q6 = q5.toCoherentUnits();
+
+    EXPECT_FLOAT_EQ(q6.value(), 0.0254);
+    EXPECT_EQ(q6.units(), MeterUnit{});
+
+    Basic_Quantity<double, DegreeUnit> q7{180.0};
+    auto q8 = q7.toCoherentUnits();
+
+    EXPECT_FLOAT_EQ(q8.value(), M_PI);
+    EXPECT_EQ(q8.units(), RadianUnit{});
+}
+
+TEST(TestQuantity, TestInCoherentUnits)
+{
+    Basic_Quantity<double, SecondUnit> q1;
+    Basic_Quantity<double, MeterUnit> q2;
+    Basic_Quantity<double, GramUnit> q3;
+    Basic_Quantity<double, AmpereUnit> q4;
+    Basic_Quantity<double, KelvinUnit> q5;
+    Basic_Quantity<double, MoleUnit> q6;
+    Basic_Quantity<double, CandelaUnit> q7;
+    Basic_Quantity<double, RadianUnit> q8; 
+
+    EXPECT_TRUE(decltype(q1)::isInCoherentUnits());
+    EXPECT_TRUE(decltype(q2)::isInCoherentUnits());
+    EXPECT_TRUE(decltype(q3)::isInCoherentUnits());
+    EXPECT_TRUE(decltype(q4)::isInCoherentUnits());
+    EXPECT_TRUE(decltype(q5)::isInCoherentUnits());
+    EXPECT_TRUE(decltype(q6)::isInCoherentUnits());
+    EXPECT_TRUE(decltype(q7)::isInCoherentUnits());
+    EXPECT_TRUE(decltype(q8)::isInCoherentUnits());
+
+    Basic_Quantity<double, KilosecondUnit> q9;
+    Basic_Quantity<double, KilometerUnit> q10;
+    Basic_Quantity<double, KilogramUnit> q11;
+    Basic_Quantity<double, KiloampereUnit> q12;
+    Basic_Quantity<double, KilokelvinUnit> q13;
+    Basic_Quantity<double, KilomoleUnit> q14;
+    Basic_Quantity<double, KilocandelaUnit> q15;
+    Basic_Quantity<double, DegreeUnit> q16;
+
+    EXPECT_FALSE(decltype(q9)::isInCoherentUnits());
+    EXPECT_FALSE(decltype(q10)::isInCoherentUnits());
+    EXPECT_FALSE(decltype(q11)::isInCoherentUnits());
+    EXPECT_FALSE(decltype(q12)::isInCoherentUnits());
+    EXPECT_FALSE(decltype(q13)::isInCoherentUnits());
+    EXPECT_FALSE(decltype(q14)::isInCoherentUnits());
+    EXPECT_FALSE(decltype(q15)::isInCoherentUnits());
+    EXPECT_FALSE(decltype(q16)::isInCoherentUnits());
 }

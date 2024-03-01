@@ -179,6 +179,7 @@ namespace Maxwell
         {
             val_ *= conversionPrefix(OtherUnit{}, Unit{});
             val_ *= conversionScale(OtherUnit{}, Unit{});
+            val_ += conversionOffset(OtherUnit{}, Unit{});
         }
 
         /**
@@ -204,6 +205,7 @@ namespace Maxwell
         {
             val_ *= conversionPrefix(OtherUnit{}, Unit{});
             val_ *= conversionScale(OtherUnit{}, Unit{});
+            val_ += conversionOffset(OtherUnit{}, Unit{});
         }
 
         /**
@@ -229,6 +231,7 @@ namespace Maxwell
         {
             val_ *= conversionPrefix(OtherUnit{}, Unit{});
             val_ *= conversionScale(OtherUnit{}, Unit{});
+            val_ += conversionOffset(OtherUnit{}, Unit{});
         }
 
         /**
@@ -254,6 +257,7 @@ namespace Maxwell
         {
             val_ *= conversionPrefix(OtherUnit{}, Unit{});
             val_ *= conversionScale(OtherUnit{}, Unit{});
+            val_ += conversionOffset(OtherUnit{}, Unit{});
         }
 
         /**
@@ -372,7 +376,7 @@ namespace Maxwell
         {
             const double prefixScale = conversionPrefix(Unit{}, coherent_unit_t<Unit>{});
             const double scale = conversionScale(Unit{}, coherent_unit_t<Unit>{});
-            return Basic_Quantity<Rep, coherent_unit_t<Unit>>{val_*prefixScale};
+            return Basic_Quantity<Rep, coherent_unit_t<Unit>>{val_*prefixScale*scale};
         }
 
         /**
@@ -617,6 +621,7 @@ namespace Maxwell
     std::ostream& operator<<(std::ostream& os, Basic_Quantity<Tp_, Unit_> q)
     {
         os << q.value();
+        os << " ";
         os << q.units();
         return os;
     }
