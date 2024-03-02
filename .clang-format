@@ -1,0 +1,15 @@
+IndentWidth: 4
+
+Language: Cpp 
+BasedOnStyle: LLVM
+AlignConsecutiveDeclarations:   Consecutive
+AlignConsecutiveAssignments:    Consecutive
+AlignOperands:                  Align
+BreakBeforeConceptDeclarations: Always
+BreakTemplateDeclarations: Leave
+IndentAccessModifiers: False
+NamespaceIndentation: All
+PackConstructorInitializers: NextLineOnly
+ReferenceAlignment: Left
+BreakBeforeBraces: Allman
+Standard: c++20

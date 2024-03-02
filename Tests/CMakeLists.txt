@@ -1,7 +1,9 @@
 enable_testing()
+include(CTest)
 
 find_package(GTest REQUIRED)
 
 add_executable(TestQuantity TestQuantity.cpp)
-target_link_libraries(TestQuantity PRIVATE Maxwell GTest::gtest_main)
+target_link_libraries(TestQuantity PRIVATE GTest::gtest_main Maxwell)
+target_compile_options(TestQuantity PRIVATE "-Wall" "-Wextra" "-Wshadow" "-pedantic")
 gtest_discover_tests(TestQuantity)
