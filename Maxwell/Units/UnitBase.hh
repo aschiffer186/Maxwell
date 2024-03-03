@@ -1,9 +1,9 @@
 /**
  * @file UnitBase.hh
  * @author Alex Schiffer
- * @brief
+ * @brief Definition of the Unit type and operations on it.
  * @version 0.1
- * @date 2024-02-29
+ * @date 2024-03-02
  *
  * @copyright Copyright (c) 2024
  *
@@ -17,20 +17,21 @@
 
 namespace Maxwell
 {
-    // One SI Base Unit
-    // UnitBase = ScaleNum/ScaleDen * 10^Prefix * Unit^Pow + OffsetNum/OffsetDen
+    /// One SI Base Unit
+    /// UnitBase = ScaleNum/ScaleDen * 10^Prefix * Unit^Pow +
+    /// OffsetNum/OffsetDen
     template <int Pow_, int Prefix_, int OffsetNum_, int OffsetDen_,
               int ScaleNum_, int ScaleDen_>
     struct UnitBase
     {
-        static constexpr int Pow       = Pow_;
+        static constexpr int Power     = Pow_;
         static constexpr int Prefix    = Prefix_;
         static constexpr int OffsetNum = OffsetNum_;
         static constexpr int OffsetDen = OffsetDen_;
         static constexpr int ScaleNum  = ScaleNum_;
         static constexpr int ScaleDen  = ScaleDen_;
 
-        constexpr auto power() const noexcept -> int { return Pow; }
+        constexpr auto power() const noexcept -> int { return Power; }
         constexpr auto prefix() const noexcept -> int { return Prefix; }
 
         constexpr auto
@@ -141,7 +142,7 @@ namespace Maxwell
      * @return the changed UnitBase
      */
     template <int Amount>
-    constexpr auto scaleUnitBase(UnitBaseLike auto unitBase) noexcept -> auto
+    consteval auto scaleUnitBase(UnitBaseLike auto unitBase) noexcept -> auto
     {
         return UnitBase<unitBase.power(), unitBase.prefix() + Amount,
                         unitBase.offsetNum(), unitBase.offsetDen(),
@@ -153,7 +154,7 @@ namespace Maxwell
     concept UnitBaseConvertibleTo =
         UnitBaseLike<FromUnitBase> && UnitBaseLike<ToUnitBase> &&
         requires(FromUnitBase, ToUnitBase) {
-            FromUnitBase::pow == ToUnitBase::pow;
+            FromUnitBase::Power == ToUnitBase::Power;
         };
 
     template <UnitBaseLike auto AmountType, UnitBaseLike auto CurrentType,
@@ -195,11 +196,37 @@ namespace Maxwell
         constexpr auto angle() const noexcept -> auto { return Angle; }
     };
 
+    /**
+     * @brief Type trait to indicate a type is a unit
+     *
+     * Primary specialization is false
+     *
+     */
     template <typename>
     struct is_unit : std::false_type
     {
     };
 
+    /**
+     * @brief Type trait to indicate a type is a unit
+     *
+     * Specialization for const-qualified types:
+     * the result is the same as the non-const qualified
+     * type.
+     *
+     */
+    template <typename Tp>
+    struct is_unit<const Tp> : is_unit<Tp>
+    {
+    };
+
+    /**
+     * @brief Type trait to indicate a type is a unit
+     *
+     * Specialization for instantiations of the Unit type
+     * the trait is true for these types.
+     *
+     */
     template <UnitBaseLike auto AmountType, UnitBaseLike auto CurrentType,
               UnitBaseLike auto LengthType, UnitBaseLike auto LuminosityType,
               UnitBaseLike auto MassType, UnitBaseLike auto TemperatureType,
@@ -268,6 +295,15 @@ namespace Maxwell
             lhs.time() / rhs.time(), lhs.angle() / rhs.angle()>{};
     }
 
+    /**
+     * @brief Computes the inverse of a unit
+     *
+     * Computes the inverse of a unit. The inverse of a unit is the product
+     * of the inverse of each of the SI base units making up the unit.
+     *
+     * @param unit the unit to invert
+     * @return the inverse of the unit
+     */
     consteval auto unitInverse(UnitLike auto unit) noexcept -> auto
     {
         return Unit<
@@ -290,22 +326,14 @@ namespace Maxwell
     template <typename FromUnit, typename ToUnit>
     concept UnitConvertibleTo =
         UnitLike<FromUnit> && UnitLike<ToUnit> &&
-        UnitBaseConvertibleTo<decltype(FromUnit::Amount),
-                              decltype(ToUnit::Amount)> &&
-        UnitBaseConvertibleTo<decltype(FromUnit::Current),
-                              decltype(ToUnit::Current)> &&
-        UnitBaseConvertibleTo<decltype(FromUnit::Length),
-                              decltype(ToUnit::Length)> &&
-        UnitBaseConvertibleTo<decltype(FromUnit::Luminosity),
-                              decltype(ToUnit::Luminosity)> &&
-        UnitBaseConvertibleTo<decltype(FromUnit::Mass),
-                              decltype(ToUnit::Mass)> &&
-        UnitBaseConvertibleTo<decltype(FromUnit::Temperature),
-                              decltype(ToUnit::Temperature)> &&
-        UnitBaseConvertibleTo<decltype(FromUnit::Time),
-                              decltype(ToUnit::Time)> &&
-        UnitBaseConvertibleTo<decltype(FromUnit::Angle),
-                              decltype(ToUnit::Angle)>;
+        FromUnit::Amount.power() == ToUnit::Amount.power() &&
+        FromUnit::Current.power() == ToUnit::Current.power() &&
+        FromUnit::Length.power() == ToUnit::Length.power() &&
+        FromUnit::Luminosity.power() == ToUnit::Luminosity.power() &&
+        FromUnit::Mass.power() == ToUnit::Mass.power() &&
+        FromUnit::Temperature.power() == ToUnit::Temperature.power() &&
+        FromUnit::Time.power() == ToUnit::Time.power() &&
+        FromUnit::Angle.power() == ToUnit::Angle.power();
 
     template <typename Unit>
     concept Unitless =
@@ -342,7 +370,7 @@ namespace Maxwell
      * Changes the current prefix of the unit by the
      * specified amount.
      *
-     * @post scaleAmount<Amount>(unit).current().prefix -
+     * @post scaleCurrent<Amount>(unit).current().prefix -
      *       unit.current().prefix() == Amount
      *
      * @tparam Amount the amount to change the prefix by
@@ -363,7 +391,7 @@ namespace Maxwell
      * Changes the length prefix of the unit by the
      * specified amount.
      *
-     * @post scaleAmount<Amount>(unit).length().prefix -
+     * @post scaleLength<Amount>(unit).length().prefix -
      *       unit.length().prefix() == Amount
      *
      * @tparam Amount the amount to change the prefix by
@@ -385,7 +413,7 @@ namespace Maxwell
      * Changes the luminosity prefix of the unit by the
      * specified amount.
      *
-     * @post scaleAmount<Amount>(unit).luminosity().prefix -
+     * @post scaleLuminosity<Amount>(unit).luminosity().prefix -
      *       unit.luminosity().prefix() == Amount
      *
      * @tparam Amount the amount to change the prefix by
@@ -406,7 +434,7 @@ namespace Maxwell
      * Changes the mass prefix of the unit by the
      * specified amount.
      *
-     * @post scaleAmount<Amount>(unit).mass().prefix -
+     * @post scaleMass<Amount>(unit).mass().prefix -
      *       unit.mass().prefix() == Amount
      *
      * @tparam Amount the amount to change the prefix by
@@ -427,7 +455,7 @@ namespace Maxwell
      * Changes the temperature prefix of the unit by the
      * specified amount.
      *
-     * @post scaleAmount<Amount>(unit).temperature().prefix -
+     * @post scaleTemperature<Amount>(unit).temperature().prefix -
      *       unit.temperature().prefix() == Amount
      *
      * @tparam Amount the amount to change the prefix by
@@ -446,10 +474,10 @@ namespace Maxwell
     /**
      * @brief Changes the prefix of the unit
      *
-     * Changes the mass prefix of the unit by the
+     * Changes the time prefix of the unit by the
      * specified amount.
      *
-     * @post scaleAmount<Amount>(unit).time().prefix -
+     * @post scaleTime<Amount>(unit).time().prefix -
      *       unit.time().prefix() == Amount
      *
      * @tparam Amount the amount to change the prefix by
@@ -459,10 +487,30 @@ namespace Maxwell
     template <int Amount>
     consteval auto scaleTime(UnitLike auto unit) noexcept -> auto
     {
-        return Unit<unit.amount(), unit.current(),
-                    scaleUnitBase<Amount>(unit.length()), unit.luminosity(),
-                    unit.mass(), unit.temperature(),
+        return Unit<unit.amount(), unit.current(), unit.length(),
+                    unit.luminosity(), unit.mass(), unit.temperature(),
                     scaleUnitBase<Amount>(unit.time()), unit.angle()>{};
+    }
+
+    /**
+     * @brief Changes the prefix of the unit
+     *
+     * Changes the angle prefix of the unit by the
+     * specified amount.
+     *
+     * @post scaleAngle<Amount>(unit).angle().prefix -
+     *       unit.angle().prefix() == Amount
+     *
+     * @tparam Amount the amount to change the prefix by
+     * @param unit the unit to change
+     * @return the changed unit
+     */
+    template <int Amount>
+    consteval auto scaleAngle(UnitLike auto unit) noexcept -> auto
+    {
+        return Unit<unit.amount(), unit.current(), unit.length(),
+                    unit.luminosity(), unit.mass(), unit.temperature(),
+                    unit.time(), scaleUnitBase<Amount>(unit.angle())>{};
     }
 
     /// Cached powers of 10
@@ -475,7 +523,15 @@ namespace Maxwell
         1e15,  1e16,  1e17,  1e18,  1e19,  1e20,  1e21,  1e22,  1e23,
         1e24,  1e25,  1e26,  1e27,  1e28,  1e29,  1e30};
 
-    constexpr auto pow10(int exp) noexcept -> double
+    /**
+     * @brief Calculates powers of 10
+     *
+     * Calculates 10^exp
+     *
+     * @param exp the exponent
+     * @return 10^exp
+     */
+    consteval auto pow10(int exp) noexcept -> double
     {
         if (exp >= -30 && exp <= 30)
         {
@@ -498,7 +554,14 @@ namespace Maxwell
     consteval auto unitPrefixConversion(UnitLike auto from,
                                         UnitLike auto to) noexcept -> double
     {
-        const int delta = from.prefix() - to.prefix();
+        int delta  = from.amount().prefix() - to.amount().prefix();
+        delta     += from.current().prefix() - to.current().prefix();
+        delta     += from.length().prefix() - to.length().prefix();
+        delta     += from.luminosity().prefix() - to.luminosity().prefix();
+        delta     += from.mass().prefix() - to.mass().prefix();
+        delta     += from.temperature().prefix() - to.temperature().prefix();
+        delta     += from.time().prefix() - to.time().prefix();
+        delta     += from.angle().prefix() - to.angle().prefix();
         return pow10(delta);
     }
 } // namespace Maxwell

@@ -33,8 +33,8 @@ namespace Maxwell
          * @post this->value() == ScalarType()
          *
          */
-        constexpr BasicQuantity() noexcept(
-            std::is_nothrow_default_constructible_v<ScalarType>)
+        constexpr BasicQuantity()
+            noexcept(std::is_nothrow_default_constructible_v<ScalarType>)
             requires std::constructible_from<Scalar>
         = default;
 
@@ -53,8 +53,8 @@ namespace Maxwell
          */
         template <typename U>
             requires std::constructible_from<ScalarType, U>
-        constexpr explicit(Unitless<UnitsType>) BasicQuantity(U&& u) noexcept(
-            std::is_nothrow_constructible_v<ScalarType, U>)
+        constexpr explicit(Unitless<UnitsType>) BasicQuantity(U&& u)
+            noexcept(std::is_nothrow_constructible_v<ScalarType, U>)
             : scalar_(std::forward<U>(u))
         {
         }
@@ -72,14 +72,15 @@ namespace Maxwell
          * @tparam Scalar2
          * @tparam Unit2
          */
-        template <Arithmetic Scalar2, UnitLike auto Unit2>
+        template <Arithmetic Scalar2, auto Unit2>
             requires std::constructible_from<ScalarType, const Scalar2&> &&
                      UnitConvertibleTo<decltype(Unit2), UnitsType>
         constexpr BasicQuantity(const BasicQuantity<Scalar2, Unit2>& other)
-            : scalar_(other.scalar_)
+            noexcept(std::is_nothrow_constructible_v<ScalarType, Scalar2>)
+            : scalar_(other.value())
         {
             constexpr double prefixConversion =
-                unitPrefixConversion(other.units(), units());
+                unitPrefixConversion(Unit2, Units);
             scalar_ = prefixConversion * scalar_;
         }
 
@@ -96,14 +97,15 @@ namespace Maxwell
          * @tparam Scalar2
          * @tparam Unit2
          */
-        template <Arithmetic Scalar2, UnitLike auto Unit2>
+        template <Arithmetic Scalar2, auto Unit2>
             requires std::constructible_from<ScalarType, Scalar2&&> &&
                      UnitConvertibleTo<decltype(Unit2), UnitsType>
         constexpr BasicQuantity(BasicQuantity<Scalar2, Unit2>&& other)
-            : scalar_{std::move(other.scalar_)}
+            noexcept(std::is_nothrow_constructible_v<ScalarType, Scalar2&&>)
+            : scalar_(std::move(other.value()))
         {
             constexpr double prefixConversion =
-                unitPrefixConversion(other.units(), units());
+                unitPrefixConversion(Unit2, Units);
             scalar_ = prefixConversion * scalar_;
         }
 
@@ -132,8 +134,9 @@ namespace Maxwell
         template <Arithmetic S>
             requires std::constructible_from<ScalarType, S> &&
                          Unitless<UnitsType>
-        constexpr auto operator=(S&& s) noexcept(
-            std::is_nothrow_constructible_v<ScalarType, S>) -> BasicQuantity&
+        constexpr auto operator=(S&& s)
+            noexcept(std::is_nothrow_constructible_v<ScalarType, S>)
+                -> BasicQuantity&
         {
             scalar_ = std::forward<S>(s);
         }
@@ -164,9 +167,9 @@ namespace Maxwell
             requires std::is_copy_assignable_v<ScalarType>
         = default;
 
-        constexpr auto operator=(BasicQuantity&&) noexcept(
-            std::is_nothrow_move_assignable_v<ScalarType>) -> BasicQuantity& =
-                                                                  default;
+        constexpr auto operator=(BasicQuantity&&)
+            noexcept(std::is_nothrow_move_assignable_v<ScalarType>)
+                -> BasicQuantity& = default;
 
         /**
          * @brief Return the value of the BasicQuanity
@@ -175,9 +178,14 @@ namespace Maxwell
          *
          * @return the value of the basic quantity
          */
-        constexpr auto value() const noexcept -> const ScalarType&
+        constexpr auto value() const& noexcept -> const ScalarType&
         {
             return scalar_;
+        }
+
+        constexpr auto value() && noexcept -> ScalarType&&
+        {
+            return std::move(scalar_);
         }
 
         /**
@@ -214,36 +222,36 @@ namespace Maxwell
         // Arithmetic operators
         // Start with the easy cases: no conversion necessary
 
-        constexpr auto operator+=(const BasicQuantity& other) noexcept(
-            NothrowArithmetic<ScalarType>) -> BasicQuantity&
+        constexpr auto operator+=(const BasicQuantity& other)
+            noexcept(NothrowArithmetic<ScalarType>) -> BasicQuantity&
         {
             scalar_ = scalar_ + other.scalar_;
             return *this;
         }
 
-        constexpr auto operator-=(const BasicQuantity& other) noexcept(
-            NothrowArithmetic<ScalarType>) -> BasicQuantity&
+        constexpr auto operator-=(const BasicQuantity& other)
+            noexcept(NothrowArithmetic<ScalarType>) -> BasicQuantity&
         {
             scalar_ = scalar_ - other.scalar_;
             return *this;
         }
 
-        constexpr auto operator*=(const ScalarType& scalar) noexcept(
-            NothrowArithmetic<ScalarType>) -> BasicQuantity&
+        constexpr auto operator*=(const ScalarType& scalar)
+            noexcept(NothrowArithmetic<ScalarType>) -> BasicQuantity&
         {
             scalar_ = scalar_ * scalar;
             return *this;
         }
 
-        constexpr auto operator/=(const ScalarType& scalar) noexcept(
-            NothrowArithmetic<ScalarType>) -> BasicQuantity&
+        constexpr auto operator/=(const ScalarType& scalar)
+            noexcept(NothrowArithmetic<ScalarType>) -> BasicQuantity&
         {
             scalar_ = scalar_ / scalar;
             return *this;
         }
 
-        constexpr auto operator%=(const ScalarType& scalar) noexcept(
-            NothrowArithmetic<ScalarType>) -> BasicQuantity&
+        constexpr auto operator%=(const ScalarType& scalar)
+            noexcept(NothrowArithmetic<ScalarType>) -> BasicQuantity&
             requires std::integral<ScalarType>
         {
             scalar_ %= scalar;
@@ -257,8 +265,8 @@ namespace Maxwell
          *
          * @param other the quantity to swap with *this
          */
-        constexpr auto swap(BasicQuantity& other) noexcept(
-            std::is_nothrow_swappable_v<ScalarType>) -> void
+        constexpr auto swap(BasicQuantity& other)
+            noexcept(std::is_nothrow_swappable_v<ScalarType>) -> void
             requires std::swappable<ScalarType>
         {
             using std::swap;
@@ -275,9 +283,8 @@ namespace Maxwell
     };
 
     template <Arithmetic S, UnitLike auto U>
-    constexpr auto
-    swap(BasicQuantity<S, U>& lhs,
-         BasicQuantity<S, U>& rhs) noexcept(noexcept(lhs.swap(rhs))) -> void
+    constexpr auto swap(BasicQuantity<S, U>& lhs, BasicQuantity<S, U>& rhs)
+        noexcept(noexcept(lhs.swap(rhs))) -> void
         requires std::swappable<S>
     {
         lhs.swap(rhs);
@@ -286,27 +293,27 @@ namespace Maxwell
     // Arithmetic operators
     // Start with the easy overloads: no conversion necessary
     template <Arithmetic S, UnitLike auto U>
-    constexpr auto
-    operator+(BasicQuantity<S, U> lhs, const BasicQuantity<S, U>& rhs) noexcept(
-        NothrowArithmetic<S>) -> BasicQuantity<S, U>
+    constexpr auto operator+(BasicQuantity<S, U>        lhs,
+                             const BasicQuantity<S, U>& rhs)
+        noexcept(NothrowArithmetic<S>) -> BasicQuantity<S, U>
     {
         lhs += rhs;
         return lhs;
     }
 
     template <Arithmetic S, UnitLike auto U>
-    constexpr auto
-    operator-(BasicQuantity<S, U> lhs, const BasicQuantity<S, U>& rhs) noexcept(
-        NothrowArithmetic<S>) -> BasicQuantity<S, U>
+    constexpr auto operator-(BasicQuantity<S, U>        lhs,
+                             const BasicQuantity<S, U>& rhs)
+        noexcept(NothrowArithmetic<S>) -> BasicQuantity<S, U>
     {
         lhs -= rhs;
         return lhs;
     }
 
     template <Arithmetic S, UnitLike auto U1, UnitLike auto U2>
-    constexpr auto operator*(
-        const BasicQuantity<S, U1>& lhs,
-        const BasicQuantity<S, U2>& rhs) noexcept(NothrowArithmetic<S>) -> auto
+    constexpr auto operator*(const BasicQuantity<S, U1>& lhs,
+                             const BasicQuantity<S, U2>& rhs)
+        noexcept(NothrowArithmetic<S>) -> auto
     {
         constexpr auto outputUnit = toCoherentUnit(U1) * toCoherentUnit(U2);
         return BasicQuantity<S, outputUnit>(lhs.inCoherentUnits().value() *
@@ -314,9 +321,9 @@ namespace Maxwell
     }
 
     template <Arithmetic S, UnitLike auto U1, UnitLike auto U2>
-    constexpr auto operator/(
-        const BasicQuantity<S, U1>& lhs,
-        const BasicQuantity<S, U2>& rhs) noexcept(NothrowArithmetic<S>) -> auto
+    constexpr auto operator/(const BasicQuantity<S, U1>& lhs,
+                             const BasicQuantity<S, U2>& rhs)
+        noexcept(NothrowArithmetic<S>) -> auto
     {
         constexpr auto outputUnit = toCoherentUnit(U1) / toCoherentUnit(U2);
         return BasicQuantity<S, outputUnit>(lhs.inCoherentUnits().value() /
@@ -324,32 +331,32 @@ namespace Maxwell
     }
 
     template <Arithmetic S, UnitLike auto U>
-    constexpr auto operator*(BasicQuantity<S, U> lhs, const S& rhs) noexcept(
-        NothrowArithmetic<S>) -> BasicQuantity<S, U>
+    constexpr auto operator*(BasicQuantity<S, U> lhs, const S& rhs)
+        noexcept(NothrowArithmetic<S>) -> BasicQuantity<S, U>
     {
         lhs *= rhs;
         return lhs;
     }
 
     template <Arithmetic S, UnitLike auto U>
-    constexpr auto operator*(const S& lhs, BasicQuantity<S, U> rhs) noexcept(
-        NothrowArithmetic<S>) -> BasicQuantity<S, U>
+    constexpr auto operator*(const S& lhs, BasicQuantity<S, U> rhs)
+        noexcept(NothrowArithmetic<S>) -> BasicQuantity<S, U>
     {
         rhs *= lhs;
         return lhs;
     }
 
     template <Arithmetic S, UnitLike auto U>
-    constexpr auto operator/(BasicQuantity<S, U> lhs, const S& rhs) noexcept(
-        NothrowArithmetic<S>) -> BasicQuantity<S, U>
+    constexpr auto operator/(BasicQuantity<S, U> lhs, const S& rhs)
+        noexcept(NothrowArithmetic<S>) -> BasicQuantity<S, U>
     {
         lhs /= rhs;
         return lhs;
     }
 
     template <Arithmetic S, UnitLike auto U>
-    constexpr auto operator/(const S& lhs, BasicQuantity<S, U> rhs) noexcept(
-        NothrowArithmetic<S>) -> BasicQuantity<S, U>
+    constexpr auto operator/(const S& lhs, BasicQuantity<S, U> rhs)
+        noexcept(NothrowArithmetic<S>) -> BasicQuantity<S, U>
     {
         rhs /= lhs;
         return lhs;

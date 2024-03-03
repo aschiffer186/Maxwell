@@ -2,6 +2,7 @@
 
 #include "Maxwell.hh"
 #include "UnitBase.hh"
+#include "UnitTypes.hh"
 
 using namespace Maxwell;
 
@@ -23,6 +24,10 @@ TEST(TestUnits, TestUnitBase)
 
 TEST(TestUnits, TestUnit)
 {
+    // Ensure units are convertible/not convertible as expected
+    EXPECT_TRUE((UnitConvertibleTo<MeterUnitType, CentimeterUnitType>));
+    EXPECT_FALSE((UnitConvertibleTo<MeterUnitType, MoleUnitType>));
+
     // Test Scaling units
     constexpr auto centimole = scaleAmount<-2>(MoleUnit);
     EXPECT_EQ(centimole.amount().prefix() - MoleUnit.amount().prefix(), -2);

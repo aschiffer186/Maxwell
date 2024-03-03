@@ -70,4 +70,61 @@ TEST(TestQuantity, TestValueConstructor)
     EXPECT_FALSE((noexcept(BasicQuantity<Type2, MeterUnit>{Type2{10.0}})));
 }
 
-TEST(TestQuantity, TestConveringConstructorPrefix) {}
+TEST(TestQuantity, TestConveringConstructorPrefix)
+{
+    BasicQuantity<double, MoleUnit>      mol1{1};
+    BasicQuantity<double, CentimoleUnit> cmol1{mol1};
+    EXPECT_FLOAT_EQ(cmol1.value(), 100.0);
+    BasicQuantity<double, KilomoleUnit> kmol1(std::move(cmol1));
+    EXPECT_FLOAT_EQ(kmol1.value(), 1e-3);
+    EXPECT_TRUE(noexcept(BasicQuantity<double, CentimoleUnit>(mol1)));
+
+    BasicQuantity<double, AmpereUnit>      amp1{1};
+    BasicQuantity<double, CentiampereUnit> camp1{amp1};
+    EXPECT_FLOAT_EQ(camp1.value(), 100.0);
+    BasicQuantity<double, KiloampereUnit> kamp1(std::move(camp1));
+    EXPECT_FLOAT_EQ(kamp1.value(), 1e-3);
+    EXPECT_TRUE(noexcept(BasicQuantity<double, CentiampereUnit>(amp1)));
+
+    BasicQuantity<double, MeterUnit>      m1{1};
+    BasicQuantity<double, CentimeterUnit> cm1{m1};
+    EXPECT_FLOAT_EQ(cm1.value(), 100.0);
+    BasicQuantity<double, KilometerUnit> km1(std::move(cm1));
+    EXPECT_FLOAT_EQ(km1.value(), 1e-3);
+    EXPECT_TRUE(noexcept(BasicQuantity<double, CentimeterUnit>(m1)));
+
+    BasicQuantity<double, CandelaUnit>      cd1{1};
+    BasicQuantity<double, CenticandelaUnit> ccd1{cd1};
+    EXPECT_FLOAT_EQ(ccd1.value(), 100.0);
+    BasicQuantity<double, KilocandelaUnit> kcd1(std::move(ccd1));
+    EXPECT_FLOAT_EQ(kcd1.value(), 1e-3);
+    EXPECT_TRUE(noexcept(BasicQuantity<double, CenticandelaUnit>(cd1)));
+
+    BasicQuantity<double, GramUnit>      g1{1};
+    BasicQuantity<double, CentigramUnit> cg1{g1};
+    EXPECT_FLOAT_EQ(cg1.value(), 100.0);
+    BasicQuantity<double, KilogramUnit> kg1(std::move(cg1));
+    EXPECT_FLOAT_EQ(kg1.value(), 1e-3);
+    EXPECT_TRUE(noexcept(BasicQuantity<double, CentigramUnit>(g1)));
+
+    BasicQuantity<double, KelvinUnit>      K1{1};
+    BasicQuantity<double, CentikelvinUnit> cK1{K1};
+    EXPECT_FLOAT_EQ(cK1.value(), 100.0);
+    BasicQuantity<double, KilokelvinUnit> kK1(std::move(cK1));
+    EXPECT_FLOAT_EQ(kK1.value(), 1e-3);
+    EXPECT_TRUE(noexcept(BasicQuantity<double, CentikelvinUnit>(K1)));
+
+    BasicQuantity<double, SecondUnit>      s1{1};
+    BasicQuantity<double, CentisecondUnit> cs1{s1};
+    EXPECT_FLOAT_EQ(cs1.value(), 100.0);
+    BasicQuantity<double, KilosecondUnit> ks1(std::move(cs1));
+    EXPECT_FLOAT_EQ(ks1.value(), 1e-3);
+    EXPECT_TRUE(noexcept(BasicQuantity<double, CentisecondUnit>(s1)));
+
+    BasicQuantity<double, RadianUnit>      rad1{1};
+    BasicQuantity<double, CentiradianUnit> crad1{rad1};
+    EXPECT_FLOAT_EQ(crad1.value(), 100.0);
+    BasicQuantity<double, KiloradianUnit> krad1(std::move(crad1));
+    EXPECT_FLOAT_EQ(krad1.value(), 1e-3);
+    EXPECT_TRUE(noexcept(BasicQuantity<double, CentiradianUnit>(rad1)));
+}

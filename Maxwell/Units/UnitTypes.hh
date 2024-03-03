@@ -1,9 +1,10 @@
 /**
  * @file UnitTypes.hh
  * @author Alex Schiffer
- * @brief
+ * @brief Constants used to represent common units, both SI
+ *        and imperial and common multiples of those units.
  * @version 0.1
- * @date 2024-02-29
+ * @date 2024-03-02
  *
  * @copyright Copyright (c) 2024
  */
@@ -15,6 +16,7 @@
 namespace Maxwell
 {
 #define MAKE_SCALED_UNITS(Unit, BaseUnit, dim)                                 \
+    using BaseUnit##Type               = decltype(BaseUnit);                   \
     constexpr inline auto Quetta##Unit = scale##dim<30>(BaseUnit);             \
     constexpr inline auto Ronna##Unit  = scale##dim<27>(BaseUnit);             \
     constexpr inline auto Yotta##Unit  = scale##dim<24>(BaseUnit);             \
@@ -38,7 +40,31 @@ namespace Maxwell
     constexpr inline auto Zepto##Unit  = scale##dim<-21>(BaseUnit);            \
     constexpr inline auto Yocto##Unit  = scale##dim<-24>(BaseUnit);            \
     constexpr inline auto Ronto##Unit  = scale##dim<-27>(BaseUnit);            \
-    constexpr inline auto Quecto##Unit = scale##dim<-30>(BaseUnit);
+    constexpr inline auto Quecto##Unit = scale##dim<-30>(BaseUnit);            \
+    using Quetta##Unit##Type           = decltype(Quetta##Unit);               \
+    using Ronna##Unit##Type            = decltype(Ronna##Unit);                \
+    using Yotta##Unit##Type            = decltype(Yotta##Unit);                \
+    using Zeta##Unit##Type             = decltype(Zeta##Unit);                 \
+    using Exa##Unit##Type              = decltype(Exa##Unit);                  \
+    using Peta##Unit##Type             = decltype(Peta##Unit);                 \
+    using Tera##Unit##Type             = decltype(Tera##Unit);                 \
+    using Giga##Unit##Type             = decltype(Giga##Unit);                 \
+    using Mega##Unit##Type             = decltype(Mega##Unit);                 \
+    using Kilo##Unit##Type             = decltype(Kilo##Unit);                 \
+    using Hecto##Unit##Type            = decltype(Hecto##Unit);                \
+    using Deca##Unit##Type             = decltype(Deca##Unit);                 \
+    using Deci##Unit##Type             = decltype(Deci##Unit);                 \
+    using Centi##Unit##Type            = decltype(Centi##Unit);                \
+    using Milli##Unit##Type            = decltype(Milli##Unit);                \
+    using Micro##Unit##Type            = decltype(Micro##Unit);                \
+    using Nano##Unit##Type             = decltype(Nano##Unit);                 \
+    using Pico##Unit##Type             = decltype(Pico##Unit);                 \
+    using Femto##Unit##Type            = decltype(Femto##Unit);                \
+    using Atoo##Unit##Type             = decltype(Atto##Unit);                 \
+    using Zepto##Unit##Type            = decltype(Zepto##Unit);                \
+    using Yocto##Unit##Type            = decltype(Yocto##Unit);                \
+    using Ronto##Unit##Type            = decltype(Ronto##Unit);                \
+    using Quecto##Unit##Type           = decltype(Quecto##Unit);
 
     // SI Base Units
     constexpr inline Unit<CoherentUnitBase, NullUnitBase, NullUnitBase,
@@ -58,8 +84,8 @@ namespace Maxwell
                           NullUnitBase>
         CandelaUnit;
     constexpr inline Unit<NullUnitBase, NullUnitBase, NullUnitBase,
-                          NullUnitBase, UnitBase<1, 0, 1, 1, 1, 1>{},
-                          NullUnitBase, NullUnitBase>
+                          NullUnitBase, CoherentUnitBase, NullUnitBase,
+                          NullUnitBase>
         GramUnit;
     constexpr inline Unit<NullUnitBase, NullUnitBase, NullUnitBase,
                           NullUnitBase, NullUnitBase, CoherentUnitBase,
@@ -71,7 +97,7 @@ namespace Maxwell
         SecondUnit;
     constexpr inline Unit<NullUnitBase, NullUnitBase, NullUnitBase,
                           NullUnitBase, NullUnitBase, NullUnitBase,
-                          CoherentUnitBase>
+                          NullUnitBase, CoherentUnitBase>
         RadianUnit;
 
     // Scaled Base Units
@@ -81,8 +107,9 @@ namespace Maxwell
     MAKE_SCALED_UNITS(meterUnit, MeterUnit, Length)
     MAKE_SCALED_UNITS(candelaUnit, CandelaUnit, Luminosity)
     MAKE_SCALED_UNITS(gramUnit, GramUnit, Mass)
-    MAKE_SCALED_UNITS(kelvnUnit, KelvinUnit, Temperature)
+    MAKE_SCALED_UNITS(kelvinUnit, KelvinUnit, Temperature)
     MAKE_SCALED_UNITS(secondUnit, SecondUnit, Time)
+    MAKE_SCALED_UNITS(radianUnit, RadianUnit, Angle)
 
     // Special Derived units
     constexpr inline auto Hertz = unitInverse(SecondUnit);
