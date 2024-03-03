@@ -4,6 +4,7 @@
 
 #include "QuantityConcepts.hh"
 #include "UDArithmeticTypes.hpp"
+#include "UnitTypes.hh"
 
 using namespace Maxwell;
 using namespace Maxwell::QuantityLiterals;
@@ -41,4 +42,32 @@ TEST(TestQuantity, TestQuantityDefaultConstructor)
     EXPECT_EQ(cq1.units(), MeterUnit);
 }
 
-TEST(TestQuantity, TestValueConstructor) {}
+TEST(TestQuantity, TestValueConstructor)
+{
+    BasicQuantity<double, MeterUnit> q1{10};
+    EXPECT_EQ(q1.value(), 10.0);
+    EXPECT_EQ(q1.units(), MeterUnit);
+
+    int baseCopyCtorCols = Type1::copyCtorCalls;
+    int baseMoveCtorCols = Type1::moveCtorCalls;
+
+    Type1                           t{10.0};
+    BasicQuantity<Type1, MeterUnit> q2{t};
+    EXPECT_EQ(q2.value().val(), 10.0);
+    EXPECT_EQ(q2.units(), MeterUnit);
+    EXPECT_EQ(Type1::copyCtorCalls, baseCopyCtorCols + 1);
+    EXPECT_EQ(Type1::moveCtorCalls, baseMoveCtorCols);
+
+    baseCopyCtorCols = Type1::copyCtorCalls;
+
+    BasicQuantity<Type1, MeterUnit> q3{Type1{10.0}};
+    EXPECT_EQ(q3.value().val(), 10.0);
+    EXPECT_EQ(q3.units(), MeterUnit);
+    EXPECT_TRUE((noexcept(BasicQuantity<Type1, MeterUnit>{Type1{10.0}})));
+    EXPECT_EQ(Type1::copyCtorCalls, baseCopyCtorCols);
+    EXPECT_EQ(Type1::moveCtorCalls, baseMoveCtorCols + 1);
+
+    EXPECT_FALSE((noexcept(BasicQuantity<Type2, MeterUnit>{Type2{10.0}})));
+}
+
+TEST(TestQuantity, TestConveringConstructorPrefix) {}

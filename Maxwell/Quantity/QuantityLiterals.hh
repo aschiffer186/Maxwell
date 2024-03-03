@@ -19,6 +19,10 @@ namespace Maxwell::QuantityLiterals
     consteval type operator""_##name(long double x) noexcept                   \
     {                                                                          \
         return type{static_cast<double>(x)};                                   \
+    }                                                                          \
+    consteval type operator""_##name(unsigned long long x) noexcept            \
+    {                                                                          \
+        return type{x};                                                        \
     }
 
     MAKE_QUANTITY_LITERAL(Mole, mol)

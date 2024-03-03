@@ -38,11 +38,24 @@ namespace Maxwell
             requires std::constructible_from<Scalar>
         = default;
 
+        /**
+         * @brief Constructor
+         *
+         * Constructs a BasicQuantity object from the specified value.
+         * The value will be initialized by std::forward<U>(u). This
+         * constructor can only be called if std::constructible_from<ScalarType,
+         * U> is true.
+         *
+         * @post this->value() == u
+         *
+         * @tparam U the type of the value used to construct
+         * @param u the value used to construct the basic quantity
+         */
         template <typename U>
-            requires std::constructible_from<Scalar, U>
+            requires std::constructible_from<ScalarType, U>
         constexpr explicit(Unitless<UnitsType>) BasicQuantity(U&& u) noexcept(
             std::is_nothrow_constructible_v<ScalarType, U>)
-            : scalar_{std::forward<U>(u)}
+            : scalar_(std::forward<U>(u))
         {
         }
 
@@ -63,7 +76,7 @@ namespace Maxwell
             requires std::constructible_from<ScalarType, const Scalar2&> &&
                      UnitConvertibleTo<decltype(Unit2), UnitsType>
         constexpr BasicQuantity(const BasicQuantity<Scalar2, Unit2>& other)
-            : scalar_{other.scalar_}
+            : scalar_(other.scalar_)
         {
             constexpr double prefixConversion =
                 unitPrefixConversion(other.units(), units());
@@ -193,6 +206,11 @@ namespace Maxwell
             return scalar_;
         }
 
+        constexpr auto inCoherentUnits() const noexcept -> auto
+        {
+            return BasicQuantity<ScalarType, toCoherentUnit(Units)>{scalar_};
+        }
+
         // Arithmetic operators
         // Start with the easy cases: no conversion necessary
 
@@ -283,6 +301,26 @@ namespace Maxwell
     {
         lhs -= rhs;
         return lhs;
+    }
+
+    template <Arithmetic S, UnitLike auto U1, UnitLike auto U2>
+    constexpr auto operator*(
+        const BasicQuantity<S, U1>& lhs,
+        const BasicQuantity<S, U2>& rhs) noexcept(NothrowArithmetic<S>) -> auto
+    {
+        constexpr auto outputUnit = toCoherentUnit(U1) * toCoherentUnit(U2);
+        return BasicQuantity<S, outputUnit>(lhs.inCoherentUnits().value() *
+                                            rhs.inCoherentUnits().value());
+    }
+
+    template <Arithmetic S, UnitLike auto U1, UnitLike auto U2>
+    constexpr auto operator/(
+        const BasicQuantity<S, U1>& lhs,
+        const BasicQuantity<S, U2>& rhs) noexcept(NothrowArithmetic<S>) -> auto
+    {
+        constexpr auto outputUnit = toCoherentUnit(U1) / toCoherentUnit(U2);
+        return BasicQuantity<S, outputUnit>(lhs.inCoherentUnits().value() /
+                                            rhs.inCoherentUnits().value());
     }
 
     template <Arithmetic S, UnitLike auto U>

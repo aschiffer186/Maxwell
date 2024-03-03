@@ -19,8 +19,8 @@ namespace Maxwell
 {
     // One SI Base Unit
     // UnitBase = ScaleNum/ScaleDen * 10^Prefix * Unit^Pow + OffsetNum/OffsetDen
-    template <int Pow_, int Prefix_, int OffsetNum_ = 1, int OffsetDen_ = 1,
-              int ScaleNum_ = 1, int ScaleDen_ = 1>
+    template <int Pow_, int Prefix_, int OffsetNum_, int OffsetDen_,
+              int ScaleNum_, int ScaleDen_>
     struct UnitBase
     {
         static constexpr int Pow       = Pow_;
@@ -54,11 +54,16 @@ namespace Maxwell
     };
 
     // Constants
-    constexpr inline UnitBase<0, 1, 1, 1, 1, 1> NullUnitBase{};
-    constexpr inline UnitBase<1, 1, 1, 1, 1, 1> CoherentUnitBase;
+    constexpr inline UnitBase<0, 0, 1, 1, 1, 1> NullUnitBase;
+    constexpr inline UnitBase<1, 0, 1, 1, 1, 1> CoherentUnitBase;
 
     template <typename>
     struct is_unit_base : std::false_type
+    {
+    };
+
+    template <typename Tp>
+    struct is_unit_base<const Tp> : is_unit_base<Tp>
     {
     };
 
@@ -76,6 +81,12 @@ namespace Maxwell
     constexpr auto isCoherentUnitBase(UnitBaseLike auto ub) noexcept -> bool
     {
         return ub.prefix() == 0;
+    }
+
+    consteval auto toCoherentUnitBase(UnitBaseLike auto ub) noexcept -> auto
+    {
+        return UnitBase<ub.power(), 0, ub.offsetNum(), ub.offsetDen(),
+                        ub.scaleNum(), ub.scaleDen()>{};
     }
 
     constexpr auto operator==(UnitBaseLike auto lhs,
@@ -101,6 +112,34 @@ namespace Maxwell
                         lhs.offsetDen(), lhs.scaleNum(), lhs.scaleDen()>{};
     }
 
+    /**
+     * @brief Calculates the inverse of a UnitBase
+     *
+     * Calculates the inverse of a UnitBase.
+     *
+     * @post unitBaseInverse(unit).power() == -unit.power()
+     *
+     * @param unit the UnitBase to find the inverse of
+     * @return the inverse of the UnitBase
+     */
+    consteval auto unitBaseInverse(UnitBaseLike auto unit) noexcept -> auto
+    {
+        return UnitBase<-unit.power(), unit.prefix(), unit.offsetNum(),
+                        unit.offsetDen(), unit.scaleNum(), unit.scaleDen()>{};
+    }
+
+    /**
+     * @brief Changes the prefix of the unit base
+     *
+     * Changes the prefix of the unit base by the specified amoumt.
+     *
+     * @post scaleUnitBase<Amout>(unitBase).prefix() -
+     *       unitBase.prefix() == Amout
+     *
+     * @tparam Amount the amount to change the prefix by
+     * @param unitBase the UnitBase to change
+     * @return the changed UnitBase
+     */
     template <int Amount>
     constexpr auto scaleUnitBase(UnitBaseLike auto unitBase) noexcept -> auto
     {
@@ -186,6 +225,18 @@ namespace Maxwell
                isCoherentUnitBase(unit.angle());
     }
 
+    consteval auto toCoherentUnit(UnitLike auto unit) noexcept -> auto
+    {
+        return Unit<toCoherentUnitBase(unit.amount()),
+                    toCoherentUnitBase(unit.current()),
+                    toCoherentUnitBase(unit.length()),
+                    toCoherentUnitBase(unit.luminosity()),
+                    toCoherentUnitBase(unit.mass()),
+                    toCoherentUnitBase(unit.temperature()),
+                    toCoherentUnitBase(unit.time()),
+                    toCoherentUnitBase(unit.angle())>{};
+    }
+
     constexpr auto operator==(UnitLike auto lhs,
                               UnitLike auto rhs) noexcept -> bool
     {
@@ -217,6 +268,25 @@ namespace Maxwell
             lhs.time() / rhs.time(), lhs.angle() / rhs.angle()>{};
     }
 
+    consteval auto unitInverse(UnitLike auto unit) noexcept -> auto
+    {
+        return Unit<
+            unitBaseInverse(unit.amount()), unitBaseInverse(unit.current()),
+            unitBaseInverse(unit.length()), unitBaseInverse(unit.luminosity()),
+            unitBaseInverse(unit.mass()), unitBaseInverse(unit.temperature()),
+            unitBaseInverse(unit.time()), unitBaseInverse(unit.angle())>{};
+    }
+
+    /**
+     * @brief Concept for conversion between units
+     *
+     * Concept modeling the ability to convert from a unit From to a unit To.
+     * A unit From can be converted unit To if there exists some constant
+     * C such C*From == To
+     *
+     * @tparam FromUnit the starting unit
+     * @tparam ToUnit the goal unit
+     */
     template <typename FromUnit, typename ToUnit>
     concept UnitConvertibleTo =
         UnitLike<FromUnit> && UnitLike<ToUnit> &&
@@ -245,24 +315,63 @@ namespace Maxwell
         Unit::Temperature.power() == 0 && Unit::Time.power() == 0 &&
         Unit::Angle.power() == 0;
 
+    /**
+     * @brief Changes the prefix of the unit
+     *
+     * Changes the amount prefix of the unit by the
+     * specified amount.
+     *
+     * @post scaleAmount<Amount>(unit).amount().prefix -
+     *       unit.amount().prefix() == Amount
+     *
+     * @tparam Amount the amount to change the prefix by
+     * @param unit the unit to change
+     * @return the changed unit
+     */
     template <int Amount>
-    constexpr auto scaleAmount(UnitLike auto unit) noexcept -> auto
+    consteval auto scaleAmount(UnitLike auto unit) noexcept -> auto
     {
         return Unit<scaleUnitBase<Amount>(unit.amount()), unit.current(),
                     unit.length(), unit.luminosity(), unit.mass(),
                     unit.temperature(), unit.time(), unit.angle()>{};
     }
 
+    /**
+     * @brief Changes the prefix of the unit
+     *
+     * Changes the current prefix of the unit by the
+     * specified amount.
+     *
+     * @post scaleAmount<Amount>(unit).current().prefix -
+     *       unit.current().prefix() == Amount
+     *
+     * @tparam Amount the amount to change the prefix by
+     * @param unit the unit to change
+     * @return the changed unit
+     */
     template <int Amount>
-    constexpr auto scaleCurrent(UnitLike auto unit) noexcept -> auto
+    consteval auto scaleCurrent(UnitLike auto unit) noexcept -> auto
     {
         return Unit<unit.amount(), scaleUnitBase<Amount>(unit.current()),
                     unit.length(), unit.luminosity(), unit.mass(),
                     unit.temperature(), unit.time(), unit.angle()>{};
     }
 
+    /**
+     * @brief Changes the prefix of the unit
+     *
+     * Changes the length prefix of the unit by the
+     * specified amount.
+     *
+     * @post scaleAmount<Amount>(unit).length().prefix -
+     *       unit.length().prefix() == Amount
+     *
+     * @tparam Amount the amount to change the prefix by
+     * @param unit the unit to change
+     * @return the changed unit
+     */
     template <int Amount>
-    constexpr auto scaleLength(UnitLike auto unit) noexcept -> auto
+    consteval auto scaleLength(UnitLike auto unit) noexcept -> auto
     {
         return Unit<unit.amount(), unit.current(),
                     scaleUnitBase<Amount>(unit.length()), unit.luminosity(),
@@ -270,24 +379,63 @@ namespace Maxwell
                     unit.angle()>{};
     }
 
+    /**
+     * @brief Changes the prefix of the unit
+     *
+     * Changes the luminosity prefix of the unit by the
+     * specified amount.
+     *
+     * @post scaleAmount<Amount>(unit).luminosity().prefix -
+     *       unit.luminosity().prefix() == Amount
+     *
+     * @tparam Amount the amount to change the prefix by
+     * @param unit the unit to change
+     * @return the changed unit
+     */
     template <int Amount>
-    constexpr auto scaleLuminosity(UnitLike auto unit) noexcept -> auto
+    consteval auto scaleLuminosity(UnitLike auto unit) noexcept -> auto
     {
         return Unit<unit.amount(), unit.current(), unit.length(),
                     scaleUnitBase<Amount>(unit.luminosity()), unit.mass(),
                     unit.temperature(), unit.time(), unit.angle()>{};
     }
 
+    /**
+     * @brief Changes the prefix of the unit
+     *
+     * Changes the mass prefix of the unit by the
+     * specified amount.
+     *
+     * @post scaleAmount<Amount>(unit).mass().prefix -
+     *       unit.mass().prefix() == Amount
+     *
+     * @tparam Amount the amount to change the prefix by
+     * @param unit the unit to change
+     * @return the changed unit
+     */
     template <int Amount>
-    constexpr auto scaleMass(UnitLike auto unit) noexcept -> auto
+    consteval auto scaleMass(UnitLike auto unit) noexcept -> auto
     {
         return Unit<unit.amount(), unit.current(), unit.length(),
                     unit.luminosity(), scaleUnitBase<Amount>(unit.mass()),
                     unit.temperature(), unit.time(), unit.angle()>{};
     }
 
+    /**
+     * @brief Changes the prefix of the unit
+     *
+     * Changes the temperature prefix of the unit by the
+     * specified amount.
+     *
+     * @post scaleAmount<Amount>(unit).temperature().prefix -
+     *       unit.temperature().prefix() == Amount
+     *
+     * @tparam Amount the amount to change the prefix by
+     * @param unit the unit to change
+     * @return the changed unit
+     */
     template <int Amount>
-    constexpr auto scaleTemperature(UnitLike auto unit) noexcept -> auto
+    consteval auto scaleTemperature(UnitLike auto unit) noexcept -> auto
     {
         return Unit<unit.amount(), unit.current(), unit.length(),
                     unit.luminosity(), unit.mass(),
@@ -295,8 +443,21 @@ namespace Maxwell
                     unit.angle()>{};
     }
 
+    /**
+     * @brief Changes the prefix of the unit
+     *
+     * Changes the mass prefix of the unit by the
+     * specified amount.
+     *
+     * @post scaleAmount<Amount>(unit).time().prefix -
+     *       unit.time().prefix() == Amount
+     *
+     * @tparam Amount the amount to change the prefix by
+     * @param unit the unit to change
+     * @return the changed unit
+     */
     template <int Amount>
-    constexpr auto scaleTime(UnitLike auto unit) noexcept -> auto
+    consteval auto scaleTime(UnitLike auto unit) noexcept -> auto
     {
         return Unit<unit.amount(), unit.current(),
                     scaleUnitBase<Amount>(unit.length()), unit.luminosity(),
@@ -304,7 +465,7 @@ namespace Maxwell
                     scaleUnitBase<Amount>(unit.time()), unit.angle()>{};
     }
 
-    // Cached powers of 10
+    /// Cached powers of 10
     inline constexpr std::array powersOf10{
         1e-30, 1e-29, 1e-28, 1e-27, 1e-26, 1e-25, 1e-24, 1e-23, 1e-22,
         1e-21, 1e-20, 1e-19, 1e-18, 1e-17, 1e-16, 1e-15, 1e-14, 1e-13,
