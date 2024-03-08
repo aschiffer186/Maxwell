@@ -258,6 +258,30 @@ namespace Maxwell
             return *this;
         }
 
+        template <Arithmetic S2, UnitLike auto U2>
+            requires UnitConvertibleTo<decltype(U2), UnitsType>
+        constexpr auto operator+=(const BasicQuantity<S2, U2>& other)
+            noexcept(NothrowArithmetic<ScalarType>) -> BasicQuantity&
+        {
+            constexpr double conversionFactor = unitPrefixConversion(U2, Units);
+            const ScalarType convertedValue = conversionFactor * other.value();
+
+            scalar_ += convertedValue;
+            return *this;
+        }
+
+        template <Arithmetic S2, UnitLike auto U2>
+            requires UnitConvertibleTo<decltype(U2), UnitsType>
+        constexpr auto operator-=(const BasicQuantity<S2, U2>& other)
+            noexcept(NothrowArithmetic<ScalarType>) -> BasicQuantity&
+        {
+            constexpr double conversionFactor = unitPrefixConversion(U2, Units);
+            const ScalarType convertedValue = conversionFactor * other.value();
+
+            scalar_ -= convertedValue;
+            return *this;
+        }
+
         /**
          * @brief Swaps the values of two quantities
          *

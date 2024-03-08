@@ -128,3 +128,5 @@ TEST(TestQuantity, TestConveringConstructorPrefix)
     EXPECT_FLOAT_EQ(krad1.value(), 1e-3);
     EXPECT_TRUE(noexcept(BasicQuantity<double, CentiradianUnit>(rad1)));
 }
+
+TEST(TestQuantity, TestConvertingAssignmentOperator) {}
