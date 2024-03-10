@@ -29,28 +29,28 @@ TEST(TestUnits, TestUnit)
     EXPECT_FALSE((UnitConvertibleTo<MeterUnitType, MoleUnitType>));
 
     // Test Scaling units
-    constexpr auto centimole = scaleAmount<-2>(MoleUnit);
+    constexpr auto centimole = adjustPrefixAmount<-2>(MoleUnit);
     EXPECT_EQ(centimole.amount().prefix() - MoleUnit.amount().prefix(), -2);
 
-    constexpr auto centiamp = scaleCurrent<-2>(AmpereUnit);
+    constexpr auto centiamp = adjustPrefixCurrent<-2>(AmpereUnit);
     EXPECT_EQ(centiamp.current().prefix() - AmpereUnit.current().prefix(), -2);
 
-    constexpr auto centimeter = scaleLength<-2>(MeterUnit);
+    constexpr auto centimeter = adjustPrefixLength<-2>(MeterUnit);
     EXPECT_EQ(centimeter.length().prefix() - MeterUnit.length().prefix(), -2);
 
-    constexpr auto centicandela = scaleLuminosity<-2>(CandelaUnit);
+    constexpr auto centicandela = adjustPrefixLuminosity<-2>(CandelaUnit);
     EXPECT_EQ(centicandela.luminosity().prefix() -
                   CandelaUnit.luminosity().prefix(),
               -2);
 
-    constexpr auto gram = scaleMass<-3>(KilogramUnit);
+    constexpr auto gram = adjustPrefixMass<-3>(KilogramUnit);
     EXPECT_EQ(gram.mass().prefix() - KilogramUnit.mass().prefix(), -3);
 
-    constexpr auto centiKelvin = scaleTemperature<-2>(KelvinUnit);
+    constexpr auto centiKelvin = adjustPrefixTemperature<-2>(KelvinUnit);
     EXPECT_EQ(centiKelvin.temperature().prefix() -
                   KelvinUnit.temperature().prefix(),
               -2);
 
-    constexpr auto centisecond = scaleTime<-2>(SecondUnit);
+    constexpr auto centisecond = adjustPrefixTime<-2>(SecondUnit);
     EXPECT_EQ(centisecond.time().prefix() - SecondUnit.time().prefix(), -2);
 }

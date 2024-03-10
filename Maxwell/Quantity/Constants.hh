@@ -13,12 +13,14 @@
 
 #include "QuantityBase.hh"
 #include "QuantityLiterals.hh"
+#include "QuantityTypes.hh"
 
 using namespace Maxwell::QuantityLiterals;
 
 namespace Maxwell::Constants
 {
-    inline constexpr auto c = 299'792'458_m / 1_s;
+    inline constexpr auto                   c     = 299'792'458_m / 1_s;
+    inline constexpr Maxwell::Dimensionless gamma = 1.4;
 } // namespace Maxwell::Constants
 
 #endif

@@ -53,7 +53,7 @@ namespace Maxwell
          */
         template <typename U>
             requires std::constructible_from<ScalarType, U>
-        constexpr explicit(Unitless<UnitsType>) BasicQuantity(U&& u)
+        constexpr explicit(!Unitless<UnitsType>) BasicQuantity(U&& u)
             noexcept(std::is_nothrow_constructible_v<ScalarType, U>)
             : scalar_(std::forward<U>(u))
         {
@@ -131,13 +131,14 @@ namespace Maxwell
          * @param s the new scalar value of the quantity
          * @return a reference to *this
          */
-        template <Arithmetic S>
+        template <typename S>
             requires std::constructible_from<ScalarType, S> &&
                          Unitless<UnitsType>
         constexpr auto operator=(S&& s)
             noexcept(std::is_nothrow_constructible_v<ScalarType, S>)
                 -> BasicQuantity&
         {
+            static_assert(Arithmetic<S>);
             scalar_ = std::forward<S>(s);
         }
 
@@ -367,7 +368,7 @@ namespace Maxwell
         noexcept(NothrowArithmetic<S>) -> BasicQuantity<S, U>
     {
         rhs *= lhs;
-        return lhs;
+        return rhs;
     }
 
     template <Arithmetic S, UnitLike auto U>
@@ -382,7 +383,7 @@ namespace Maxwell
     constexpr auto operator/(const S& lhs, BasicQuantity<S, U> rhs)
         noexcept(NothrowArithmetic<S>) -> BasicQuantity<S, U>
     {
-        rhs /= lhs;
+        rhs /= rhs;
         return lhs;
     }
 } // namespace Maxwell

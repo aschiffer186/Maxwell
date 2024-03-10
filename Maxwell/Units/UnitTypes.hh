@@ -17,30 +17,30 @@ namespace Maxwell
 {
 #define MAKE_SCALED_UNITS(Unit, BaseUnit, dim)                                 \
     using BaseUnit##Type               = decltype(BaseUnit);                   \
-    constexpr inline auto Quetta##Unit = scale##dim<30>(BaseUnit);             \
-    constexpr inline auto Ronna##Unit  = scale##dim<27>(BaseUnit);             \
-    constexpr inline auto Yotta##Unit  = scale##dim<24>(BaseUnit);             \
-    constexpr inline auto Zeta##Unit   = scale##dim<21>(BaseUnit);             \
-    constexpr inline auto Exa##Unit    = scale##dim<18>(BaseUnit);             \
-    constexpr inline auto Peta##Unit   = scale##dim<15>(BaseUnit);             \
-    constexpr inline auto Tera##Unit   = scale##dim<12>(BaseUnit);             \
-    constexpr inline auto Giga##Unit   = scale##dim<9>(BaseUnit);              \
-    constexpr inline auto Mega##Unit   = scale##dim<6>(BaseUnit);              \
-    constexpr inline auto Kilo##Unit   = scale##dim<3>(BaseUnit);              \
-    constexpr inline auto Hecto##Unit  = scale##dim<2>(BaseUnit);              \
-    constexpr inline auto Deca##Unit   = scale##dim<1>(BaseUnit);              \
-    constexpr inline auto Deci##Unit   = scale##dim<-1>(BaseUnit);             \
-    constexpr inline auto Centi##Unit  = scale##dim<-2>(BaseUnit);             \
-    constexpr inline auto Milli##Unit  = scale##dim<-3>(BaseUnit);             \
-    constexpr inline auto Micro##Unit  = scale##dim<-6>(BaseUnit);             \
-    constexpr inline auto Nano##Unit   = scale##dim<-9>(BaseUnit);             \
-    constexpr inline auto Pico##Unit   = scale##dim<-12>(BaseUnit);            \
-    constexpr inline auto Femto##Unit  = scale##dim<-15>(BaseUnit);            \
-    constexpr inline auto Atto##Unit   = scale##dim<-18>(BaseUnit);            \
-    constexpr inline auto Zepto##Unit  = scale##dim<-21>(BaseUnit);            \
-    constexpr inline auto Yocto##Unit  = scale##dim<-24>(BaseUnit);            \
-    constexpr inline auto Ronto##Unit  = scale##dim<-27>(BaseUnit);            \
-    constexpr inline auto Quecto##Unit = scale##dim<-30>(BaseUnit);            \
+    constexpr inline auto Quetta##Unit = adjustPrefix##dim<30>(BaseUnit);      \
+    constexpr inline auto Ronna##Unit  = adjustPrefix##dim<27>(BaseUnit);      \
+    constexpr inline auto Yotta##Unit  = adjustPrefix##dim<24>(BaseUnit);      \
+    constexpr inline auto Zeta##Unit   = adjustPrefix##dim<21>(BaseUnit);      \
+    constexpr inline auto Exa##Unit    = adjustPrefix##dim<18>(BaseUnit);      \
+    constexpr inline auto Peta##Unit   = adjustPrefix##dim<15>(BaseUnit);      \
+    constexpr inline auto Tera##Unit   = adjustPrefix##dim<12>(BaseUnit);      \
+    constexpr inline auto Giga##Unit   = adjustPrefix##dim<9>(BaseUnit);       \
+    constexpr inline auto Mega##Unit   = adjustPrefix##dim<6>(BaseUnit);       \
+    constexpr inline auto Kilo##Unit   = adjustPrefix##dim<3>(BaseUnit);       \
+    constexpr inline auto Hecto##Unit  = adjustPrefix##dim<2>(BaseUnit);       \
+    constexpr inline auto Deca##Unit   = adjustPrefix##dim<1>(BaseUnit);       \
+    constexpr inline auto Deci##Unit   = adjustPrefix##dim<-1>(BaseUnit);      \
+    constexpr inline auto Centi##Unit  = adjustPrefix##dim<-2>(BaseUnit);      \
+    constexpr inline auto Milli##Unit  = adjustPrefix##dim<-3>(BaseUnit);      \
+    constexpr inline auto Micro##Unit  = adjustPrefix##dim<-6>(BaseUnit);      \
+    constexpr inline auto Nano##Unit   = adjustPrefix##dim<-9>(BaseUnit);      \
+    constexpr inline auto Pico##Unit   = adjustPrefix##dim<-12>(BaseUnit);     \
+    constexpr inline auto Femto##Unit  = adjustPrefix##dim<-15>(BaseUnit);     \
+    constexpr inline auto Atto##Unit   = adjustPrefix##dim<-18>(BaseUnit);     \
+    constexpr inline auto Zepto##Unit  = adjustPrefix##dim<-21>(BaseUnit);     \
+    constexpr inline auto Yocto##Unit  = adjustPrefix##dim<-24>(BaseUnit);     \
+    constexpr inline auto Ronto##Unit  = adjustPrefix##dim<-27>(BaseUnit);     \
+    constexpr inline auto Quecto##Unit = adjustPrefix##dim<-30>(BaseUnit);     \
     using Quetta##Unit##Type           = decltype(Quetta##Unit);               \
     using Ronna##Unit##Type            = decltype(Ronna##Unit);                \
     using Yotta##Unit##Type            = decltype(Yotta##Unit);                \
@@ -60,7 +60,7 @@ namespace Maxwell
     using Nano##Unit##Type             = decltype(Nano##Unit);                 \
     using Pico##Unit##Type             = decltype(Pico##Unit);                 \
     using Femto##Unit##Type            = decltype(Femto##Unit);                \
-    using Atoo##Unit##Type             = decltype(Atto##Unit);                 \
+    using Atto##Unit##Type             = decltype(Atto##Unit);                 \
     using Zepto##Unit##Type            = decltype(Zepto##Unit);                \
     using Yocto##Unit##Type            = decltype(Yocto##Unit);                \
     using Ronto##Unit##Type            = decltype(Ronto##Unit);                \
@@ -99,6 +99,11 @@ namespace Maxwell
                           NullUnitBase, NullUnitBase, NullUnitBase,
                           NullUnitBase, CoherentUnitBase>
         RadianUnit;
+    constexpr inline Unit<NullUnitBase, NullUnitBase, NullUnitBase,
+                          NullUnitBase, NullUnitBase, NullUnitBase,
+                          NullUnitBase, NullUnitBase>
+        DimensionlessUnit;
+    using DimensionlessUnitType = decltype(DimensionlessUnit);
 
     // Scaled Base Units
     // Amount
@@ -112,7 +117,8 @@ namespace Maxwell
     MAKE_SCALED_UNITS(radianUnit, RadianUnit, Angle)
 
     // Special Derived units
-    constexpr inline auto Hertz = unitInverse(SecondUnit);
+    constexpr inline auto HertzUnit = unitInverse(SecondUnit);
+    MAKE_SCALED_UNITS(hertzUnit, HertzUnit, Time)
 
     constexpr inline auto NewtonUnit =
         KilogramUnit * MeterUnit / (SecondUnit * SecondUnit);
@@ -139,12 +145,49 @@ namespace Maxwell
     constexpr inline auto OhmUnit = VoltUnit / AmpereUnit;
     MAKE_SCALED_UNITS(ohmUnit, OhmUnit, Mass)
 
-    // Siemens
     constexpr inline auto SiemensUnit = AmpereUnit / VoltUnit;
     MAKE_SCALED_UNITS(siemensUnit, SiemensUnit, Current)
 
     constexpr inline auto WeberUnit = VoltUnit * SecondUnit;
     MAKE_SCALED_UNITS(weberUnit, WeberUnit, Mass)
+
+    constexpr inline auto DegreesUnit =
+        adjustScaleAngle<5'729'578, 100'000>(RadianUnit);
+    using DegreesUnitType = decltype(DegreesUnit);
+
+    // Imperial units
+
+    // Length measurements
+    constexpr inline auto FootUnit =
+        adjustScaleLength<328'084, 100'000>(MeterUnit);
+    using FootUnitType = decltype(FootUnit);
+
+    constexpr inline auto InchUnit = adjustScaleLength<1, 12>(FootUnit);
+    using InchUnitType             = decltype(InchUnit);
+
+    constexpr inline auto YardUnit = adjustScaleLength<3, 1>(FootUnit);
+    using YardUnitType             = decltype(YardUnit);
+
+    constexpr inline auto MileUnit = adjustScaleLength<5'280, 1>(FootUnit);
+    using MileUnitType             = decltype(MileUnit);
+
+    // Mass measurements
+    constexpr inline auto PoundUnit =
+        adjustScaleMass<220'462, 100'000>(KilogramUnit);
+    using PoundUnitType = decltype(PoundUnit);
+
+    // Time measurements
+    constexpr inline auto MinuteUnit = adjustScaleTime<60, 1>(SecondUnit);
+    using MinuteUnitType             = decltype(DegreesUnit);
+
+    constexpr inline auto HourUnit = adjustScaleTime<60, 1>(MinuteUnit);
+    using HourUnitType             = decltype(HourUnit);
+
+    constexpr inline auto DayUnit = adjustScaleTime<24, 1>(HourUnit);
+    using DayUnitType             = decltype(DayUnit);
+
+    constexpr inline auto YearUnit = adjustScaleTime<365, 1>(DayUnit);
+    using YearUnitType             = decltype(YearUnit);
 #undef MAKE_SCALED_UNITS
 } // namespace Maxwell
 

@@ -18,7 +18,7 @@
 namespace Maxwell
 {
     /// One SI Base Unit
-    /// UnitBase = ScaleNum/ScaleDen * 10^Prefix * Unit^Pow +
+    /// UnitBase = ScaleNum/ScaleDen * 10^Prefix * SI-Unit^Pow +
     /// OffsetNum/OffsetDen
     template <int Pow_, int Prefix_, int OffsetNum_, int OffsetDen_,
               int ScaleNum_, int ScaleDen_>
@@ -129,27 +129,54 @@ namespace Maxwell
                         unit.offsetDen(), unit.scaleNum(), unit.scaleDen()>{};
     }
 
+    consteval auto
+    unitBaseScaleConversion(UnitBaseLike auto from,
+                            UnitBaseLike auto to) noexcept -> double
+    {
+        return static_cast<double>(to.scaleNum()) /
+               static_cast<double>(to.scaleDen());
+    }
+
     /**
      * @brief Changes the prefix of the unit base
      *
-     * Changes the prefix of the unit base by the specified amoumt.
+     * Changes the prefix of the unit base by the specified amount.
      *
-     * @post scaleUnitBase<Amout>(unitBase).prefix() -
-     *       unitBase.prefix() == Amout
+     * @post scaleUnitBase<Amount>(unitBase).prefix() -
+     *       unitBase.prefix() == Amount
      *
      * @tparam Amount the amount to change the prefix by
      * @param unitBase the UnitBase to change
      * @return the changed UnitBase
      */
     template <int Amount>
-    consteval auto scaleUnitBase(UnitBaseLike auto unitBase) noexcept -> auto
+    consteval auto
+    adjustUnitBasePrefix(UnitBaseLike auto unitBase) noexcept -> auto
     {
         return UnitBase<unitBase.power(), unitBase.prefix() + Amount,
                         unitBase.offsetNum(), unitBase.offsetDen(),
                         unitBase.scaleNum(), unitBase.scaleDen()>{};
     }
 
-    // Concept defining when it's possible
+    template <int Num, int Den>
+    consteval auto
+    adjustUnitBaseScale(UnitBaseLike auto unitBase) noexcept -> auto
+    {
+        return UnitBase<unitBase.power(), unitBase.prefix(),
+                        unitBase.offsetNum(), unitBase.offsetDen(),
+                        unitBase.scaleNum() * Num, unitBase.scaleDen() * Den>{};
+    }
+
+    /**
+     * @brief Concept for conversion between unit bases
+     *
+     * Concept modeling the ability to convert from a unit base From to a unit
+     * To. A unit base From can be converted unit To if there exists some
+     * constant C such C*From == To
+     *
+     * @tparam FromUnitBase the starting unit base
+     * @tparam ToUnitBase the goal unit base
+     */
     template <typename FromUnitBase, typename ToUnitBase>
     concept UnitBaseConvertibleTo =
         UnitBaseLike<FromUnitBase> && UnitBaseLike<ToUnitBase> &&
@@ -335,6 +362,15 @@ namespace Maxwell
         FromUnit::Time.power() == ToUnit::Time.power() &&
         FromUnit::Angle.power() == ToUnit::Angle.power();
 
+    /**
+     * @brief Concept indicating that a unit is unitless
+     *
+     * The Unitless concept is true if a unit can be implicitly
+     * converted to a scalar value. This is true if and only if
+     * the power of all the components of the unit are 0.
+     *
+     * @tparam Unit the unit to check
+     */
     template <typename Unit>
     concept Unitless =
         UnitLike<Unit> && Unit::Amount.power() == 0 &&
@@ -357,9 +393,9 @@ namespace Maxwell
      * @return the changed unit
      */
     template <int Amount>
-    consteval auto scaleAmount(UnitLike auto unit) noexcept -> auto
+    consteval auto adjustPrefixAmount(UnitLike auto unit) noexcept -> auto
     {
-        return Unit<scaleUnitBase<Amount>(unit.amount()), unit.current(),
+        return Unit<adjustUnitBasePrefix<Amount>(unit.amount()), unit.current(),
                     unit.length(), unit.luminosity(), unit.mass(),
                     unit.temperature(), unit.time(), unit.angle()>{};
     }
@@ -378,9 +414,9 @@ namespace Maxwell
      * @return the changed unit
      */
     template <int Amount>
-    consteval auto scaleCurrent(UnitLike auto unit) noexcept -> auto
+    consteval auto adjustPrefixCurrent(UnitLike auto unit) noexcept -> auto
     {
-        return Unit<unit.amount(), scaleUnitBase<Amount>(unit.current()),
+        return Unit<unit.amount(), adjustUnitBasePrefix<Amount>(unit.current()),
                     unit.length(), unit.luminosity(), unit.mass(),
                     unit.temperature(), unit.time(), unit.angle()>{};
     }
@@ -399,12 +435,12 @@ namespace Maxwell
      * @return the changed unit
      */
     template <int Amount>
-    consteval auto scaleLength(UnitLike auto unit) noexcept -> auto
+    consteval auto adjustPrefixLength(UnitLike auto unit) noexcept -> auto
     {
         return Unit<unit.amount(), unit.current(),
-                    scaleUnitBase<Amount>(unit.length()), unit.luminosity(),
-                    unit.mass(), unit.temperature(), unit.time(),
-                    unit.angle()>{};
+                    adjustUnitBasePrefix<Amount>(unit.length()),
+                    unit.luminosity(), unit.mass(), unit.temperature(),
+                    unit.time(), unit.angle()>{};
     }
 
     /**
@@ -421,11 +457,12 @@ namespace Maxwell
      * @return the changed unit
      */
     template <int Amount>
-    consteval auto scaleLuminosity(UnitLike auto unit) noexcept -> auto
+    consteval auto adjustPrefixLuminosity(UnitLike auto unit) noexcept -> auto
     {
         return Unit<unit.amount(), unit.current(), unit.length(),
-                    scaleUnitBase<Amount>(unit.luminosity()), unit.mass(),
-                    unit.temperature(), unit.time(), unit.angle()>{};
+                    adjustUnitBasePrefix<Amount>(unit.luminosity()),
+                    unit.mass(), unit.temperature(), unit.time(),
+                    unit.angle()>{};
     }
 
     /**
@@ -442,10 +479,11 @@ namespace Maxwell
      * @return the changed unit
      */
     template <int Amount>
-    consteval auto scaleMass(UnitLike auto unit) noexcept -> auto
+    consteval auto adjustPrefixMass(UnitLike auto unit) noexcept -> auto
     {
         return Unit<unit.amount(), unit.current(), unit.length(),
-                    unit.luminosity(), scaleUnitBase<Amount>(unit.mass()),
+                    unit.luminosity(),
+                    adjustUnitBasePrefix<Amount>(unit.mass()),
                     unit.temperature(), unit.time(), unit.angle()>{};
     }
 
@@ -463,12 +501,12 @@ namespace Maxwell
      * @return the changed unit
      */
     template <int Amount>
-    consteval auto scaleTemperature(UnitLike auto unit) noexcept -> auto
+    consteval auto adjustPrefixTemperature(UnitLike auto unit) noexcept -> auto
     {
         return Unit<unit.amount(), unit.current(), unit.length(),
                     unit.luminosity(), unit.mass(),
-                    scaleUnitBase<Amount>(unit.temperature()), unit.time(),
-                    unit.angle()>{};
+                    adjustUnitBasePrefix<Amount>(unit.temperature()),
+                    unit.time(), unit.angle()>{};
     }
 
     /**
@@ -485,11 +523,11 @@ namespace Maxwell
      * @return the changed unit
      */
     template <int Amount>
-    consteval auto scaleTime(UnitLike auto unit) noexcept -> auto
+    consteval auto adjustPrefixTime(UnitLike auto unit) noexcept -> auto
     {
         return Unit<unit.amount(), unit.current(), unit.length(),
                     unit.luminosity(), unit.mass(), unit.temperature(),
-                    scaleUnitBase<Amount>(unit.time()), unit.angle()>{};
+                    adjustUnitBasePrefix<Amount>(unit.time()), unit.angle()>{};
     }
 
     /**
@@ -506,11 +544,97 @@ namespace Maxwell
      * @return the changed unit
      */
     template <int Amount>
-    consteval auto scaleAngle(UnitLike auto unit) noexcept -> auto
+    consteval auto adjustPrefixAngle(UnitLike auto unit) noexcept -> auto
     {
         return Unit<unit.amount(), unit.current(), unit.length(),
                     unit.luminosity(), unit.mass(), unit.temperature(),
-                    unit.time(), scaleUnitBase<Amount>(unit.angle())>{};
+                    unit.time(), adjustUnitBasePrefix<Amount>(unit.angle())>{};
+    }
+
+    /**
+     * @brief Changes the scale of the unit
+     *
+     * Changes the length scale of the unit by the
+     * specified amount.
+     *
+     * @post adjustScaleTime<Num, Den>(unit) == Num/Den*unit.length()
+     *
+     * @tparam Num the numerator of the new scale
+     * @tparam Den the denominator of the new scale
+     * @param unit the unit to change
+     * @return the changed unit
+     */
+    template <int Num, int Den>
+    consteval auto adjustScaleLength(UnitLike auto unit) noexcept -> auto
+    {
+        return Unit<unit.amount(), unit.current(),
+                    adjustUnitBaseScale<Num, Den>(unit.length()),
+                    unit.luminosity(), unit.mass(), unit.temperature(),
+                    unit.time(), unit.angle()>{};
+    }
+
+    /**
+     * @brief Changes the scale of the unit
+     *
+     * Changes the length scale of the unit by the
+     * specified amount.
+     *
+     * @post adjustScaleTime<Num, Den>(unit) == Num/Den*unit.length()
+     *
+     * @tparam Num the numerator of the new scale
+     * @tparam Den the denominator of the new scale
+     * @param unit the unit to change
+     * @return the changed unit
+     */
+    template <int Num, int Den>
+    consteval auto adjustScaleMass(UnitLike auto unit) noexcept -> auto
+    {
+        return Unit<unit.amount(), unit.current(), unit.length(),
+                    unit.luminosity(),
+                    adjustUnitBaseScale<Num, Den>(unit.mass()),
+                    unit.temperature(), unit.time(), unit.angle()>{};
+    }
+
+    /**
+     * @brief Changes the scale of the unit
+     *
+     * Changes the time scale of the unit by the
+     * specified amount.
+     *
+     * @post adjustScaleTime<Num, Den>(unit) == Num/Den*unit.time()
+     *
+     * @tparam Num the numerator of the new scale
+     * @tparam Den the denominator of the new scale
+     * @param unit the unit to change
+     * @return the changed unit
+     */
+    template <int Num, int Den>
+    consteval auto adjustScaleTime(UnitLike auto unit) noexcept -> auto
+    {
+        return Unit<unit.amount(), unit.current(), unit.length(),
+                    unit.luminosity(), unit.mass(), unit.temperature(),
+                    adjustUnitBaseScale<Num, Den>(unit.time()), unit.angle()>{};
+    }
+
+    /**
+     * @brief Changes the scale of the unit
+     *
+     * Changes the angle scale of the unit by the
+     * specified amount.
+     *
+     * @post adjustScaleAngle<Num, Den>(unit) == Num/Den*unit.angle()
+     *
+     * @tparam Num the numerator of the new scale
+     * @tparam Den the denominator of the new scale
+     * @param unit the unit to change
+     * @return the changed unit
+     */
+    template <int Num, int Den>
+    consteval auto adjustScaleAngle(UnitLike auto unit) noexcept -> auto
+    {
+        return Unit<unit.amount(), unit.current(), unit.length(),
+                    unit.luminosity(), unit.mass(), unit.temperature(),
+                    unit.time(), adjustUnitBaseScale<Num, Den>(unit.angle())>{};
     }
 
     /// Cached powers of 10
@@ -543,16 +667,17 @@ namespace Maxwell
     /**
      * @brief Calculate conversion factor due to differences in prefix
      *
-     * Calculate the multipication factor used to multiplythe value of
+     * Calculate the multiplication factor used to multiply the value of
      * a quantity going from one unit to another due to differences in
      * their prefixes. Equal to 10^(from.prefix() - to.prefix())
      *
      * @param from the starting unit
      * @param to to target unit
-     * @return the convesion factor
+     * @return the conversion factor
      */
     consteval auto unitPrefixConversion(UnitLike auto from,
                                         UnitLike auto to) noexcept -> double
+        requires UnitConvertibleTo<decltype(from), decltype(to)>
     {
         int delta  = from.amount().prefix() - to.amount().prefix();
         delta     += from.current().prefix() - to.current().prefix();
@@ -563,6 +688,33 @@ namespace Maxwell
         delta     += from.time().prefix() - to.time().prefix();
         delta     += from.angle().prefix() - to.angle().prefix();
         return pow10(delta);
+    }
+
+    /**
+     * @brief Calculate conversion factor due to differences in scale
+     *
+     *
+     * Calculate the multiplication factor used the multiply the value of a
+     * quantity going from one unit to another due to their differences in
+     * scale factors. Equal to from.scaleDen()/from.scaleNum()
+     *
+     * @param from the starting unit
+     * @param to the target unit
+     * @return the conversion factor
+     */
+    consteval auto unitScaleConversion(UnitLike auto from,
+                                       UnitLike auto to) noexcept -> double
+        requires UnitConvertibleTo<decltype(from), decltype(to)>
+    {
+        double mult  = unitBaseScaleConversion(from.amount(), to.amount());
+        mult        *= unitBaseConversion(from.current(), to.current());
+        mult        *= unitBaseConversion(from.length(), to.length());
+        mult        *= unitBaseConversion(from.luminosity(), to.luminosity());
+        mult        *= unitBaseConversion(from.mass(), to.mass());
+        mult        *= unitBaseConversion(from.temperature(), to.temperature());
+        mult        *= unitBaseConversion(from.time(), to.time());
+        mult        *= unitBaseConversion(from.angle(), to.angle());
+        return mult;
     }
 } // namespace Maxwell
 
