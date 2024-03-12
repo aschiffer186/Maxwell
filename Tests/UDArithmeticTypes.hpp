@@ -138,7 +138,7 @@ class Type2
         swap(t.d_, d_);
     }
 
-    friend constexpr auto operator<=>(Type2, Type2) = default;
+    friend constexpr auto operator==(Type2, Type2) -> bool = default;
 
   private:
     double d_{};

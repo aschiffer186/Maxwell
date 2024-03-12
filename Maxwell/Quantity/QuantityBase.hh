@@ -1,6 +1,6 @@
 /**
  * @file QuantityBase.hh
- * @author Alex Schiffer (aschiffer186)
+ * @author Alex Schiffer
  * @brief
  * @version 0.1
  * @date 2024-02-29
@@ -12,6 +12,7 @@
 #define QUANTITY_BASE_HH
 
 #include <compare>
+#include <concepts>
 #include <type_traits>
 #include <utility>
 
@@ -64,7 +65,7 @@ namespace Maxwell
          *
          * Constructs a BasicQuantity from the specified quantity,
          * converting the value expressed in Unit2 its equivalent
-         * expresssed in Units. This constructor can only be
+         * expressed in Units. This constructor can only be
          * called if Unit2 is convertible to Units and Scalar2
          * can be constructed from ScalarType. The value is copy
          * constructed other.scalar_ prior to the conversion.
@@ -89,7 +90,7 @@ namespace Maxwell
          *
          * Constructs a BasicQuantity from the specified quantity,
          * converting the value expressed in Unit2 its equivalent
-         * expresssed in Units. This constructor can only be
+         * expressed in Units. This constructor can only be
          * called if Unit2 is convertible to Units and Scalar2
          * can be constructed from ScalarType. The value is move
          * constructed from other.scalar_ prior to conversion.
@@ -173,7 +174,7 @@ namespace Maxwell
                 -> BasicQuantity& = default;
 
         /**
-         * @brief Return the value of the BasicQuanity
+         * @brief Return the value of the BasicQuantity
          *
          * Returns the value of the BasicQuantity.
          *
@@ -203,7 +204,7 @@ namespace Maxwell
          * @brief Conversion operator to Scalar
          *
          * Conversion operator to convert the value of *this
-         * to the value of the underyling scalar type, ScalarType.
+         * to the value of the underlying scalar type, ScalarType.
          * This conversion operator can only be called if the
          * the BasicQuantity is unitless.
          *
@@ -301,6 +302,11 @@ namespace Maxwell
         friend auto operator<=>(const BasicQuantity& lhs,
                                 const BasicQuantity& rhs)
             requires std::three_way_comparable<ScalarType>
+        = default;
+
+        friend auto operator==(const BasicQuantity& lhs,
+                               const BasicQuantity& rhs) -> bool
+            requires std::equality_comparable<ScalarType>
         = default;
 
       private:

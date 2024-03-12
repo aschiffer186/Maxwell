@@ -53,4 +53,9 @@ TEST(TestUnits, TestUnit)
 
     constexpr auto centisecond = adjustPrefixTime<-2>(SecondUnit);
     EXPECT_EQ(centisecond.time().prefix() - SecondUnit.time().prefix(), -2);
+
+    constexpr auto centiradian = adjustPrefixAngle<-2>(RadianUnit);
+    EXPECT_EQ(centiradian.angle().prefix() - RadianUnit.angle().prefix(), -2);
 }
+
+TEST(TestUnits, TestUnitConversionPrefix) {}
