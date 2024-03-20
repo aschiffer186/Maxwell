@@ -155,6 +155,9 @@ namespace Maxwell
         adjustScaleAngle<5'729'578, 100'000>(RadianUnit);
     using DegreesUnitType = decltype(DegreesUnit);
 
+    constexpr inline auto MeterPerSecondUnit = MeterUnit / SecondUnit;
+    using MeterPerSecondUnitType             = decltype(MeterPerSecondUnit);
+
     // Imperial units
 
     // Length measurements

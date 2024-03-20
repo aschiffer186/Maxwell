@@ -45,6 +45,8 @@ namespace Maxwell
 
     using Degrees = Quantity<DegreesUnit>;
 
+    using MeterPerSecond = Quantity<MeterPerSecondUnit>;
+
     using Pound = Quantity<PoundUnit>;
 
     using Foot = Quantity<FootUnit>;

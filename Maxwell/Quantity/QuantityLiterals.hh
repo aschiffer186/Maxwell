@@ -47,6 +47,8 @@ namespace Maxwell::QuantityLiterals
 
     MAKE_QUANTITY_LITERAL(Degrees, deg)
 
+    MAKE_QUANTITY_LITERAL(MeterPerSecond, m_s)
+
     MAKE_QUANTITY_LITERAL(Pound, lb)
 
     MAKE_QUANTITY_LITERAL(Foot, ft)

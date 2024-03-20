@@ -24,39 +24,65 @@ namespace Maxwell
               int ScaleNum_, int ScaleDen_>
     struct UnitBase
     {
-        static constexpr int Power     = Pow_;
-        static constexpr int Prefix    = Prefix_;
+        /// The power of the UnitBase
+        static constexpr int Power = Pow_;
+        /// The prefix of the UnitBase
+        static constexpr int Prefix = Prefix_;
+        /// The numerator of the UnitBase's offset
         static constexpr int OffsetNum = OffsetNum_;
+        /// The denominator of the UnitBase's offset
         static constexpr int OffsetDen = OffsetDen_;
-        static constexpr int ScaleNum  = ScaleNum_;
-        static constexpr int ScaleDen  = ScaleDen_;
+        /// The numerator of the UnitBase's scale factor
+        static constexpr int ScaleNum = ScaleNum_;
+        /// The denominator of the UnitBase's scale factor
+        static constexpr int ScaleDen = ScaleDen_;
 
+        /**
+         * @brief Return the UnitBase's power
+         *
+         * @return the UnitBase's power
+         */
         constexpr auto power() const noexcept -> int { return Power; }
+
+        /**
+         * @brief Return the UnitBase's prefix
+         *
+         * @return the UnitBase's prefix
+         */
         constexpr auto prefix() const noexcept -> int { return Prefix; }
 
-        constexpr auto
-        offset() const noexcept -> std::ratio<OffsetNum, OffsetDen>
-        {
-            return std::ratio<OffsetNum, OffsetDen>{};
-        }
-
+        /**
+         * @brief Return the numerator of the UnitBase's offset
+         *
+         * @return the numerator of the UnitBase's offset
+         */
         constexpr auto offsetNum() const noexcept -> int { return OffsetNum; }
 
+        /**
+         * @brief Return the denominator of the UnitBase's offset
+         *
+         * @return the denominator of the unitBase's offset
+         */
         constexpr auto offsetDen() const noexcept -> int { return OffsetDen; }
 
-        constexpr auto scale() const noexcept -> std::ratio<ScaleNum, ScaleDen>
-        {
-            return std::ratio<ScaleNum, ScaleDen>{};
-        }
-
+        /**
+         * @brief Return the numerator of the UnitBase's scale factor
+         *
+         * @return the numerator of the UnitBase's scale factor
+         */
         constexpr auto scaleNum() const noexcept -> int { return ScaleNum; }
 
+        /**
+         * @brief Return the denominator of the UnitBase's scale factor
+         *
+         * @return the denominator of the UnitBase's scale factor
+         */
         constexpr auto scaleDen() const noexcept -> int { return ScaleDen; }
     };
 
     // Constants
-    constexpr inline UnitBase<0, 0, 1, 1, 1, 1> NullUnitBase;
-    constexpr inline UnitBase<1, 0, 1, 1, 1, 1> CoherentUnitBase;
+    constexpr inline UnitBase<0, 0, 0, 1, 1, 1> NullUnitBase;
+    constexpr inline UnitBase<1, 0, 0, 1, 1, 1> CoherentUnitBase;
 
     template <typename>
     struct is_unit_base : std::false_type
@@ -76,29 +102,85 @@ namespace Maxwell
     {
     };
 
+    /**
+     * @brief Concept modeling a UnitBase
+     *
+     * Concept modeling a UnitBase. A type satisfies UnitBaseLike if
+     * it is a specialization of the UnitBase class template
+     *
+     * @tparam Tp
+     */
     template <typename Tp>
     concept UnitBaseLike = is_unit_base<Tp>::value;
 
+    /**
+     * @brief Returns true if the unit base is a coherent unit
+     *
+     * Returns true if the UnitBase is a coherent unit. A coherent
+     * unit has no prefix, no offset, and a scale factor of 1.
+     *
+     * @param ub
+     * @return true
+     * @return false
+     */
     constexpr auto isCoherentUnitBase(UnitBaseLike auto ub) noexcept -> bool
     {
-        return ub.prefix() == 0;
+        return ub.prefix() == 0 && ub.offsetNum() == 0 && ub.offsetDen() == 1 &&
+               ub.scaleNum() == 1 && ub.scaleDen() == 1;
     }
 
+    /**
+     * @brief Converts a UnitBase to a coherent UnitBase
+     *
+     * Given a UnitBase ub, returns a new UnitBase ub' such that
+     * ub' is a coherent unit base and ub'.power() == ub.power()
+     *
+     * @post isCoherentUnitBase(ub') == true
+     * @post ub.power() == ub'.power()
+     *
+     * @param ub the UnitBase to convert
+     * @return the converted UnitBase
+     */
     consteval auto toCoherentUnitBase(UnitBaseLike auto ub) noexcept -> auto
     {
-        return UnitBase<ub.power(), 0, ub.offsetNum(), ub.offsetDen(),
-                        ub.scaleNum(), ub.scaleDen()>{};
+        return UnitBase<ub.power(), 0, 0, 1, 1, 1>{};
     }
 
+    /**
+     * @brief Returns true if two UnitBase objects are equal
+     *
+     * Returns true if two UnitBase objects are equal. Two UnitBase
+     * objects are equal if they have the same power, same prefix,
+     * same offset, and same scale factor.
+     *
+     * @param lhs the first UnitBase to compare for equality
+     * @param rhs the second UnitBase to compare for equality
+     * @return true if the UnitBase objects are equal
+     */
     constexpr auto operator==(UnitBaseLike auto lhs,
                               UnitBaseLike auto rhs) noexcept -> bool
     {
         return lhs.power() == rhs.power() && lhs.prefix() == rhs.prefix() &&
-               std::ratio_equal_v<decltype(lhs.offset()),
-                                  decltype(rhs.offset())> &&
-               std::ratio_equal_v<decltype(lhs.scale()), decltype(rhs.scale())>;
+               lhs.offsetNum() == rhs.offsetNum() &&
+               lhs.offsetDen() == rhs.offsetDen() &&
+               lhs.scaleNum() == rhs.scaleNum() &&
+               lhs.scaleDen() == rhs.scaleDen();
     }
 
+    /**
+     * @brief Multiplies two UnitBase
+     *
+     * Multiplies two UnitBase objects. The product of the
+     * two UnitBase objects has a power that is the sum of the
+     * two operands.
+     *
+     * @post Let prod = lhs * rhs -> prod.power() == lhs.power() +
+     *                                                rhs.power()
+     *
+     * @param lhs the left hand side of the product
+     * @param rhs the right hand side of the product
+     * @return the product of the lhs and rhs UnitBase objects
+     */
     constexpr auto operator*(UnitBaseLike auto lhs,
                              UnitBaseLike auto rhs) noexcept -> auto
     {
@@ -106,6 +188,20 @@ namespace Maxwell
                         lhs.offsetDen(), lhs.scaleNum(), lhs.scaleDen()>{};
     }
 
+    /**
+     * @brief Divides two UnitBase
+     *
+     * Divides two UnitBase objects. The quotient of the
+     * two UnitBase objects has a power that is the difference of the
+     * two operands.
+     *
+     * @post Let quot = lhs * rhs -> quot.power() == lhs.power() -
+     *                                                rhs.power()
+     *
+     * @param lhs the left hand side of the operation
+     * @param rhs the right hand side of the operation
+     * @return the quotient of the lhs and rhs UnitBaseObjects
+     */
     constexpr auto operator/(UnitBaseLike auto lhs,
                              UnitBaseLike auto rhs) noexcept -> auto
     {
@@ -129,12 +225,26 @@ namespace Maxwell
                         unit.offsetDen(), unit.scaleNum(), unit.scaleDen()>{};
     }
 
+    /**
+     * @brief Calculates the scale conversion factor
+     *
+     * Calculates the conversion factor used to multiply
+     * the value of a quantity to go from a quantity whose units
+     * are from to a quantity whose units are to
+     *
+     * @param from the starting UnitBase
+     * @param to the destination UnitBase
+     * @return the conversion factor
+     */
     consteval auto
     unitBaseScaleConversion(UnitBaseLike auto from,
                             UnitBaseLike auto to) noexcept -> double
     {
-        return static_cast<double>(to.scaleNum()) /
-               static_cast<double>(to.scaleDen());
+        const double t1 = static_cast<double>(to.scaleDen()) /
+                          static_cast<double>(to.scaleNum());
+        const double t2 = static_cast<double>(from.scaleNum()) /
+                          static_cast<double>(from.scaleDen());
+        return t1 * t2;
     }
 
     /**
