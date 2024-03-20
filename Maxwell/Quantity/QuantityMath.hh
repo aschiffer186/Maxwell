@@ -12,10 +12,11 @@
 #ifndef QUANTITY_MATH_HH
 #define QUANTITY_MATH_HH
 
-#include <cinttypes>
 #include <cmath>
 #include <concepts>
+#include <limits>
 
+#include "QuantityBase.hh"
 #include "QuantityTypes.hh"
 
 namespace Maxwell::Math
@@ -92,9 +93,39 @@ namespace Maxwell::Math
         return Degrees(val * 180.0 / M_PI);
     }
 
+    template <Arithmetic S, UnitLike auto U>
+    auto abs(BasicQuantity<S, U> x)
+        noexcept(noexcept(std::abs(x.value()))) -> BasicQuantity<S, U>
+    {
+        return BasicQuantity<S, U>(std::abs(x.value()));
+    }
+
+    template <Arithmetic S, UnitLike auto U>
+    auto ceil(BasicQuantity<S, U> x)
+        noexcept(noexcept(std::ceil(x.value()))) -> BasicQuantity<S, U>
+    {
+        return BasicQuantity<S, U>(std::ceil(x.value()));
+    }
+
+    template <Arithmetic S, UnitLike auto U>
+    auto floor(BasicQuantity<S, U> x)
+        noexcept(noexcept(std::floor(x.value()))) -> BasicQuantity<S, U>
+    {
+        return BasicQuantity<S, U>(std::floor(x.value()));
+    }
+
 #undef MAXWELL_TRIG_FUNCTION
 #undef MAXWELL_RECIP_TRIG_FUNCTION
 #undef MAXWELL_INV_TRIG_FUNCTION
 } // namespace Maxwell::Math
+
+namespace std
+{
+    template <Maxwell::Arithmetic S, Maxwell::UnitLike auto U>
+    class numeric_limits<Maxwell::BasicQuantity<S, U>>
+        : public numeric_limits<S>
+    {
+    };
+} // namespace std
 
 #endif
