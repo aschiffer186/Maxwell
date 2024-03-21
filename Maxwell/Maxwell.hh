@@ -5,6 +5,7 @@
 #include "QuantityBase.hh"
 #include "QuantityConcepts.hh"
 #include "QuantityLiterals.hh"
+#include "QuantityMath.hh"
 #include "QuantityTypes.hh"
 #include "UnitBase.hh"
 #include "UnitTypes.hh"
