@@ -14,6 +14,42 @@ using Kelvin  = Quantity<KelvinUnit>;
 using Second  = Quantity<SecondUnit>;
 using Radian  = Quantity<RadianUnit>;
 
+#define MAKE_PREFIXED_QUANTITIES(Q)                                            \
+    using Quetta##Q = Quantity<Quetta##Q##Unit>;                               \
+    using Ronna##Q  = Quantity<Ronna##Q##Unit>;                                \
+    using Yotta##Q  = Quantity<Yotta##Q##Unit>;                                \
+    using Zetta##Q  = Quantity<Zetta##Q##Unit>;                                \
+    using Exa##Q    = Quantity<Exa##Q##Unit>;                                  \
+    using Tera##Q   = Quantity<Tera##Q##Unit>;                                 \
+    using Peta##Q   = Quantity<Peta##Q##Unit>;                                 \
+    using Tera##Q   = Quantity<Tera##Q##Unit>;                                 \
+    using Giga##Q   = Quantity<Giga##Q##Unit>;                                 \
+    using Mega##Q   = Quantity<Mega##Q##Unit>;                                 \
+    using Kilo##Q   = Quantity<Kilo##Q##Unit>;                                 \
+    using Hecto##Q  = Quantity<Hecto##Q##Unit>;                                \
+    using Deca##Q   = Quantity<Deca##Q##Unit>;                                 \
+    using Deci##Q   = Quantity<Deci##Q##Unit>;                                 \
+    using Centi##Q  = Quantity<Centi##Q##Unit>;                                \
+    using Milli##Q  = Quantity<Milli##Q##Unit>;                                \
+    using Micro##Q  = Quantity<Micro##Q##Unit>;                                \
+    using Nano##Q   = Quantity<Nano##Q##Unit>;                                 \
+    using Pico##Q   = Quantity<Pico##Q##Unit>;                                 \
+    using Femto##Q  = Quantity<Femto##Q##Unit>;                                \
+    using Atto##Q   = Quantity<Atto##Q##Unit>;                                 \
+    using Zepto##Q  = Quantity<Zepto##Q##Unit>;                                \
+    using Yocto##Q  = Quantity<Yocto##Q##Unit>;                                \
+    using Yocto##Q  = Quantity<Yocto##Q##Unit>;                                \
+    using Quecto##Q = Quantity<Quecto##Q##Unit>;
+
+MAKE_PREFIXED_QUANTITIES(Mole)
+MAKE_PREFIXED_QUANTITIES(Ampere)
+MAKE_PREFIXED_QUANTITIES(Meter)
+MAKE_PREFIXED_QUANTITIES(Candela)
+MAKE_PREFIXED_QUANTITIES(Gram)
+MAKE_PREFIXED_QUANTITIES(Kelvin)
+MAKE_PREFIXED_QUANTITIES(Second)
+MAKE_PREFIXED_QUANTITIES(Radian)
+
 using Degree = Quantity<DegreeUnit>;
 
 using Minute    = Quantity<MinuteUnit>;
@@ -29,6 +65,11 @@ using Foot = Quantity<FootUnit>;
 using Yard = Quantity<YardUnit>;
 using Mile = Quantity<MileUnit>;
 
+using PoundMass = Quantity<PoundMassUnit>;
+
+using Hertz     = Quantity<HertzUnit>;
+using Becquerel = Quantity<BecquerelUnit>;
+
 #define MAKE_QUANTITY_LITERAL(UnitName, Symbol)                                \
     auto consteval operator""_##Symbol(long double x) noexcept -> UnitName {   \
         return UnitName(x);                                                    \
@@ -38,37 +79,34 @@ using Mile = Quantity<MileUnit>;
         return BasicQuantity<unsigned long long, UnitName##Unit>(x);           \
     }
 
-inline namespace MetricLiterals
-{
-    MAKE_QUANTITY_LITERAL(Mole, mol)
-    MAKE_QUANTITY_LITERAL(Ampere, A)
-    MAKE_QUANTITY_LITERAL(Meter, m)
-    MAKE_QUANTITY_LITERAL(Candela, cd)
-    MAKE_QUANTITY_LITERAL(Gram, g)
-    MAKE_QUANTITY_LITERAL(Kelvin, K)
-    MAKE_QUANTITY_LITERAL(Second, s)
-    MAKE_QUANTITY_LITERAL(Radian, rad)
+inline namespace MetricLiterals {
+MAKE_QUANTITY_LITERAL(Mole, mol)
+MAKE_QUANTITY_LITERAL(Ampere, A)
+MAKE_QUANTITY_LITERAL(Meter, m)
+MAKE_QUANTITY_LITERAL(Candela, cd)
+MAKE_QUANTITY_LITERAL(Gram, g)
+MAKE_QUANTITY_LITERAL(Kelvin, K)
+MAKE_QUANTITY_LITERAL(Second, s)
+MAKE_QUANTITY_LITERAL(Radian, rad)
 
-    MAKE_QUANTITY_LITERAL(Degree, deg)
-}
+MAKE_QUANTITY_LITERAL(Degree, deg)
+}   // namespace MetricLiterals
 
-inline namespace TimeLiterals
-{
-    MAKE_QUANTITY_LITERAL(Day, d)
-    MAKE_QUANTITY_LITERAL(Hour, hr)
-    MAKE_QUANTITY_LITERAL(Year, yr)
-    MAKE_QUANTITY_LITERAL(Decade, dec)
-    MAKE_QUANTITY_LITERAL(Century, c)
-    MAKE_QUANTITY_LITERAL(Millenium, M)
-}
+inline namespace TimeLiterals {
+MAKE_QUANTITY_LITERAL(Day, d)
+MAKE_QUANTITY_LITERAL(Hour, hr)
+MAKE_QUANTITY_LITERAL(Year, yr)
+MAKE_QUANTITY_LITERAL(Decade, dec)
+MAKE_QUANTITY_LITERAL(Century, c)
+MAKE_QUANTITY_LITERAL(Millenium, M)
+}   // namespace TimeLiterals
 
-inline namespace ImperialUnits
-{
-    MAKE_QUANTITY_LITERAL(Inch, in)
-    MAKE_QUANTITY_LITERAL(Foot, ft)
-    MAKE_QUANTITY_LITERAL(Yard, yd)
-    MAKE_QUANTITY_LITERAL(Mile, mi)
-}
+inline namespace ImperialUnits {
+MAKE_QUANTITY_LITERAL(Inch, in)
+MAKE_QUANTITY_LITERAL(Foot, ft)
+MAKE_QUANTITY_LITERAL(Yard, yd)
+MAKE_QUANTITY_LITERAL(Mile, mi)
+}   // namespace ImperialUnits
 }   // namespace Maxwell
 
 #endif

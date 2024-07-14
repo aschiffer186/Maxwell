@@ -200,6 +200,13 @@ struct UnitType {
     }
 
     template <_detail::Ratio NewScaleFactor>
+    auto consteval adjustScaleMass() const noexcept -> Unit auto {
+        return UnitType<Amount, Current, Length, Luminosity,
+                        Mass.template adjustScale<NewScaleFactor>(),
+                        Temperature, Time, Angle>{};
+    }
+
+    template <_detail::Ratio NewScaleFactor>
     auto consteval adjustScaleTime() const noexcept -> Unit auto {
         return UnitType<Amount, Current, Length, Luminosity, Mass, Temperature,
                         Time.template adjustScale<NewScaleFactor>(), Angle>{};
@@ -306,12 +313,12 @@ auto constexpr isUnitless(Unit auto u) noexcept -> bool {
 /// --- Unit Conversion ---
 namespace _detail {
 constexpr std::array pow10Arr{
-    1e-30, 1e-29, 1e-27, 1e-26, 1e-25, 1e-24, 1e-23, 1e-22, 1e-20, 1e-19,
-    1e-18, 1e-17, 1e-16, 1e-15, 1e-14, 1e-13, 1e-12, 1e-11, 1e-10, 1e-9,
-    1e-8,  1e-7,  1e-6,  1e-5,  1e-4,  1e-3,  1e-2,  1e-1,  1e0,   1e1,
-    1e2,   1e3,   1e4,   1e5,   1e6,   1e7,   1e8,   1e9,   1e10,  1e11,
-    1e12,  1e13,  1e14,  1e15,  1e16,  1e17,  1e18,  1e19,  1e20,  1e21,
-    1e22,  1e23,  1e24,  1e25,  1e26,  1e27,  1e28,  1e29,  1e30};
+    1e-30, 1e-29, 1e-28, 1e-27, 1e-26, 1e-25, 1e-24, 1e-23, 1e-22, 1e-21, 1e-20,
+    1e-19, 1e-18, 1e-17, 1e-16, 1e-15, 1e-14, 1e-13, 1e-12, 1e-11, 1e-10, 1e-9,
+    1e-8,  1e-7,  1e-6,  1e-5,  1e-4,  1e-3,  1e-2,  1e-1,  1.0,   1e1,   1e2,
+    1e3,   1e4,   1e5,   1e6,   1e7,   1e8,   1e9,   1e10,  1e11,  1e12,  1e13,
+    1e14,  1e15,  1e16,  1e17,  1e18,  1e19,  1e20,  1e21,  1e22,  1e23,  1e24,
+    1e25,  1e26,  1e27,  1e28,  1e29,  1e30};
 
 auto consteval pow10(int exp) noexcept -> double {
     if (exp >= -30 && exp <= 30) {
@@ -335,14 +342,16 @@ auto consteval pow10(int exp) noexcept -> double {
 }   // namespace _detail
 
 auto consteval convertPrefix(Unit auto from, Unit auto to) noexcept -> double {
-    const int amountDiff      = from.amount() - to.amount();
-    const int currentDiff     = from.current() - to.current();
-    const int lengthDiff      = from.length() - to.length();
-    const int luminosityDiff  = from.luminosity() - to.luminosity();
-    const int massDiff        = from.mass() - to.mass();
-    const int temperatureDiff = from.temperature() - to.temperature();
-    const int timeDiff        = from.time() - to.time();
-    const int angleDiff       = from.angle() - to.angle();
+    const int amountDiff  = from.amount().prefix() - to.amount().prefix();
+    const int currentDiff = from.current().prefix() - to.current().prefix();
+    const int lengthDiff  = from.length().prefix() - to.length().prefix();
+    const int luminosityDiff =
+        from.luminosity().prefix() - to.luminosity().prefix();
+    const int massDiff = from.mass().prefix() - to.mass().prefix();
+    const int temperatureDiff =
+        from.temperature().prefix() - to.temperature().prefix();
+    const int timeDiff  = from.time().prefix() - to.time().prefix();
+    const int angleDiff = from.angle().prefix() - to.angle().prefix();
 
     return _detail::pow10(amountDiff) * _detail::pow10(currentDiff) *
            _detail::pow10(lengthDiff) * _detail::pow10(luminosityDiff) *
@@ -376,7 +385,7 @@ auto consteval convertScale(Unit auto from, Unit auto to) noexcept -> double {
     using angleRatio =
         std::ratio_divide<typename decltype(to.angle())::ScaleFactor,
                           typename decltype(from.angle())::ScaleFactor>;
-    double res{};
+    double res{1.0};
     res *= static_cast<double>(amountRatio::num) /
            static_cast<double>(amountRatio::den);
     res *= static_cast<double>(currentRatio::num) /

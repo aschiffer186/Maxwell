@@ -87,7 +87,7 @@ using UnitlessUnitType = decltype(UnitlessUnit);
 constexpr std::intmax_t Quetta = 30;
 constexpr std::intmax_t Ronna  = 27;
 constexpr std::intmax_t Yotta  = 24;
-constexpr std::intmax_t Zeta   = 21;
+constexpr std::intmax_t Zetta  = 21;
 constexpr std::intmax_t Exa    = 18;
 constexpr std::intmax_t Peta   = 15;
 constexpr std::intmax_t Tera   = 12;
@@ -127,9 +127,10 @@ constexpr std::intmax_t Quecto = -30;
     using Ronna##UnitName##Type = decltype(Ronna##UnitName);                   \
     constexpr auto Yotta##UnitName =                                           \
         UnitName.adjustPrefix##Dimension<Yotta>();                             \
-    using Yotta##UnitName##Type   = decltype(Yotta##UnitName);                 \
-    constexpr auto Zeta##UnitName = UnitName.adjustPrefix##Dimension<Zeta>();  \
-    using Zeta##UnitName##Type    = decltype(Zeta##UnitName);                  \
+    using Yotta##UnitName##Type = decltype(Yotta##UnitName);                   \
+    constexpr auto Zetta##UnitName =                                           \
+        UnitName.adjustPrefix##Dimension<Zetta>();                             \
+    using Zetta##UnitName##Type   = decltype(Zetta##UnitName);                 \
     constexpr auto Exa##UnitName  = UnitName.adjustPrefix##Dimension<Exa>();   \
     using Exa##UnitName##Type     = decltype(Exa##UnitName);                   \
     constexpr auto Peta##UnitName = UnitName.adjustPrefix##Dimension<Peta>();  \
@@ -182,7 +183,7 @@ constexpr std::intmax_t Quecto = -30;
 
 /// Unit representing Degrees. Constructed from Radians.
 constexpr auto DegreeUnit =
-    RadianUnit.adjustScaleAngle<std::ratio<5'729'577'913, 10'000'000>>();
+    RadianUnit.adjustScaleAngle<std::ratio<5'729'577'913, 100'000'000>>();
 using DegreeUnitType = decltype(DegreeUnit);
 
 MAKE_UNIT_PREFIXES(MoleUnit, Amount);
@@ -278,19 +279,23 @@ using CenturyUnitType      = decltype(CenturyUnit);
 constexpr auto MilleniumUnit = YearUnit.adjustScaleTime<std::ratio<1'000>>();
 using MilleniumUnitType      = decltype(MilleniumUnit);
 
-// -- Derived Length nits
+// -- Derived Length Units
 constexpr auto FootUnit =
     MeterUnit.adjustScaleLength<std::ratio<328'084, 100'000>>();
 using FootUnitType = decltype(FootUnit);
 
-constexpr auto InchUnit = FootUnit.adjustScaleLength<std::ratio<1, 12>>();
+constexpr auto InchUnit = FootUnit.adjustScaleLength<std::ratio<12>>();
 using InchUnitType      = decltype(InchUnit);
 
-constexpr auto YardUnit = FootUnit.adjustScaleLength<std::ratio<3>>();
+constexpr auto YardUnit = FootUnit.adjustScaleLength<std::ratio<1, 3>>();
 using YardUnitType      = decltype(YardUnit);
 
-constexpr auto MileUnit = FootUnit.adjustScaleLength<std::ratio<5'280>>();
+constexpr auto MileUnit = FootUnit.adjustScaleLength<std::ratio<1, 5'280>>();
 using MileUnitType      = decltype(MileUnit);
+
+// -- Derived Mass Units
+constexpr auto PoundMassUnit =
+    KiloGramUnit.adjustScaleMass<std::ratio<220'462, 100'000>>();
 }   // namespace Maxwell
 
 #endif

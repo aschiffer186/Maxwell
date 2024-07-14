@@ -71,7 +71,10 @@
             "name": "default",
             "displayName": "Default",
             "configuration": "Debug",
-            "configurePreset": "debug"
+            "configurePreset": "debug",
+            "output": {
+                "outputOnFailure": true
+            }
         }
     ],
     "workflowPresets": [

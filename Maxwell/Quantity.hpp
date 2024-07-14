@@ -121,7 +121,8 @@ template <_detail::Arithmetic Tp, Unit auto U> class BasicQuantity {
     constexpr BasicQuantity(const BasicQuantity<Up, From>& other) noexcept(
         std::is_nothrow_constructible_v<MagnitudeType, Up>)
         : mag_(other.magnitude()) {
-        mag_ *= conversionFactor(From, Units);
+        constexpr double factor = conversionFactor(From, Units);
+        mag_ *= factor;
     }
 
     template <_detail::Arithmetic Up, Unit auto From>
@@ -131,7 +132,8 @@ template <_detail::Arithmetic Tp, Unit auto U> class BasicQuantity {
     constexpr BasicQuantity(BasicQuantity<Up, From>&& other) noexcept(
         std::is_nothrow_constructible_v<MagnitudeType, Up>)
         : mag_(std::move(other.magnitude())) {
-        mag_ *= conversionFactor(From, Units);
+        constexpr double factor = conversionFactor(From, Units);
+        mag_ *= factor;
     }
 
     template <_detail::Arithmetic Up, Unit auto From>
@@ -149,9 +151,9 @@ template <_detail::Arithmetic Tp, Unit auto U> class BasicQuantity {
         return mag_;
     }
 
-    constexpr explicit(Unitless<Units>) operator MagnitudeType() const {
-        return mag_;
-    }
+    // constexpr explicit(Unitless<Units>) operator MagnitudeType() const {
+    //     return mag_;
+    // }
 
     auto constexpr units() const noexcept -> UnitsType { return Units; }
 
