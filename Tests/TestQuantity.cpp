@@ -1,554 +1,165 @@
-#include <compare>
-#include <concepts>
-#include <gtest/gtest.h> 
-#include <type_traits>
+#include "gtest/gtest.h"
+#include <gtest/gtest.h>
 
-#include "BaseUnitScales.hpp"
-#include "Quantity.hpp"
-#include "QuantityCore.hpp"
-#include "QuantityTypes.hpp"
-#include "Unit.hpp"
-#include "UnitCore.hpp"
-#include "UnitTypes.hpp"
+#include "Maxwell.hpp"
+
+#include <string>
 
 using namespace Maxwell;
-using namespace Maxwell::Literals;
 
-TEST(TestQuantity, TestLanguageProperties)
-{
-    using Q1 = Maxwell::Basic_Quantity<int, Maxwell::MeterUnit>;
-    using Q2 = Maxwell::Basic_Quantity<double, Maxwell::MeterUnit>;
+class Custom {
+  public:
+    static int numCopyCtorCalls;
+    static int numMoveCtorCalls;
 
-    EXPECT_EQ(sizeof(Q1), sizeof(int));
-    EXPECT_EQ(sizeof(Q2), sizeof(double));
-    EXPECT_TRUE(std::is_class_v<Q1>);
-    EXPECT_TRUE(std::is_class_v<Q2>);
-    EXPECT_TRUE(std::is_nothrow_default_constructible_v<Q1>);
-    EXPECT_TRUE(std::is_nothrow_default_constructible_v<Q2>);
-    EXPECT_TRUE(std::is_trivially_copy_constructible_v<Q1>);
-    EXPECT_TRUE(std::is_trivially_copy_constructible_v<Q2>);
-    EXPECT_TRUE(std::is_nothrow_copy_constructible_v<Q1>);
-    EXPECT_TRUE(std::is_nothrow_copy_constructible_v<Q2>);
-    EXPECT_TRUE(std::is_trivially_move_constructible_v<Q1>);
-    EXPECT_TRUE(std::is_trivially_move_constructible_v<Q2>);
-    EXPECT_TRUE(std::is_nothrow_move_constructible_v<Q1>);
-    EXPECT_TRUE(std::is_nothrow_move_constructible_v<Q2>);
-    EXPECT_TRUE(std::is_trivially_copy_assignable_v<Q1>);
-    EXPECT_TRUE(std::is_trivially_copy_assignable_v<Q2>);
-    EXPECT_TRUE(std::is_nothrow_copy_assignable_v<Q1>);
-    EXPECT_TRUE(std::is_nothrow_copy_assignable_v<Q2>);
-    EXPECT_TRUE(std::is_trivially_move_assignable_v<Q1>);
-    EXPECT_TRUE(std::is_trivially_move_assignable_v<Q2>);
-    EXPECT_TRUE(std::is_nothrow_move_assignable_v<Q1>);
-    EXPECT_TRUE(std::is_nothrow_move_assignable_v<Q2>);
-    EXPECT_TRUE(std::is_trivially_destructible_v<Q1>);
-    EXPECT_TRUE(std::is_trivially_destructible_v<Q2>);
-    EXPECT_TRUE(std::is_nothrow_destructible_v<Q1>);
-    EXPECT_TRUE(std::is_nothrow_destructible_v<Q2>);
-    EXPECT_TRUE(std::is_trivially_copyable_v<Q1>);
-    EXPECT_TRUE(std::is_trivially_copyable_v<Q2>);
-    EXPECT_TRUE(std::is_standard_layout_v<Q1>);
-    EXPECT_TRUE(std::is_standard_layout_v<Q2>);
-    EXPECT_TRUE(std::is_nothrow_swappable_v<Q1>);
-    EXPECT_TRUE(std::is_nothrow_swappable_v<Q2>);
-    EXPECT_TRUE(std::regular<Q1>);
-    EXPECT_TRUE(std::regular<Q2>);
-    EXPECT_TRUE(std::equality_comparable<Q1>);
-    EXPECT_TRUE(std::equality_comparable<Q2>);
-    EXPECT_TRUE(std::three_way_comparable<Q1>);
-    EXPECT_TRUE(std::three_way_comparable<Q2>);
-    EXPECT_TRUE(std::totally_ordered<Q1>);
-    EXPECT_TRUE(std::totally_ordered<Q2>);
-}
+    Custom() : d_{} {}
 
-struct Foo 
-{
-    double val{};
+    explicit Custom(double d) : d_(d) {}
 
-    Foo() noexcept = default; 
+    Custom(const Custom& c) : d_(c.d_) { ++numCopyCtorCalls; }
 
-    int numMoveCtorCalls{};
-    int numCopyCtorCalls{};
+    Custom(Custom&& c) noexcept(false) : d_(c.d_) { ++numMoveCtorCalls; }
 
-    Foo(const Foo& other) noexcept
-    : val{other.val}
-    {
-        ++numCopyCtorCalls;
-    }
+    friend auto operator==(const Custom&,
+                           const Custom&) noexcept -> bool = default;
 
-    Foo(Foo&& other) noexcept
-    : val{std::move(other.val)}
-    {
-        ++numMoveCtorCalls;
-    }
-
-    explicit Foo(double d) noexcept
-    : val{d}
-    {
-
-    }
-
-    Foo operator+(const Foo&) const
-    {
-        return Foo{};
-    }
-
-    Foo operator-(const Foo&) const 
-    {
-        return Foo{};
-    }
-
-    Foo operator*(const Foo&) const
-    {
-        return Foo{};
-    }
-
-    Foo operator/(const Foo&) const 
-    {
-        return Foo{};
-    }
-
-    Foo operator*(double d) const 
-    {
-        return Foo{};
-    }
-
-    friend auto operator<=>(const Foo& lhs, const Foo& rhs) = default;
+  private:
+    double d_;
 };
 
-struct Bar 
-{
-    double val{};
+int Custom::numCopyCtorCalls{0};
+int Custom::numMoveCtorCalls{0};
 
-    int numMoveCtorCalls{};
-    int numCopyCtorCalls{};
+auto
+operator+(Custom, Custom) -> Custom {
+    return {};
+}
 
-    Bar() noexcept(false) = default; 
+auto
+operator-(Custom, Custom) -> Custom {
+    return {};
+}
 
-    Bar(const Bar& other) 
-    : val{other.val}
-    {
-        ++numCopyCtorCalls;
-    }
+auto
+operator*(Custom, Custom) -> Custom {
+    return {};
+}
 
-    Bar(Bar&& other) 
-    : val{std::move(other.val)}
-    {
-        ++numMoveCtorCalls;
-    }
+auto
+operator/(Custom, Custom) -> Custom {
+    return {};
+}
 
-    explicit Bar(double d) noexcept
-    : val{d}
-    {
+auto
+operator*(double, Custom) -> Custom {
+    return {};
+}
 
-    }
+class Custom2 {
+  public:
+    Custom2() : d_{} {}
 
-    Bar operator+(const Bar&) const
-    {
-        return Bar{};
-    }
+    explicit Custom2(double d) : d_(d) {}
 
-    Bar operator-(const Bar&) const 
-    {
-        return Bar{};
-    }
+    Custom2(const Custom2& c) = delete;
 
-    Bar operator*(const Bar&) const
-    {
-        return Bar{};
-    }
+    Custom2(Custom2&& c) = default;
 
-    Bar operator/(const Bar&) const 
-    {
-        return Bar{};
-    }
+    friend auto operator==(const Custom2&,
+                           const Custom2&) noexcept -> bool = default;
 
-    Bar operator*(double d) const 
-    {
-        return Bar{};
-    }
+    ~Custom2() {}
 
-    friend auto operator<=>(const Bar& lhs, const Bar& rhs) = default;
+  private:
+    double d_;
 };
 
-TEST(TestQuantity, TestDefaultConstructor)
-{
-    Basic_Quantity<double, MeterUnit> q;
-
-    EXPECT_FLOAT_EQ(q.value(), 0.0);
-    EXPECT_EQ(q.units(), MeterUnit{});
-    EXPECT_TRUE(std::is_nothrow_default_constructible_v<decltype(q)>);
-
-    Basic_Quantity<Foo, MeterUnit> q2;
-    EXPECT_FLOAT_EQ(q2.value().val, 0.0);
-    EXPECT_EQ(q2.units(), MeterUnit{});
-    EXPECT_TRUE(std::is_nothrow_default_constructible_v<decltype(q2)>);
-
-    Basic_Quantity<Bar, MeterUnit> q3;
-    EXPECT_FLOAT_EQ(q3.value().val, 0.0);
-    EXPECT_EQ(q3.units(), MeterUnit{});
-    EXPECT_FALSE(std::is_nothrow_default_constructible_v<decltype(q3)>);
+auto
+operator+(Custom2, Custom2) -> Custom2 {
+    return {};
 }
 
-TEST(TestQuantity, TestSingleArgumentConstructor)
-{
-    Basic_Quantity<double, MeterUnit> q{1.0};
-    EXPECT_FLOAT_EQ(q.value(), 1.0);
-    EXPECT_EQ(q.units(), MeterUnit{});
-    bool isNothrowConstructible = std::is_nothrow_constructible_v<decltype(q), double>;
-    EXPECT_TRUE(isNothrowConstructible);
-
-    Basic_Quantity<Foo, MeterUnit> q2{Foo{1.0}};
-    EXPECT_FLOAT_EQ(q2.value().val, 1.0);
-    EXPECT_EQ(q2.units(), MeterUnit{});
-    EXPECT_EQ(q2.value().numMoveCtorCalls, 1);
-    isNothrowConstructible = std::is_nothrow_constructible_v<decltype(q2), Foo&&>;
-    EXPECT_TRUE(isNothrowConstructible);
-
-    Foo f{2.0};
-    Basic_Quantity<Foo, MeterUnit> q3{f};
-    EXPECT_FLOAT_EQ(q3.value().val, 2.0);
-    EXPECT_EQ(q3.units(), MeterUnit{});
-    EXPECT_EQ(q3.value().numCopyCtorCalls, 1);
-    isNothrowConstructible = std::is_nothrow_constructible_v<decltype(q2),const Foo&>;
-    EXPECT_TRUE(isNothrowConstructible);
-
-    Basic_Quantity<Bar, MeterUnit> q4{Bar{1.0}};
-    EXPECT_FLOAT_EQ(q4.value().val, 1.0);
-    EXPECT_EQ(q4.units(), MeterUnit{});
-    EXPECT_EQ(q4.value().numMoveCtorCalls, 1);
-    isNothrowConstructible = std::is_nothrow_constructible_v<decltype(q4), Bar&&>;
-    EXPECT_FALSE(isNothrowConstructible);
-
-    Bar b{2.0};
-    Basic_Quantity<Bar, MeterUnit> q5{b};
-    EXPECT_FLOAT_EQ(q5.value().val, 2.0);
-    EXPECT_EQ(q5.units(), MeterUnit{});
-    EXPECT_EQ(q5.value().numCopyCtorCalls, 1);
-    isNothrowConstructible = std::is_nothrow_constructible_v<decltype(q5),const Bar&>;
-    EXPECT_FALSE(isNothrowConstructible);
+auto
+operator-(Custom2, Custom2) -> Custom2 {
+    return {};
 }
 
-TEST(TestQuantity, TestSingleArgumentUnitConstructr)
-{
-    Basic_Quantity q{1.0, MeterUnit{}};
-    EXPECT_FLOAT_EQ(q.value(), 1.0);
-    EXPECT_EQ(q.units(), MeterUnit{});
-    bool isNothrowConstructible = std::is_nothrow_constructible_v<decltype(q), double, MeterUnit>;
-    EXPECT_TRUE(isNothrowConstructible);
-
-    Basic_Quantity q2{Foo{1.0}, MeterUnit{}};
-    EXPECT_TRUE((std::is_same_v<decltype(q2)::Rep, Foo>));
-    EXPECT_FLOAT_EQ(q2.value().val, 1.0);
-    EXPECT_EQ(q2.units(), MeterUnit{});
-    EXPECT_EQ(q2.value().numMoveCtorCalls, 1);
-    isNothrowConstructible = std::is_nothrow_constructible_v<decltype(q2), Foo&&>;
-    EXPECT_TRUE(isNothrowConstructible);
-
-    Foo f{2.0};
-    Basic_Quantity q3{f, MeterUnit{}};
-    EXPECT_TRUE((std::is_same_v<decltype(q3)::Rep, Foo>));
-    EXPECT_FLOAT_EQ(q3.value().val, 2.0);
-    EXPECT_EQ(q3.units(), MeterUnit{});
-    EXPECT_EQ(q3.value().numCopyCtorCalls, 1);
-    isNothrowConstructible = std::is_nothrow_constructible_v<decltype(q2),const Foo&>;
-    EXPECT_TRUE(isNothrowConstructible);
-
-    Basic_Quantity q4{Bar{1.0}, MeterUnit{}};
-    EXPECT_TRUE((std::is_same_v<decltype(q4)::Rep, Bar>));
-    EXPECT_FLOAT_EQ(q4.value().val, 1.0);
-    EXPECT_EQ(q4.units(), MeterUnit{});
-    EXPECT_EQ(q4.value().numMoveCtorCalls, 1);
-    isNothrowConstructible = std::is_nothrow_constructible_v<decltype(q4), Bar&&>;
-    EXPECT_FALSE(isNothrowConstructible);
-
-    Bar b{2.0};
-    Basic_Quantity q5{b, MeterUnit{}};
-    EXPECT_TRUE((std::is_same_v<decltype(q5)::Rep, Bar>));
-    EXPECT_FLOAT_EQ(q5.value().val, 2.0);
-    EXPECT_EQ(q5.units(), MeterUnit{});
-    EXPECT_EQ(q5.value().numCopyCtorCalls, 1);
-    isNothrowConstructible = std::is_nothrow_constructible_v<decltype(q5),const Bar&>;
-    EXPECT_FALSE(isNothrowConstructible);
+auto
+operator*(Custom2, Custom2) -> Custom2 {
+    return {};
 }
 
-TEST(TestQuantity, TestConvertingConstructorPrefix)
-{
-    //Test Prefix conversion
-    Basic_Quantity<double, SecondUnit> s{1'000};
-    Basic_Quantity<double, KilosecondUnit> ks{s};
-    Basic_Quantity<double, MillisecondUnit> ms{s};
-
-    EXPECT_FLOAT_EQ(ks.value(), 1.0);
-    EXPECT_EQ(ks.units(), KilosecondUnit{});
-    
-    EXPECT_FLOAT_EQ(ms.value(), 1'000*1'000);
-    EXPECT_EQ(ms.units(), MillisecondUnit{});
-
-    Basic_Quantity<double, MeterUnit> m{1'000};
-    Basic_Quantity<double, KilometerUnit> km{m};
-    Basic_Quantity<double, MillimeterUnit> mm{m};
-
-    EXPECT_FLOAT_EQ(km.value(), 1.0);
-    EXPECT_EQ(km.units(), KilometerUnit{});
-
-    EXPECT_FLOAT_EQ(mm.value(), 1'000*1'000);
-    EXPECT_EQ(mm.units(), MillimeterUnit{});
-
-    Basic_Quantity<double, GramUnit> g{1'000};
-    Basic_Quantity<double, KilogramUnit> kg{g};
-    Basic_Quantity<double, MilligramUnit> mg{g}; 
-
-    EXPECT_FLOAT_EQ(kg.value(), 1.0);
-    EXPECT_EQ(kg.units(), KilogramUnit{});
-
-    EXPECT_FLOAT_EQ(mg.value(), 1'000*1'000);
-    EXPECT_EQ(mg.units(), MilligramUnit{});
-
-    Basic_Quantity<double, AmpereUnit> A{1'000};
-    Basic_Quantity<double, KiloampereUnit> kA{A};
-    Basic_Quantity<double, MilliampereUnit> mA{A};
-
-    EXPECT_FLOAT_EQ(kA.value(), 1.0);
-    EXPECT_EQ(kA.units(), KiloampereUnit{});
-
-    EXPECT_FLOAT_EQ(mA.value(), 1'000*1'000);
-    EXPECT_EQ(mA.units(), MilliampereUnit{});
-
-    Basic_Quantity<double, KelvinUnit> K{1'000};
-    Basic_Quantity<double, KilokelvinUnit> KK{K};
-    Basic_Quantity<double, MillikelvinUnit> mK{K};
-
-    EXPECT_FLOAT_EQ(KK.value(), 1.0);
-    EXPECT_EQ(KK.units(), KilokelvinUnit{});
-
-    EXPECT_FLOAT_EQ(mK.value(), 1'000*1'000);
-    EXPECT_EQ(mK.units(), MillikelvinUnit{});
-
-    Basic_Quantity<double, MoleUnit> mol{1'000};
-    Basic_Quantity<double, KilomoleUnit> kMol{mol};
-    Basic_Quantity<double, MillimoleUnit> mmol{mol};
-
-    EXPECT_FLOAT_EQ(kMol.value(), 1.0);
-    EXPECT_EQ(kMol.units(), KilomoleUnit{});
-
-    EXPECT_FLOAT_EQ(mmol.value(), 1'000*1'000);
-    EXPECT_EQ(mmol.units(), MillimoleUnit{});
-
-    Basic_Quantity<double, CandelaUnit> cd{1'000};
-    Basic_Quantity<double, KilocandelaUnit> kcd{cd};
-    Basic_Quantity<double, MillicandelaUnit> mcd{cd};
-
-    EXPECT_FLOAT_EQ(kcd.value(), 1.0);
-    EXPECT_EQ(kcd.units(), KilocandelaUnit{});
-
-    EXPECT_FLOAT_EQ(mcd.value(), 1'000*1'000);
-    EXPECT_EQ(mcd.units(), MillicandelaUnit{});
-
-    Basic_Quantity<double, RadianUnit> rad{1'000};
-    Basic_Quantity<double, KiloradianUnit> krad{rad};
-    Basic_Quantity<double, MilliradianUnit> mrad{rad};
-
-    EXPECT_FLOAT_EQ(krad.value(), 1.0);
-    EXPECT_EQ(krad.units(), KiloradianUnit{});
-
-    EXPECT_FLOAT_EQ(mrad.value(), 1'000*1'000);
-    EXPECT_EQ(mrad.units(), MilliradianUnit{});
-
-    using InputUnit = decltype(SecondUnit{}*MeterUnit{}*GramUnit{}*AmpereUnit{}*KelvinUnit()*MoleUnit{}*CandelaUnit{}*RadianUnit{});
-    using OutputUnit = decltype(PetasecondUnit{}*DecimeterUnit{}*QuettagramUnit{}*YoctoampereUnit{}*FemtokelvinUnit{}*QuectomoleUnit{}*QuettacandelaUnit{}*DecaradianUnit{});
-
-    Basic_Quantity<double, InputUnit> in{1.0};
-    Basic_Quantity<double, OutputUnit> out{in};
-
-    EXPECT_FLOAT_EQ(out.value(), 1e-6);
-    EXPECT_EQ(out.units(), OutputUnit{});
-
-    Basic_Quantity<double, SqMeterUnit> sm{1.0};
-    Basic_Quantity<double, SqCentimeterUnit> scm{sm};
-
-    EXPECT_FLOAT_EQ(scm.value(), 100*100);
-    EXPECT_EQ(scm.units(), SqCentimeterUnit{});
+auto
+operator/(Custom2, Custom2) -> Custom2 {
+    return {};
 }
 
-TEST(TestQuantity, TestConvertingConstructorScale)
-{
-    Basic_Quantity<double, SecondUnit> s1{60.0};
-    Basic_Quantity<double, MinuteUnit> min{s1};
-    Basic_Quantity<double, SecondUnit> s2{min};
-
-    EXPECT_FLOAT_EQ(min.value(), 1.0);
-    EXPECT_FLOAT_EQ(s2.value(), 60.0);
-
-    Basic_Quantity<double, RadianUnit> rad1{M_PI};
-    Basic_Quantity<double, DegreeUnit> deg{rad1}; 
-    Basic_Quantity<double, RadianUnit> rad2{deg};
-
-    EXPECT_FLOAT_EQ(deg.value(), 180.0);
-    EXPECT_FLOAT_EQ(rad2.value(), M_PI);
-
-    Basic_Quantity<double, MeterUnit> m1{1.0};
-    Basic_Quantity<double, FootUnit> ft{m1};
-    Basic_Quantity<double, MeterUnit> m2{ft};
-
-    EXPECT_FLOAT_EQ(ft.value(), 1/0.3048);
-    EXPECT_FLOAT_EQ(m2.value(), 1.0);
-
-    Basic_Quantity<double, KilogramUnit> kg1{1.0};
-    Basic_Quantity<double, PoundMassUnit> lbm{kg1};
-    Basic_Quantity<double, KilogramUnit> kg2{lbm};
-
-    EXPECT_FLOAT_EQ(lbm.value(), 2.204622);
-    EXPECT_FLOAT_EQ(kg2.value(), 1.0);
-
-    Basic_Quantity<double, FootUnit> ft1{1.0};
-    Basic_Quantity<double, InchUnit> in{ft1};
-    Basic_Quantity<double, FootUnit> ft2{in};
-
-    EXPECT_FLOAT_EQ(in.value(), 12.0);
-    EXPECT_FLOAT_EQ(ft2.value(), 1.0);
-
-    Basic_Quantity<double, SqFootUnit> sft1{1.0};
-    Basic_Quantity<double, SqInchUnit> sin{sft1};
-    Basic_Quantity<double, SqFootUnit> sft2{sin};
-
-    EXPECT_FLOAT_EQ(sin.value(), 144.0);
-    EXPECT_FLOAT_EQ(sft2.value(), 1.0);
+auto
+operator*(double, Custom2) -> Custom2 {
+    return {};
 }
 
-TEST(TestQuantity, TestConvertingConstructorOffset)
-{
-    constexpr Basic_Quantity<double, KelvinUnit> q1{273.15};
-    Basic_Quantity<double, CelsiusUnit> q2{q1};
-    constexpr Basic_Quantity<double, FarenheitUnit> q3{q1};
-    constexpr Basic_Quantity<double, CelsiusUnit> q4{q3};
+template <typename T> class TestQuantityFixture : public testing::Test {
+  protected:
+    T value_;
+};
 
-    constexpr double cs = conversionScale(q3.units(), q4.units());
-    constexpr double co = conversionOffset(q3.units(), q4.units());
-    EXPECT_FLOAT_EQ(q2.value(), 0.0);
-    EXPECT_FLOAT_EQ(q3.value(), 32.0);
-    EXPECT_FLOAT_EQ(q4.value(), 0.0);
+using MagnitudeTypes = ::testing::Types<unsigned, int, double, Custom>;
+TYPED_TEST_SUITE(TestQuantityFixture, MagnitudeTypes);
+
+TYPED_TEST(TestQuantityFixture, TestProperties) {
+    using QuantityType = BasicQuantity<TypeParam, MeterUnit>;
+
+    EXPECT_EQ(noexcept(QuantityType()), noexcept(TypeParam()));
+    EXPECT_EQ(sizeof(QuantityType), sizeof(TypeParam));
+    EXPECT_EQ(alignof(QuantityType), alignof(TypeParam));
+    EXPECT_EQ(std::is_trivially_destructible_v<QuantityType>,
+              std::is_trivially_destructible_v<TypeParam>);
+    EXPECT_EQ(std::is_copy_constructible_v<QuantityType>,
+              std::is_copy_constructible_v<TypeParam>);
+    EXPECT_EQ(std::is_nothrow_copy_constructible_v<QuantityType>,
+              std::is_nothrow_copy_constructible_v<TypeParam>);
+    EXPECT_EQ(std::is_move_constructible_v<QuantityType>,
+              std::is_move_constructible_v<TypeParam>);
+    EXPECT_EQ(std::is_nothrow_move_constructible_v<QuantityType>,
+              std::is_nothrow_move_constructible_v<TypeParam>);
 }
 
-TEST(TestQuantity, TestBadConversions)
-{
-    using Quantity1 = Basic_Quantity<double, SecondUnit>;
-    using Quantity2 = Basic_Quantity<double, MeterUnit>;
-    using Quantity3 = Basic_Quantity<double, KilogramUnit>;
-    using Quantity4 = Basic_Quantity<double, KelvinUnit>;
-    using Quantity5 = Basic_Quantity<double, AmpereUnit>;
-    using Quantity6 = Basic_Quantity<double, MoleUnit>;
-    using Quantity7 = Basic_Quantity<double, CandelaUnit>;
-    using Quantity8 = Basic_Quantity<double, RadianUnit>;
+TYPED_TEST(TestQuantityFixture, TestDefaultConstructor) {
+    using QuantityType = BasicQuantity<TypeParam, MeterUnit>;
 
-    using Quantity9 = Basic_Quantity<double, SqMeterUnit>;
-
-    EXPECT_FALSE((std::constructible_from<Quantity1, Quantity2>));
-    EXPECT_FALSE((std::constructible_from<Quantity1, Quantity3>));
-    EXPECT_FALSE((std::constructible_from<Quantity1, Quantity4>));
-    EXPECT_FALSE((std::constructible_from<Quantity1, Quantity5>));
-    EXPECT_FALSE((std::constructible_from<Quantity1, Quantity6>));
-    EXPECT_FALSE((std::constructible_from<Quantity1, Quantity7>));
-    EXPECT_FALSE((std::constructible_from<Quantity1, Quantity8>));
-    EXPECT_FALSE((std::constructible_from<Quantity1, Quantity9>));
+    QuantityType q;
+    EXPECT_EQ(q.magnitude(), TypeParam());
+    EXPECT_EQ(q.units(), MeterUnit);
+    EXPECT_EQ(std::is_nothrow_default_constructible_v<QuantityType>,
+              std::is_nothrow_default_constructible_v<TypeParam>);
 }
 
-TEST(TestQuantity, TestConvertingRepConstructor)
-{
-    Basic_Quantity<int, MeterUnit> q1{1};
-    Basic_Quantity<long double, MeterUnit> q2{q1};
-    Basic_Quantity<double, MeterUnit> q3{q2};
-    Basic_Quantity<short, MeterUnit> q4{q3};
+TYPED_TEST(TestQuantityFixture, TestSingleArgumentConstructor) {
+    using QuantityType = BasicQuantity<Custom, MeterUnit>;
 
-    EXPECT_FLOAT_EQ(q2.value(), 1.0);
-    EXPECT_EQ(q2.units(), MeterUnit{});
-    EXPECT_FLOAT_EQ(q3.value(), 1.0);
-    EXPECT_EQ(q3.units(), MeterUnit{});
-    EXPECT_EQ(q4.value(), 1);
-    EXPECT_EQ(q4.units(), MeterUnit{});
-}
+    const int initCopyCtorCalls = Custom::numCopyCtorCalls;
+    const int initMoveCtorCalls = Custom::numMoveCtorCalls;
 
-TEST(TestQuantity, TestQuantitySwap)
-{
-    Basic_Quantity<double, MeterUnit> q1{1.0};
-    Basic_Quantity<double, MeterUnit> q2{2.0};
-    q1.swap(q2);
+    Custom c{1.0};
+    QuantityType q1{c};
+    EXPECT_EQ(q1.magnitude(), Custom{1.0});
+    EXPECT_EQ(q1.units(), MeterUnit);
+    EXPECT_EQ(Custom::numCopyCtorCalls, initCopyCtorCalls + 1);
+    EXPECT_EQ(Custom::numMoveCtorCalls, initMoveCtorCalls);
 
-    EXPECT_TRUE(noexcept(q1.swap(q2)));
-    EXPECT_FLOAT_EQ(q1.value(), 2.0);
-    EXPECT_FLOAT_EQ(q2.value(), 1.0);
+    QuantityType q2{Custom{1.0}};
+    EXPECT_EQ(q1.magnitude(), Custom{1.0});
+    EXPECT_EQ(q1.units(), MeterUnit);
+    EXPECT_EQ(Custom::numCopyCtorCalls, initCopyCtorCalls + 1);
+    EXPECT_EQ(Custom::numMoveCtorCalls, initMoveCtorCalls + 1);
 
-    Basic_Quantity<double, MeterUnit> q3{1.0};
-    Basic_Quantity<double, MeterUnit> q4{2.0};
+    using QuantityType2 = BasicQuantity<TypeParam, MeterUnit>;
 
-    swap(q3, q4);
-    EXPECT_TRUE(noexcept(swap(q3, q4)));
-    EXPECT_FLOAT_EQ(q3.value(), 2.0);
-    EXPECT_FLOAT_EQ(q4.value(), 1.0);
-}
+    EXPECT_EQ(
+        (std::is_nothrow_constructible_v<QuantityType2, const TypeParam&>),
+        (std::is_nothrow_constructible_v<TypeParam, const TypeParam&>) );
 
-TEST(TestQuantity, TestToCoherentUnits)
-{
-    Basic_Quantity<double, MeterUnit> q1{1.0};
-    auto q2 = q1.toCoherentUnits();
-
-    EXPECT_FLOAT_EQ(q2.value(), 1.0);
-    EXPECT_EQ(q2.units(), MeterUnit{});
-
-    Basic_Quantity<double, KilometerUnit> q3{1.0};
-    auto q4 = q3.toCoherentUnits();
-
-    EXPECT_FLOAT_EQ(q4.value(), 1000.0);
-    EXPECT_EQ(q4.units(), MeterUnit{});
-
-    Basic_Quantity<double, InchUnit> q5{1.0};
-    auto q6 = q5.toCoherentUnits();
-
-    EXPECT_FLOAT_EQ(q6.value(), 0.0254);
-    EXPECT_EQ(q6.units(), MeterUnit{});
-
-    Basic_Quantity<double, DegreeUnit> q7{180.0};
-    auto q8 = q7.toCoherentUnits();
-
-    EXPECT_FLOAT_EQ(q8.value(), M_PI);
-    EXPECT_EQ(q8.units(), RadianUnit{});
-}
-
-TEST(TestQuantity, TestInCoherentUnits)
-{
-    Basic_Quantity<double, SecondUnit> q1;
-    Basic_Quantity<double, MeterUnit> q2;
-    Basic_Quantity<double, GramUnit> q3;
-    Basic_Quantity<double, AmpereUnit> q4;
-    Basic_Quantity<double, KelvinUnit> q5;
-    Basic_Quantity<double, MoleUnit> q6;
-    Basic_Quantity<double, CandelaUnit> q7;
-    Basic_Quantity<double, RadianUnit> q8; 
-
-    EXPECT_TRUE(decltype(q1)::isInCoherentUnits());
-    EXPECT_TRUE(decltype(q2)::isInCoherentUnits());
-    EXPECT_TRUE(decltype(q3)::isInCoherentUnits());
-    EXPECT_TRUE(decltype(q4)::isInCoherentUnits());
-    EXPECT_TRUE(decltype(q5)::isInCoherentUnits());
-    EXPECT_TRUE(decltype(q6)::isInCoherentUnits());
-    EXPECT_TRUE(decltype(q7)::isInCoherentUnits());
-    EXPECT_TRUE(decltype(q8)::isInCoherentUnits());
-
-    Basic_Quantity<double, KilosecondUnit> q9;
-    Basic_Quantity<double, KilometerUnit> q10;
-    Basic_Quantity<double, KilogramUnit> q11;
-    Basic_Quantity<double, KiloampereUnit> q12;
-    Basic_Quantity<double, KilokelvinUnit> q13;
-    Basic_Quantity<double, KilomoleUnit> q14;
-    Basic_Quantity<double, KilocandelaUnit> q15;
-    Basic_Quantity<double, DegreeUnit> q16;
-
-    EXPECT_FALSE(decltype(q9)::isInCoherentUnits());
-    EXPECT_FALSE(decltype(q10)::isInCoherentUnits());
-    EXPECT_FALSE(decltype(q11)::isInCoherentUnits());
-    EXPECT_FALSE(decltype(q12)::isInCoherentUnits());
-    EXPECT_FALSE(decltype(q13)::isInCoherentUnits());
-    EXPECT_FALSE(decltype(q14)::isInCoherentUnits());
-    EXPECT_FALSE(decltype(q15)::isInCoherentUnits());
-    EXPECT_FALSE(decltype(q16)::isInCoherentUnits());
+    EXPECT_EQ((std::is_nothrow_constructible_v<QuantityType2, TypeParam&&>),
+              (std::is_nothrow_constructible_v<TypeParam, TypeParam&&>) );
 }

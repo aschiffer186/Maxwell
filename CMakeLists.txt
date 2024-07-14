@@ -1,9 +1,10 @@
-cmake_minimum_required(VERSION 3.22)
-project(Maxwell VERSION 0.1.0 LANGUAGES CXX)
+cmake_minimum_required(VERSION 3.25)
+project(Maxwell)
 
-# add_library(Maxwell Maxwell/test.cpp)
-# target_compile_features(Maxwell PRIVATE cxx_std_20)
+set(CMAKE_CXX_SCAN_FOR_MODULES "OFF")
+set(CMAKE_EXPORT_COMPILE_COMMANDS "ON")
 
 add_subdirectory(Maxwell)
 
+enable_testing()
 add_subdirectory(Tests)
