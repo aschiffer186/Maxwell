@@ -16,6 +16,7 @@ constexpr UnitType<CoherentDimension, NullDimension, NullDimension,
     MoleUnit{};
 /// Type alias for MoleUnit's type
 using MoleUnitType = decltype(MoleUnit);
+auto constexpr toString(MoleUnitType) -> std::string { return "mol"; }
 
 /// Unit representing Ampere, SI base unit for current.
 constexpr UnitType<NullDimension, CoherentDimension, NullDimension,
@@ -24,6 +25,7 @@ constexpr UnitType<NullDimension, CoherentDimension, NullDimension,
     AmpereUnit{};
 /// Type alias for AmpereUnit's type
 using AmpereUnitType = decltype(AmpereUnit);
+auto constexpr toString(AmpereUnitType) -> std::string { return "A"; }
 
 /// Unit reprsenting Meter, SI base unit for length.
 constexpr UnitType<NullDimension, NullDimension, CoherentDimension,
@@ -32,6 +34,7 @@ constexpr UnitType<NullDimension, NullDimension, CoherentDimension,
     MeterUnit{};
 /// Type alias for MeterUnit's type
 using MeterUnitType = decltype(MeterUnit);
+auto constexpr toString(MeterUnitType) -> std::string { return "m"; }
 
 /// Unit reprsenting Candela, SI base unit for luminosity.
 constexpr UnitType<NullDimension, NullDimension, NullDimension,
@@ -39,6 +42,7 @@ constexpr UnitType<NullDimension, NullDimension, NullDimension,
                    NullDimension, NullDimension>
     CandelaUnit{};
 using CandelaUnitType = decltype(CandelaUnit);
+auto constexpr toString(CandelaUnitType) -> std::string { return "cd"; }
 
 /// Unit representin Gram. This is not the SI base unit for mass,
 /// but for ease of implementation, is Maxwell's base unit for mass.
@@ -48,6 +52,7 @@ constexpr UnitType<NullDimension, NullDimension, NullDimension, NullDimension,
     GramUnit{};
 /// Type alias for GramUnit's type
 using GramUnitType = decltype(GramUnit);
+auto constexpr toString(GramUnitType) -> std::string { return "g"; }
 
 /// Unit representing Kelvin, SI base unit for temperature.
 constexpr UnitType<NullDimension, NullDimension, NullDimension, NullDimension,
@@ -56,6 +61,7 @@ constexpr UnitType<NullDimension, NullDimension, NullDimension, NullDimension,
     KelvinUnit{};
 /// Type alias for KelvinUnit's type
 using KelvinUnitType = decltype(KelvinUnit);
+auto constexpr toString(KelvinUnitType) -> std::string { return "K"; }
 
 /// Unit representing Second, SI base unit for time.
 constexpr UnitType<NullDimension, NullDimension, NullDimension, NullDimension,
@@ -64,6 +70,7 @@ constexpr UnitType<NullDimension, NullDimension, NullDimension, NullDimension,
     SecondUnit{};
 /// Type alias for SecondUnit's type
 using SecondUnitType = decltype(SecondUnit);
+auto constexpr toString(SecondUnitType) -> std::string { return "s"; }
 
 /// Unit representing Radian. This is not an SI base unit,
 /// but for ease of implementation, is a base unit in Maxwell
@@ -73,6 +80,7 @@ constexpr UnitType<NullDimension, NullDimension, NullDimension, NullDimension,
     RadianUnit{};
 /// Type alias for RadianUnit's type
 using RadianUnitType = decltype(RadianUnit);
+auto constexpr toString(RadianUnitType) -> std::string { return "rad"; }
 
 /// Unit representing the abscence of a unit. Exists to distinguish between
 /// dimensionless quantities like Radians and quantities with no unit, e.g. m/m
@@ -81,6 +89,7 @@ constexpr UnitType<NullDimension, NullDimension, NullDimension, NullDimension,
     UnitlessUnit{};
 /// Type alias for UnitlessUnit's type.
 using UnitlessUnitType = decltype(UnitlessUnit);
+auto constexpr toString(UnitlessUnitType) -> std::string { return ""; }
 
 /// --- SI derive units ---
 
@@ -122,15 +131,27 @@ constexpr std::intmax_t Quecto = -30;
     constexpr auto Quetta##UnitName =                                          \
         UnitName.adjustPrefix##Dimension<Quetta>();                            \
     using Quetta##UnitName##Type = decltype(Quetta##UnitName);                 \
+    auto constexpr toString(decltype(Quetta##UnitName))->std::string {         \
+        return std::string{"Q"}.append(toString(UnitName));                    \
+    }                                                                          \
     constexpr auto Ronna##UnitName =                                           \
         UnitName.adjustPrefix##Dimension<Ronna>();                             \
     using Ronna##UnitName##Type = decltype(Ronna##UnitName);                   \
+    auto constexpr toString(decltype(Ronna##UnitName))->std::string {          \
+        return std::string{"R"}.append(toString(UnitName));                    \
+    }                                                                          \
     constexpr auto Yotta##UnitName =                                           \
         UnitName.adjustPrefix##Dimension<Yotta>();                             \
     using Yotta##UnitName##Type = decltype(Yotta##UnitName);                   \
+    auto constexpr toString(decltype(Yotta##UnitName))->std::string {          \
+        return std::string{"Y"}.append(toString(UnitName));                    \
+    }                                                                          \
     constexpr auto Zetta##UnitName =                                           \
         UnitName.adjustPrefix##Dimension<Zetta>();                             \
-    using Zetta##UnitName##Type   = decltype(Zetta##UnitName);                 \
+    using Zetta##UnitName##Type = decltype(Zetta##UnitName);                   \
+    auto constexpr toString(decltype(Zetta##UnitName))->std::string {          \
+        return std::string{"Z"}.append(toString(UnitName));                    \
+    }                                                                          \
     constexpr auto Exa##UnitName  = UnitName.adjustPrefix##Dimension<Exa>();   \
     using Exa##UnitName##Type     = decltype(Exa##UnitName);                   \
     constexpr auto Peta##UnitName = UnitName.adjustPrefix##Dimension<Peta>();  \
@@ -256,6 +277,8 @@ MAKE_UNIT_PREFIXES(BecquerelUnit, Time);
 MAKE_UNIT_PREFIXES(GrayUnit, Mass);
 MAKE_UNIT_PREFIXES(SievertUnit, Mass);
 MAKE_UNIT_PREFIXES(KatalUnit, Amount);
+
+static_assert(!std::is_same_v<decltype(BecquerelUnit), decltype(HertzUnit)>);
 
 /// -- Derived Time Units ---
 constexpr auto MinuteUnit = SecondUnit.adjustScaleTime<std::ratio<60>>();

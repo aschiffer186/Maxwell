@@ -509,6 +509,10 @@ template <Unit auto U> struct UnitFormat {
 
     auto constexpr static unitString() -> std::string { return ""; }
 };
+
+auto constexpr toString([[maybe_unused]] Unit auto u) -> std::string {
+    return "";
+}
 }   // namespace Maxwell
 
 #endif
