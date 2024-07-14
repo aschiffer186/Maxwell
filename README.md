@@ -1,0 +1,2 @@
+# Overivew 
+Maxwell is a strongly-typed units library for C++ 20. It performs unit checking and conversions at compile-time; if a program is well-formed then all of its units are consistent. It also performs automatic units conversions at compile-time, eliminating common errors such as converting between degrees and radians.

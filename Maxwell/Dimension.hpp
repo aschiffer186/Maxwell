@@ -27,16 +27,16 @@ template <typename> struct is_dimension : std::false_type {};
 
 template <typename T> struct is_dimension<const T> : is_dimension<T> {};
 
-template <typename T> struct is_dimension<T &> : is_dimension<T> {};
+template <typename T> struct is_dimension<T&> : is_dimension<T> {};
 
-template <typename T> struct is_dimension<T &&> : is_dimension<T> {};
+template <typename T> struct is_dimension<T&&> : is_dimension<T> {};
 
 template <std::intmax_t Power, std::intmax_t Prefix, _detail::Ratio ScaleFactor,
           _detail::Ratio Offset>
 struct is_dimension<DimensionType<Power, Prefix, ScaleFactor, Offset>>
     : std::true_type {};
 
-using One = std::ratio<1, 1>;
+using One  = std::ratio<1, 1>;
 using Zero = std::ratio<0, 1>;
 }   // namespace _detail
 
@@ -47,27 +47,34 @@ concept Dimension = _detail::is_dimension<T>::value;
 template <std::intmax_t Power_, std::intmax_t Prefix_,
           _detail::Ratio ScaleFactor_, _detail::Ratio Offset_>
 struct DimensionType {
-    static constexpr auto Power = Power_;
+    static constexpr auto Power  = Power_;
     static constexpr auto Prefix = Prefix_;
-    using ScaleFactor = ScaleFactor_;
-    using Offset = Offset_;
-
-    auto consteval toCoherentDimension() noexcept -> Dimension auto {
-        return DimensionType<Power_, 0, _detail::One, _detail::Zero>{};
-    }
-
-    auto consteval isCoherentDimension() noexcept -> Dimension auto {
-        return Prefix == 0 && std::ratio_equal_v<ScaleFactor, _detail::One> &&
-               std::ratio_equal_v<Offset, _detail::Zero>;
-    }
+    using ScaleFactor            = ScaleFactor_;
+    using Offset                 = Offset_;
 
     auto consteval prefix() const noexcept -> std::intmax_t { return Power; }
 
     auto consteval power() const noexcept -> std::intmax_t { return Prefix; }
 
-    template <std::size_t NewPrefix>
-    auto static consteval adjustPrefix() noexcept -> Dimension auto {
+    template <std::intmax_t NewPrefix>
+    auto consteval adjustPrefix() const noexcept -> Dimension auto {
         return DimensionType<Power, NewPrefix, ScaleFactor, Offset>{};
+    }
+
+    template <_detail::Ratio NewScaleFactor>
+    auto consteval adjustScale() const noexcept -> Dimension auto {
+        return DimensionType<Power, Prefix,
+                             std::ratio_multiply<NewScaleFactor, ScaleFactor>,
+                             Offset>{};
+    }
+
+    auto consteval toCoherentDimension() const noexcept -> Dimension auto {
+        return DimensionType<Power_, 0, _detail::One, _detail::Zero>{};
+    }
+
+    auto consteval isCoherentDimension() const noexcept -> bool {
+        return Prefix == 0 && std::ratio_equal_v<ScaleFactor, _detail::One> &&
+               std::ratio_equal_v<Offset, _detail::Zero>;
     }
 };
 
@@ -81,9 +88,10 @@ operator==(Dimension auto lhs, Dimension auto rhs) noexcept -> bool {
     return std::same_as<decltype(lhs), decltype(rhs)>;
 }
 
-template <typename From, typename To>
+template <auto From, auto To>
 concept DimensionConvertibleTo =
-    Dimension<From> && Dimension<To> && std::same_as<From, To>;
+    Dimension<decltype(From)> && Dimension<decltype(To)> &&
+    From.power() == To.power();
 
 // --- Dimension Composition ---
 // Multiplies two dimensions. Always returns a coherent dimension
@@ -100,6 +108,8 @@ auto consteval
 operator/(Dimension auto lhs, Dimension auto rhs) noexcept -> Dimension auto {
     constexpr Dimension auto res = DimensionType<lhs.power() - rhs.power(), 0,
                                                  _detail::One, _detail::Zero>{};
+    static_assert(res.isCoherentDimension());
+    return res;
 }
 }   // namespace Maxwell
 #endif

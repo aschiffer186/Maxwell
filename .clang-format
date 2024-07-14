@@ -10,6 +10,7 @@ UseTab: Never
 # if (x) doStuff()  is not allowed, bad style
 AllowShortIfStatementsOnASingleLine: false
 # 
+AlignConsecutiveAssignments: true
 AlignTrailingComments: true
 SpacesBeforeTrailingComments: 3
 # change the next line to All for Alistair's textbook style

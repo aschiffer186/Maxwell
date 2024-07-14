@@ -7,28 +7,91 @@
             "cacheVariables": {
                 "CMAKE_CXX_STANDARD": "20",
                 "CMAKE_CXX_EXTENSIONS": "OFF",
-                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+                "CMAKE_VERBOSE_MAKEFILE": "ON"
             }
         },
         {
             "name": "common",
-            "hidden": true, 
+            "hidden": true,
             "binaryDir": "build/${presetName}"
         },
         {
             "name": "debug",
-            "inherits": ["common", "c++_setup"],
+            "inherits": [
+                "common",
+                "c++_setup"
+            ],
             "generator": "Ninja",
             "displayName": "Debug",
-            "description": "Configure debug build"
+            "description": "Configure debug build",
+            "cacheVariables": {
+                "CMAKE_CXX_FLAGS": "-Wall -Wextra -Wpedantic -Og -g"
+            }
+        },
+        {
+            "name": "release",
+            "inherits": [
+                "common",
+                "c++_setup"
+            ],
+            "generator": "Ninja",
+            "displayName": "Release",
+            "description": "Configure debug build",
+            "cacheVariables": {
+                "CMAKE_CXX_FLAGS": "-Wall -Wextra -Wpedantic -O2 -DNDEBUG"
+            }
         }
     ],
     "buildPresets": [
         {
             "name": "debug",
             "displayName": "Debug",
+            "configuration": "debug",
+            "configurePreset": "debug"
+        },
+        {
+            "name": "clean-debug",
+            "displayName": "Clean Debug",
+            "configuration": "debug",
+            "configurePreset": "debug",
+            "targets": [
+                "clean"
+            ]
+        },
+        {
+            "name": "release",
+            "displayName": "Release",
+            "configuration": "Release",
+            "configurePreset": "release"
+        }
+    ],
+    "testPresets": [
+        {
+            "name": "default",
+            "displayName": "Default",
             "configuration": "Debug",
             "configurePreset": "debug"
+        }
+    ],
+    "workflowPresets": [
+        {
+            "name": "run-tests",
+            "description": "Run Tests",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "debug"
+                },
+                {
+                    "type": "build",
+                    "name": "debug"
+                },
+                {
+                    "type": "test",
+                    "name": "default"
+                }
+            ]
         }
     ]
 }
