@@ -32,6 +32,17 @@ struct UnitTagType {
 /// Constant for when the tag type isn't needed
 constexpr UnitTagType NullTag{0};
 
+// --- Forward Declaration ---
+
+/// @tparam Amount_ the amount dimension of the unit
+/// @tparam Current_ the current dimension of the unit
+/// @tparam Length_ the length dimension of the unit
+/// @tparam Luminosity_ the luminosity dimension of the unit
+/// @tparam Mass_ the mass dimension of the unit
+/// @tparam Temperature_ the temperature dimension of the unit
+/// @tparam Time_ the time dimension of the unit
+/// @tparam Angle_ the angle "dimension" of the unit
+/// @tparam Tag_ a tag for creating unique units with the same dimension
 template <Dimension auto Amount_, Dimension auto Current_,
           Dimension auto Length_, Dimension auto Luminosity_,
           Dimension auto Mass_, Dimension auto Temperature_,
@@ -55,15 +66,7 @@ struct is_unit<UnitType<Amount_, Current_, Length_, Luminosity_, Mass_,
 template <typename T>
 concept Unit = _detail::is_unit<T>::value;
 
-/// @tparam Amount_ the amount dimension of the unit
-/// @tparam Current_ the current dimension of the unit
-/// @tparam Length_ the length dimension of the unit
-/// @tparam Luminosity_ the luminosity dimension of the unit
-/// @tparam Mass_ the mass dimension of the unit
-/// @tparam Temperature_ the temperature dimension of the unit
-/// @tparam Time_ the time dimension of the unit
-/// @tparam Angle_ the angle "dimension" of the unit
-/// @tparam Tag_ a tag for creating unique units with the same dimension
+/// --- Definition of Unit ---
 template <Dimension auto Amount_, Dimension auto Current_,
           Dimension auto Length_, Dimension auto Luminosity_,
           Dimension auto Mass_, Dimension auto Temperature_,
@@ -110,7 +113,11 @@ struct UnitType {
         return Current;
     }
 
-    /// @brief Returns the length dimension of the unit
+    //// @brief Returns the length dimension of the unit
+    ///
+    /// Returns the length dimension of the unit. This function
+    /// is always usable in a constant expression even if *this
+    /// isn't a compile-time constant.
     ///
     /// @return the length dimension of the unit
     auto consteval length() const noexcept -> decltype(Length) {
@@ -118,26 +125,81 @@ struct UnitType {
     }
 
     /// @brief Returns the luminosity dimension of the unit
+    ///
+    /// Returns the luminosity dimension of the unit. This function
+    /// is always usable in a constant expression even if *this
+    /// isn't a compile-time constant.
+    ///
+    /// @return the luminosity dimension of the unit
     auto consteval luminosity() const noexcept -> decltype(Luminosity) {
         return Luminosity;
     }
 
+    /// @brief Returns the mass dimension of the unit
+    ///
+    /// Returns the mass dimension of the unit. This function
+    /// is always usable in a constant expression even if *this
+    /// isn't a compile-time constant.
+    ///
+    /// @return the mass dimension of the unit
     auto consteval mass() const noexcept -> decltype(Mass) { return Mass; }
 
+    /// @brief Returns the temperature dimension of the unit
+    ///
+    /// Returns the temperature dimension of the unit. This function
+    /// is always usable in a constant expression even if *this
+    /// isn't a compile-time constant.
+    ///
+    /// @return the temperature dimension of the unit
     auto consteval temperature() const noexcept -> decltype(Temperature) {
         return Temperature;
     }
 
+    /// @brief Returns the time dimension of the unit
+    ///
+    /// Returns the time dimension of the unit. This function
+    /// is always usable in a constant expression even if *this
+    /// isn't a compile-time constant.
+    ///
+    /// @return the time dimension of the unit
     auto consteval time() const noexcept -> decltype(Time) { return Time; }
 
+    /// @brief Returns the angle "dimension" of the unit
+    ///
+    /// Returns the angle "dimension" of the unit. This function
+    /// is always usable in a constant expression even if *this
+    /// isn't a compile-time constant.
+    ///
+    /// @return the angle "dimension" of the unit
     auto consteval angle() const noexcept -> decltype(Angle) { return Angle; }
 
+    ///@brief Adds a tag to the unit
+    ///
+    /// Adds a tag to the unit. This is useful for creating
+    /// two separate units that have te same dimensions (e.g. radians and
+    /// steradians). The new unit will have the same dimensions as the current
+    /// unit. This function
+    /// is always usable in a constant expression even if *this
+    /// isn't a compile-time constant.
+    ///
+    /// @post the dimensions of *this and addTag() are the same
+    ///
+    /// @tparam NewTag the tag of the new unit
+    ///
+    ///@return a new unit with the specified tag.
     template <UnitTagType NewTag>
     auto consteval addTag() const noexcept -> Unit auto {
         return UnitType<Amount, Current, Length, Luminosity, Mass, Temperature,
                         Time, Angle, NewTag>{};
     }
 
+    ///@brief Returns the tag of the unit
+    ///
+    /// Returns the tag of the unit. This function
+    /// is always usable in a constant expression even if *this
+    /// isn't a compile-time constant.
+    ///
+    /// @return the tag of the unit
     auto consteval tag() const noexcept -> UnitTagType { return Tag; }
 
     template <std::intmax_t NewPrefix>
@@ -236,6 +298,18 @@ struct UnitType {
 };
 
 /// --- Query Functions ---
+
+/// @brief Returns true if two units are equal
+///
+/// Returns true if two units are equal. Two units
+/// are equal if they have the same dimensions and
+/// the same tag. This implies two units are equal
+/// if and only if they are the same type.
+///
+/// @param lhs one unit to compare
+/// @param rhs the other unit to compare
+///
+/// @return true if two units are equal.
 auto constexpr
 operator==(Unit auto lhs, Unit auto rhs) noexcept -> bool {
     return std::same_as<decltype(lhs), decltype(rhs)>;
