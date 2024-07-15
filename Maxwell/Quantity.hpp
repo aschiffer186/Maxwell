@@ -3,6 +3,8 @@
 
 #include <compare>
 #include <concepts>
+#include <format>
+#include <ostream>
 #include <type_traits>
 #include <utility>
 
@@ -285,6 +287,14 @@ auto constexpr swap(BasicQuantity<S, U>& lhs,
     -> void {
     lhs.swap(rhs);
 }
+template <_detail::Arithmetic S, Unit auto U>
+auto
+operator<<(std::ostream& os, const BasicQuantity<S, U>& q) -> std::ostream& {
+    os << q.magnitude() << " " << unitString<q.units()>;
+}
 }   // namespace Maxwell
+
+template <Maxwell::_detail::Arithmetic S, Maxwell::Unit auto U>
+struct std::formatter<Maxwell::BasicQuantity<S, U>> {};
 
 #endif

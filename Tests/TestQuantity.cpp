@@ -3,12 +3,8 @@
 #include <gtest/gtest.h>
 
 #include "Maxwell.hpp"
-#include "QuantityRepo.hpp"
-#include "Unit.hpp"
 
-#include <iostream>
 #include <numbers>
-#include <typeinfo>
 
 #include <cxxabi.h>
 

@@ -9,28 +9,8 @@
 /// @file Unit.hpp Contains the definition of UnitType
 
 namespace Maxwell {
-/**
- * @brief Helper type to create unique units
- *
- * UnitTagType is a helper type that can be used to create unique units
- * who have the same dimensionality (e.g. Hertz and Bercquel). By supplying
- * unique values of UnitTagType, two different units can be created. Units
- * with different tags are not convertible.
- *
- * Example usage:
- *  constexpr auto SteradianUnit = RadianUnit.addTag<UnitTagType{1}>();
- *  bool b = SteradianUnt = RadianUnit; //false
- *  bool b2 = UnitConvertibleTo<SteradianUnit, RadianUnit> // false
- */
-struct UnitTagType {
-    int i{};
-
-    friend auto constexpr operator==(UnitTagType,
-                                     UnitTagType) noexcept -> bool = default;
-};
-
 /// Constant for when the tag type isn't needed
-constexpr UnitTagType NullTag{0};
+struct NullTag {};
 
 // --- Forward Declaration ---
 
@@ -46,7 +26,7 @@ constexpr UnitTagType NullTag{0};
 template <Dimension auto Amount_, Dimension auto Current_,
           Dimension auto Length_, Dimension auto Luminosity_,
           Dimension auto Mass_, Dimension auto Temperature_,
-          Dimension auto Time_, Dimension auto Angle_, UnitTagType = NullTag>
+          Dimension auto Time_, Dimension auto Angle_, typename = NullTag>
 struct UnitType;
 
 namespace _detail {
@@ -57,7 +37,7 @@ template <typename T> struct is_unit<const T> : is_unit<T> {};
 template <Dimension auto Amount_, Dimension auto Current_,
           Dimension auto Length_, Dimension auto Luminosity_,
           Dimension auto Mass_, Dimension auto Temperature_,
-          Dimension auto Time_, Dimension auto Angle_, UnitTagType Tag>
+          Dimension auto Time_, Dimension auto Angle_, typename Tag>
 struct is_unit<UnitType<Amount_, Current_, Length_, Luminosity_, Mass_,
                         Temperature_, Time_, Angle_, Tag>> : std::true_type {};
 }   // namespace _detail
@@ -70,7 +50,7 @@ concept Unit = _detail::is_unit<T>::value;
 template <Dimension auto Amount_, Dimension auto Current_,
           Dimension auto Length_, Dimension auto Luminosity_,
           Dimension auto Mass_, Dimension auto Temperature_,
-          Dimension auto Time_, Dimension auto Angle_, UnitTagType Tag_>
+          Dimension auto Time_, Dimension auto Angle_, typename Tag_>
 struct UnitType {
     /// The amount dimension of the unit
     static constexpr Dimension auto Amount = Amount_;
@@ -89,7 +69,7 @@ struct UnitType {
     //// The angle "dimension" of the unit
     static constexpr Dimension auto Angle = Angle_;
     /// The unit's tag
-    static constexpr UnitTagType Tag = Tag_;
+    using Tag = Tag_;
 
     /// @brief Returns the amount dimension of the unit
     ///
@@ -187,7 +167,7 @@ struct UnitType {
     /// @tparam NewTag the tag of the new unit
     ///
     ///@return a new unit with the specified tag.
-    template <UnitTagType NewTag>
+    template <typename NewTag>
     auto consteval addTag() const noexcept -> Unit auto {
         return UnitType<Amount, Current, Length, Luminosity, Mass, Temperature,
                         Time, Angle, NewTag>{};
@@ -200,84 +180,88 @@ struct UnitType {
     /// isn't a compile-time constant.
     ///
     /// @return the tag of the unit
-    auto consteval tag() const noexcept -> UnitTagType { return Tag; }
+    // auto consteval tag() const noexcept -> int { return Tag; }
 
     template <std::intmax_t NewPrefix>
     auto consteval adjustPrefixAmount() const noexcept -> Unit auto {
         return UnitType<Amount.template adjustPrefix<NewPrefix>(), Current,
-                        Length, Luminosity, Mass, Temperature, Time, Angle>{};
+                        Length, Luminosity, Mass, Temperature, Time, Angle,
+                        Tag>{};
     }
 
     template <std::intmax_t NewPrefix>
     auto consteval adjustPrefixCurrent() const noexcept -> Unit auto {
         return UnitType<Amount, Current.template adjustPrefix<NewPrefix>(),
-                        Length, Luminosity, Mass, Temperature, Time, Angle>{};
+                        Length, Luminosity, Mass, Temperature, Time, Angle,
+                        Tag>{};
     }
 
     template <std::intmax_t NewPrefix>
     auto consteval adjustPrefixLength() const noexcept -> Unit auto {
         return UnitType<Amount, Current,
                         Length.template adjustPrefix<NewPrefix>(), Luminosity,
-                        Mass, Temperature, Time, Angle>{};
+                        Mass, Temperature, Time, Angle, Tag>{};
     }
 
     template <std::intmax_t NewPrefix>
     auto consteval adjustPrefixLuminosity() const noexcept -> Unit auto {
         return UnitType<Amount, Current, Length,
                         Luminosity.template adjustPrefix<NewPrefix>(), Mass,
-                        Temperature, Time, Angle>{};
+                        Temperature, Time, Angle, Tag>{};
     }
 
     template <std::intmax_t NewPrefix>
     auto consteval adjustPrefixMass() const noexcept -> Unit auto {
         return UnitType<Amount, Current, Length, Luminosity,
                         Mass.template adjustPrefix<NewPrefix>(), Temperature,
-                        Time, Angle>{};
+                        Time, Angle, Tag>{};
     }
 
     template <std::intmax_t NewPrefix>
     auto consteval adjustPrefixTemperature() const noexcept -> Unit auto {
         return UnitType<Amount, Current, Length, Luminosity, Mass,
                         Temperature.template adjustPrefix<NewPrefix>(), Time,
-                        Angle>{};
+                        Angle, Tag>{};
     }
 
     template <std::intmax_t NewPrefix>
     auto consteval adjustPrefixTime() const noexcept -> Unit auto {
         return UnitType<Amount, Current, Length, Luminosity, Mass, Temperature,
-                        Time.template adjustPrefix<NewPrefix>(), Angle>{};
+                        Time.template adjustPrefix<NewPrefix>(), Angle, Tag>{};
     }
 
     template <std::intmax_t NewPrefix>
     auto consteval adjustPrefixAngle() const noexcept -> Unit auto {
         return UnitType<Amount, Current, Length, Luminosity, Mass, Temperature,
-                        Time, Angle.template adjustPrefix<NewPrefix>()>{};
+                        Time, Angle.template adjustPrefix<NewPrefix>(), Tag>{};
     }
 
     template <_detail::Ratio NewScaleFactor>
     auto consteval adjustScaleLength() const noexcept -> Unit auto {
         return UnitType<Amount, Current,
                         Length.template adjustScale<NewScaleFactor>(),
-                        Luminosity, Mass, Temperature, Time, Angle>{};
+                        Luminosity, Mass, Temperature, Time, Angle, Tag>{};
     }
 
     template <_detail::Ratio NewScaleFactor>
     auto consteval adjustScaleMass() const noexcept -> Unit auto {
         return UnitType<Amount, Current, Length, Luminosity,
                         Mass.template adjustScale<NewScaleFactor>(),
-                        Temperature, Time, Angle>{};
+                        Temperature, Time, Angle, Tag>{};
     }
 
     template <_detail::Ratio NewScaleFactor>
     auto consteval adjustScaleTime() const noexcept -> Unit auto {
         return UnitType<Amount, Current, Length, Luminosity, Mass, Temperature,
-                        Time.template adjustScale<NewScaleFactor>(), Angle>{};
+                        Time.template adjustScale<NewScaleFactor>(), Angle,
+                        Tag>{};
     }
 
     template <_detail::Ratio NewScaleFactor>
     auto consteval adjustScaleAngle() const noexcept -> Unit auto {
         return UnitType<Amount, Current, Length, Luminosity, Mass, Temperature,
-                        Time, Angle.template adjustScale<NewScaleFactor>()>{};
+                        Time, Angle.template adjustScale<NewScaleFactor>(),
+                        Tag>{};
     }
 
     auto consteval toCoherentUnit() const noexcept -> Unit auto {
@@ -366,7 +350,8 @@ concept UnitConvertibleTo =
     MassConvertibleTo<From.mass(), To.mass()> &&
     TemperatureConvertibleTo<From.temperature(), To.temperature()> &&
     TimeConvertibleTo<From.time(), To.time()> &&
-    AngleConvertibleTo<From.angle(), To.angle()> && From.tag() == To.tag();
+    AngleConvertibleTo<From.angle(), To.angle()> &&
+    std::same_as<typename decltype(From)::Tag, typename decltype(To)::Tag>;
 
 auto constexpr isConvertibleTo(Unit auto from, Unit auto to) noexcept -> bool {
     return UnitConvertibleTo<from, to>;
@@ -510,9 +495,13 @@ template <Unit auto U> struct UnitFormat {
     auto constexpr static unitString() -> std::string { return ""; }
 };
 
+namespace _detail {
 auto constexpr toString([[maybe_unused]] Unit auto u) -> std::string {
     return "";
 }
+}   // namespace _detail
+template <Unit auto U>
+inline const std::string unitString = _detail::toString(U);
 }   // namespace Maxwell
 
 #endif
