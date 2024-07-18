@@ -62,7 +62,7 @@ const double meangingless = mass_kg + length_m; // Yikes
 const SqMeter error = 15_m + 15_kg; // Won't compile
 ```
 
-For complicated expressions, `auto` can be used. However, be carefule using auto. Arithmetic expressions always convert their output to SI base units
+For complicated expressions, `auto` can be used. However, be careful using `auto`. Arithmetic expressions always convert their output to SI base units (the reason for this is to always have a consistent result for mixed units)!
 ```c++
-const auto area = 200_cm * 100_cm // the value of area is 2 m^2, intended? maybe no.
+const auto area = 200_cm * 100_cm // The value of area is 2 m^2. Intended? Maybe not.
 ```
