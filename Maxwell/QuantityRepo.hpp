@@ -4,6 +4,8 @@
 #include "Quantity.hpp"
 #include "UnitRepo.hpp"
 
+///@file QuantityRepo.hpp Definition of commonly used quantity types
+
 namespace Maxwell {
 using Mole    = Quantity<MoleUnit>;
 using Ampere  = Quantity<AmpereUnit>;
@@ -14,33 +16,34 @@ using Kelvin  = Quantity<KelvinUnit>;
 using Second  = Quantity<SecondUnit>;
 using Radian  = Quantity<RadianUnit>;
 
-#define MAKE_PREFIXED_QUANTITIES(Q)                                            \
-    using Quetta##Q = Quantity<Quetta##Q##Unit>;                               \
-    using Ronna##Q  = Quantity<Ronna##Q##Unit>;                                \
-    using Yotta##Q  = Quantity<Yotta##Q##Unit>;                                \
-    using Zetta##Q  = Quantity<Zetta##Q##Unit>;                                \
-    using Exa##Q    = Quantity<Exa##Q##Unit>;                                  \
-    using Tera##Q   = Quantity<Tera##Q##Unit>;                                 \
-    using Peta##Q   = Quantity<Peta##Q##Unit>;                                 \
-    using Tera##Q   = Quantity<Tera##Q##Unit>;                                 \
-    using Giga##Q   = Quantity<Giga##Q##Unit>;                                 \
-    using Mega##Q   = Quantity<Mega##Q##Unit>;                                 \
-    using Kilo##Q   = Quantity<Kilo##Q##Unit>;                                 \
-    using Hecto##Q  = Quantity<Hecto##Q##Unit>;                                \
-    using Deca##Q   = Quantity<Deca##Q##Unit>;                                 \
-    using Deci##Q   = Quantity<Deci##Q##Unit>;                                 \
-    using Centi##Q  = Quantity<Centi##Q##Unit>;                                \
-    using Milli##Q  = Quantity<Milli##Q##Unit>;                                \
-    using Micro##Q  = Quantity<Micro##Q##Unit>;                                \
-    using Nano##Q   = Quantity<Nano##Q##Unit>;                                 \
-    using Pico##Q   = Quantity<Pico##Q##Unit>;                                 \
-    using Femto##Q  = Quantity<Femto##Q##Unit>;                                \
-    using Atto##Q   = Quantity<Atto##Q##Unit>;                                 \
-    using Zepto##Q  = Quantity<Zepto##Q##Unit>;                                \
-    using Yocto##Q  = Quantity<Yocto##Q##Unit>;                                \
-    using Yocto##Q  = Quantity<Yocto##Q##Unit>;                                \
+#define MAKE_PREFIXED_QUANTITIES(Q)                                                                                    \
+    using Quetta##Q = Quantity<Quetta##Q##Unit>;                                                                       \
+    using Ronna##Q  = Quantity<Ronna##Q##Unit>;                                                                        \
+    using Yotta##Q  = Quantity<Yotta##Q##Unit>;                                                                        \
+    using Zetta##Q  = Quantity<Zetta##Q##Unit>;                                                                        \
+    using Exa##Q    = Quantity<Exa##Q##Unit>;                                                                          \
+    using Tera##Q   = Quantity<Tera##Q##Unit>;                                                                         \
+    using Peta##Q   = Quantity<Peta##Q##Unit>;                                                                         \
+    using Tera##Q   = Quantity<Tera##Q##Unit>;                                                                         \
+    using Giga##Q   = Quantity<Giga##Q##Unit>;                                                                         \
+    using Mega##Q   = Quantity<Mega##Q##Unit>;                                                                         \
+    using Kilo##Q   = Quantity<Kilo##Q##Unit>;                                                                         \
+    using Hecto##Q  = Quantity<Hecto##Q##Unit>;                                                                        \
+    using Deca##Q   = Quantity<Deca##Q##Unit>;                                                                         \
+    using Deci##Q   = Quantity<Deci##Q##Unit>;                                                                         \
+    using Centi##Q  = Quantity<Centi##Q##Unit>;                                                                        \
+    using Milli##Q  = Quantity<Milli##Q##Unit>;                                                                        \
+    using Micro##Q  = Quantity<Micro##Q##Unit>;                                                                        \
+    using Nano##Q   = Quantity<Nano##Q##Unit>;                                                                         \
+    using Pico##Q   = Quantity<Pico##Q##Unit>;                                                                         \
+    using Femto##Q  = Quantity<Femto##Q##Unit>;                                                                        \
+    using Atto##Q   = Quantity<Atto##Q##Unit>;                                                                         \
+    using Zepto##Q  = Quantity<Zepto##Q##Unit>;                                                                        \
+    using Yocto##Q  = Quantity<Yocto##Q##Unit>;                                                                        \
+    using Yocto##Q  = Quantity<Yocto##Q##Unit>;                                                                        \
     using Quecto##Q = Quantity<Quecto##Q##Unit>;
 
+#ifndef NO_PREDIFNED_DERIVED_UNITS
 MAKE_PREFIXED_QUANTITIES(Mole)
 MAKE_PREFIXED_QUANTITIES(Ampere)
 MAKE_PREFIXED_QUANTITIES(Meter)
@@ -70,13 +73,11 @@ using PoundMass = Quantity<PoundMassUnit>;
 using Hertz     = Quantity<HertzUnit>;
 using Becquerel = Quantity<BecquerelUnit>;
 
-#define MAKE_QUANTITY_LITERAL(UnitName, Symbol)                                \
-    auto consteval operator""_##Symbol(long double x) noexcept -> UnitName {   \
-        return UnitName(x);                                                    \
-    }                                                                          \
-    auto consteval operator""_##Symbol(unsigned long long x) noexcept          \
-        -> BasicQuantity<unsigned long long, UnitName##Unit> {                 \
-        return BasicQuantity<unsigned long long, UnitName##Unit>(x);           \
+#define MAKE_QUANTITY_LITERAL(UnitName, Symbol)                                                                        \
+    auto consteval operator""_##Symbol(long double x) noexcept -> UnitName { return UnitName(x); }                     \
+    auto consteval operator""_##Symbol(                                                                                \
+        unsigned long long x) noexcept -> BasicQuantity<unsigned long long, UnitName##Unit> {                          \
+        return BasicQuantity<unsigned long long, UnitName##Unit>(x);                                                   \
     }
 
 inline namespace MetricLiterals {
@@ -107,6 +108,10 @@ MAKE_QUANTITY_LITERAL(Foot, ft)
 MAKE_QUANTITY_LITERAL(Yard, yd)
 MAKE_QUANTITY_LITERAL(Mile, mi)
 }   // namespace ImperialUnits
+#else
+#define MAKE_MOLE_PREFIXES MAKE_QUANTITY_PREFIXES(Mole)
+#define MAKE_DEGREE        using Degree = Quantity<DegreeUnit>;
+#endif
 }   // namespace Maxwell
 
 #endif

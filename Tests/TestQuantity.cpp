@@ -6,8 +6,6 @@
 
 #include <numbers>
 
-#include <cxxabi.h>
-
 using namespace Maxwell;
 
 class Custom {
@@ -23,8 +21,7 @@ class Custom {
 
     Custom(Custom&& c) noexcept(false) : d_(c.d_) { ++numMoveCtorCalls; }
 
-    friend auto operator==(const Custom&,
-                           const Custom&) noexcept -> bool = default;
+    friend auto operator==(const Custom&, const Custom&) noexcept -> bool = default;
 
   private:
     double d_;
@@ -68,8 +65,7 @@ class Custom2 {
 
     Custom2(Custom2&& c) = default;
 
-    friend auto operator==(const Custom2&,
-                           const Custom2&) noexcept -> bool = default;
+    friend auto operator==(const Custom2&, const Custom2&) noexcept -> bool = default;
 
     ~Custom2() {}
 
@@ -116,16 +112,11 @@ TYPED_TEST(TestQuantityFixture, TestProperties) {
     EXPECT_EQ(noexcept(QuantityType()), noexcept(TypeParam()));
     EXPECT_EQ(sizeof(QuantityType), sizeof(TypeParam));
     EXPECT_EQ(alignof(QuantityType), alignof(TypeParam));
-    EXPECT_EQ(std::is_trivially_destructible_v<QuantityType>,
-              std::is_trivially_destructible_v<TypeParam>);
-    EXPECT_EQ(std::is_copy_constructible_v<QuantityType>,
-              std::is_copy_constructible_v<TypeParam>);
-    EXPECT_EQ(std::is_nothrow_copy_constructible_v<QuantityType>,
-              std::is_nothrow_copy_constructible_v<TypeParam>);
-    EXPECT_EQ(std::is_move_constructible_v<QuantityType>,
-              std::is_move_constructible_v<TypeParam>);
-    EXPECT_EQ(std::is_nothrow_move_constructible_v<QuantityType>,
-              std::is_nothrow_move_constructible_v<TypeParam>);
+    EXPECT_EQ(std::is_trivially_destructible_v<QuantityType>, std::is_trivially_destructible_v<TypeParam>);
+    EXPECT_EQ(std::is_copy_constructible_v<QuantityType>, std::is_copy_constructible_v<TypeParam>);
+    EXPECT_EQ(std::is_nothrow_copy_constructible_v<QuantityType>, std::is_nothrow_copy_constructible_v<TypeParam>);
+    EXPECT_EQ(std::is_move_constructible_v<QuantityType>, std::is_move_constructible_v<TypeParam>);
+    EXPECT_EQ(std::is_nothrow_move_constructible_v<QuantityType>, std::is_nothrow_move_constructible_v<TypeParam>);
 }
 
 TYPED_TEST(TestQuantityFixture, TestDefaultConstructor) {
@@ -159,22 +150,18 @@ TYPED_TEST(TestQuantityFixture, TestSingleArgumentConstructor) {
 
     using QuantityType2 = BasicQuantity<TypeParam, MeterUnit>;
 
-    EXPECT_EQ(
-        (std::is_nothrow_constructible_v<QuantityType2, const TypeParam&>),
-        (std::is_nothrow_constructible_v<TypeParam, const TypeParam&>) );
+    EXPECT_EQ((std::is_nothrow_constructible_v<QuantityType2, const TypeParam&>),
+              (std::is_nothrow_constructible_v<TypeParam, const TypeParam&>) );
 
     EXPECT_EQ((std::is_nothrow_constructible_v<QuantityType2, TypeParam&&>),
               (std::is_nothrow_constructible_v<TypeParam, TypeParam&&>) );
 }
 
-template <typename T>
-class TestQuantityIncompatbility : public ::testing::Test {};
+template <typename T> class TestQuantityIncompatbility : public ::testing::Test {};
 
-using QuantityTypes =
-    ::testing::Types<std::pair<Mole, Ampere>, std::pair<Mole, Meter>,
-                     std::pair<Mole, Candela>, std::pair<Mole, Gram>,
-                     std::pair<Mole, Kelvin>, std::pair<Mole, Second>,
-                     std::pair<Mole, Radian>, std::pair<Hertz, Becquerel>>;
+using QuantityTypes = ::testing::Types<std::pair<Mole, Ampere>, std::pair<Mole, Meter>, std::pair<Mole, Candela>,
+                                       std::pair<Mole, Gram>, std::pair<Mole, Kelvin>, std::pair<Mole, Second>,
+                                       std::pair<Mole, Radian>, std::pair<Hertz, Becquerel>>;
 TYPED_TEST_SUITE(TestQuantityIncompatbility, QuantityTypes);
 
 template <typename L, typename R>
@@ -197,14 +184,12 @@ TYPED_TEST(TestQuantityIncompatbility, TestIncompatbility) {
     EXPECT_FALSE((SubtractableWith<RHSType, LHSType>) );
 }
 
-template <typename T>
-class TestQuantityConversionsPrefixes : public ::testing::Test {};
+template <typename T> class TestQuantityConversionsPrefixes : public ::testing::Test {};
 
-using QuantitTypePrefixes = ::testing::Types<
-    std::pair<Mole, KiloMole>, std::pair<Ampere, KiloAmpere>,
-    std::pair<Meter, KiloMeter>, std::pair<Candela, KiloCandela>,
-    std::pair<Gram, KiloGram>, std::pair<Second, KiloSecond>,
-    std::pair<Kelvin, KiloKelvin>, std::pair<Radian, KiloRadian>>;
+using QuantitTypePrefixes =
+    ::testing::Types<std::pair<Mole, KiloMole>, std::pair<Ampere, KiloAmpere>, std::pair<Meter, KiloMeter>,
+                     std::pair<Candela, KiloCandela>, std::pair<Gram, KiloGram>, std::pair<Second, KiloSecond>,
+                     std::pair<Kelvin, KiloKelvin>, std::pair<Radian, KiloRadian>>;
 TYPED_TEST_SUITE(TestQuantityConversionsPrefixes, QuantitTypePrefixes);
 
 TYPED_TEST(TestQuantityConversionsPrefixes, TestConversionPrefix) {
@@ -257,16 +242,13 @@ TEST(TestQuantityConversionsScale, TestMass) {
     EXPECT_FLOAT_EQ(kg2.magnitude(), 1);
 }
 
-template <typename T>
-class TestQuantityArithmeticValidity : public ::testing::Test {};
+template <typename T> class TestQuantityArithmeticValidity : public ::testing::Test {};
 
-using QuantityArithmeticTypes = ::testing::Types<
-    std::pair<Mole, KiloMole>, std::pair<Ampere, KiloAmpere>,
-    std::pair<Meter, KiloMeter>, std::pair<Candela, KiloCandela>,
-    std::pair<Gram, KiloGram>, std::pair<Second, KiloSecond>,
-    std::pair<Kelvin, KiloKelvin>, std::pair<Radian, KiloRadian>,
-    std::pair<Foot, Inch>, std::pair<Foot, Meter>, std::pair<Degree, Radian>,
-    std::pair<KiloGram, PoundMass>>;
+using QuantityArithmeticTypes =
+    ::testing::Types<std::pair<Mole, KiloMole>, std::pair<Ampere, KiloAmpere>, std::pair<Meter, KiloMeter>,
+                     std::pair<Candela, KiloCandela>, std::pair<Gram, KiloGram>, std::pair<Second, KiloSecond>,
+                     std::pair<Kelvin, KiloKelvin>, std::pair<Radian, KiloRadian>, std::pair<Foot, Inch>,
+                     std::pair<Foot, Meter>, std::pair<Degree, Radian>, std::pair<KiloGram, PoundMass>>;
 TYPED_TEST_SUITE(TestQuantityArithmeticValidity, QuantityArithmeticTypes);
 
 TYPED_TEST(TestQuantityArithmeticValidity, TestAddition) {
@@ -283,4 +265,20 @@ TYPED_TEST(TestQuantityArithmeticValidity, TestSubtraction) {
 
     EXPECT_TRUE((SubtractableWith<LHSType, RHSType>) );
     EXPECT_TRUE((SubtractableWith<RHSType, LHSType>) );
+}
+
+TYPED_TEST(TestQuantityIncompatbility, TestAddition) {
+    using LHSType = TypeParam::first_type;
+    using RHSType = TypeParam::second_type;
+
+    EXPECT_FALSE((AddableWith<LHSType, RHSType>) );
+    EXPECT_FALSE((AddableWith<RHSType, LHSType>) );
+}
+
+TYPED_TEST(TestQuantityIncompatbility, TestSubtraction) {
+    using LHSType = TypeParam::first_type;
+    using RHSType = TypeParam::second_type;
+
+    EXPECT_FALSE((SubtractableWith<LHSType, RHSType>) );
+    EXPECT_FALSE((SubtractableWith<RHSType, LHSType>) );
 }

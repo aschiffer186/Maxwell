@@ -29,6 +29,7 @@ template <Dimension auto Amount_, Dimension auto Current_,
           Dimension auto Time_, Dimension auto Angle_, typename = NullTag>
 struct UnitType;
 
+/// \cond
 namespace _detail {
 template <typename> struct is_unit : std::false_type {};
 
@@ -41,6 +42,7 @@ template <Dimension auto Amount_, Dimension auto Current_,
 struct is_unit<UnitType<Amount_, Current_, Length_, Luminosity_, Mass_,
                         Temperature_, Time_, Angle_, Tag>> : std::true_type {};
 }   // namespace _detail
+/// \endcond
 
 /// @brief Concept modeling types that are instantiations of UnitType
 template <typename T>
@@ -173,15 +175,18 @@ struct UnitType {
                         Time, Angle, NewTag>{};
     }
 
-    ///@brief Returns the tag of the unit
+    ///@brief Adjusts the prefix of the amount dimension
     ///
-    /// Returns the tag of the unit. This function
-    /// is always usable in a constant expression even if *this
-    /// isn't a compile-time constant.
+    /// Adjusts the prefix of the amount dimension by the specified amount.
+    /// This function may also be used in constant in expressoins even
+    /// if *this isn't a compile-time constant.
     ///
-    /// @return the tag of the unit
-    // auto consteval tag() const noexcept -> int { return Tag; }
+    ///
+    /// @post this->adjustPrefixAmount<NewPrefix>().prefix() == Prfix +
+    /// NewPrefix
 
+    ///@tparam NewPrefix the amount to adjust the prefix by
+    ///@return a unit with the adjusted prefix
     template <std::intmax_t NewPrefix>
     auto consteval adjustPrefixAmount() const noexcept -> Unit auto {
         return UnitType<Amount.template adjustPrefix<NewPrefix>(), Current,
@@ -189,6 +194,17 @@ struct UnitType {
                         Tag>{};
     }
 
+    ///@brief Adjusts the prefix of the current dimension
+    ///
+    /// Adjusts the prefix of the current dimension by the specified amount.
+    /// This function may also be used in constant in expressoins even
+    /// if *this isn't a compile-time constant.
+    ///
+    /// @post this->adjustPrefixCurrent<NewPrefix>().prefix() == Prfix +
+    /// NewPrefix
+    ///
+    ///@tparam NewPrefix the amount to adjust the prefix by
+    ///@return a unit with the adjusted prefix
     template <std::intmax_t NewPrefix>
     auto consteval adjustPrefixCurrent() const noexcept -> Unit auto {
         return UnitType<Amount, Current.template adjustPrefix<NewPrefix>(),
@@ -196,6 +212,18 @@ struct UnitType {
                         Tag>{};
     }
 
+    ///@brief Adjusts the prefix of the length dimension
+    ///
+    /// Adjusts the prefix of the length dimension by the specified amount.
+    /// This function may also be used in constant in expressoins even
+    /// if *this isn't a compile-time constant.
+    ///
+    /// @post this->adjustPrefixLength<NewPrefix>().prefix() == Prfix +
+    /// NewPrefix
+    ///
+    ///
+    ///@tparam NewPrefix the amount to adjust the prefix by
+    ///@return a unit with the adjusted prefix
     template <std::intmax_t NewPrefix>
     auto consteval adjustPrefixLength() const noexcept -> Unit auto {
         return UnitType<Amount, Current,
@@ -203,6 +231,17 @@ struct UnitType {
                         Mass, Temperature, Time, Angle, Tag>{};
     }
 
+    ///@brief Adjusts the prefix of the luminosity dimension
+    ///
+    /// Adjusts the prefix of the luminosity dimension by the specified amount.
+    /// This function may also be used in constant in expressoins even
+    /// if *this isn't a compile-time constant.
+    ///
+    /// @post this->adjustPrefixLuminoity<NewPrefix>().prefix() == Prfix +
+    /// NewPrefix
+    ///
+    ///@tparam NewPrefix the amount to adjust the prefix by
+    ///@return a unit with the adjusted prefix
     template <std::intmax_t NewPrefix>
     auto consteval adjustPrefixLuminosity() const noexcept -> Unit auto {
         return UnitType<Amount, Current, Length,
@@ -210,6 +249,16 @@ struct UnitType {
                         Temperature, Time, Angle, Tag>{};
     }
 
+    ///@brief Adjusts the prefix of the mass dimension
+    ///
+    /// Adjusts the prefix of the mass dimension by the specified amount.
+    /// This function may also be used in constant in expressoins even
+    /// if *this isn't a compile-time constant.
+    ///
+    /// @post this->adjustPrefixMass<NewPrefix>().prefix() == Prfix + NewPrefix
+    ///
+    ///@tparam NewPrefix the amount to adjust the prefix by
+    ///@return a unit with the adjusted prefix
     template <std::intmax_t NewPrefix>
     auto consteval adjustPrefixMass() const noexcept -> Unit auto {
         return UnitType<Amount, Current, Length, Luminosity,
@@ -217,6 +266,17 @@ struct UnitType {
                         Time, Angle, Tag>{};
     }
 
+    ///@brief Adjusts the prefix of the temperature dimension
+    ///
+    /// Adjusts the prefix of the temperature dimension by the specified amount.
+    /// This function may also be used in constant in expressoins even
+    /// if *this isn't a compile-time constant.
+    ///
+    /// @post this->adjustPrefixTemperature<NewPrefix>().prefix() == Prfix +
+    /// NewPrefix
+    ///
+    ///@tparam NewPrefix the amount to adjust the prefix by
+    ///@return a unit with the adjusted prefix
     template <std::intmax_t NewPrefix>
     auto consteval adjustPrefixTemperature() const noexcept -> Unit auto {
         return UnitType<Amount, Current, Length, Luminosity, Mass,
@@ -224,12 +284,32 @@ struct UnitType {
                         Angle, Tag>{};
     }
 
+    ///@brief Adjusts the prefix of the time dimension
+    ///
+    /// Adjusts the prefix of the time dimension by the specified amount.
+    /// This function may also be used in constant in expressoins even
+    /// if *this isn't a compile-time constant.
+
+    /// @post this->adjustPrefixTime<NewPrefix>().prefix() == Prfix + NewPrefix
+    ///
+    ///@tparam NewPrefix the amount to adjust the prefix by
+    ///@return a unit with the adjusted prefix
     template <std::intmax_t NewPrefix>
     auto consteval adjustPrefixTime() const noexcept -> Unit auto {
         return UnitType<Amount, Current, Length, Luminosity, Mass, Temperature,
                         Time.template adjustPrefix<NewPrefix>(), Angle, Tag>{};
     }
 
+    ///@brief Adjusts the prefix of the angle dimension
+    ///
+    /// Adjusts the prefix of the length dimension by the specified amount.
+    /// This function may also be used in constant in expressoins even
+    /// if *this isn't a compile-time constant.
+    ///
+    /// @post this->adjustPrefixAngle<NewPrefix>().prefix() == Prfix + NewPrefix
+    ///
+    ///@tparam NewPrefix the amount to angle the prefix by
+    ///@return a unit with the adjusted prefix
     template <std::intmax_t NewPrefix>
     auto consteval adjustPrefixAngle() const noexcept -> Unit auto {
         return UnitType<Amount, Current, Length, Luminosity, Mass, Temperature,
@@ -370,6 +450,7 @@ auto constexpr isUnitless(Unit auto u) noexcept -> bool {
 }
 
 /// --- Unit Conversion ---
+/// \cond
 namespace _detail {
 constexpr std::array pow10Arr{
     1e-30, 1e-29, 1e-28, 1e-27, 1e-26, 1e-25, 1e-24, 1e-23, 1e-22, 1e-21, 1e-20,
@@ -399,6 +480,7 @@ auto consteval pow10(int exp) noexcept -> double {
     return res;
 }
 }   // namespace _detail
+/// \endcond
 
 auto consteval convertPrefix(Unit auto from, Unit auto to) noexcept -> double {
     const int amountDiff  = from.amount().prefix() - to.amount().prefix();

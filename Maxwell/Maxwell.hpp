@@ -1,6 +1,8 @@
 #ifndef MAXWELL_HPP
 #define MAXWELL_HPP
 
+///@file Maxwell.hpp main include file
+
 #include "Dimension.hpp"
 #include "Quantity.hpp"
 #include "QuantityRepo.hpp"

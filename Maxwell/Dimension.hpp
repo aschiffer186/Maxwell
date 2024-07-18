@@ -9,6 +9,7 @@
 ///@file Dimension.hpp Definition of DimensionType
 
 namespace Maxwell {
+/// \cond
 namespace _detail {
 template <typename> struct is_ratio : std::false_type {};
 
@@ -18,6 +19,7 @@ struct is_ratio<std::ratio<Num, Den>> : std::true_type {};
 template <typename T>
 concept Ratio = is_ratio<T>::value;
 }   // namespace _detail
+/// \endcond
 
 // --- Dimension Concept ---
 
@@ -40,10 +42,10 @@ concept Ratio = is_ratio<T>::value;
 /// @tparam Prefix_ the metric prefix relative to the SI coherent unit
 /// @tparam ScaleFactor_ the scale factor relative to the SI coherent unit
 /// @tparam Offset_ the offset relative to the SI prefix unit
-template <std::intmax_t Power, std::intmax_t Prefix, _detail::Ratio ScaleFactor,
-          _detail::Ratio Offset>
+template <std::intmax_t Power, std::intmax_t Prefix, _detail::Ratio ScaleFactor, _detail::Ratio Offset>
 struct DimensionType;
 
+/// \cond
 namespace _detail {
 template <typename> struct is_dimension : std::false_type {};
 
@@ -53,22 +55,20 @@ template <typename T> struct is_dimension<T&> : is_dimension<T> {};
 
 template <typename T> struct is_dimension<T&&> : is_dimension<T> {};
 
-template <std::intmax_t Power, std::intmax_t Prefix, _detail::Ratio ScaleFactor,
-          _detail::Ratio Offset>
-struct is_dimension<DimensionType<Power, Prefix, ScaleFactor, Offset>>
-    : std::true_type {};
+template <std::intmax_t Power, std::intmax_t Prefix, _detail::Ratio ScaleFactor, _detail::Ratio Offset>
+struct is_dimension<DimensionType<Power, Prefix, ScaleFactor, Offset>> : std::true_type {};
 
 using One  = std::ratio<1, 1>;
 using Zero = std::ratio<0, 1>;
 }   // namespace _detail
+/// \endcond
 
 /// Concept modeling an instantiation of DimensionType
 template <typename T>
 concept Dimension = _detail::is_dimension<T>::value;
 
 // Definition of unit
-template <std::intmax_t Power_, std::intmax_t Prefix_,
-          _detail::Ratio ScaleFactor_, _detail::Ratio Offset_>
+template <std::intmax_t Power_, std::intmax_t Prefix_, _detail::Ratio ScaleFactor_, _detail::Ratio Offset_>
 struct DimensionType {
     /// The power of the dimension relative to the SI coherent unit
     static constexpr auto Power = Power_;
@@ -104,8 +104,7 @@ struct DimensionType {
     /// @post prefix() == old Prefix + NewPrefix
     ///
     /// @tparam NewPrefix the prefix to add by
-    template <std::intmax_t NewPrefix>
-    auto consteval adjustPrefix() const noexcept -> Dimension auto {
+    template <std::intmax_t NewPrefix> auto consteval adjustPrefix() const noexcept -> Dimension auto {
         return DimensionType<Power, Prefix + NewPrefix, ScaleFactor, Offset>{};
     }
 
@@ -120,11 +119,8 @@ struct DimensionType {
     /// NewScaleFactor>, ScaleFactor>
     ///
     ///@tparam NewScaleFactor the scale factor to multiply by
-    template <_detail::Ratio NewScaleFactor>
-    auto consteval adjustScale() const noexcept -> Dimension auto {
-        return DimensionType<Power, Prefix,
-                             std::ratio_multiply<NewScaleFactor, ScaleFactor>,
-                             Offset>{};
+    template <_detail::Ratio NewScaleFactor> auto consteval adjustScale() const noexcept -> Dimension auto {
+        return DimensionType<Power, Prefix, std::ratio_multiply<NewScaleFactor, ScaleFactor>, Offset>{};
     }
 
     ///@brief Adjusts the offset of the dimension
@@ -136,10 +132,8 @@ struct DimensionType {
     /// @post std::ratio_equal_v<std::ratio_add<old Offset, NewOffset>, Offset>
     ///
     /// @tparam NewPrefix the offset to add by
-    template <_detail::Ratio NewOffset>
-    auto consteval adjustOffset() const noexcept -> Dimension auto {
-        return DimensionType<Power, Prefix, ScaleFactor,
-                             std::ratio_add<Offset, NewOffset>>{};
+    template <_detail::Ratio NewOffset> auto consteval adjustOffset() const noexcept -> Dimension auto {
+        return DimensionType<Power, Prefix, ScaleFactor, std::ratio_add<Offset, NewOffset>>{};
     }
 
     ///@brief Returns true if the dimension is coherent.
@@ -188,7 +182,7 @@ constexpr DimensionType<0, 0, _detail::One, _detail::Zero> NullDimension{};
 /// @param rhs the other dimension to compare
 ///
 /// @return true if the two dimension are equal
-auto consteval
+auto constexpr
 operator==(Dimension auto lhs, Dimension auto rhs) noexcept -> bool {
     return std::same_as<decltype(lhs), decltype(rhs)>;
 }
@@ -199,8 +193,7 @@ operator==(Dimension auto lhs, Dimension auto rhs) noexcept -> bool {
 /// if both are types modeling Dimension and From.power() == To.power()
 template <auto From, auto To>
 concept DimensionConvertibleTo =
-    Dimension<decltype(From)> && Dimension<decltype(To)> &&
-    decltype(From)::Power == decltype(To)::Power;
+    Dimension<decltype(From)> && Dimension<decltype(To)> && decltype(From)::Power == decltype(To)::Power;
 
 // --- Dimension Composition ---
 
@@ -219,8 +212,7 @@ concept DimensionConvertibleTo =
 /// @return the product of two dimensions
 auto consteval
 operator*(Dimension auto lhs, Dimension auto rhs) noexcept -> Dimension auto {
-    constexpr Dimension auto res = DimensionType<lhs.power() + rhs.power(), 0,
-                                                 _detail::One, _detail::Zero>{};
+    constexpr Dimension auto res = DimensionType<lhs.power() + rhs.power(), 0, _detail::One, _detail::Zero>{};
     static_assert(res.isCoherentDimension());
     return res;
 }
@@ -240,8 +232,7 @@ operator*(Dimension auto lhs, Dimension auto rhs) noexcept -> Dimension auto {
 /// @return the quotient of two dimensions
 auto consteval
 operator/(Dimension auto lhs, Dimension auto rhs) noexcept -> Dimension auto {
-    constexpr Dimension auto res = DimensionType<lhs.power() - rhs.power(), 0,
-                                                 _detail::One, _detail::Zero>{};
+    constexpr Dimension auto res = DimensionType<lhs.power() - rhs.power(), 0, _detail::One, _detail::Zero>{};
     static_assert(res.isCoherentDimension());
     return res;
 }
