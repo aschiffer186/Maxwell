@@ -2,9 +2,10 @@
 #include <concepts>
 #include <gtest/gtest.h>
 
-#include "Maxwell.hpp"
-
 #include <numbers>
+#include <vector>
+
+#include "Maxwell.hpp"
 
 using namespace Maxwell;
 
@@ -98,6 +99,31 @@ operator*(double, Custom2) -> Custom2 {
     return {};
 }
 
+auto
+operator+(const std::vector<double>&, const std::vector<double>&) -> std::vector<double> {
+    return {};
+}
+
+auto
+operator-(const std::vector<double>&, const std::vector<double>&) -> std::vector<double> {
+    return {};
+}
+
+auto
+operator*(const std::vector<double>&, const std::vector<double>&) -> std::vector<double> {
+    return {};
+}
+
+auto
+operator*(double, const std::vector<double>&) -> std::vector<double> {
+    return {};
+}
+
+auto
+operator/(const std::vector<double>&, const std::vector<double>&) -> std::vector<double> {
+    return {};
+}
+
 template <typename T> class TestQuantityFixture : public testing::Test {
   protected:
     T value_;
@@ -155,6 +181,14 @@ TYPED_TEST(TestQuantityFixture, TestSingleArgumentConstructor) {
 
     EXPECT_EQ((std::is_nothrow_constructible_v<QuantityType2, TypeParam&&>),
               (std::is_nothrow_constructible_v<TypeParam, TypeParam&&>) );
+}
+
+TYPED_TEST(TestQuantityFixture, TestInitializerListConstructor) {
+    using MeterVector = BasicQuantity<std::vector<double>, MeterUnit>;
+
+    MeterVector q(std::in_place, {1.0, 2.0, 3.0, 4.0});
+    EXPECT_EQ(q.magnitude(), (std::vector{1.0, 2.0, 3.0, 4.0}));
+    EXPECT_EQ(q.units(), MeterUnit);
 }
 
 template <typename T> class TestQuantityIncompatbility : public ::testing::Test {};

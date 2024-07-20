@@ -15,20 +15,7 @@
 /// @file Quantity.hpp Contains the definition of BasicQuantity
 
 namespace Maxwell {
-/// \cond
-namespace _detail {
-template <typename T>
-concept Arithmetic = requires(T t, double d) {
-    { t + t } -> std::convertible_to<T>;
-    { t - t } -> std::convertible_to<T>;
-    { t* t } -> std::convertible_to<T>;
-    { t / t } -> std::convertible_to<T>;
-    d* t;
-};
-}   // namespace _detail
-/// \endcond
-
-template <_detail::Arithmetic Tp, Unit auto U> class BasicQuantity;
+template <typename Tp, Unit auto U> class BasicQuantity;
 
 /// \cond
 namespace _detail {
@@ -40,7 +27,7 @@ template <typename T> struct is_quantity<T&> : is_quantity<T> {};
 
 template <typename T> struct is_quantity<T&&> : is_quantity<T> {};
 
-template <Arithmetic Tp, Unit auto U> struct is_quantity<BasicQuantity<Tp, U>> : std::true_type {};
+template <typename Tp, Unit auto U> struct is_quantity<BasicQuantity<Tp, U>> : std::true_type {};
 }   // namespace _detail
 /// \endcond
 
@@ -65,7 +52,7 @@ concept QuantityLike = _detail::is_quantity<T>::value;
  * @tparam Tp the type of the BasicQuantity's magnitude
  * @tparam U the BasicQuantity's unit
  */
-template <_detail::Arithmetic Tp, Unit auto U> class BasicQuantity {
+template <typename Tp, Unit auto U> class BasicQuantity {
   public:
     /// Type alias for the type of the BasicQuantity's magnitude
     using MagnitudeType = Tp;
@@ -115,7 +102,7 @@ template <_detail::Arithmetic Tp, Unit auto U> class BasicQuantity {
         requires std::constructible_from<MagnitudeType, std::initializer_list<Up>, Args&&...>
         : mag_(il, std::forward<Args>(args)...) {}
 
-    template <_detail::Arithmetic Up, Unit auto From>
+    template <typename Up, Unit auto From>
         requires UnitConvertibleTo<From, Units> && std::constructible_from<MagnitudeType, const Up&>
     constexpr BasicQuantity(const BasicQuantity<Up, From>& other) noexcept(
         std::is_nothrow_constructible_v<MagnitudeType, Up>)
@@ -124,7 +111,7 @@ template <_detail::Arithmetic Tp, Unit auto U> class BasicQuantity {
         mag_ *= factor;
     }
 
-    template <_detail::Arithmetic Up, Unit auto From>
+    template <typename Up, Unit auto From>
         requires UnitConvertibleTo<From, Units> &&
                  std::constructible_from<MagnitudeType, std::add_rvalue_reference_t<Up>>
     constexpr BasicQuantity(BasicQuantity<Up, From>&& other) noexcept(
@@ -134,7 +121,7 @@ template <_detail::Arithmetic Tp, Unit auto U> class BasicQuantity {
         mag_ *= factor;
     }
 
-    template <_detail::Arithmetic Up, Unit auto From>
+    template <typename Up, Unit auto From>
         requires UnitConvertibleTo<From, Units> &&
                      std::constructible_from<MagnitudeType, std::add_rvalue_reference_t<Up>>
     auto constexpr operator=(BasicQuantity<Up, From> other) noexcept(
@@ -228,13 +215,13 @@ template <_detail::Arithmetic Tp, Unit auto U> class BasicQuantity {
         return *this;
     }
 
-    template <_detail::Arithmetic S, Unit auto O>
+    template <typename S, Unit auto O>
         requires UnitConvertibleTo<O, Units>
     auto constexpr operator+=(const BasicQuantity<S, O>& other) noexcept(noexcept(magnitude() + magnitude())) {
         mag_ += conversionFactor(O, Units) * other.magnitude();
     }
 
-    template <_detail::Arithmetic S, Unit auto O>
+    template <typename S, Unit auto O>
         requires UnitConvertibleTo<O, Units>
     auto constexpr operator-=(const BasicQuantity<S, O>& other) noexcept(noexcept(magnitude() - magnitude())) {
         mag_ -= conversionFactor(O, Units) * other.magnitude();
@@ -247,21 +234,21 @@ template <_detail::Arithmetic Tp, Unit auto U> class BasicQuantity {
 template <Unit auto U> using Quantity = BasicQuantity<double, U>;
 
 // --- Arithmetic Operators ---
-template <_detail::Arithmetic S1, Unit auto U1, _detail::Arithmetic S2, Unit auto U2>
+template <typename S1, Unit auto U1, typename S2, Unit auto U2>
     requires UnitConvertibleTo<U2, U1>
 auto constexpr
 operator+(BasicQuantity<S1, U1> lhs, const BasicQuantity<S2, U2>& rhs) noexcept(noexcept(lhs += rhs)) -> auto {
     return lhs += rhs;
 }
 
-template <_detail::Arithmetic S1, Unit auto U1, _detail::Arithmetic S2, Unit auto U2>
+template <typename S1, Unit auto U1, typename S2, Unit auto U2>
     requires UnitConvertibleTo<U2, U1>
 auto constexpr
 operator-(BasicQuantity<S1, U1> lhs, const BasicQuantity<S2, U2>& rhs) noexcept(noexcept(lhs -= rhs)) -> auto {
     return lhs -= rhs;
 }
 
-template <_detail::Arithmetic S1, Unit auto U1, _detail::Arithmetic S2, Unit auto U2>
+template <typename S1, Unit auto U1, typename S2, Unit auto U2>
     requires UnitConvertibleTo<U2, U1>
 auto constexpr
 operator*(BasicQuantity<S1, U1> lhs,
@@ -270,7 +257,7 @@ operator*(BasicQuantity<S1, U1> lhs,
     return BasicQuantity(lhs.toCoherentQuantity() * rhs.toCoherentQuantity(), resUnit);
 }
 
-template <_detail::Arithmetic S1, Unit auto U1, _detail::Arithmetic S2, Unit auto U2>
+template <typename S1, Unit auto U1, typename S2, Unit auto U2>
     requires UnitConvertibleTo<U2, U1>
 auto constexpr
 operator/(BasicQuantity<S1, U1> lhs,
@@ -280,7 +267,7 @@ operator/(BasicQuantity<S1, U1> lhs,
 }
 
 // --- Comparison Operators ---
-template <_detail::Arithmetic S1, Unit auto U1, _detail::Arithmetic S2, Unit auto U2>
+template <typename S1, Unit auto U1, typename S2, Unit auto U2>
     requires UnitConvertibleTo<U2, U1> && std::three_way_comparable_with<S1, S2>
 auto constexpr
 operator<=>(const BasicQuantity<S1, U1>& lhs,
@@ -288,18 +275,18 @@ operator<=>(const BasicQuantity<S1, U1>& lhs,
     return lhs.toCoherentQuantity() <=> rhs.toCoherentQuantity();
 }
 
-template <_detail::Arithmetic S1, Unit auto U1, _detail::Arithmetic S2, Unit auto U2>
+template <typename S1, Unit auto U1, typename S2, Unit auto U2>
     requires UnitConvertibleTo<U2, U1> && std::equality_comparable_with<S1, S2>
 auto constexpr
 operator==(const BasicQuantity<S1, U1>& lhs, const BasicQuantity<S2, U2>& rhs) {
     return lhs.toCoherentQuantity() == rhs.toCoherentQuantity();
 }
 
-template <_detail::Arithmetic S, Unit auto U>
+template <typename S, Unit auto U>
 auto constexpr swap(BasicQuantity<S, U>& lhs, BasicQuantity<S, U>& rhs) noexcept(noexcept(lhs.swap(rhs))) -> void {
     lhs.swap(rhs);
 }
-template <_detail::Arithmetic S, Unit auto U>
+template <typename S, Unit auto U>
 auto
 operator<<(std::ostream& os, const BasicQuantity<S, U>& q) -> std::ostream& {
     os << q.magnitude() << " " << unitString<q.units()>;
@@ -324,6 +311,6 @@ auto constexpr quantity_cast(From&& from) -> QuantityLike auto {
 }
 }   // namespace Maxwell
 
-template <Maxwell::_detail::Arithmetic S, Maxwell::Unit auto U> struct std::formatter<Maxwell::BasicQuantity<S, U>> {};
+template <typename S, Maxwell::Unit auto U> struct std::formatter<Maxwell::BasicQuantity<S, U>> {};
 
 #endif
