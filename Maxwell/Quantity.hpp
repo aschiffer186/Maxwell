@@ -249,6 +249,16 @@ template <typename Tp, Unit auto U> class BasicQuantity {
         mag_ -= conversionFactor(O, Units) * other.magnitude();
     }
 
+    auto constexpr operator*=(const MagnitudeType& other) noexcept -> BasicQuantity& {
+        mag_ *= other;
+        return *this;
+    }
+
+    auto constexpr operator/=(const MagnitudeType& other) noexcept -> BasicQuantity& {
+        mag_ /= other;
+        return *this;
+    }
+
   private:
     MagnitudeType mag_{};
 };
@@ -276,6 +286,30 @@ operator*(BasicQuantity<S1, U1> lhs,
           const BasicQuantity<S2, U2>& rhs) noexcept(noexcept(lhs.magnitude() * rhs.magnitude())) -> auto {
     constexpr Unit auto resUnit = decltype(lhs)::Units / std::remove_reference_t<decltype(rhs)>::Units;
     return BasicQuantity<S1, resUnit>(lhs.toCoherentQuantity().magnitude() * rhs.toCoherentQuantity().magnitude());
+}
+
+template <typename S1, Unit auto U1>
+auto constexpr
+operator*(const S1& lhs, BasicQuantity<S1, U1> rhs) {
+    return rhs *= lhs;
+}
+
+template <typename S1, Unit auto U1>
+auto constexpr
+operator*(BasicQuantity<S1, U1> lhs, const S1& rhs) {
+    return lhs *= rhs;
+}
+
+template <typename S1, Unit auto U1>
+auto constexpr
+operator/(const S1& lhs, BasicQuantity<S1, U1> rhs) {
+    return rhs /= lhs;
+}
+
+template <typename S1, Unit auto U1>
+auto constexpr
+operator/(BasicQuantity<S1, U1> lhs, const S1& rhs) {
+    return lhs /= rhs;
 }
 
 template <typename S1, Unit auto U1, typename S2, Unit auto U2>
