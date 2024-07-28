@@ -5,6 +5,7 @@
 
 #include "Dimension.hpp"
 #include "Quantity.hpp"
+#include "QuantityMath.hpp"
 #include "QuantityRepo.hpp"
 #include "Unit.hpp"
 #include "UnitRepo.hpp"

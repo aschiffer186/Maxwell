@@ -31,27 +31,26 @@ template <typename Tp, Unit auto U> struct is_quantity<BasicQuantity<Tp, U>> : s
 }   // namespace _detail
 /// \endcond
 
+/// @brief Concept modeling an instanation of BasicQuantity
 template <typename T>
 concept QuantityLike = _detail::is_quantity<T>::value;
 
-/**
- * @brief Type respenting a quantity with a magnitude and a unit.
- *
- * BasicQuantity is the central type in Maxwell. It is a type representing
- * a quantity with a magnitude and unit and whose units are strongly typed.
- * This means it is only possible to construct BasicQuantity's whose units
- * are convertible to the specified units of the BasicQuantity. The conversion
- * is performed automatically during the construction process and the conversion
- * factor is calculated at compile-time rather than runtime for maximum
- * efficiency.
- *
- * The magnitude of the BasicQuantity may be any type that implements
- * the 4 basic arithmetic operators (+, -, *, and /) and that can be
- * multipled by a double.
- *
- * @tparam Tp the type of the BasicQuantity's magnitude
- * @tparam U the BasicQuantity's unit
- */
+/// @brief Type respenting a quantity with a magnitude and a unit.
+///
+/// BasicQuantity is the central type in Maxwell. It is a type representing
+/// a quantity with a magnitude and unit and whose units are strongly typed.
+/// This means it is only possible to construct BasicQuantity's whose units
+/// are convertible to the specified units of the BasicQuantity. The conversion
+/// is performed automatically during the construction process and the conversion
+/// factor is calculated at compile-time rather than runtime for maximum
+/// efficiency.
+///
+/// The magnitude of the BasicQuantity may be any type that implements
+/// the 4 basic arithmetic operators (+, -, *, and /) and that can be
+/// multipled by a double.
+///
+/// @tparam Tp the type of the BasicQuantity's magnitude
+/// @tparam U the BasicQuantity's unit
 template <typename Tp, Unit auto U> class BasicQuantity {
   public:
     /// Type alias for the type of the BasicQuantity's magnitude
@@ -79,7 +78,8 @@ template <typename Tp, Unit auto U> class BasicQuantity {
     /// Constructs a BasicQuantiy whose magnitude is initialized from the
     /// specified argument as if by MagnitudeType(std::forward<Up>(mag)).
     ///
-    /// @pre MagnitudeType is constructible from Up && Up is not std::in_place_t
+    /// @pre MagnitudeType is constructible from Up && Up is not std::in_place_t &&
+    ///         is not a specialization of BasicQuantity.
     /// @post magnitude() is equal to MagnitudeType(std::forward<Up>(mag))
     ///
     /// @param mag the value used to construct the BasicQuantity's magnitude
@@ -90,12 +90,34 @@ template <typename Tp, Unit auto U> class BasicQuantity {
     constexpr explicit BasicQuantity(Up&& mag) noexcept(std::is_nothrow_constructible_v<MagnitudeType, Up&&>)
         : mag_(std::forward<Up>(mag)) {}
 
+    /// @brief Constructor
+    ///
+    /// Constructs a BasicQuantity in place using the specified arguments.
+    /// The underlying magnitude is constructed as if by
+    /// MagnitudeType(std::forward<Args>(args)...).
+    ///
+    /// @tparam Args the type of the arguments
+    ///
+    /// @param args the arguments used to construct the underlying value
+    /// @throws any exceptions thrown by the constructor of magnitude type
     template <typename... Args>
     constexpr BasicQuantity(std::in_place_t,
                             Args&&... args) noexcept(std::is_nothrow_constructible_v<MagnitudeType, Args&&...>)
         requires std::constructible_from<MagnitudeType, Args&&...>
         : mag_(std::forward<Args>(args)...) {}
 
+    /// @brief Constructor
+    ///
+    /// Constructs a BasicQuantity in place using the specified arguments.
+    /// The underlying magnitude is constructed as if by
+    /// MagnitudeType(il, std::forward<Args>(args)...).
+    ///
+    /// @tparam U the tye of elements in the initializer list
+    /// @tparam Args the type of the arguments
+    ///
+    /// @param il the initializer list used to construct the underlying type
+    /// @param args the arguments used to construct the underlying value
+    /// @throws any exceptions thrown by the constructor of magnitude type
     template <typename Up, typename... Args>
     constexpr BasicQuantity(std::in_place_t, std::initializer_list<Up> il, Args&&... args) noexcept(
         std::is_nothrow_constructible_v<MagnitudeType, std::initializer_list<Up>, Args&&...>)
@@ -249,21 +271,19 @@ operator-(BasicQuantity<S1, U1> lhs, const BasicQuantity<S2, U2>& rhs) noexcept(
 }
 
 template <typename S1, Unit auto U1, typename S2, Unit auto U2>
-    requires UnitConvertibleTo<U2, U1>
 auto constexpr
 operator*(BasicQuantity<S1, U1> lhs,
           const BasicQuantity<S2, U2>& rhs) noexcept(noexcept(lhs.magnitude() * rhs.magnitude())) -> auto {
-    constexpr Unit auto resUnit = lhs.units() * rhs.units();
-    return BasicQuantity(lhs.toCoherentQuantity() * rhs.toCoherentQuantity(), resUnit);
+    constexpr Unit auto resUnit = decltype(lhs)::Units / std::remove_reference_t<decltype(rhs)>::Units;
+    return BasicQuantity<S1, resUnit>(lhs.toCoherentQuantity().magnitude() * rhs.toCoherentQuantity().magnitude());
 }
 
 template <typename S1, Unit auto U1, typename S2, Unit auto U2>
-    requires UnitConvertibleTo<U2, U1>
 auto constexpr
 operator/(BasicQuantity<S1, U1> lhs,
           const BasicQuantity<S2, U2>& rhs) noexcept(noexcept(lhs.magnitude() / rhs.magnitude())) -> auto {
-    constexpr Unit auto resUnit = lhs.units() / rhs.units();
-    return BasicQuantity(lhs.toCoherentQuantity() * rhs.toCoherentQuantity(), resUnit);
+    constexpr Unit auto resUnit = decltype(lhs)::Units / std::remove_reference_t<decltype(rhs)>::Units;
+    return BasicQuantity<S1, resUnit>(lhs.toCoherentQuantity().magnitude() / rhs.toCoherentQuantity().magnitude());
 }
 
 // --- Comparison Operators ---

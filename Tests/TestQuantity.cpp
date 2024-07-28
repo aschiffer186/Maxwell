@@ -1,128 +1,14 @@
-#include "gtest/gtest.h"
-#include <concepts>
-#include <gtest/gtest.h>
+#include "TestQuantity.hpp"
 
+#include <concepts>
 #include <numbers>
 #include <vector>
+
+#include <gtest/gtest.h>
 
 #include "Maxwell.hpp"
 
 using namespace Maxwell;
-
-class Custom {
-  public:
-    static int numCopyCtorCalls;
-    static int numMoveCtorCalls;
-
-    Custom() : d_{} {}
-
-    explicit Custom(double d) : d_(d) {}
-
-    Custom(const Custom& c) : d_(c.d_) { ++numCopyCtorCalls; }
-
-    Custom(Custom&& c) noexcept(false) : d_(c.d_) { ++numMoveCtorCalls; }
-
-    friend auto operator==(const Custom&, const Custom&) noexcept -> bool = default;
-
-  private:
-    double d_;
-};
-
-int Custom::numCopyCtorCalls{0};
-int Custom::numMoveCtorCalls{0};
-
-auto
-operator+(Custom, Custom) -> Custom {
-    return {};
-}
-
-auto
-operator-(Custom, Custom) -> Custom {
-    return {};
-}
-
-auto
-operator*(Custom, Custom) -> Custom {
-    return {};
-}
-
-auto
-operator/(Custom, Custom) -> Custom {
-    return {};
-}
-
-auto
-operator*(double, Custom) -> Custom {
-    return {};
-}
-
-class Custom2 {
-  public:
-    Custom2() : d_{} {}
-
-    explicit Custom2(double d) : d_(d) {}
-
-    Custom2(const Custom2& c) = delete;
-
-    Custom2(Custom2&& c) = default;
-
-    friend auto operator==(const Custom2&, const Custom2&) noexcept -> bool = default;
-
-    ~Custom2() {}
-
-  private:
-    double d_;
-};
-
-auto
-operator+(Custom2, Custom2) -> Custom2 {
-    return {};
-}
-
-auto
-operator-(Custom2, Custom2) -> Custom2 {
-    return {};
-}
-
-auto
-operator*(Custom2, Custom2) -> Custom2 {
-    return {};
-}
-
-auto
-operator/(Custom2, Custom2) -> Custom2 {
-    return {};
-}
-
-auto
-operator*(double, Custom2) -> Custom2 {
-    return {};
-}
-
-auto
-operator+(const std::vector<double>&, const std::vector<double>&) -> std::vector<double> {
-    return {};
-}
-
-auto
-operator-(const std::vector<double>&, const std::vector<double>&) -> std::vector<double> {
-    return {};
-}
-
-auto
-operator*(const std::vector<double>&, const std::vector<double>&) -> std::vector<double> {
-    return {};
-}
-
-auto
-operator*(double, const std::vector<double>&) -> std::vector<double> {
-    return {};
-}
-
-auto
-operator/(const std::vector<double>&, const std::vector<double>&) -> std::vector<double> {
-    return {};
-}
 
 template <typename T> class TestQuantityFixture : public testing::Test {
   protected:
@@ -131,6 +17,36 @@ template <typename T> class TestQuantityFixture : public testing::Test {
 
 using MagnitudeTypes = ::testing::Types<unsigned, int, double, Custom>;
 TYPED_TEST_SUITE(TestQuantityFixture, MagnitudeTypes);
+
+template <typename T> class TestQuantityIncompatbility : public ::testing::Test {};
+
+using QuantityTypes = ::testing::Types<std::pair<Mole, Ampere>, std::pair<Mole, Meter>, std::pair<Mole, Candela>,
+                                       std::pair<Mole, Gram>, std::pair<Mole, Kelvin>, std::pair<Mole, Second>,
+                                       std::pair<Mole, Radian>, std::pair<Hertz, Becquerel>>;
+TYPED_TEST_SUITE(TestQuantityIncompatbility, QuantityTypes);
+
+template <typename T> class TestQuantityArithmeticValidity : public ::testing::Test {};
+
+using QuantityArithmeticTypes =
+    ::testing::Types<std::pair<Mole, KiloMole>, std::pair<Ampere, KiloAmpere>, std::pair<Meter, KiloMeter>,
+                     std::pair<Candela, KiloCandela>, std::pair<Gram, KiloGram>, std::pair<Second, KiloSecond>,
+                     std::pair<Kelvin, KiloKelvin>, std::pair<Radian, KiloRadian>, std::pair<Foot, Inch>,
+                     std::pair<Foot, Meter>, std::pair<Degree, Radian>, std::pair<KiloGram, PoundMass>>;
+TYPED_TEST_SUITE(TestQuantityArithmeticValidity, QuantityArithmeticTypes);
+
+template <typename T> class TestQuantityConversionsPrefixes : public ::testing::Test {};
+
+using QuantitTypePrefixes =
+    ::testing::Types<std::pair<Mole, KiloMole>, std::pair<Ampere, KiloAmpere>, std::pair<Meter, KiloMeter>,
+                     std::pair<Candela, KiloCandela>, std::pair<Gram, KiloGram>, std::pair<Second, KiloSecond>,
+                     std::pair<Kelvin, KiloKelvin>, std::pair<Radian, KiloRadian>>;
+TYPED_TEST_SUITE(TestQuantityConversionsPrefixes, QuantitTypePrefixes);
+
+template <typename L, typename R>
+concept AddableWith = requires(L l, R r) { l + r; };
+
+template <typename L, typename R>
+concept SubtractableWith = requires(L l, R r) { l - r; };
 
 TYPED_TEST(TestQuantityFixture, TestProperties) {
     using QuantityType = BasicQuantity<TypeParam, MeterUnit>;
@@ -189,20 +105,11 @@ TYPED_TEST(TestQuantityFixture, TestInitializerListConstructor) {
     MeterVector q(std::in_place, {1.0, 2.0, 3.0, 4.0});
     EXPECT_EQ(q.magnitude(), (std::vector{1.0, 2.0, 3.0, 4.0}));
     EXPECT_EQ(q.units(), MeterUnit);
+
+    MeterVector q2(std::in_place, q.magnitude().begin(), q.magnitude().end());
+    EXPECT_EQ(q2.magnitude(), q.magnitude());
+    EXPECT_EQ(q2.units(), MeterUnit);
 }
-
-template <typename T> class TestQuantityIncompatbility : public ::testing::Test {};
-
-using QuantityTypes = ::testing::Types<std::pair<Mole, Ampere>, std::pair<Mole, Meter>, std::pair<Mole, Candela>,
-                                       std::pair<Mole, Gram>, std::pair<Mole, Kelvin>, std::pair<Mole, Second>,
-                                       std::pair<Mole, Radian>, std::pair<Hertz, Becquerel>>;
-TYPED_TEST_SUITE(TestQuantityIncompatbility, QuantityTypes);
-
-template <typename L, typename R>
-concept AddableWith = requires(L l, R r) { l + r; };
-
-template <typename L, typename R>
-concept SubtractableWith = requires(L l, R r) { l - r; };
 
 TYPED_TEST(TestQuantityIncompatbility, TestIncompatbility) {
     using LHSType = TypeParam::first_type;
@@ -217,14 +124,6 @@ TYPED_TEST(TestQuantityIncompatbility, TestIncompatbility) {
     EXPECT_FALSE((SubtractableWith<LHSType, RHSType>) );
     EXPECT_FALSE((SubtractableWith<RHSType, LHSType>) );
 }
-
-template <typename T> class TestQuantityConversionsPrefixes : public ::testing::Test {};
-
-using QuantitTypePrefixes =
-    ::testing::Types<std::pair<Mole, KiloMole>, std::pair<Ampere, KiloAmpere>, std::pair<Meter, KiloMeter>,
-                     std::pair<Candela, KiloCandela>, std::pair<Gram, KiloGram>, std::pair<Second, KiloSecond>,
-                     std::pair<Kelvin, KiloKelvin>, std::pair<Radian, KiloRadian>>;
-TYPED_TEST_SUITE(TestQuantityConversionsPrefixes, QuantitTypePrefixes);
 
 TYPED_TEST(TestQuantityConversionsPrefixes, TestConversionPrefix) {
     using LHSType = TypeParam::first_type;
@@ -275,15 +174,6 @@ TEST(TestQuantityConversionsScale, TestMass) {
     EXPECT_FLOAT_EQ(m2.magnitude(), 2.20462);
     EXPECT_FLOAT_EQ(kg2.magnitude(), 1);
 }
-
-template <typename T> class TestQuantityArithmeticValidity : public ::testing::Test {};
-
-using QuantityArithmeticTypes =
-    ::testing::Types<std::pair<Mole, KiloMole>, std::pair<Ampere, KiloAmpere>, std::pair<Meter, KiloMeter>,
-                     std::pair<Candela, KiloCandela>, std::pair<Gram, KiloGram>, std::pair<Second, KiloSecond>,
-                     std::pair<Kelvin, KiloKelvin>, std::pair<Radian, KiloRadian>, std::pair<Foot, Inch>,
-                     std::pair<Foot, Meter>, std::pair<Degree, Radian>, std::pair<KiloGram, PoundMass>>;
-TYPED_TEST_SUITE(TestQuantityArithmeticValidity, QuantityArithmeticTypes);
 
 TYPED_TEST(TestQuantityArithmeticValidity, TestAddition) {
     using LHSType = TypeParam::first_type;

@@ -4,6 +4,7 @@
 #include <cmath>
 
 #include "Quantity.hpp"
+#include "QuantityRepo.hpp"
 #include "UnitRepo.hpp"
 
 ///@file QuantityMath.hpp Definition of common math functions
@@ -12,8 +13,7 @@ namespace Maxwell {
 namespace _detail {
 template <typename Q>
 concept CMathQuantity =
-    QuantityLike<Q> && (std::integral<typename Q::MagnitudeType> ||
-                        std::floating_point<typename Q::MagnitudeType>);
+    QuantityLike<Q> && (std::integral<typename Q::MagnitudeType> || std::floating_point<typename Q::MagnitudeType>);
 
 template <typename T>
 concept CMathType = std::integral<T> || std::floating_point<T>;
@@ -38,15 +38,13 @@ fmod(Q q1, Q q2) -> Quantity<std::declval<typename Q::UnitsType>()> {
 auto
 min(QuantityLike auto q, QuantityLike auto q2) -> QuantityLike auto {
     using ReturnType = decltype(q.toCoherentQuantity());
-    return ReturnType(std::min(q.toCoherentQuantity().magnitude(),
-                               q2.toCoherentQuantity().magnitde()));
+    return ReturnType(std::min(q.toCoherentQuantity().magnitude(), q2.toCoherentQuantity().magnitde()));
 }
 
 auto
 max(QuantityLike auto q, QuantityLike auto q2) -> QuantityLike auto {
     using ReturnType = decltype(q.toCoherentQuantity());
-    return ReturnType(std::max(q.toCoherentQuantity().magnitude(),
-                               q2.toCoherentQuantity().magnitde()));
+    return ReturnType(std::max(q.toCoherentQuantity().magnitude(), q2.toCoherentQuantity().magnitde()));
 }
 
 #ifdef NO_PREDFINED_DERIVE_UNIT
@@ -84,27 +82,31 @@ tan(BasicQuantity<T, DegreeUnit> q) -> double {
 }
 
 template <_detail::CMathQuantity Q>
-    requires(std::same_as<typename Q::UnitsType, RadianUnitType> ||
-             std::same_as<typename Q::Units, DegreeUnitType>)
+    requires(std::same_as<typename Q::UnitsType, RadianUnitType> || std::same_as<typename Q::Units, DegreeUnitType>)
 auto
 sec(Q q) -> double {
     return 1.0 / cos(q);
 }
 
 template <_detail::CMathQuantity Q>
-    requires(std::same_as<typename Q::UnitsType, RadianUnitType> ||
-             std::same_as<typename Q::Units, DegreeUnitType>)
+    requires(std::same_as<typename Q::UnitsType, RadianUnitType> || std::same_as<typename Q::Units, DegreeUnitType>)
 auto
 csc(Q q) -> double {
     return 1.0 / sin(q);
 }
 
 template <_detail::CMathQuantity Q>
-    requires(std::same_as<typename Q::UnitsType, RadianUnitType> ||
-             std::same_as<typename Q::Units, DegreeUnitType>)
+    requires(std::same_as<typename Q::UnitsType, RadianUnitType> || std::same_as<typename Q::Units, DegreeUnitType>)
 auto
 cot(Q q) -> double {
     return 1.0 / tan(q);
 }
 
+namespace Constants {
+constexpr MeterPerSecond c{299'792'482};
+constexpr auto h    = Joule{6.626'070'15e-34} / Hertz{1.0};
+constexpr auto hBar = Joule{1.054'517'817} / Hertz{1.0};
+constexpr auto mu0  = Newton{1.25663706127e-6} / Ampere{1.0} / Ampere{1.0};
+}   // namespace Constants
+}   // namespace Maxwell
 #endif

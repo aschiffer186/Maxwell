@@ -55,6 +55,14 @@ MAKE_PREFIXED_QUANTITIES(Radian)
 
 using Degree = Quantity<DegreeUnit>;
 
+using MeterPerSecond = Quantity<MeterPerSecondUnit>;
+
+using Joule  = Quantity<JouleUnit>;
+using Hertz  = Quantity<HertzUnit>;
+using Newton = Quantity<NewtonUnit>;
+using Ampere = Quantity<AmpereUnit>;
+using Pascal = Quantity<PascalUnit>;
+
 using Minute    = Quantity<MinuteUnit>;
 using Hour      = Quantity<HourUnit>;
 using Day       = Quantity<DayUnit>;
@@ -113,5 +121,4 @@ MAKE_QUANTITY_LITERAL(Mile, mi)
 #define MAKE_DEGREE        using Degree = Quantity<DegreeUnit>;
 #endif
 }   // namespace Maxwell
-
 #endif
