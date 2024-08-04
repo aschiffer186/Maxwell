@@ -201,10 +201,11 @@ concept DimensionConvertibleTo =
 ///
 /// Calculates the products of two dimensions. The product of two dimensions
 /// is a coherent dimension whose power is the sum of lhs.power() and
-/// rhs.power(). This function may always be used in a constant expression.
-///
+/// rhs.power(). If only one dimension has a prefix, the prefix is carried forward,
+/// otherwise, the result is coherent dimension. This function may always be used
+/// in a constant expression.
+
 /// @post (lhs * rhs).power() == lhs.power() + rhs.power()
-/// @post (lhs * rhs).isCoherentDimension()
 ///
 /// @param lhs one dimension to multiply
 /// @param rhs the other dimension to multiply
@@ -212,19 +213,22 @@ concept DimensionConvertibleTo =
 /// @return the product of two dimensions
 auto consteval
 operator*(Dimension auto lhs, Dimension auto rhs) noexcept -> Dimension auto {
-    constexpr Dimension auto res = DimensionType<lhs.power() + rhs.power(), 0, _detail::One, _detail::Zero>{};
-    static_assert(res.isCoherentDimension());
+    constexpr int newPrefix      = (lhs.prefix() != 0 && rhs.prefix() != 0) ? 0
+                                   : (lhs.prefix() != 0)                    ? lhs.prefix()
+                                                                            : rhs.prefix();
+    constexpr Dimension auto res = DimensionType<lhs.power() + rhs.power(), newPrefix, _detail::One, _detail::Zero>{};
     return res;
 }
 
 /// @brief Calculates the product of two dimensions
 ///
 /// Calculates the quotient of two dimensions. The quotent of two dimensions
-/// is a coherent dimension whose power is the difference of lhs.power() and
-/// rhs.power(). This function may always be used in a constant expression.
+/// is a dimension whose power is the difference of lhs.power() and
+/// rhs.power(). If only one dimension has a prefix, the prefix is carried forward,
+/// otherwise, the result is coherent dimension. This function may always be used
+/// in a constant expression.
 ///
 /// @post (lhs / rhs).power() == lhs.power() - rhs.power()
-/// @post (lhs / rhs).isCoherentDimension()
 ///
 /// @param lhs the divident
 /// @param rhs the divisor
@@ -232,8 +236,10 @@ operator*(Dimension auto lhs, Dimension auto rhs) noexcept -> Dimension auto {
 /// @return the quotient of two dimensions
 auto consteval
 operator/(Dimension auto lhs, Dimension auto rhs) noexcept -> Dimension auto {
-    constexpr Dimension auto res = DimensionType<lhs.power() - rhs.power(), 0, _detail::One, _detail::Zero>{};
-    static_assert(res.isCoherentDimension());
+    constexpr int newPrefix      = (lhs.prefix() != 0 && rhs.prefix() != 0) ? 0
+                                   : (lhs.prefix() != 0)                    ? lhs.prefix()
+                                                                            : rhs.prefix();
+    constexpr Dimension auto res = DimensionType<lhs.power() - rhs.power(), newPrefix, _detail::One, _detail::Zero>{};
     return res;
 }
 }   // namespace Maxwell

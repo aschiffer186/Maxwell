@@ -52,6 +52,10 @@ concept QuantityLike = _detail::is_quantity<T>::value;
 /// @tparam Tp the type of the BasicQuantity's magnitude
 /// @tparam U the BasicQuantity's unit
 template <typename Tp, Unit auto U> class BasicQuantity {
+    static_assert(!std::is_void_v<Tp>, "Cannot construct BasicQuantity from cv void!");
+    static_assert(!std::is_same_v<std::remove_cvref_t<Tp>, std::in_place_t>,
+                  "Cannot construct BasicQuantity from std::in_place_t");
+
   public:
     /// Type alias for the type of the BasicQuantity's magnitude
     using MagnitudeType = Tp;
@@ -64,7 +68,7 @@ template <typename Tp, Unit auto U> class BasicQuantity {
     ///
     /// Constructs a BasicQuantity whose magnitude is default constructed.
     ///
-    /// @pre MagnitudeType is default construcible
+    /// @pre MagnitudeType is default constructible
     /// @post magnitude() is equal to MagnitudeType()
     ///
     /// @throws any exceptions thrown by the default consturctor of
@@ -77,8 +81,11 @@ template <typename Tp, Unit auto U> class BasicQuantity {
     ///
     /// Constructs a BasicQuantiy whose magnitude is initialized from the
     /// specified argument as if by MagnitudeType(std::forward<Up>(mag)).
+    /// This constructor is explicit if Units is not unitless (this allows
+    /// for implicit convesion from unitless quantities like scalars. Not quantities
+    /// like radians are not unitless).
     ///
-    /// @pre MagnitudeType is constructible from Up && Up is not std::in_place_t &&
+    /// @pre  std::constructible_from<MagnitudeType, Up&&> && Up is not std::in_place_t &&
     ///         is not a specialization of BasicQuantity.
     /// @post magnitude() is equal to MagnitudeType(std::forward<Up>(mag))
     ///
@@ -87,7 +94,8 @@ template <typename Tp, Unit auto U> class BasicQuantity {
     template <typename Up = MagnitudeType>
         requires std::constructible_from<MagnitudeType, Up&&> && (!std::same_as<Up, std::in_place_t>) &&
                  (!QuantityLike<Up>)
-    constexpr explicit BasicQuantity(Up&& mag) noexcept(std::is_nothrow_constructible_v<MagnitudeType, Up&&>)
+    constexpr explicit(!Unitless<Units>)
+        BasicQuantity(Up&& mag) noexcept(std::is_nothrow_constructible_v<MagnitudeType, Up&&>)
         : mag_(std::forward<Up>(mag)) {}
 
     /// @brief Constructor
@@ -95,6 +103,9 @@ template <typename Tp, Unit auto U> class BasicQuantity {
     /// Constructs a BasicQuantity in place using the specified arguments.
     /// The underlying magnitude is constructed as if by
     /// MagnitudeType(std::forward<Args>(args)...).
+    ///
+    /// @pre std::constructible_from<MagniutdeType, Args...>
+    /// @post magnitude() is equal to MagnitudeType(std::forward<Args>(args)...)
     ///
     /// @tparam Args the type of the arguments
     ///
@@ -112,6 +123,9 @@ template <typename Tp, Unit auto U> class BasicQuantity {
     /// The underlying magnitude is constructed as if by
     /// MagnitudeType(il, std::forward<Args>(args)...).
     ///
+    /// @pre std::constructible_from<MagnitudeType, std::initializer_list<Up>, Args...>
+    /// @post magnitude() is equal to MagnitudeType(il, std::forward<Args>(args)...)
+    ///
     /// @tparam U the tye of elements in the initializer list
     /// @tparam Args the type of the arguments
     ///
@@ -124,6 +138,23 @@ template <typename Tp, Unit auto U> class BasicQuantity {
         requires std::constructible_from<MagnitudeType, std::initializer_list<Up>, Args&&...>
         : mag_(il, std::forward<Args>(args)...) {}
 
+    /// @brief Converting constructor
+    ///
+    /// Constructs a BasicQuantity from a BasicQuantity with different units,
+    /// converting the value of the other quantity from its units to the units
+    /// specified by this->units(). The underlying magnitude is first copy construced
+    /// from other.mganitude() prior to the conversion process. This constructor
+    /// can only be called if the units of other are convertible to this->units().
+    ///
+    /// @pre std::constructible_from<MagnitudeType, const Up&>
+    /// @pre UnitConvertibleTo<From, Units>
+    /// @post magnitude() == MagnitudeType(other.magnitude()) * conversion factor from From to Units
+    ///
+    /// @tparam Up the type of the magnitude of the other BasicQuantity
+    /// @tparam From the units of the other magnitude
+    ///
+    /// @param other the BasicQuantity used to construct *this
+    /// @throws any exceptions thrown by the copy constructor of MagnitudeType
     template <typename Up, Unit auto From>
         requires UnitConvertibleTo<From, Units> && std::constructible_from<MagnitudeType, const Up&>
     constexpr BasicQuantity(const BasicQuantity<Up, From>& other) noexcept(
@@ -133,16 +164,49 @@ template <typename Tp, Unit auto U> class BasicQuantity {
         mag_ *= factor;
     }
 
+    /// @brief Converting constructor
+    ///
+    /// Constructs a BasicQuantity from a BasicQuantity with different units,
+    /// converting the value of the other quantity from its units to the units
+    /// specified by this->units(). The underlying magnitude is first move constructed
+    /// from other.mganitude() prior to the conversion process. This constructor
+    /// can only be called if the units of other are convertible to this->units().
+    ///
+    /// @pre std::constructible_from<MagnitudeType, std::add_rvalue_reference_t<Up>>
+    /// @pre UnitConvertibleTo<From, Units>
+    /// @post magnitude() == MagnitudeType(std::move(other.magnitude())) * conversion factor from From to Units
+    ///
+    /// @tparam Up the type of the magnitude of the other BasicQuantity
+    /// @tparam From the units of the other magnitude
+    ///
+    /// @param other the BasicQuantity used to construct *this
+    /// @throws any exceptions thrown by the move constructor of MagnitudeType
     template <typename Up, Unit auto From>
         requires UnitConvertibleTo<From, Units> &&
                  std::constructible_from<MagnitudeType, std::add_rvalue_reference_t<Up>>
     constexpr BasicQuantity(BasicQuantity<Up, From>&& other) noexcept(
-        std::is_nothrow_constructible_v<MagnitudeType, Up>)
+        std::is_nothrow_constructible_v<MagnitudeType, std::add_rvalue_reference_t<Up>>)
         : mag_(std::move(other.magnitude())) {
         constexpr double factor = conversionFactor(From, Units);
         mag_ *= factor;
     }
 
+    /// @brief Converting assignment operator
+    ///
+    /// Assigns the value from BasicQuantity from a BasicQuantity with different units,
+    /// converting the value of the other quantity from its units to the units
+    /// specified by this->units(). xThis assignment operator
+    /// can only be called if the units of other are convertible to this->units().
+    ///
+    /// @pre std::constructible_from<MagnitudeType, std::add_rvalue_reference_t<Up>>
+    /// @pre UnitConvertibleTo<From, Units>
+    /// @post magnitude() == MagnitudeType(std::move(other.magnitude())) * conversion factor from From to Units
+    ///
+    /// @tparam Up the type of the magnitude of the other BasicQuantity
+    /// @tparam From the units of the other magnitude
+    ///
+    /// @param other the BasicQuantity used to construct *this
+    /// @throws any exceptions thrown by the move constructor of MagnitudeType
     template <typename Up, Unit auto From>
         requires UnitConvertibleTo<From, Units> &&
                      std::constructible_from<MagnitudeType, std::add_rvalue_reference_t<Up>>
@@ -152,33 +216,58 @@ template <typename Tp, Unit auto U> class BasicQuantity {
         return *this;
     }
 
-    template <typename... Args>
-        requires std::constructible_from<MagnitudeType, Args&&...>
-    auto constexpr emplace(Args&&... args) {
-        mag_->~MagnitudeType();
-        std::construct_at(&mag_, std::forward<Args>(args)...);
-    }
+    // /// @brief Constructs the underlying value in place
+    // ///
+    // /// Constructs the magnitude of the BasicQuantity in place. Destroys
+    // /// the existing magnitude prior to constructing a value in place.
+    // /// The value is initialized as if by calling MagnitudeType(std::forward<Args>(args)...)
+    // template <typename... Args>
+    //     requires std::constructible_from<MagnitudeType, Args&&...>
+    // auto constexpr emplace(Args&&... args) {
+    //     mag_->~MagnitudeType();
+    //     std::construct_at(&mag_, std::forward<Args>(args)...);
+    // }
 
-    template <typename Up, typename... Args>
-        requires std::constructible_from<MagnitudeType, std::initializer_list<Up>, Args&&...>
-    auto constexpr emplace(std::initializer_list<Up> il, Args&&... args) {
-        mag_->~MagnitudeType();
-        std::construct_at(&mag_, il, std::forward<Args>(args)...);
-    }
+    // template <typename Up, typename... Args>
+    //     requires std::constructible_from<MagnitudeType, std::initializer_list<Up>, Args&&...>
+    // auto constexpr emplace(std::initializer_list<Up> il, Args&&... args) {
+    //     mag_->~MagnitudeType();
+    //     std::construct_at(&mag_, il, std::forward<Args>(args)...);
+    // }
 
+#ifdef __cpp_explicit_this_parameter
+    template <typename Self> auto constexpr magnitude(this Self&& self) noexcept -> auto&& {
+        return std::forward<Self>(self).mag_;
+    }
+#else
     /// @brief Returns the magnitude of the BasicQuantity
     ///
-    /// Returns the magnitude of the basic quantity.
+    /// Returns a const lvalue reference to the magnitude of the basic quantity.
     ///
     /// @return the magnitude of the basic quantity
     auto constexpr magnitude() const& noexcept -> const MagnitudeType& { return mag_; }
 
+    /// @brief Returns the magnitude of the BasicQuantity
+    ///
+    /// Returns a non-const lvalue reference to the magnitude of the basic quantity.
+    ///
+    /// @return the magnitude of the basic quantity
     auto constexpr magnitude() & noexcept -> MagnitudeType& { return mag_; }
 
+    /// @brief Returns the magnitude of the BasicQuantity
+    ///
+    /// Returns a const rvalue reference to the magnitude of the basic quantity.
+    ///
+    /// @return the magnitude of the basic quantity
     auto constexpr magnitude() const&& noexcept -> const MagnitudeType&& { return std::move(mag_); }
 
+    /// @brief Returns the magnitude of the BasicQuantity
+    ///
+    /// Returns a non-const rvalue reference to the magnitude of the basic quantity.
+    ///
+    /// @return the magnitude of the basic quantity
     auto constexpr magnitude() && noexcept -> MagnitudeType&& { return std::move(mag_); }
-
+#endif
     /// @brief Converts the BasicQuantity to the underlying MagnitudeType
     ///
     /// Converts the BasicQuantity to the underlying MagnitudeType. This

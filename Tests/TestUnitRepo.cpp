@@ -1,8 +1,7 @@
 #include <gtest/gtest.h>
 
-#include "Dimension.hpp"
-#include "Unit.hpp"
-#include "UnitRepo.hpp"
+#include "Maxwell.hpp"
+#include "detail/UnitRepo.hpp"
 
 using namespace Maxwell;
 
@@ -88,6 +87,33 @@ TEST(TestUnitRepo, TestSIBaseUnits) {
     EXPECT_TRUE((std::same_as<decltype(MoleUnit)::Tag, NullTag>) );
 }
 
+TEST(TestUnitRepo, TestPrefixes) {
+    EXPECT_EQ(QuettaAmpereUnit.current().prefix(), Quetta);
+    EXPECT_EQ(RonnaAmpereUnit.current().prefix(), Ronna);
+    EXPECT_EQ(YottaAmpereUnit.current().prefix(), Yotta);
+    EXPECT_EQ(ZettaAmpereUnit.current().prefix(), Zetta);
+    EXPECT_EQ(ExaAmpereUnit.current().prefix(), Exa);
+    EXPECT_EQ(PetaAmpereUnit.current().prefix(), Peta);
+    EXPECT_EQ(TeraAmpereUnit.current().prefix(), Tera);
+    EXPECT_EQ(GigaAmpereUnit.current().prefix(), Giga);
+    EXPECT_EQ(MegaAmpereUnit.current().prefix(), Mega);
+    EXPECT_EQ(KiloAmpereUnit.current().prefix(), Kilo);
+    EXPECT_EQ(HectoAmpereUnit.current().prefix(), Hecto);
+    EXPECT_EQ(DecaAmpereUnit.current().prefix(), Deca);
+    EXPECT_EQ(DeciAmpereUnit.current().prefix(), Deci);
+    EXPECT_EQ(CentiAmpereUnit.current().prefix(), Centi);
+    EXPECT_EQ(MilliAmpereUnit.current().prefix(), Milli);
+    EXPECT_EQ(MicroAmpereUnit.current().prefix(), Micro);
+    EXPECT_EQ(NanoAmpereUnit.current().prefix(), Nano);
+    EXPECT_EQ(PicoAmpereUnit.current().prefix(), Pico);
+    EXPECT_EQ(FemtoAmpereUnit.current().prefix(), Femto);
+    EXPECT_EQ(AttoAmpereUnit.current().prefix(), Atto);
+    EXPECT_EQ(ZeptoAmpereUnit.current().prefix(), Zepto);
+    EXPECT_EQ(YoctoAmpereUnit.current().prefix(), Yocto);
+    EXPECT_EQ(RontoAmpereUnit.current().prefix(), Ronto);
+    EXPECT_EQ(QuectoAmpereUnit.current().prefix(), Quecto);
+}
+
 TEST(TestUnitRepo, TestMeterPerSecond) {
     EXPECT_EQ(MeterPerSecondUnit.length().power(), 1);
     EXPECT_EQ(MeterPerSecondUnit.time().power(), -1);
@@ -101,3 +127,33 @@ TEST(TestUnitRepo, TestMeterPerSecondPerSecond) {
 TEST(TestUnitRepo, TestSquareMeterUnit) { EXPECT_EQ(SqMeterUnit.length().power(), 2); }
 
 TEST(TestUnitRepo, TestCubicMeterUnit) { EXPECT_EQ(CuMeterUnit.length().power(), 3); }
+
+TEST(TestUnitRepo, TestHertzUnit) { EXPECT_EQ(HertzUnit.time().power(), -1); }
+
+TEST(TestUnitRepo, TestNewtonUnit) {
+    EXPECT_EQ(NewtonUnit.mass().prefix(), Kilo);
+    EXPECT_EQ(NewtonUnit.mass().power(), 1);
+    EXPECT_EQ(NewtonUnit.length().power(), 1);
+    EXPECT_EQ(NewtonUnit.time().power(), -2);
+}
+
+TEST(TestUnitRepo, TestPascalUnit) {
+    EXPECT_EQ(PascalUnit.mass().power(), 1);
+    EXPECT_EQ(PascalUnit.mass().prefix(), Kilo);
+    EXPECT_EQ(PascalUnit.length().power(), -1);
+    EXPECT_EQ(PascalUnit.time().power(), -2);
+}
+
+TEST(TestUnitRepo, TestJouleUnit) {
+    EXPECT_EQ(JouleUnit.mass().power(), 1);
+    EXPECT_EQ(JouleUnit.mass().prefix(), Kilo);
+    EXPECT_EQ(JouleUnit.length().power(), 2);
+    EXPECT_EQ(JouleUnit.time().power(), -2);
+}
+
+TEST(TestUnitRepo, TestWattUnit) {
+    EXPECT_EQ(JouleUnit.mass().power(), 1);
+    EXPECT_EQ(JouleUnit.mass().prefix(), Kilo);
+    EXPECT_EQ(JouleUnit.length().power(), 2);
+    EXPECT_EQ(JouleUnit.time().power(), -2);
+}

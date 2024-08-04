@@ -16,6 +16,9 @@ using Kelvin  = Quantity<KelvinUnit>;
 using Second  = Quantity<SecondUnit>;
 using Radian  = Quantity<RadianUnit>;
 
+/// Given a quantity, makes quantities with all metrix prefixes. E
+///
+/// @param Q the name of the quantity
 #define MAKE_PREFIXED_QUANTITIES(Q)                                                                                    \
     using Quetta##Q = Quantity<Quetta##Q##Unit>;                                                                       \
     using Ronna##Q  = Quantity<Ronna##Q##Unit>;                                                                        \
@@ -57,11 +60,26 @@ using Degree = Quantity<DegreeUnit>;
 
 using MeterPerSecond = Quantity<MeterPerSecondUnit>;
 
-using Joule  = Quantity<JouleUnit>;
-using Hertz  = Quantity<HertzUnit>;
+using Joule = Quantity<JouleUnit>;
+MAKE_PREFIXED_QUANTITIES(Joule)
+using Hertz = Quantity<HertzUnit>;
+MAKE_PREFIXED_QUANTITIES(Hertz)
 using Newton = Quantity<NewtonUnit>;
-using Ampere = Quantity<AmpereUnit>;
+MAKE_PREFIXED_QUANTITIES(Newton)
 using Pascal = Quantity<PascalUnit>;
+MAKE_PREFIXED_QUANTITIES(Pascal)
+using Watt = Quantity<WattUnit>;
+MAKE_PREFIXED_QUANTITIES(Watt)
+using Coulomb = Quantity<CoulombUnit>;
+MAKE_PREFIXED_QUANTITIES(Coulomb)
+using Volt = Quantity<VoltUnit>;
+MAKE_PREFIXED_QUANTITIES(Volt)
+using Farad = Quantity<FaradUnit>;
+MAKE_PREFIXED_QUANTITIES(Farad)
+using Ohm = Quantity<OhmUnit>;
+MAKE_PREFIXED_QUANTITIES(Ohm)
+using Becquerel = Quantity<BecquerelUnit>;
+MAKE_PREFIXED_QUANTITIES(Becquerel)
 
 using Minute    = Quantity<MinuteUnit>;
 using Hour      = Quantity<HourUnit>;
@@ -77,9 +95,6 @@ using Yard = Quantity<YardUnit>;
 using Mile = Quantity<MileUnit>;
 
 using PoundMass = Quantity<PoundMassUnit>;
-
-using Hertz     = Quantity<HertzUnit>;
-using Becquerel = Quantity<BecquerelUnit>;
 
 #define MAKE_QUANTITY_LITERAL(UnitName, Symbol)                                                                        \
     auto consteval operator""_##Symbol(long double x) noexcept -> UnitName { return UnitName(x); }                     \
@@ -99,6 +114,11 @@ MAKE_QUANTITY_LITERAL(Second, s)
 MAKE_QUANTITY_LITERAL(Radian, rad)
 
 MAKE_QUANTITY_LITERAL(Degree, deg)
+
+MAKE_QUANTITY_LITERAL(Joule, J)
+MAKE_QUANTITY_LITERAL(Hertz, hz)
+MAKE_QUANTITY_LITERAL(Newton, N)
+MAKE_QUANTITY_LITERAL(Pascal, Pa)
 }   // namespace MetricLiterals
 
 inline namespace TimeLiterals {
@@ -115,6 +135,9 @@ MAKE_QUANTITY_LITERAL(Inch, in)
 MAKE_QUANTITY_LITERAL(Foot, ft)
 MAKE_QUANTITY_LITERAL(Yard, yd)
 MAKE_QUANTITY_LITERAL(Mile, mi)
+
+MAKE_QUANTITY_LITERAL(PoundMass, lb)
+MAKE_QUANTITY_LITERAL(PoundMass, lbm)
 }   // namespace ImperialUnits
 #else
 #define MAKE_MOLE_PREFIXES MAKE_QUANTITY_PREFIXES(Mole)

@@ -92,10 +92,30 @@ template <> inline const std::string unitString<UnitlessUnit> = "";
     constexpr auto UnitName = UnitDef;                                                                                 \
     using UnitName##Type    = decltype(UnitName);
 
+/// Creates a new by scaling an existing unit. This macro creates a
+/// constexpr variable initialized by scaling the specified unit
+/// and a type alias for the new unit
+///
+/// @param UnitName the name of the new unit
+/// @param BaseUnit the unit to scale
+/// @param Dim the dimension to scale
+/// @param Num the numerator of the scale factor
+/// @param Den the denominator of the scale factor
 #define MAKE_UNIT_SCALE(UnitName, BaseUnit, Dim, Num, Den)                                                             \
     constexpr auto UnitName = BaseUnit.adjustScale##Dim<std::ratio<Num, Den>>();                                       \
     using UnitName##Type    = decltype(UnitName);
 
+/// Creates a new by scaling an existing unit. This macro creates a
+/// constexpr variable initialized by scaling the specified unit
+/// and a type alias for the new unit. Also specifies a string
+/// representation for the new unit.
+///
+/// @param UnitName the name of the new unit
+/// @param BaseUnit the unit to scale
+/// @param Dim the dimension to scale
+/// @param Num the numerator of the scale factor
+/// @param Den the denominator of the scale factor
+/// @param UnitString the string represenation of the unit
 #define MAKE_UNIT_SCALE_STRING(UnitName, BaseUnit, Dim, Num, Den, UnitString)                                          \
     MAKE_UNIT_SCALE(UnitName, BaseUnit, Dim, Num, Den)                                                                 \
     template <> inline const std::string unitString<UnitName> = UnitString;
@@ -113,40 +133,77 @@ template <> inline const std::string unitString<UnitlessUnit> = "";
     MAKE_UNIT(UnitName, UnitDef)                                                                                       \
     template <> inline const std::string unitString<UnitName> = UnitRep;
 
+/// Creates a new unit type that has the same dimensions as an existing unit.
+/// This can be used for units that are distinct but have the same dimensionality
+/// e.g. hertz and becquerel.
+///
+/// @param UnitName the name of the new unit
+/// @param BaseUnit the unit being used to create the new unit
 #define MAKE_UNIT_TAG(UnitName, BaseUnit)                                                                              \
     struct UnitName##Tag {};                                                                                           \
     constexpr auto UnitName = BaseUnit.addTag<UnitName##Tag>();                                                        \
     using UnitName##Type    = decltype(UnitName);
 
+/// Creates a new unit type that has the same dimensions as an existing unit.
+/// This can be used for units that are distinct but have the same dimensionality
+/// e.g. hertz and becquerel. Additionally specifies a string representation for
+/// the new unit.
+///
+/// @param UnitName the name of the new unit
+/// @param BaseUnit the unit being used to create the new unit
+/// @param UnitRep the string representation of the unit
 #define MAKE_UNIT_TAG_STRING(UnitName, BaseUnit, UnitRep)                                                              \
     MAKE_UNIT_TAG(UnitName, BaseUnit);                                                                                 \
     template <> inline const std::string unitString<UnitName> = UnitRep;
 
 #ifndef NO_PREDIFNED_DERIVED_UNITS
-/// --- SI derive units ---
+/// Quetta prefix(10^30)
 constexpr std::intmax_t Quetta = 30;
-constexpr std::intmax_t Ronna  = 27;
-constexpr std::intmax_t Yotta  = 24;
-constexpr std::intmax_t Zetta  = 21;
-constexpr std::intmax_t Exa    = 18;
-constexpr std::intmax_t Peta   = 15;
-constexpr std::intmax_t Tera   = 12;
-constexpr std::intmax_t Giga   = 9;
-constexpr std::intmax_t Mega   = 6;
-constexpr std::intmax_t Kilo   = 3;
-constexpr std::intmax_t Hecto  = 2;
-constexpr std::intmax_t Deca   = 1;
-constexpr std::intmax_t Deci   = -1;
-constexpr std::intmax_t Centi  = -2;
-constexpr std::intmax_t Milli  = -3;
-constexpr std::intmax_t Micro  = -6;
-constexpr std::intmax_t Nano   = -9;
-constexpr std::intmax_t Pico   = -12;
-constexpr std::intmax_t Femto  = -15;
-constexpr std::intmax_t Atto   = -18;
-constexpr std::intmax_t Zepto  = -21;
-constexpr std::intmax_t Yocto  = -24;
-constexpr std::intmax_t Ronto  = -27;
+/// Ronna prefix (10^27)
+constexpr std::intmax_t Ronna = 27;
+/// Yotta prefix (10^24)
+constexpr std::intmax_t Yotta = 24;
+/// Zetta prefix (10^21)
+constexpr std::intmax_t Zetta = 21;
+/// Exa prefix (10^18)
+constexpr std::intmax_t Exa = 18;
+/// Peta prefix (10^15)
+constexpr std::intmax_t Peta = 15;
+/// Tera prefix (10^12)
+constexpr std::intmax_t Tera = 12;
+/// Giga prefix (10^9)
+constexpr std::intmax_t Giga = 9;
+/// Mega prefix (10^6)
+constexpr std::intmax_t Mega = 6;
+/// Kilo prefix (10^3)
+constexpr std::intmax_t Kilo = 3;
+/// Hecto prefix (10^2)
+constexpr std::intmax_t Hecto = 2;
+/// Deca/Deka prefix (10^1)
+constexpr std::intmax_t Deca = 1;
+/// Deci prefix (10^-1)
+constexpr std::intmax_t Deci = -1;
+/// Centi prefix (10^-2)
+constexpr std::intmax_t Centi = -2;
+/// Milli prefix (10^-3)
+constexpr std::intmax_t Milli = -3;
+/// Micro prefix (10^-6)
+constexpr std::intmax_t Micro = -6;
+/// Nano prefix (10^-9)
+constexpr std::intmax_t Nano = -9;
+/// Pico prefix (10^-12)
+constexpr std::intmax_t Pico = -12;
+/// Femto prefix (10^-15)
+constexpr std::intmax_t Femto = -15;
+/// Atto prefix (10^-18)
+constexpr std::intmax_t Atto = -18;
+/// Zepto prefix (10^-21)
+constexpr std::intmax_t Zepto = -21;
+/// Yocto prefix (10^-24)
+constexpr std::intmax_t Yocto = -24;
+/// Ronto prefix (10^-27)
+constexpr std::intmax_t Ronto = -27;
+/// Quecto prefix (10^-30)
 constexpr std::intmax_t Quecto = -30;
 
 /// Given a unit, makes derived units with all metrix prefixes where
@@ -253,7 +310,7 @@ MAKE_UNIT(MeterPerSecondUnit, MeterUnit / SecondUnit)
 MAKE_UNIT(MeterPerSecondPerSecondUnit, MeterPerSecondUnit / SecondUnit)
 
 MAKE_UNIT_STRING(HertzUnit, UnitlessUnit / SecondUnit, "Hz")
-MAKE_UNIT_STRING(NewtonUnit, KiloGramUnit* MeterUnit / SecondUnit / SecondUnit, "N");
+MAKE_UNIT_STRING(NewtonUnit, KiloGramUnit* MeterUnit / SecondUnit / SecondUnit, "N")
 MAKE_UNIT_STRING(PascalUnit, NewtonUnit / SqMeterUnit, "Pa")
 MAKE_UNIT_STRING(JouleUnit, NewtonUnit* MeterUnit, "J")
 MAKE_UNIT_STRING(WattUnit, JouleUnit / SecondUnit, "W")
@@ -316,6 +373,7 @@ MAKE_UNIT_SCALE_STRING(MileUnit, FootUnit, Length, 5280, 1, "mi")
 MAKE_UNIT_SCALE_STRING(PoundMassUnit, KiloGramUnit, Mass, 220'462, 100'000, "lbm")
 /// \cond
 #else
+// Macros for individual units
 #define MAKE_DEGREE_UNIT MAKE_UNIT_SCALE_STRING(DegreeUnit, RadianUnit, Angle, 5'729'577'913,
                        100'000'000, "deg")
 
@@ -332,6 +390,42 @@ MAKE_UNIT_SCALE_STRING(PoundMassUnit, KiloGramUnit, Mass, 220'462, 100'000, "lbm
 #define MAKE_CU_METER_UNIT                    MAKE_UNIT(CuMeterUnit, SqMeterUnit* MeterUnit)
 #define MAKE_METER_PER_SECOND_UNIT            MAKE_UNIT(MeterPerSecondUnit, MeterUnit / SecondUnit)
 #define MAKE_METER_PER_SECOND_PER_SECOND_UNIT MAKE_UNIT(MeterPerSecondPerSecondUnit, MeterPerSecondUnit / SecondUnit)
+#define MAKE_HERTZ_UNIT                       MAKE_UNIT_STRING(HertzUnit, UnitlessUnit / SecondUnit, "Hz")
+#define MAKE_NEWTON_UNIT                      MAKE_UNIT_STRING(NewtonUnit, KiloGramUnit* MeterUnit / SecondUnit / SecondUnit, "N")
+#define MAKE_PASCAL_UNIT                      MAKE_UNIT_STRING(PascalUnit, NewtonUnit / SqMeterUnit, "Pa")
+#define MAKE_JOULE_UNIT                       MAKE_UNIT_STRING(JouleUnit, NewtonUnit* MeterUnit, "J")
+#define MAKE_WATT_UNIT                        MAKE_UNIT_STRING(WattUnit, JouleUnit / SecondUnit, "W")
+#define MAKE_COULOMB_UNIT                     MAKE_UNIT_STRING(CoulombUnit, SecondUnit* AmpereUnit, "C")
+#define MAKE_VOLT_UNIT                        MAKE_UNIT_STRING(VoltUnit, WattUnit / AmpereUnit, "V")
+#define MAKE_FARAD_UNIT                       MAKE_UNIT_STRING(FaradUnit, CoulombUnit / VoltUnit, "F")
+#define MAKE_OHM_UNIT                         MAKE_UNIT_STRING(OhmUnit, VoltUnit / AmpereUnit, "O")
+#define MAKE_SIEMENS_UNIT                     MAKE_UNIT_STRING(SiemensUnit, UnitlessUnit / OhmUnit, "sv")
+#define MAKE_WEBER_UNIT                       MAKE_UNIT_STRING(WeberUnit, VoltUnit* SecondUnit, "Wb")
+#define MAKE_TESLA_UNIT                       MAKE_UNIT_STRING(TeslaUnit, WeberUnit / SqMeterUnit, "T")
+#define MAKE_HENRY_UNIT                       MAKE_UNIT_STRING(HenryUnit, WeberUnit / AmpereUnit, "L")
+#define MAKE_BECQUEREL_UNIT                   MAKE_UNIT_TAG(BecquerelUnit, HertzUnit)
+
+#define MAKE_GRAY_UNIT      MAKE_UNIT_STRING(GrayUnit, JouleUnit / KiloGramUnit, "Gy")
+#define MAKE_SIEVERT_UNIT   MAKE_UNIT_TAG_STRING(SievertUnit, GrayUnit, "sv")
+#define MAKE_KATAL_UNIT     MAKE_UNIT(KatalUnit, MoleUnit / SecondUnit);
+#define MAKE_STERADIAN_UNIT MAKE_UNIT_TAG_STRING(SteradianUnit, RadianUnit, "sd")
+
+#define MAKE_LUMEN_UNIT MAKE_UNIT(LumenUnit, CandelaUnit* SteradianUnit)
+#define MAKE_LUX_UNIT   MAKE_UNIT(LuxUnit, LumenUnit / SqMeterUnit)
+
+#define MAKE_MINUTE_UNIT    MAKE_UNIT_SCALE_STRING(MinuteUnit, SecondUnit, Time, 60, 1, "min")
+#define MAKE_HOUR_UNIT      MAKE_UNIT_SCALE_STRING(HourUnit, MinuteUnit, Time, 60, 1, "hr")
+#define MAKE_DAY_UNIT       MAKE_UNIT_SCALE_STRING(DayUnit, HourUnit, Time, 24, 1, "day")
+#define MAKE_YEAR_UNIT      MAKE_UNIT_SCALE(YearUnit, DayUnit, Time, 365, 1)
+#define MAKE_DECADE_UNIT    MAKE_UNIT_SCALE(DecadeUnit, YearUnit, Time, 10, 1)
+#define MAKE_CENTURY_UNIT   MAKE_UNIT_SCALE(CenturyUnit, YearUnit, Time, 100, 1)
+#define MAKE_MILLENIUM_UNIT MAKE_UNIT_SCALE(MilleniumUnit, YearUnit, Time, 1000, 1)
+
+#define MAKE_FOOT_UNIT MAKE_UNIT_SCALE_STRING(FootUnit, MeterUnit, Length, 328'084, 100'000, "ft")
+#define MAKE_INCH_UNIT MAKE_UNIT_SCALE_STRING(InchUnit, FootUnit, Length, 12, 1, "in")
+#define MAKE_YARD_UNIT MAKE_UNIT_SCALE_STRING(YardUnit, FootUnit, Length, 3, 1, "yd")
+#define MAKE_MILE_UNIT MAKE_UNIT_SCALE_STRING(MileUnit, FootUnit, Length, 5280, 1, "mi")
+
 #endif
 /// \endcond
 }   // namespace Maxwell
