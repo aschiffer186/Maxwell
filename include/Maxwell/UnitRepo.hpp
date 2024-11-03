@@ -129,6 +129,14 @@ struct DegreeTag
     MAKE_UNIT_WITH_DESC(name, def, desc)                                                                               \
     MAKE_METRIC_PREFIXES(name##Unit, dimension)
 
+#define ESC(...) __VA_ARGS__
+
+#define MAKE_SCALED_UNIT_WITH_DESC(name, base, amount, dimension, desc)                                                \
+    constexpr Unit auto name##Unit = base.adjustScale##dimension<ESC amount>();                                        \
+    template <>                                                                                                        \
+    inline const std::string unitString<name##Unit> = desc;                                                            \
+    using name##UnitType                            = std::remove_const_t<decltype(name##Unit)>;
+
 MAKE_METRIC_PREFIXES(moleUnit, Amount)
 MAKE_METRIC_PREFIXES(ampereUnit, Current)
 MAKE_METRIC_PREFIXES(meterUnit, Length)
@@ -166,47 +174,118 @@ struct is_tag_convertible<_detail::DegreeTag, _detail::RadianTag> : std::true_ty
 {
 };
 
-/**
- * @brief Calculate conversion factor
- *
- * Calculate conversion factor from radians to degrees,
- * i.e. the constant to multiply a quantity in radians by
- * to get a value in degrees
- *
- * @return conversion factor from radians to degrees
- */
-auto consteval tagConversionFactor(radianUnitType, degreeUnitType) noexcept -> double
+/// \brief Calculate conversion factor
+///
+/// Calculate conversion factor from radians to degrees,
+/// i.e. the constant to multiply a quantity in radians by
+/// to get a value in degrees
+///
+/// \return conversion factor from radians to degrees
+consteval double tagConversionFactor(radianUnitType, degreeUnitType) noexcept
 {
     return 180.0 / std::numbers::pi;
 }
 
-/**
- * @brief Calculate conversion factor
- *
- * Calculate conversion factor from degrees to radians,
- * i.e. the constant to multiply a quantity in degrees by
- * to get a value in radians
- *
- * @return conversion factor from degrees to radians
- */
-auto consteval tagConversionFactor(degreeUnitType, radianUnitType) noexcept -> double
+/// \brief Calculate conversion factor
+///
+/// Calculate conversion factor from degrees to radians,
+/// i.e. the constant to multiply a quantity in degrees by
+/// to get a value in radians
+///
+/// \return conversion factor from degrees to radians
+consteval double tagConversionFactor(degreeUnitType, radianUnitType) noexcept
 {
     return std::numbers::pi / 180.0;
 }
 
+/// \cond
+namespace _detail
+{
+struct SteradianTag
+{
+};
+} // namespace _detail
+/// \endcond
+
+constexpr Unit auto steradianUnit = unitlessUnit.addTag<_detail::SteradianTag>();
+template <>
+inline const std::string unitString<steradianUnit> = "sr";
+using steradianUnitType                            = std::remove_const_t<decltype(steradianUnit)>;
+MAKE_METRIC_PREFIXES(steradianUnit, Extra)
+
+// 22 SI Special Derived Units
+// clang-format off
 MAKE_UNIT_WITH_PREFIXES_DESC(hertz, unitlessUnit / secondUnit, Time, "Hz")
-MAKE_UNIT_WITH_PREFIXES_DESC(newton, kilogramUnit* meterUnit / (secondUnit * secondUnit), Mass, "N")
+MAKE_UNIT_WITH_PREFIXES_DESC(newton, kilogramUnit * meterUnit / (secondUnit * secondUnit), Mass, "N")
 MAKE_UNIT_WITH_PREFIXES_DESC(pascal, newtonUnit / (meterUnit * meterUnit), Mass, "Pa")
-MAKE_UNIT_WITH_PREFIXES_DESC(joule, newtonUnit* meterUnit, Mass, "J")
+MAKE_UNIT_WITH_PREFIXES_DESC(joule, newtonUnit * meterUnit, Mass, "J")
 MAKE_UNIT_WITH_PREFIXES_DESC(watt, jouleUnit / secondUnit, Mass, "J/s")
-MAKE_UNIT_WITH_PREFIXES_DESC(coulomb, secondUnit* ampereUnit, Current, "C")
+MAKE_UNIT_WITH_PREFIXES_DESC(coulomb, secondUnit * ampereUnit, Current, "C")
 MAKE_UNIT_WITH_PREFIXES_DESC(volt, wattUnit / ampereUnit, Mass, "V")
 MAKE_UNIT_WITH_PREFIXES_DESC(farad, coulombUnit / voltUnit, Mass, "F")
 MAKE_UNIT_WITH_PREFIXES_DESC(ohm, voltUnit / ampereUnit, Mass, "Ω")
 MAKE_UNIT_WITH_PREFIXES_DESC(siemens, unitlessUnit / ohmUnit, Time, "S")
-MAKE_UNIT_WITH_PREFIXES_DESC(weber, voltUnit* secondUnit, Mass, "Wb")
+MAKE_UNIT_WITH_PREFIXES_DESC(weber, voltUnit * secondUnit, Mass, "Wb")
 MAKE_UNIT_WITH_PREFIXES_DESC(tesla, weberUnit / (meterUnit * meterUnit), Mass, "T")
+MAKE_UNIT_WITH_PREFIXES_DESC(henry, weberUnit / ampereUnit, Mass, "L")
+// Celsius
+MAKE_UNIT_WITH_PREFIXES_DESC(lumen, candelaUnit * steradianUnit, Luminosity, "lm")
+MAKE_UNIT_WITH_PREFIXES_DESC(lux, candelaUnit / (meterUnit * meterUnit), Luminosity, "lx")
 
+/// \cond
+namespace _detail 
+{
+struct BecquerelTag 
+{
+
+};
+
+struct SievertTag 
+{
+
+};
+}
+/// \endcond
+
+constexpr Unit auto becquerelUnit = hertzUnit.addTag<_detail::BecquerelTag>();
+template<>
+inline const std::string unitString<becquerelUnit> = "Bq";
+using becquerelUnitType = std::remove_const_t<decltype(becquerelUnit)>;
+MAKE_METRIC_PREFIXES(becquerelUnit, Time)
+
+MAKE_UNIT_WITH_PREFIXES_DESC(gray, jouleUnit / kilogramUnit, Mass, "Gy")
+
+constexpr Unit auto sievertUnit = grayUnit.addTag<_detail::SievertTag>();
+template<>
+inline const std::string unitString<sievertUnit> = "Sv";
+using sievertUnitType = std::remove_const_t<decltype(sievertUnit)>;
+MAKE_METRIC_PREFIXES(sievertUnit, Mass)
+
+MAKE_UNIT_WITH_PREFIXES_DESC(katal, moleUnit / secondUnit, Amount, "kat")
+
+MAKE_UNIT(meterPerSecond, meterUnit / secondUnit)
+MAKE_UNIT(meterPerSecondPerSecond, meterPerSecondUnit / secondUnit)
+MAKE_UNIT(squareMeter, meterUnit * meterUnit)
+MAKE_UNIT(cubicMeter, squareMeterUnit * meterUnit)
+
+MAKE_SCALED_UNIT_WITH_DESC(liter, candelaUnit, (std::ratio<1'000, 1>), Length, "L")
+
+// Imperial units 
+MAKE_SCALED_UNIT_WITH_DESC(foot, meterUnit, (std::ratio<328'084, 100'000>), Length, "ft")
+MAKE_SCALED_UNIT_WITH_DESC(inch, footUnit, (std::ratio<1, 12>), Length, "in")
+MAKE_SCALED_UNIT_WITH_DESC(yard, footUnit, (std::ratio<3, 1>), Length, "yd")
+MAKE_SCALED_UNIT_WITH_DESC(mile, footUnit, (std::ratio<5'280, 1>), Length, "mi")
+
+MAKE_SCALED_UNIT_WITH_DESC(pound, kilogramUnit, (std::ratio<453'592, 1'000'000)>, Mass, "lb")
+
+MAKE_SCALED_UNIT_WITH_DESC(minute, secondUnit, (std::ratio<60, 1>), Time, "min")
+MAKE_SCALED_UNIT_WITH_DESC(hour, minuteUnit, (std::ratio<60, 1>), Time, "hr")
+MAKE_SCALED_UNIT_WITH_DESC(day, hourUnit, (std::ratio<24, 1>), Time, "day")
+MAKE_SCALED_UNIT_WITH_DESC(week, dayUnit, (std::ratio<7, 1>), Time, "week")
+MAKE_SCALED_UNIT_WITH_DESC(year, dayUnit, (std::ratio<52, 1>), Time, "yr")
+
+// clang-format on
+#undef ESC
 #endif
 } // namespace Maxwell
 

@@ -10,6 +10,7 @@
 
 #include <array>
 #include <concepts>
+#include <ratio>
 #include <string>
 #include <type_traits>
 
@@ -283,7 +284,7 @@ struct UnitType
     /// \brief Adjusts the extra multiplier of the unit
     ///
     /// Returns a new \c UnitType with the same dimensions as \c *this, but
-    /// with an adjusted multiplier for the xtra multiplier
+    /// with an adjusted multiplier for the extra multiplier
     ///
     /// \post the unit returned has the same dimensions as \c *this and
     /// \code
@@ -298,6 +299,160 @@ struct UnitType
     {
         return UnitType<Amount, Current, Length, Luminosity, Mass, Temperature, Time, Tag,
                         ExtraMultiplier_ + Adjustment>{};
+    }
+
+    /// \brief Adjusts the scale factor of the amount dimension of the unit
+    ///
+    /// Returns a new \c UnitType with the same dimension, but whose amount dimension
+    /// has been multiplied by the specified value.
+    ///
+    /// \post The scale factor of the amount dimension of the return unit is equal to the scale factor
+    ///       of \c *this time adjustment
+    ///
+    /// \tparam Adjustment The amount to multiply the scale factor of the amount dimension by
+    /// \return A \c UnitType whose amount dimension has been scaled
+    template <Internal::_detail::RatioLike Adjustment>
+    consteval auto adjustScaleAmount() const noexcept
+    {
+        constexpr Internal::Measure auto oldMeasure = Amount;
+        using OldScale                              = decltype(oldMeasure)::Scale;
+        using NewScale                              = std::ratio_multiply<OldScale, Adjustment>;
+        constexpr Internal::MeasureType<oldMeasure.power(), oldMeasure.multiplier(), NewScale,
+                                        typename decltype(oldMeasure)::Offset>
+            newMeasure{};
+        return UnitType<newMeasure, Current, Length, Luminosity, Mass, Temperature, Time, Tag, ExtraMultiplier_>{};
+    }
+
+    /// \brief Adjusts the scale factor of the current dimension of the unit
+    ///
+    /// Returns a new \c UnitType with the same dimension, but whose current dimension
+    /// has been multiplied by the specified value.
+    ///
+    /// \post The scale factor of the current dimension of the return unit is equal to the scale factor
+    ///       of \c *this time adjustment
+    ///
+    /// \tparam Adjustment The amount to multiply the scale factor of the current dimension by
+    /// \return A \c UnitType whose current dimension has been scaled
+    template <Internal::_detail::RatioLike Adjustment>
+    consteval auto adjustScaleCurrent() const noexcept
+    {
+        constexpr Internal::Measure auto oldMeasure = Current;
+        using OldScale                              = decltype(oldMeasure)::Scale;
+        using NewScale                              = std::ratio_multiply<OldScale, Adjustment>;
+        constexpr Internal::MeasureType<oldMeasure.power(), oldMeasure.multiplier(), NewScale,
+                                        typename decltype(oldMeasure)::Offset>
+            newMeasure{};
+        return UnitType<Amount, newMeasure, Length, Luminosity, Mass, Temperature, Time, Tag, ExtraMultiplier_>{};
+    }
+
+    /// \brief Adjusts the scale factor of the length dimension of the unit
+    ///
+    /// Returns a new \c UnitType with the same dimension, but whose length dimension
+    /// has been multiplied by the specified value.
+    ///
+    /// \post The scale factor of the length dimension of the return unit is equal to the scale factor
+    ///       of \c *this time adjustment
+    ///
+    /// \tparam Adjustment The amount to multiply the scale factor of the length dimension by
+    /// \return A \c UnitType whose length dimension has been scaled
+    template <Internal::_detail::RatioLike Adjustment>
+    consteval auto adjustScaleLength() const noexcept
+    {
+        constexpr Internal::Measure auto oldMeasure = Length;
+        using OldScale                              = decltype(oldMeasure)::Scale;
+        using NewScale                              = std::ratio_multiply<OldScale, Adjustment>;
+        constexpr Internal::MeasureType<oldMeasure.power(), oldMeasure.multiplier(), NewScale,
+                                        typename decltype(oldMeasure)::Offset>
+            newMeasure{};
+        return UnitType<Amount, Current, newMeasure, Luminosity, Mass, Temperature, Time, Tag, ExtraMultiplier_>{};
+    }
+
+    /// \brief Adjusts the scale factor of the luminosity dimension of the unit
+    ///
+    /// Returns a new \c UnitType with the same dimension, but whose luminosity dimension
+    /// has been multiplied by the specified value.
+    ///
+    /// \post The scale factor of the luminosity dimension of the return unit is equal to the scale factor
+    ///       of \c *this time adjustment
+    ///
+    /// \tparam Adjustment The amount to multiply the scale factor of the luminosity dimension by
+    /// \return A \c UnitType whose amount dimension has been scaled
+    template <Internal::_detail::RatioLike Adjustment>
+    consteval auto adjustScaleLuminosity() const noexcept
+    {
+        constexpr Internal::Measure auto oldMeasure = Luminosity;
+        using OldScale                              = decltype(oldMeasure)::Scale;
+        using NewScale                              = std::ratio_multiply<OldScale, Adjustment>;
+        constexpr Internal::MeasureType<oldMeasure.power(), oldMeasure.multiplier(), NewScale,
+                                        typename decltype(oldMeasure)::Offset>
+            newMeasure{};
+        return UnitType<Amount, Current, Length, newMeasure, Mass, Temperature, Time, Tag, ExtraMultiplier_>{};
+    }
+
+    /// \brief Adjusts the scale factor of the mass dimension of the unit
+    ///
+    /// Returns a new \c UnitType with the same dimension, but whose mass dimension
+    /// has been multiplied by the specified value.
+    ///
+    /// \post The scale factor of the mass dimension of the return unit is equal to the scale factor
+    ///       of \c *this time adjustment
+    ///
+    /// \tparam Adjustment The amount to multiply the scale factor of the mass dimension by
+    /// \return A \c UnitType whose mass dimension has been scaled
+    template <Internal::_detail::RatioLike Adjustment>
+    consteval auto adjustScaleMass() const noexcept
+    {
+        constexpr Internal::Measure auto oldMeasure = Length;
+        using OldScale                              = decltype(oldMeasure)::Scale;
+        using NewScale                              = std::ratio_multiply<OldScale, Adjustment>;
+        constexpr Internal::MeasureType<oldMeasure.power(), oldMeasure.multiplier(), NewScale,
+                                        typename decltype(oldMeasure)::Offset>
+            newMeasure{};
+        return UnitType<Amount, Current, Length, Luminosity, newMeasure, Temperature, Time, Tag, ExtraMultiplier_>{};
+    }
+
+    /// \brief Adjusts the scale factor of the temperature dimension of the unit
+    ///
+    /// Returns a new \c UnitType with the same dimension, but whose temperature dimension
+    /// has been multiplied by the specified value.
+    ///
+    /// \post The scale factor of the temperature dimension of the return unit is equal to the scale factor
+    ///       of \c *this time adjustment
+    ///
+    /// \tparam Adjustment The amount to multiply the scale factor of the temperature dimension by
+    /// \return A \c UnitType whose temperature dimension has been scaled
+    template <Internal::_detail::RatioLike Adjustment>
+    consteval auto adjustScaleTemperature() const noexcept
+    {
+        constexpr Internal::Measure auto oldMeasure = Length;
+        using OldScale                              = decltype(oldMeasure)::Scale;
+        using NewScale                              = std::ratio_multiply<OldScale, Adjustment>;
+        constexpr Internal::MeasureType<oldMeasure.power(), oldMeasure.multiplier(), NewScale,
+                                        typename decltype(oldMeasure)::Offset>
+            newMeasure{};
+        return UnitType<Amount, Current, Length, Luminosity, Mass, newMeasure, Time, Tag, ExtraMultiplier_>{};
+    }
+
+    /// \brief Adjusts the scale factor of the time dimension of the unit
+    ///
+    /// Returns a new \c UnitType with the same dimension, but whose time dimension
+    /// has been multiplied by the specified value.
+    ///
+    /// \post The scale factor of the time dimension of the return unit is equal to the scale factor
+    ///       of \c *this time adjustment
+    ///
+    /// \tparam Adjustment The amount to multiply the scale factor of the time dimension by
+    /// \return A \c UnitType whose time dimension has been scaled
+    template <Internal::_detail::RatioLike Adjustment>
+    consteval auto adjustScaleTime() const noexcept
+    {
+        constexpr Internal::Measure auto oldMeasure = Time;
+        using OldScale                              = decltype(oldMeasure)::Scale;
+        using NewScale                              = std::ratio_multiply<OldScale, Adjustment>;
+        constexpr Internal::MeasureType<oldMeasure.power(), oldMeasure.multiplier(), NewScale,
+                                        typename decltype(oldMeasure)::Offset>
+            newMeasure{};
+        return UnitType<Amount, Current, Length, Luminosity, Mass, Temperature, newMeasure, Tag, ExtraMultiplier_>{};
     }
 
     /// \brief Converts a unit to SI base units
