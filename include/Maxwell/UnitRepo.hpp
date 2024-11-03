@@ -58,38 +58,57 @@ struct DegreeTag
     inline const std::string unitString<name##Unit> = str;                                                             \
     using name##UnitType                            = decltype(name##Unit);
 
-constexpr std::intmax_t quetta = 30;
-constexpr std::intmax_t ronna  = 27;
-constexpr std::intmax_t yotta  = 24;
-constexpr std::intmax_t zetta  = 21;
-constexpr std::intmax_t exa    = 18;
-constexpr std::intmax_t peta   = 15;
-constexpr std::intmax_t tera   = 12;
-constexpr std::intmax_t giga   = 9;
-constexpr std::intmax_t mega   = 6;
-constexpr std::intmax_t kilo   = 3;
-constexpr std::intmax_t hecto  = 2;
-constexpr std::intmax_t deca   = 1;
-constexpr std::intmax_t deci   = -1;
-constexpr std::intmax_t centi  = -2;
-constexpr std::intmax_t milli  = -3;
-constexpr std::intmax_t micro  = -6;
-constexpr std::intmax_t nano   = -9;
-constexpr std::intmax_t pico   = -12;
-constexpr std::intmax_t femto  = -15;
-constexpr std::intmax_t atto   = -18;
-constexpr std::intmax_t zepto  = -21;
-constexpr std::intmax_t yocto  = -24;
-constexpr std::intmax_t ronto  = -27;
-constexpr std::intmax_t quecto = -30;
-
 #ifndef NO_PREDEFINE_DERIVED_UNITS
 
 #define MAKE_METRIC_PREFIXES(name, dimension)                                                                          \
     constexpr Unit auto quetta##name = name.adjustMultiplier##dimension<quetta>();                                     \
-    using quetta##name##Type         = decltype(quetta##name);                                                         \
+    using quetta##name##Type         = std::remove_const_t<decltype(quetta##name)>;                                    \
+    constexpr Unit auto ronna##name  = name.adjustMultiplier##dimension<ronna>();                                      \
+    using ronna##name##Type          = std::remove_const_t<decltype(ronna##name)>;                                     \
+    constexpr Unit auto yotta##name  = name.adjustMultiplier##dimension<yotta>();                                      \
+    using yotta##name##Type          = std::remove_const_t<decltype(yotta##name)>;                                     \
+    constexpr Unit auto zetta##name  = name.adjustMultiplier##dimension<zetta>();                                      \
+    using zetta##name##Type          = std::remove_const_t<decltype(zetta##name)>;                                     \
+    constexpr Unit auto exa##name    = name.adjustMultiplier##dimension<exa>();                                        \
+    using exa##name##Type            = std::remove_const_t<decltype(exa##name)>;                                       \
+    constexpr Unit auto peta##name   = name.adjustMultiplier##dimension<peta>();                                       \
+    using peta##name##Type           = std::remove_const_t<decltype(peta##name)>;                                      \
+    constexpr Unit auto tera##name   = name.adjustMultiplier##dimension<tera>();                                       \
+    using tera##name##Type           = std::remove_const_t<decltype(tera##name)>;                                      \
+    constexpr Unit auto giga##name   = name.adjustMultiplier##dimension<giga>();                                       \
+    using giga##name##Type           = std::remove_const_t<decltype(giga##name)>;                                      \
+    constexpr Unit auto mega##name   = name.adjustMultiplier##dimension<mega>();                                       \
+    using mega##name##Type           = std::remove_const_t<decltype(mega##name)>;                                      \
     constexpr Unit auto kilo##name   = name.adjustMultiplier##dimension<kilo>();                                       \
-    using kilo##name##Type           = decltype(kilo##name);
+    using kilo##name##Type           = std::remove_const_t<decltype(kilo##name)>;                                      \
+    constexpr Unit auto hecto##name  = name.adjustMultiplier##dimension<hecto>();                                      \
+    using hecto##name##Type          = std::remove_const_t<decltype(hecto##name)>;                                     \
+    constexpr Unit auto deca##name   = name.adjustMultiplier##dimension<deca>();                                       \
+    using deca##name##Type           = std::remove_const_t<decltype(deca##name)>;                                      \
+    constexpr Unit auto deci##name   = name.adjustMultiplier##dimension<deci>();                                       \
+    using deci##name##Type           = std::remove_const_t<decltype(deci##name)>;                                      \
+    constexpr Unit auto centi##name  = name.adjustMultiplier##dimension<centi>();                                      \
+    using centi##name##Type          = std::remove_const_t<decltype(centi##name)>;                                     \
+    constexpr Unit auto milli##name  = name.adjustMultiplier##dimension<milli>();                                      \
+    using milli##name##Type          = std::remove_const_t<decltype(milli##name)>;                                     \
+    constexpr Unit auto micro##name  = name.adjustMultiplier##dimension<micro>();                                      \
+    using micro##name##Type          = std::remove_const_t<decltype(micro##name)>;                                     \
+    constexpr Unit auto nano##name   = name.adjustMultiplier##dimension<nano>();                                       \
+    using nano##name##Type           = std::remove_const_t<decltype(nano##name)>;                                      \
+    constexpr Unit auto femto##name  = name.adjustMultiplier##dimension<femto>();                                      \
+    using femto##name##Type          = std::remove_const_t<decltype(femto##name)>;                                     \
+    constexpr Unit auto pico##name   = name.adjustMultiplier##dimension<pico>();                                       \
+    using pico##name##Type           = std::remove_const_t<decltype(pico##name)>;                                      \
+    constexpr Unit auto atto##name   = name.adjustMultiplier##dimension<atto>();                                       \
+    using atto##name##Type           = std::remove_const_t<decltype(atto##name)>;                                      \
+    constexpr Unit auto zepto##name  = name.adjustMultiplier##dimension<zepto>();                                      \
+    using zepto##name##Type          = std::remove_const_t<decltype(zepto##name)>;                                     \
+    constexpr Unit auto yocto##name  = name.adjustMultiplier##dimension<yocto>();                                      \
+    using yocto##name##Type          = std::remove_const_t<decltype(yocto##name)>;                                     \
+    constexpr Unit auto ronto##name  = name.adjustMultiplier##dimension<ronto>();                                      \
+    using ronto##name##Type          = std::remove_const_t<decltype(ronto##name)>;                                     \
+    constexpr Unit auto quecto##name = name.adjustMultiplier##dimension<quecto>();                                     \
+    using quecto##name##Type         = std::remove_const_t<decltype(quecto##name)>;
 
 /// \brief Create a new unit and corresponding metric prefixes
 ///

@@ -15,3 +15,14 @@ The `Quantity` class template can (and should) be used anywhere a `double` can b
 Class template `BasicQuantity` is the fundamental type in Maxwell; it represents a quantity that has a magnitude and units. The type of the magnitude can be any C++ type that isn't `cv`-qualified. For convenience, the type aliases `Quantity` and `IQuantity` are provided
 * `Quantity` is an alias of `BasicQuantity` whose magnitude type is `double`
 * `IQuantity` is an alias of `BasicQuantity` whose magnitude type is `int`
+
+# Integration with C++ Standard Library. 
+The `BasicQuantity` type behaves well with types in the standard library.
+## Container Support
+`BasicQuantity` specializes `std::hash` whenever its magnitude type specializes `std::hash`, allowing it to be used in unordered containers (e.g. `std::unordered_map` and `std::unordered_set`). It provides an `operator <` when its magnitude type provides `operator <` allowing it to be used with ordered containers (e.g. `std::map` and `std::set`)
+
+## Formatting Support
+`BasicQuantity` specializes `std::formatter`, allowing it to be used in `std::format` and `std::print` (C++ 23 and later). It also provides an overloaded `operator <<` for easy printing to output streams.
+
+## Integration with Chrono Library
+`BasicQuantity` can be constructed from and converted to an instance of `std::chrono::duration` when the `BasicQuantity` has units of time. This construction and conversion is implict when no information is loss. 

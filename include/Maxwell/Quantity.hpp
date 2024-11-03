@@ -8,10 +8,12 @@
 #ifndef QUANTITY_HPP
 #define QUANTITY_HPP
 
+#include <cctype>
 #include <chrono>
 #include <concepts>
 #include <format>
 #include <functional>
+#include <initializer_list>
 #include <iterator>
 #include <limits>
 #include <ostream>
@@ -76,6 +78,8 @@ class BasicQuantity
 {
     static_assert(!std::is_const_v<T>);
     static_assert(!std::is_volatile_v<T>);
+    static_assert(!Internal::Similar<T, std::in_place_t>);
+    static_assert(!Internal::_detail::ChronoDuration<T>);
 
     template <typename D>
     static constexpr bool implicitFromChrono = Internal::_detail::EnableImplicitFromChrono<D, T, U>;
@@ -126,19 +130,55 @@ class BasicQuantity
     /// \pre \c MagnitudeType is constructible from \c Up&&
     /// \post \c this->magnitude() is equal to \c MagnitudeType(std::forward<Up>(magnitude))
     ///
-    /// \throws any exceptions thrown by the constructor of \c MagnitudeType
+    /// \throws Any exceptions thrown by the constructor of \c MagnitudeType
     template <typename Up>
-        requires(!std::same_as<Up, MagnitudeType>) && std::constructible_from<MagnitudeType, Up&&>
+        requires(!std::same_as<Up, MagnitudeType>) &&
+                (!Internal::_detail::ChronoDuration<Up>) && std::constructible_from<MagnitudeType, Up&&>
     constexpr explicit(UnitlessUnit<Units>)
         BasicQuantity(Up&& magnitude) noexcept(std::is_nothrow_constructible_v<MagnitudeType, Up&&>)
         : magnitude_(std::forward<Up>(magnitude))
     {
     }
 
+    /// \c Constructor
+    ///
+    /// Constructs a \c BasicQuantity whose magnitude s constructed in place from the specified arguments using
+    /// the expression \c std::forward<Args>(args)...
+    ///
+    /// \pre \c MagnitudeType is constructible from \c Args
+    /// \post \c this->magnitude() is equal to \c MagnitudeType(std::forward<Args>(args)...)
+    ///
+    /// \throws Any exceptions thrown by the constructor of \c MagnitudeType
+    template <typename... Args>
+        requires(std::constructible_from<MagnitudeType, Args && ...>)
+    constexpr explicit BasicQuantity(std::in_place_t,
+                                     Args&&... args) noexcept(std::is_nothrow_constructible_v<MagnitudeType, Args&&...>)
+        : magnitude_(std::forward<Args>(args)...)
+    {
+    }
+
+    /// \c Constructor
+    ///
+    /// Constructs a \c BasicQuantity whose magnitude s constructed in place from the specified initializer list
+    /// and arguments arguments using
+    /// the expression <tt>MagnitudeType(il, std::forward<Args>(args)...)</tt>
+    ///
+    /// \pre \c MagnitudeType is constructible from \c Args
+    /// \post \c this->magnitude() is equal to <tt>MagnitudeType(il, std::forward<Args>(args)...)</t>>
+    ///
+    /// \throws Any exceptions thrown by the constructor of \c MagnitudeType
+    template <typename Up, typename... Args>
+        requires std::constructible_from<std::initializer_list<Up>, Args...>
+    constexpr explicit BasicQuantity(std::in_place_t, std::initializer_list<Up> il, Args&&... args) noexcept(
+        std::is_nothrow_constructible_v<MagnitudeType, std::initializer_list<Up>, Args...>)
+        : magnitude_(il, std::forward<Args>(args)...)
+    {
+    }
+
     /// \brief Constructor
     ///
-    /// Constructs a \c BasicQuantity from a \c std::chrono::duration type, allowing for integration with the standard
-    /// library. This constructor is implicit if there would be a loss of information converting from the
+    /// Constructs a \c BasicQuantity from a \c std::chrono::duration type, allowing for integration with the
+    /// standard library. This constructor is implicit if there would be a loss of information converting from the
     /// specified \c std::chrono::duration type.
     ///
     /// \pre \c MagnitudeType is constructible from \c Rep
@@ -359,21 +399,90 @@ concept Temperature = TemperatureUnit<QuantityType::Units>;
 /// \tparam QuantityType The quantity to check
 template <typename QuantityType>
 concept Time = TimeUnit<QuantityType::Units>;
+
+/// \brief Specifies a quantity is unitless
+///
+/// \tparam QuantityType The quantity to check
+template <typename QuantityType>
+concept Unitless = UnitlessUnit<QuantityType::Units>;
 } // namespace Maxwell
 
+// --- Specialization of standard library templates ---
+
+/// \namespace std
+/// \brief Specialization of standard library templates
 namespace std
 {
+/// \brief Specialization of \c std::formatter for \c BasicQuantity
+///
+/// \tparam M The type of the magnitude of the \c BasicQuantity
+/// \tparam U The units of the \c BasicQuantity
 template <typename M, Maxwell::Unit auto U>
 struct formatter<Maxwell::BasicQuantity<M, U>>
 {
-    auto format(const Maxwell::BasicQuantity<M, U> q, std::format_context& ctx) const
+    constexpr auto parse(std::format_parse_context& ctx)
+    {
+        auto pos = ctx.begin();
+        while (pos != ctx.end() && *pos != '}')
+        {
+            if (std::tolower(*pos) == 'b')
+            {
+                inSIBaseUnits_ = true;
+            }
+            else if (std::tolower(*pos) == 'u')
+            {
+                unitsOnly_ = true;
+            }
+            else if (std::tolower(*pos) == 'd')
+            {
+                dimensionOnly_ = true;
+            }
+            ++pos;
+        }
+        if (dimensionOnly_ && unitsOnly_)
+        {
+            throw std::format_error{"Cannot specify both dimension only and units only!"};
+        }
+    }
+
+    auto format(const Maxwell::BasicQuantity<M, U>& q, std::format_context& ctx) const
     {
         std::string temp;
-        std::format_to(std::back_inserter(temp), "{} {}", q.magnitude(), Maxwell::unitString<U>);
+        const auto  actual = (inSIBaseUnits_) ? q.toSIBaseUnits() : q;
+        if (unitsOnly_)
+        {
+            std::format_to(std::back_inserter(temp), "{}", Maxwell::unitString<decltype(actual)::Units>);
+        }
+        else if (dimensionOnly_)
+        {
+            if constexpr (Maxwell::Unitless<decltype(q)>)
+            {
+                std::format_to(std::back_inserter(temp), "{}", "[]");
+            }
+            else
+            {
+                std::string dimensionString;
+            }
+        }
+        else
+        {
+            std::format_to(std::back_inserter(temp), "{} {}", actual.magnitude(),
+                           Maxwell::unitString<decltype(actual)::Units>);
+        }
         return std::formatter<std::string_view>{}.format(temp, ctx);
     }
+
+  private:
+    bool inSIBaseUnits_{false};
+    bool unitsOnly_{false};
+    bool dimensionOnly_{false};
 };
 
+/// \brief Specialization of \c std::hash for \c BasicQuantity
+///
+/// Specialization of \c std::hash for \c BasicQuantity. Returns the hash value
+/// of the magnitude of a quantity after converting to SI base units. This ensures
+/// that equal instances of \c BasicQuantity have equal hash values.
 template <typename M, Maxwell::Unit auto U>
 struct hash<Maxwell::BasicQuantity<M, U>>
 {
@@ -383,6 +492,10 @@ struct hash<Maxwell::BasicQuantity<M, U>>
     }
 };
 
+/// \brief Specialization of \c std::numeric_limits for \c BasicQuantity
+///
+/// Specialization of \c std::numeric_limits for \c BasicQuantity. Provides
+/// values equivalent to \c std::numeric_limits<M>.
 template <typename M, Maxwell::Unit auto U>
 struct numeric_limits<Maxwell::BasicQuantity<M, U>> : numeric_limits<M>
 {

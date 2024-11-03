@@ -713,6 +713,7 @@ constexpr double conversionFactor(Unit auto from, Unit auto to) noexcept
     return conversionFactor;
 }
 
+/// \brief Multiplies two units
 consteval Unit auto operator*(Unit auto lhs, Unit auto rhs) noexcept
 {
     return UnitType<lhs.amount() * rhs.amount(), lhs.current() * rhs.current(), lhs.length() * rhs.length(),
@@ -720,12 +721,40 @@ consteval Unit auto operator*(Unit auto lhs, Unit auto rhs) noexcept
                     lhs.time() * rhs.time(), typename decltype(lhs)::Tag>{};
 }
 
+/// \brief Divides two units
 consteval Unit auto operator/(Unit auto lhs, Unit auto rhs) noexcept
 {
     return UnitType<lhs.amount() / rhs.amount(), lhs.current() / rhs.current(), lhs.length() / rhs.length(),
                     lhs.luminosity() / rhs.luminosity(), lhs.mass() / rhs.mass(), lhs.temperature() / rhs.temperature(),
                     lhs.time() / rhs.time(), typename decltype(lhs)::Tag>{};
 }
+
+// --- Metric Prefixes ---
+
+constexpr std::intmax_t quetta = 30;
+constexpr std::intmax_t ronna  = 27;
+constexpr std::intmax_t yotta  = 24;
+constexpr std::intmax_t zetta  = 21;
+constexpr std::intmax_t exa    = 18;
+constexpr std::intmax_t peta   = 15;
+constexpr std::intmax_t tera   = 12;
+constexpr std::intmax_t giga   = 9;
+constexpr std::intmax_t mega   = 6;
+constexpr std::intmax_t kilo   = 3;
+constexpr std::intmax_t hecto  = 2;
+constexpr std::intmax_t deca   = 1;
+constexpr std::intmax_t deci   = -1;
+constexpr std::intmax_t centi  = -2;
+constexpr std::intmax_t milli  = -3;
+constexpr std::intmax_t micro  = -6;
+constexpr std::intmax_t nano   = -9;
+constexpr std::intmax_t pico   = -12;
+constexpr std::intmax_t femto  = -15;
+constexpr std::intmax_t atto   = -18;
+constexpr std::intmax_t zepto  = -21;
+constexpr std::intmax_t yocto  = -24;
+constexpr std::intmax_t ronto  = -27;
+constexpr std::intmax_t quecto = -30;
 
 // --- Formatting ---
 /// \cond
@@ -738,6 +767,14 @@ std::string defaultUnitName(Unit auto)
 } // namespace _detail
 /// \endcond
 
+/// \brief Provides a string representation of the unit
+///
+/// Provides a string representation of the unit (e.g. m for meter, K for kelvin).
+/// The default representation of a unit is in terms of SI base units
+/// (e.g. a newton would be represented as kg * m * s^-2). To provide a custom
+/// representation for the unit, specialize this string for that unit.
+///
+/// \tparam U The unit to provide a description for
 template <Unit auto U>
 inline const std::string unitString = _detail::defaultUnitName(U);
 } // namespace Maxwell
