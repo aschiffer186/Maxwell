@@ -321,6 +321,62 @@ TEST(TestUnit, TestUnitTraits)
     EXPECT_FALSE(LengthUnit<secondUnit>);
     EXPECT_FALSE(LengthUnit<radianUnit>);
     EXPECT_FALSE(LengthUnit<unitlessUnit>);
+
+    EXPECT_FALSE(LuminosityUnit<moleUnit>);
+    EXPECT_FALSE(LuminosityUnit<ampereUnit>);
+    EXPECT_FALSE(LuminosityUnit<meterUnit>);
+    EXPECT_TRUE(LuminosityUnit<candelaUnit>);
+    EXPECT_TRUE(LuminosityUnit<kilocandelaUnit>);
+    EXPECT_FALSE(LuminosityUnit<gramUnit>);
+    EXPECT_FALSE(LuminosityUnit<kelvinUnit>);
+    EXPECT_FALSE(LuminosityUnit<secondUnit>);
+    EXPECT_FALSE(LuminosityUnit<radianUnit>);
+    EXPECT_FALSE(LuminosityUnit<unitlessUnit>);
+
+    EXPECT_FALSE(MassUnit<moleUnit>);
+    EXPECT_FALSE(MassUnit<ampereUnit>);
+    EXPECT_FALSE(MassUnit<meterUnit>);
+    EXPECT_FALSE(MassUnit<candelaUnit>);
+    EXPECT_TRUE(MassUnit<gramUnit>);
+    EXPECT_TRUE(MassUnit<kilogramUnit>);
+    EXPECT_FALSE(MassUnit<kelvinUnit>);
+    EXPECT_FALSE(MassUnit<secondUnit>);
+    EXPECT_FALSE(MassUnit<radianUnit>);
+    EXPECT_FALSE(MassUnit<unitlessUnit>);
+
+    EXPECT_FALSE(TemperatureUnit<moleUnit>);
+    EXPECT_FALSE(TemperatureUnit<ampereUnit>);
+    EXPECT_FALSE(TemperatureUnit<meterUnit>);
+    EXPECT_FALSE(TemperatureUnit<candelaUnit>);
+    EXPECT_FALSE(TemperatureUnit<gramUnit>);
+    EXPECT_TRUE(TemperatureUnit<kelvinUnit>);
+    EXPECT_TRUE(TemperatureUnit<kilokelvinUnit>);
+    EXPECT_FALSE(TemperatureUnit<secondUnit>);
+    EXPECT_FALSE(TemperatureUnit<radianUnit>);
+    EXPECT_FALSE(TemperatureUnit<unitlessUnit>);
+
+    EXPECT_FALSE(TimeUnit<moleUnit>);
+    EXPECT_FALSE(TimeUnit<ampereUnit>);
+    EXPECT_FALSE(TimeUnit<meterUnit>);
+    EXPECT_FALSE(TimeUnit<candelaUnit>);
+    EXPECT_FALSE(TimeUnit<gramUnit>);
+    EXPECT_FALSE(TimeUnit<kelvinUnit>);
+    EXPECT_TRUE(TimeUnit<secondUnit>);
+    EXPECT_TRUE(TimeUnit<kilosecondUnit>);
+    EXPECT_FALSE(TimeUnit<radianUnit>);
+    EXPECT_FALSE(TimeUnit<unitlessUnit>);
+
+    EXPECT_FALSE(AngleUnit<moleUnit>);
+    EXPECT_FALSE(AngleUnit<ampereUnit>);
+    EXPECT_FALSE(AngleUnit<meterUnit>);
+    EXPECT_FALSE(AngleUnit<candelaUnit>);
+    EXPECT_FALSE(AngleUnit<gramUnit>);
+    EXPECT_FALSE(AngleUnit<kelvinUnit>);
+    EXPECT_FALSE(AngleUnit<secondUnit>);
+    EXPECT_TRUE(AngleUnit<radianUnit>);
+    static_assert(AngleUnit<kiloradianUnit>);
+    EXPECT_TRUE(AngleUnit<degreeUnit>);
+    EXPECT_FALSE(AngleUnit<unitlessUnit>);
 }
 
 // --- Type Parameterized Tests ---

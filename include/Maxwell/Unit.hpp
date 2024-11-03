@@ -556,7 +556,7 @@ concept LuminosityUnit =
 /// \tparam U The unit to check
 template <auto U>
 concept MassUnit = Unit<decltype(U)> && U.amount() == Internal::nullMeasure && U.current() == Internal::nullMeasure &&
-                   U.length() == Internal::nullMeasure && U.luminosity().power() == Internal::nullMeasure &&
+                   U.length() == Internal::nullMeasure && U.luminosity() == Internal::nullMeasure &&
                    U.mass().power() == 1 && U.temperature() == Internal::nullMeasure &&
                    U.time() == Internal::nullMeasure && Internal::Similar<typename decltype(U)::Tag, void>;
 
@@ -568,8 +568,8 @@ concept MassUnit = Unit<decltype(U)> && U.amount() == Internal::nullMeasure && U
 template <auto U>
 concept TemperatureUnit =
     Unit<decltype(U)> && U.amount() == Internal::nullMeasure && U.current() == Internal::nullMeasure &&
-    U.length() == Internal::nullMeasure && U.luminosity().power() == Internal::nullMeasure &&
-    U.mass().power() == Internal::nullMeasure && U.temperature().power() == 1 && U.time() == Internal::nullMeasure &&
+    U.length() == Internal::nullMeasure && U.luminosity() == Internal::nullMeasure &&
+    U.mass() == Internal::nullMeasure && U.temperature().power() == 1 && U.time() == Internal::nullMeasure &&
     Internal::Similar<typename decltype(U)::Tag, void>;
 
 /// \brief Specifies a unit has dimensions of time
