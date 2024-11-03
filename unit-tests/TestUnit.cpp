@@ -380,6 +380,30 @@ TEST(TestUnit, TestUnitTraits)
     EXPECT_FALSE(AngleUnit<unitlessUnit>);
 }
 
+TEST(TestUnit, TestUnitEquality)
+{
+    Unit auto        u  = meterUnit;
+    const Unit auto  u2 = meterUnit;
+    const Unit auto& u3 = meterUnit;
+
+    EXPECT_EQ(u, u);
+    EXPECT_EQ(u, u2);
+    EXPECT_EQ(u2, u);
+    EXPECT_EQ(u, u3);
+    EXPECT_EQ(u3, u);
+    EXPECT_EQ(u2, u3);
+    EXPECT_EQ(u3, u2);
+
+    EXPECT_NE(meterUnit, kilometerUnit);
+    EXPECT_FALSE(u != u);
+    EXPECT_FALSE(u != u2);
+    EXPECT_FALSE(u2 != u);
+    EXPECT_FALSE(u != u3);
+    EXPECT_FALSE(u3 != u);
+    EXPECT_FALSE(u2 != u3);
+    EXPECT_FALSE(u3 != u2);
+}
+
 // --- Type Parameterized Tests ---
 template <typename T>
 class UnitIncompatabilityTest : public testing::Test

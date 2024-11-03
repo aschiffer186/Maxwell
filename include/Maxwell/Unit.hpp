@@ -40,14 +40,15 @@ namespace Maxwell
 /// units type (e.g. it is possible to perform transformations on values of units or compare two units with \c ==
 /// instead of needing to use metafunctions).
 ///
-/// \tparam Amount_ the amount dimension of the unit
-/// \tparam Currrent_ the current dimension of the unit
-/// \tparam Length_ the length dimension of the unit
-/// \tparam Luminosity_ the luminosity dimension of the unit
-/// \tparam Mass_ the mass dimension of the unit
-/// \tparam Temerature_ the temperature dimension of the unit
-/// \tparam Time_ the time dimension of the unit
-/// \tparam Tag_ the tag of the unit (see above)
+/// \tparam Amount_ The amount dimension of the unit
+/// \tparam Currrent_ The current dimension of the unit
+/// \tparam Length_ The length dimension of the unit
+/// \tparam Luminosity_ The luminosity dimension of the unit
+/// \tparam Mass_ The mass dimension of the unit
+/// \tparam Temerature_ The temperature dimension of the unit
+/// \tparam Time_ The time dimension of the unit
+/// \tparam Tag_ The tag of the unit (see above)
+/// \tparam ExtraMultiplier_ Extra multiplier for dimensionless units that are not unitless
 template <Internal::Measure auto Amount_, Internal::Measure auto Current_, Internal::Measure auto Length_,
           Internal::Measure auto Luminosity_, Internal::Measure auto Mass_, Internal::Measure auto Temperature_,
           Internal::Measure auto Time_, typename Tag_ = void, std::intmax_t ExtraMultiplier_ = 0>
@@ -592,7 +593,15 @@ template <auto U>
 concept TimeUnit = UnitConvertibleTo<U, secondUnit>;
 // --- Unit comparisons ---
 
-consteval bool operator==(Unit auto lhs, Unit auto rhs) noexcept
+/// \brief Compare two units for equality
+///
+/// Compares two units for equality; two units are equal if and only if they
+/// have the same dimension and tag. This implies the units have the same type
+/// up to cvref-qualifiers.
+///
+/// \param lhs the first unit to compare for equality
+/// \param rhs th second unit to compare for equality
+constexpr bool operator==(Unit auto lhs, Unit auto rhs) noexcept
 {
     return std::same_as<std::remove_cvref_t<decltype(lhs)>, std::remove_cvref_t<decltype(rhs)>>;
 }
