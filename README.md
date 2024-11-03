@@ -19,7 +19,7 @@ Class template `BasicQuantity` is the fundamental type in Maxwell; it represents
 Athough the `BasicQuantity` template will most commonly be instantiated with a `double`, there is nothing stopping you from using other types, e.g. `std::vector<int>`
 ```c++
 // Creates a quantity that is a vector of meters
-Maxwell::BasicQuantity<std::vector<double>, Maxwell::meterUnit> q({1.0, 2.0, 3.0}); 
+Maxwell::BasicQuantity<std::vector<double>, Maxwell::meterUnit> q(std::in_place, {1.0, 2.0, 3.0}); 
 ```
 
 # Integration with C++ Standard Library. 
