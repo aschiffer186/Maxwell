@@ -504,26 +504,85 @@ concept UnitConvertibleTo =
     TagConvertibleTo<typename decltype(From)::Tag, typename decltype(To)::Tag>;
 
 // --- Unit Traits ---
+/// \brief Specifies a unit has dimensions of amount
+///
+/// Specifies a unit has dimensions of amount, regardless of scaling and offset
+///
+/// \tparam U The unit to check
 template <auto U>
-concept Amount = Unit<decltype(U)> && U.amount().power() == 1 && U.current() == Internal::nullMeasure &&
-                 U.length() == Internal::nullMeasure && U.luminosity() == Internal::nullMeasure &&
-                 U.mass() == Internal::nullMeasure && U.temperature() == Internal::nullMeasure &&
-                 U.time() == Internal::nullMeasure && std::same_as<std::remove_cv_t<typename decltype(U)::Tag>, void>;
+concept AmountUnit = Unit<decltype(U)> && U.amount().power() == 1 && U.current() == Internal::nullMeasure &&
+                     U.length() == Internal::nullMeasure && U.luminosity() == Internal::nullMeasure &&
+                     U.mass() == Internal::nullMeasure && U.temperature() == Internal::nullMeasure &&
+                     U.time() == Internal::nullMeasure && Internal::Similar<typename decltype(U)::Tag, void>;
 
+/// \brief Specifies a unit has dimensions of current
+///
+/// Specifies a unit has dimensions of current, regardless of scaling and offset
+///
+/// \tparam U The unit to check
 template <auto U>
-concept Current = Unit<decltype(U)>;
+concept CurrentUnit = Unit<decltype(U)> && U.amount() == Internal::nullMeasure && U.current().power() == 1 &&
+                      U.length() == Internal::nullMeasure && U.luminosity() == Internal::nullMeasure &&
+                      U.mass() == Internal::nullMeasure && U.temperature() == Internal::nullMeasure &&
+                      U.time() == Internal::nullMeasure && Internal::Similar<typename decltype(U)::Tag, void>;
 
+/// \brief Specifies a unit has dimensions of length
+///
+/// Specifies a unit has dimensions of length, regardless of scaling and offset
+///
+/// \tparam U The unit to check
 template <auto U>
-concept Length = Unit<decltype(U)>;
+concept LengthUnit =
+    Unit<decltype(U)> && U.amount().power() == Internal::nullMeasure && U.current() == Internal::nullMeasure &&
+    U.length().power() == 1 && U.luminosity() == Internal::nullMeasure && U.mass() == Internal::nullMeasure &&
+    U.temperature() == Internal::nullMeasure && U.time() == Internal::nullMeasure &&
+    Internal::Similar<typename decltype(U)::Tag, void>;
 
+/// \brief Specifies a unit has dimensions of luminosity
+///
+/// Specifies a unit has dimensions of luminosity, regardless of scaling and offset
+///
+/// \tparam U The unit to check
 template <auto U>
-concept Luminosity = Unit<decltype(U)>;
+concept LuminosityUnit =
+    Unit<decltype(U)> && U.amount() == Internal::nullMeasure && U.current() == Internal::nullMeasure &&
+    U.length() == Internal::nullMeasure && U.luminosity().power() == 1 && U.mass() == Internal::nullMeasure &&
+    U.temperature() == Internal::nullMeasure && U.time() == Internal::nullMeasure &&
+    Internal::Similar<typename decltype(U)::Tag, void>;
 
+/// \brief Specifies a unit has dimensions of mass
+///
+/// Specifies a unit has dimensions of mass, regardless of scaling and offset
+///
+/// \tparam U The unit to check
 template <auto U>
-concept Time = Unit<decltype(U)> && U.amount() == Internal::nullMeasure && U.current() == Internal::nullMeasure &&
-               U.length() == Internal::nullMeasure && U.luminosity() == Internal::nullMeasure &&
-               U.mass() == Internal::nullMeasure && U.temperature() == Internal::nullMeasure && U.time().power() == 1 &&
-               std::same_as<std::remove_cv_t<typename decltype(U)::Tag>, void>;
+concept MassUnit = Unit<decltype(U)> && U.amount() == Internal::nullMeasure && U.current() == Internal::nullMeasure &&
+                   U.length() == Internal::nullMeasure && U.luminosity().power() == Internal::nullMeasure &&
+                   U.mass().power() == 1 && U.temperature() == Internal::nullMeasure &&
+                   U.time() == Internal::nullMeasure && Internal::Similar<typename decltype(U)::Tag, void>;
+
+/// \brief Specifies a unit has dimensions of temperature
+///
+/// Specifies a unit has dimensions of temperature, regardless of scaling and offset
+///
+/// \tparam U The unit to check
+template <auto U>
+concept TemperatureUnit =
+    Unit<decltype(U)> && U.amount() == Internal::nullMeasure && U.current() == Internal::nullMeasure &&
+    U.length() == Internal::nullMeasure && U.luminosity().power() == Internal::nullMeasure &&
+    U.mass().power() == Internal::nullMeasure && U.temperature().power() == 1 && U.time() == Internal::nullMeasure &&
+    Internal::Similar<typename decltype(U)::Tag, void>;
+
+/// \brief Specifies a unit has dimensions of time
+///
+/// Specifies a unit has dimensions of time, regardless of scaling and offset
+///
+/// \tparam U The unit to check
+template <auto U>
+concept TimeUnit = Unit<decltype(U)> && U.amount() == Internal::nullMeasure && U.current() == Internal::nullMeasure &&
+                   U.length() == Internal::nullMeasure && U.luminosity() == Internal::nullMeasure &&
+                   U.mass() == Internal::nullMeasure && U.temperature() == Internal::nullMeasure &&
+                   U.time().power() == 1 && std::same_as<std::remove_cv_t<typename decltype(U)::Tag>, void>;
 // --- Unit comparisons ---
 
 consteval bool operator==(Unit auto lhs, Unit auto rhs) noexcept

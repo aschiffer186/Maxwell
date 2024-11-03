@@ -41,7 +41,7 @@ concept EnableImplicitFromChrono = Unit<decltype(U)> && ChronoDuration<D> &&
                                    std::convertible_to<typename D::rep, M>;
 
 template <typename D, Unit auto U>
-    requires Time<U>
+    requires TimeUnit<U>
 constexpr double chronoConversionFactor()
 {
     if (std::ratio_equal_v<typename decltype(U.time())::Scale, Internal::_detail::one>)
@@ -147,7 +147,7 @@ class BasicQuantity
     ///
     /// \throw any exceptions thrown by \c dur or by the constructor of \c MagnitudeType
     template <typename Rep, typename Period>
-        requires Time<Units> && std::constructible_from<MagnitudeType, Rep>
+        requires TimeUnit<Units> && std::constructible_from<MagnitudeType, Rep>
     constexpr explicit(!implicitFromChrono<std::chrono::duration<Rep, Period>>)
         BasicQuantity(std::chrono::duration<Rep, Period> dur)
         : magnitude_(dur.count() *
@@ -214,7 +214,7 @@ class BasicQuantity
     constexpr explicit(
         !Internal::_detail::EnableImplicitFromChrono<std::chrono::duration<Rep, Period>, MagnitudeType,
                                                      Units>) operator std::chrono::duration<Rep, Period>() const
-        requires Time<Units>
+        requires TimeUnit<Units>
     {
         return std::chrono::duration<Rep, Period>{};
     }
@@ -297,6 +297,10 @@ std::ostream& operator<<(std::ostream& os, const BasicQuantity<M, U>& q)
     os << std::format("{}", q);
     return os;
 }
+
+// --- Quantity Type Traits ---
+template <typename T>
+concept Amount = AmountUnit<T::Units>;
 } // namespace Maxwell
 
 namespace std

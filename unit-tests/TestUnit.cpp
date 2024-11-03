@@ -287,6 +287,19 @@ TEST(TestUnit, TestUnitless)
     EXPECT_TRUE(Unitless<unitlessUnit>);
 }
 
+TEST(TestUnit, TestUnitTraits)
+{
+    EXPECT_TRUE(AmountUnit<moleUnit>);
+    EXPECT_TRUE(AmountUnit<kilomoleUnit>);
+    EXPECT_FALSE(AmountUnit<ampereUnit>);
+    EXPECT_FALSE(AmountUnit<meterUnit>);
+    EXPECT_FALSE(AmountUnit<candelaUnit>);
+    EXPECT_FALSE(AmountUnit<gramUnit>);
+    EXPECT_FALSE(AmountUnit<kelvinUnit>);
+    EXPECT_FALSE(AmountUnit<secondUnit>);
+    EXPECT_FALSE(AmountUnit<radianUnit>);
+}
+
 // --- Type Parameterized Tests ---
 template <typename T>
 class UnitIncompatabilityTest : public testing::Test
