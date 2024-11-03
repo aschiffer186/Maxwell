@@ -326,6 +326,10 @@ class BasicQuantity
     MagnitudeType magnitude_{};
 };
 
+// --- CTAD for construction from std::chrono::duration 
+template<typename Rep, typename Period> 
+BasicQuantity(std::chrono::duration<Rep, Period>) -> BasicQuantity<Rep, secondUnit>;
+
 /// \brief Convenience type alias for common case where \c MagnitudeType is \c double
 template <Unit auto U>
 using Quantity = BasicQuantity<double, U>;

@@ -32,3 +32,5 @@ The `BasicQuantity` type behaves well with types in the standard library.
 
 ## Integration with Chrono Library
 `BasicQuantity` can be constructed from and converted to an instance of `std::chrono::duration` when the `BasicQuantity` has units of time. This construction and conversion is implict when no information is loss. 
+
+Class template argument deduction is available when constructing from a `std::chrono::duration` when the period of the duration matches a unit in Maxwell.
