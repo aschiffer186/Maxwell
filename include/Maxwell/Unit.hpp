@@ -577,24 +577,65 @@ namespace _detail
 template <typename>
 constexpr bool dependentFalse = false;
 
-constexpr std::array pow10{1e30,  1e29,  1e28,  1e27,  1e26,  1e25,  1e24,  1e23,  1e22,  1e21,  1e20,  1e19,  1e18,
-                           1e17,  1e16,  1e15,  1e14,  1e13,  1e12,  1e11,  1e10,  1e9,   1e8,   1e7,   1e6,   1e5,
-                           1e4,   1e3,   1e2,   1e1,   1e0,   1e-1,  1e-2,  1e-3,  1e-4,  1e-5,  1e-6,  1e-7,  1e-8,
-                           1e-9,  1e-10, 1e-11, 1e-12, 1e-13, 1e-14, 1e-15, 1e-16, 1e-17, 1e-18, 1e-19, 1e-20, 1e-21,
-                           1e-22, 1e-23, 1e-24, 1e-25, 1e-26, 1e-27, 1e-28, 1e-29, 1e-30};
+constexpr std::array pow10{1e-30, 1e-29, 1e-28, 1e-27, 1e-26, 1e-25, 1e-24, 1e-23, 1e-22, 1e-21, 1e-20, 1e-19, 1e-18,
+                           1e-17, 1e-16, 1e-15, 1e-14, 1e-13, 1e-12, 1e-11, 1e-10, 1e-9,  1e-8,  1e-7,  1e-6,  1e-5,
+                           1e-4,  1e-3,  1e-2,  1e-1,  1e-0,  1e1,   1e2,   1e3,   1e4,   1e5,   1e6,   1e7,   1e8,
+                           1e9,   1e10,  1e11,  1e12,  1e13,  1e14,  1e15,  1e16,  1e17,  1e18,  1e19,  1e20,  1e21,
+                           1e22,  1e23,  1e24,  1e25,  1e26,  1e27,  1e28,  1e29,  1e30};
 
-consteval double conversionFactorPrefix(std::intmax_t from, std::intmax_t to) noexcept
+constexpr double pow(double base, std::intmax_t power) noexcept
 {
-    if (from - to < pow10.size())
+    if (power < 0)
+    {
+        return 1.0 / pow(base, -power);
+    }
+
+    if (power == 0)
+    {
+        return 1.0;
+    }
+
+    if (power == 1)
+    {
+        return base;
+    }
+
+    if (power % 2 == 0)
+    {
+        return pow(base * base, power / 2);
+    }
+
+    return pow(base * base, (power - 1) / 2);
+}
+
+constexpr double conversionFactorPrefix(std::intmax_t from, std::intmax_t to) noexcept
+{
+    if ((from - to) < 30)
     {
         return pow10[(from - to) + 30];
     }
-    return 0.0;
+    else
+    {
+        return pow(10, (from - to));
+    }
 }
 } // namespace _detail
 /// \endcond
 
-consteval double tagConversionFactor(Unit auto lhs, Unit auto rhs) noexcept
+/// \brief Calculates the conversion factor due to diffrent tags
+///
+/// Calculates the factor the magnitude of aquantity with units \c from needs to be multiplied
+/// to be converted to a quantity with units \c to due to different unit tags, By default, this
+/// returns 1. To add a conversion factor for different tags, provide an overload of this
+/// function
+///
+/// \pre \c from is convertible to \c to
+///
+/// \param from The starting unit
+/// \param to The target unit
+/// \return The factor the magnitude of a quantity with units \c from needs to be multiplied
+/// to be converted to a quantity with units \c to
+constexpr double tagConversionFactor(Unit auto lhs, Unit auto rhs) noexcept
 {
     if constexpr (std::same_as<typename decltype(lhs)::Tag, typename decltype(rhs)::Tag>)
     {
@@ -607,9 +648,31 @@ consteval double tagConversionFactor(Unit auto lhs, Unit auto rhs) noexcept
     }
 }
 
-consteval double conversionFactor(Unit auto, Unit auto) noexcept
+/// \brief Calculate the conversion factor to go from \c from to \c to
+///
+/// Calculates the factor the magnitude of a quantity with units \c from needs to be multiplied
+/// to be converted to a quantity with units \c to
+///
+/// \pre \c from is convertible to \c to
+///
+/// \param from The starting unit
+/// \param to The target unit
+/// \return The factor the magnitude of a quantity with units \c from needs to be multiplied
+/// to be converted to a quantity with units \c to
+constexpr double conversionFactor(Unit auto from, Unit auto to) noexcept
+    requires UnitConvertibleTo<from, to>
 {
-    return 0.0;
+    double conversionFactor{1.0};
+    // Convert prefixes
+    conversionFactor *= _detail::conversionFactorPrefix(from.amount().multiplier(), to.amount().multiplier());
+    conversionFactor *= _detail::conversionFactorPrefix(from.current().multiplier(), to.current().multiplier());
+    conversionFactor *= _detail::conversionFactorPrefix(from.length().multiplier(), to.length().multiplier());
+    conversionFactor *= _detail::conversionFactorPrefix(from.luminosity().multiplier(), to.luminosity().multiplier());
+    conversionFactor *= _detail::conversionFactorPrefix(from.mass().multiplier(), to.mass().multiplier());
+    conversionFactor *= _detail::conversionFactorPrefix(from.temperature().multiplier(), to.temperature().multiplier());
+    conversionFactor *= _detail::conversionFactorPrefix(from.time().multiplier(), to.time().multiplier());
+    conversionFactor *= tagConversionFactor(from, to);
+    return conversionFactor;
 }
 
 consteval Unit auto operator*(Unit auto lhs, Unit auto rhs) noexcept

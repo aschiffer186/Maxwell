@@ -1,3 +1,10 @@
+/// \file QuantityRepo.hpp
+/// \author Alex Schiffer
+/// \brief Aliases for common quantities and quantity literals
+/// \version 0.1
+/// \date 2024-11-02
+///
+/// \copyright Copyright (c) 2024
 #ifndef QUANTITY_REPO_HPP
 #define QUANTITY_REPO_HPP
 

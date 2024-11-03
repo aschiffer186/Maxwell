@@ -1,5 +1,6 @@
 #include "Unit.hpp"
 #include "UnitRepo.hpp"
+#include "internal/Concepts.hpp"
 #include "internal/Measure.hpp"
 
 #include <gtest/gtest.h>
@@ -422,11 +423,31 @@ using CompatibleUnits =
                      std::pair<radianUnitType, degreeUnitType>>;
 TYPED_TEST_SUITE(UnitCompatabilityTest, CompatibleUnits);
 
-TYPED_TEST(UnitCompatabilityTest, CompatibleUnits)
+TYPED_TEST(UnitCompatabilityTest, TestCompatibleUnits)
 {
     constexpr auto first  = TestFixture::first;
     constexpr auto second = TestFixture::second;
 
     EXPECT_TRUE((UnitConvertibleTo<first, second>));
     EXPECT_TRUE((UnitConvertibleTo<second, first>));
+}
+
+TYPED_TEST(UnitCompatabilityTest, TestUnitPrefixConversion)
+{
+    constexpr auto first  = TestFixture::first;
+    constexpr auto second = TestFixture::second;
+
+    double conversion1 = conversionFactor(first, second);
+    double conversion2 = conversionFactor(second, first);
+
+    if constexpr (!Internal::Similar<decltype(second), degreeUnitType>)
+    {
+        EXPECT_FLOAT_EQ(conversion1, 1e-3);
+        EXPECT_FLOAT_EQ(conversion2, 1e3);
+    }
+    else
+    {
+        EXPECT_FLOAT_EQ(conversion1, 180.0 / std::numbers::pi);
+        EXPECT_FLOAT_EQ(conversion2, std::numbers::pi / 180.0);
+    }
 }

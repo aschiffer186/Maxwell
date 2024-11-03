@@ -77,7 +77,7 @@ concept MultiplyEnabled = MultiplyEnabledWith<Tp, Tp>;
 template <typename Tp, typename Up>
 concept NothrowMultiplyEnabledWith = MultiplyEnabledWith<Tp, Up> && requires(Tp a, Up b) { noexcept(a * b); };
 
-// \brief Specifies a type supports multiplication by itself and the multiplication is \c noexcept
+/// \brief Specifies a type supports multiplication by itself and the multiplication is \c noexcept
 /// \tparam Tp The type to check
 template <typename Tp>
 concept NothrowMultiplyEnabled = NothrowMultiplyEnabledWith<Tp, Tp>;
@@ -100,7 +100,7 @@ concept DivideEnabled = DivideEnabledWith<Tp, Tp>;
 template <typename Tp, typename Up>
 concept NothrowDivideEnabledWith = DivideEnabledWith<Tp, Up> && requires(Tp a, Up b) { noexcept(a / b); };
 
-// \brief Specifies a type supports divided by itself and the division is \c noexcept
+/// \brief Specifies a type supports divided by itself and the division is \c noexcept
 /// \tparam Tp The type to check
 template <typename Tp>
 concept NothrowDivideEnabled = NothrowDivideEnabledWith<Tp, Tp>;
