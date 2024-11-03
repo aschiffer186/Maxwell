@@ -54,6 +54,12 @@ using IRadian = IQuantity<radianUnit>;
 
 using Degree  = Quantity<degreeUnit>;
 using IDegree = IQuantity<degreeUnit>;
+
+/// \brief Specifies a quantity has dimensions of angle
+///
+/// \tparam QuantityType The quantity to check
+template <typename QuantityType>
+concept Angle = AngleUnit<QuantityType::Units>;
 #endif
 } // namespace Maxwell
 

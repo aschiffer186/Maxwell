@@ -32,34 +32,78 @@ concept AddEnabled = AddEnabledWith<Tp, Tp>;
 template <typename Tp, typename Up>
 concept NothrowAddEnabledWith = AddEnabledWith<Tp, Up> && requires(Tp a, Up b) { noexcept(a + b); };
 
-/// \brief Specifies a type supports addition with itself andthe addition is \c noexcept
+/// \brief Specifies a type supports addition with itself and the addition is \c noexcept
 /// \tparam Tp The type to check
 template <typename Tp>
 concept NothrowAddEnabled = NothrowAddEnabledWith<Tp, Tp>;
 
-template <typename Tp>
-concept SubtractEnabled = requires(Tp a, Tp b) { a - b; };
-
+/// \brief Specifies two types can be subtracted
+/// \tparam Tp The left hand side type of the subtraction
+/// \tparam Up The right hand side type of the subtraction
 template <typename Tp, typename Up>
 concept SubtractEnabledWith = requires(Tp a, Up b) { a + b; };
 
+/// \brief Specifies a type supports subtraction from itself
+/// \tparam Tp The type to check
 template <typename Tp>
-concept NothrowSubtractEnabled = SubtractEnabled<Tp> && requires(Tp a, Tp b) { noexcept(a - b); };
+concept SubtractEnabled = SubtractEnabledWith<Tp, Tp>;
 
+/// \brief Specifies two types can be subtracted and the subtraction is \c noexcept
+/// \tparam Tp The left hand side type of the subtraction
+/// \tparam Up The right hand side type of the subtraction
 template <typename Tp, typename Up>
 concept NothrowSubtractEnabledWith = SubtractEnabledWith<Tp, Up> && requires(Tp a, Up b) { noexcept(a - b); };
 
+/// \brief Specifies a type supports subtraction from itself and the subtraction is \c noexcept
+/// \tparam Tp The type to check
 template <typename Tp>
-concept MultiplyEnabled = requires(Tp a, Tp b) { a* b; };
+concept NothrowSubtractEnabled = NothrowSubtractEnabledWith<Tp, Tp>;
 
-template <typename Tp>
-concept NothrowMultiplyEnabled = MultiplyEnabled<Tp> && requires(Tp a, Tp b) { noexcept(a * b); };
+// clang-format off
+/// \brief Specifies two types can be multiplied
+/// \tparam Tp The left hand side type of the multiplication
+/// \tparam Up The right hand side type of the multiplication
+template <typename Tp, typename Up>
+concept MultiplyEnabledWith = requires(Tp a, Up b) { a * b; };
 
+/// \brief Specifies a type supports multiplied by itself
+/// \tparam Tp The type to check
 template <typename Tp>
-concept DivideEnabled = requires(Tp a, Tp b) { a / b; };
+concept MultiplyEnabled = MultiplyEnabledWith<Tp, Tp>;
 
+/// \brief Specifies two types can be multiplied and the multiplication is \c noexcept
+/// \tparam Tp The left hand side type of the multiplication
+/// \tparam Up The right hand side type of the multiplication
+template <typename Tp, typename Up>
+concept NothrowMultiplyEnabledWith = MultiplyEnabledWith<Tp, Up> && requires(Tp a, Up b) { noexcept(a * b); };
+
+// \brief Specifies a type supports multiplication by itself and the multiplication is \c noexcept
+/// \tparam Tp The type to check
 template <typename Tp>
-concept NothrowDivideEnabled = DivideEnabled<Tp> && requires(Tp a, Tp b) { noexcept(a / b); };
+concept NothrowMultiplyEnabled = NothrowMultiplyEnabledWith<Tp, Tp>;
+// clang-format on
+
+/// \brief Specifies two types can be divided
+/// \tparam Tp The left hand side type of the division
+/// \tparam Up The right hand side type of the division
+template <typename Tp, typename Up>
+concept DivideEnabledWith = requires(Tp a, Up b) { a / b; };
+
+/// \brief Specifies a type supports division by itself
+/// \tparam Tp The type to check
+template <typename Tp>
+concept DivideEnabled = DivideEnabledWith<Tp, Tp>;
+
+/// \brief Specifies two types can be divided and the division is \c noexcept
+/// \tparam Tp The left hand side type of the division
+/// \tparam Up The right hand side type of the division
+template <typename Tp, typename Up>
+concept NothrowDivideEnabledWith = DivideEnabledWith<Tp, Up> && requires(Tp a, Up b) { noexcept(a / b); };
+
+// \brief Specifies a type supports divided by itself and the division is \c noexcept
+/// \tparam Tp The type to check
+template <typename Tp>
+concept NothrowDivideEnabled = NothrowDivideEnabledWith<Tp, Tp>;
 
 /// \cond
 namespace _detail
@@ -77,6 +121,7 @@ struct is_chrono_dur<std::chrono::duration<Rep, Period>> : std::true_type
 template <typename T>
 concept ChronoDuration = is_chrono_dur<std::remove_cvref_t<T>>::value;
 } // namespace _detail
+/// \endcond
 
 /// \brief Specifies two types are the same up to cvref-qualifiers
 ///

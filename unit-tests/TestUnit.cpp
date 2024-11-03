@@ -276,15 +276,15 @@ TEST(TestUnit, TestUnitConcept)
 
 TEST(TestUnit, TestUnitless)
 {
-    EXPECT_FALSE(Unitless<moleUnit>);
-    EXPECT_FALSE(Unitless<ampereUnit>);
-    EXPECT_FALSE(Unitless<meterUnit>);
-    EXPECT_FALSE(Unitless<candelaUnit>);
-    EXPECT_FALSE(Unitless<gramUnit>);
-    EXPECT_FALSE(Unitless<kelvinUnit>);
-    EXPECT_FALSE(Unitless<secondUnit>);
-    EXPECT_FALSE(Unitless<radianUnit>);
-    EXPECT_TRUE(Unitless<unitlessUnit>);
+    EXPECT_FALSE(UnitlessUnit<moleUnit>);
+    EXPECT_FALSE(UnitlessUnit<ampereUnit>);
+    EXPECT_FALSE(UnitlessUnit<meterUnit>);
+    EXPECT_FALSE(UnitlessUnit<candelaUnit>);
+    EXPECT_FALSE(UnitlessUnit<gramUnit>);
+    EXPECT_FALSE(UnitlessUnit<kelvinUnit>);
+    EXPECT_FALSE(UnitlessUnit<secondUnit>);
+    EXPECT_FALSE(UnitlessUnit<radianUnit>);
+    EXPECT_TRUE(UnitlessUnit<unitlessUnit>);
 }
 
 TEST(TestUnit, TestUnitTraits)
@@ -418,7 +418,8 @@ using CompatibleUnits =
     ::testing::Types<std::pair<moleUnitType, kilomoleUnitType>, std::pair<ampereUnitType, kiloampereUnitType>,
                      std::pair<meterUnitType, kilometerUnitType>, std::pair<candelaUnitType, kilocandelaUnitType>,
                      std::pair<gramUnitType, kilogramUnitType>, std::pair<kelvinUnitType, kilokelvinUnitType>,
-                     std::pair<secondUnitType, kilosecondUnitType>, std::pair<radianUnitType, kiloradianUnitType>>;
+                     std::pair<secondUnitType, kilosecondUnitType>, std::pair<radianUnitType, kiloradianUnitType>,
+                     std::pair<radianUnitType, degreeUnitType>>;
 TYPED_TEST_SUITE(UnitCompatabilityTest, CompatibleUnits);
 
 TYPED_TEST(UnitCompatabilityTest, CompatibleUnits)

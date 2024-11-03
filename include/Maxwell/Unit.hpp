@@ -380,7 +380,7 @@ concept Unit = _detail::_is_unit<std::remove_cvref_t<U>>::value;
 ///
 /// \tparam U The unit to check
 template <auto U>
-concept Unitless = Internal::Similar<decltype(U), unitlessUnitType>;
+concept UnitlessUnit = Internal::Similar<decltype(U), unitlessUnitType>;
 
 /// \brief Specfies amount dimension \c From can be converted to amount dimension \c To
 ///
@@ -493,6 +493,9 @@ concept TagConvertibleTo = is_tag_convertible<From, To>::value;
 /// \c To if all of all the dimensions of \c From can be converted to the corresponding
 /// dimensions of \c To and the tag of \c From can be converted to the \c Tag of to.
 ///
+/// Convertibility is a symmetric relation, if \c From is convertible to \c To, then \c To
+/// is convertible to \c From.
+///
 /// \tparam From The starting unit
 /// \tparam To the target unit
 template <auto From, auto To>
@@ -510,10 +513,7 @@ concept UnitConvertibleTo =
 ///
 /// \tparam U The unit to check
 template <auto U>
-concept AmountUnit = Unit<decltype(U)> && U.amount().power() == 1 && U.current() == Internal::nullMeasure &&
-                     U.length() == Internal::nullMeasure && U.luminosity() == Internal::nullMeasure &&
-                     U.mass() == Internal::nullMeasure && U.temperature() == Internal::nullMeasure &&
-                     U.time() == Internal::nullMeasure && Internal::Similar<typename decltype(U)::Tag, void>;
+concept AmountUnit = UnitConvertibleTo<U, moleUnit>;
 
 /// \brief Specifies a unit has dimensions of current
 ///
@@ -521,10 +521,7 @@ concept AmountUnit = Unit<decltype(U)> && U.amount().power() == 1 && U.current()
 ///
 /// \tparam U The unit to check
 template <auto U>
-concept CurrentUnit = Unit<decltype(U)> && U.amount() == Internal::nullMeasure && U.current().power() == 1 &&
-                      U.length() == Internal::nullMeasure && U.luminosity() == Internal::nullMeasure &&
-                      U.mass() == Internal::nullMeasure && U.temperature() == Internal::nullMeasure &&
-                      U.time() == Internal::nullMeasure && Internal::Similar<typename decltype(U)::Tag, void>;
+concept CurrentUnit = UnitConvertibleTo<U, ampereUnit>;
 
 /// \brief Specifies a unit has dimensions of length
 ///
@@ -532,10 +529,7 @@ concept CurrentUnit = Unit<decltype(U)> && U.amount() == Internal::nullMeasure &
 ///
 /// \tparam U The unit to check
 template <auto U>
-concept LengthUnit = Unit<decltype(U)> && U.amount() == Internal::nullMeasure && U.current() == Internal::nullMeasure &&
-                     U.length().power() == 1 && U.luminosity() == Internal::nullMeasure &&
-                     U.mass() == Internal::nullMeasure && U.temperature() == Internal::nullMeasure &&
-                     U.time() == Internal::nullMeasure && Internal::Similar<typename decltype(U)::Tag, void>;
+concept LengthUnit = UnitConvertibleTo<U, meterUnit>;
 
 /// \brief Specifies a unit has dimensions of luminosity
 ///
@@ -543,11 +537,7 @@ concept LengthUnit = Unit<decltype(U)> && U.amount() == Internal::nullMeasure &&
 ///
 /// \tparam U The unit to check
 template <auto U>
-concept LuminosityUnit =
-    Unit<decltype(U)> && U.amount() == Internal::nullMeasure && U.current() == Internal::nullMeasure &&
-    U.length() == Internal::nullMeasure && U.luminosity().power() == 1 && U.mass() == Internal::nullMeasure &&
-    U.temperature() == Internal::nullMeasure && U.time() == Internal::nullMeasure &&
-    Internal::Similar<typename decltype(U)::Tag, void>;
+concept LuminosityUnit = UnitConvertibleTo<U, candelaUnit>;
 
 /// \brief Specifies a unit has dimensions of mass
 ///
@@ -555,10 +545,7 @@ concept LuminosityUnit =
 ///
 /// \tparam U The unit to check
 template <auto U>
-concept MassUnit = Unit<decltype(U)> && U.amount() == Internal::nullMeasure && U.current() == Internal::nullMeasure &&
-                   U.length() == Internal::nullMeasure && U.luminosity() == Internal::nullMeasure &&
-                   U.mass().power() == 1 && U.temperature() == Internal::nullMeasure &&
-                   U.time() == Internal::nullMeasure && Internal::Similar<typename decltype(U)::Tag, void>;
+concept MassUnit = UnitConvertibleTo<U, gramUnit>;
 
 /// \brief Specifies a unit has dimensions of temperature
 ///
@@ -566,11 +553,7 @@ concept MassUnit = Unit<decltype(U)> && U.amount() == Internal::nullMeasure && U
 ///
 /// \tparam U The unit to check
 template <auto U>
-concept TemperatureUnit =
-    Unit<decltype(U)> && U.amount() == Internal::nullMeasure && U.current() == Internal::nullMeasure &&
-    U.length() == Internal::nullMeasure && U.luminosity() == Internal::nullMeasure &&
-    U.mass() == Internal::nullMeasure && U.temperature().power() == 1 && U.time() == Internal::nullMeasure &&
-    Internal::Similar<typename decltype(U)::Tag, void>;
+concept TemperatureUnit = UnitConvertibleTo<U, kelvinUnit>;
 
 /// \brief Specifies a unit has dimensions of time
 ///
@@ -578,10 +561,7 @@ concept TemperatureUnit =
 ///
 /// \tparam U The unit to check
 template <auto U>
-concept TimeUnit = Unit<decltype(U)> && U.amount() == Internal::nullMeasure && U.current() == Internal::nullMeasure &&
-                   U.length() == Internal::nullMeasure && U.luminosity() == Internal::nullMeasure &&
-                   U.mass() == Internal::nullMeasure && U.temperature() == Internal::nullMeasure &&
-                   U.time().power() == 1 && std::same_as<std::remove_cv_t<typename decltype(U)::Tag>, void>;
+concept TimeUnit = UnitConvertibleTo<U, secondUnit>;
 // --- Unit comparisons ---
 
 consteval bool operator==(Unit auto lhs, Unit auto rhs) noexcept

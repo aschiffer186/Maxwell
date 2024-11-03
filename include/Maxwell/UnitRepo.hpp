@@ -129,13 +129,13 @@ template <>
 inline const std::string unitString<degreeUnit> = "deg";
 using degreeUnitType                            = decltype(degreeUnit);
 
+/// \brief Specifies a unit has dimensions of angle
+///
+/// Specifies a unit has dimensions of angle, regardless of scaling and offset
+///
+/// \tparam U The unit to check
 template <auto U>
-concept AngleUnit =
-    Unit<decltype(U)> && U.amount() == Internal::nullMeasure && U.current() == Internal::nullMeasure &&
-    U.length() == Internal::nullMeasure && U.luminosity() == Internal::nullMeasure &&
-    U.mass() == Internal::nullMeasure && U.temperature() == Internal::nullMeasure && U.time().power() == 0 &&
-    (std::same_as<std::remove_cv_t<typename decltype(U)::Tag>, _detail::RadianTag> ||
-     std::same_as<std::remove_cv_t<typename decltype(U)::Tag>, _detail::DegreeTag>);
+concept AngleUnit = UnitConvertibleTo<U, radianUnit>;
 
 template <>
 struct is_tag_convertible<_detail::RadianTag, _detail::DegreeTag> : std::true_type

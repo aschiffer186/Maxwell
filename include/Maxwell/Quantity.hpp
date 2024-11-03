@@ -112,7 +112,7 @@ class BasicQuantity
     /// \post <tt>this->magnitude()</tt> is equal to \c magnitude
     ///
     /// \throws Any exceptions thrown by the move constructor of \c MagnitudeType
-    constexpr explicit(Unitless<Units>)
+    constexpr explicit(UnitlessUnit<Units>)
         BasicQuantity(MagnitudeType magnitude) noexcept(std::is_nothrow_move_constructible_v<MagnitudeType>)
         requires std::move_constructible<MagnitudeType>
         : magnitude_(std::move(magnitude))
@@ -129,7 +129,7 @@ class BasicQuantity
     /// \throws any exceptions thrown by the constructor of \c MagnitudeType
     template <typename Up>
         requires(!std::same_as<Up, MagnitudeType>) && std::constructible_from<MagnitudeType, Up&&>
-    constexpr explicit(Unitless<Units>)
+    constexpr explicit(UnitlessUnit<Units>)
         BasicQuantity(Up&& magnitude) noexcept(std::is_nothrow_constructible_v<MagnitudeType, Up&&>)
         : magnitude_(std::forward<Up>(magnitude))
     {
@@ -176,6 +176,13 @@ class BasicQuantity
 
     // --- Core Language Functions ---
 
+    /// \brief Swaps two quantities
+    ///
+    /// Swaps the magnitude of two quantities.
+    ///
+    /// \post \c other has the old magnitude of \c *this and \c *this has the old magnitude of \c other
+    ///
+    /// \throws Any exceptions thrown by swapping the magnitudes of the quantities
     auto swap(BasicQuantity& other) noexcept(std::is_nothrow_swappable_v<MagnitudeType>)
     {
         using std::swap;
@@ -187,17 +194,29 @@ class BasicQuantity
 
     // --- Accessor Functions ---
 
+    /// \brief Returns the magnitude of the \c *this
+    ///
+    /// \return A \c const reference to the magnitude of \c *this
     constexpr const MagnitudeType& magnitude() const noexcept
     {
         return magnitude_;
     }
 
+    /// \brief Returns the units of \c *this
+    ///
+    /// \return The units of \c *this
     constexpr Unit auto units() const noexcept
     {
         return Units;
     }
 
     // --- Transformation Functions ---
+    /// \brief Returns a new \c BasicQuantity with the same dimensions of \c *this but in SI base units
+    ///
+    /// Returns a new \c BasicQuantity with the same dimension of \c *this, but in SI base units. The magnitude of
+    /// the returned quantity is equivalent to \c this->magnitude() converted to SI base units
+    ///
+    /// \return A new \c BasicQuantity with the same dimension of \c *this in SI base units.
     constexpr auto toSIBaseUnits() const noexcept
     {
         return *this;
@@ -205,7 +224,7 @@ class BasicQuantity
 
     // --- Conversion Functions ---
 
-    constexpr explicit(Unitless<Units>) operator MagnitudeType() const noexcept
+    constexpr explicit(UnitlessUnit<Units>) operator MagnitudeType() const noexcept
     {
         return magnitude_;
     }
@@ -310,6 +329,36 @@ concept Amount = AmountUnit<QuantityType::Units>;
 /// \tparam QuantityType The quantity to check
 template <typename QuantityType>
 concept Current = CurrentUnit<QuantityType::Units>;
+
+/// \brief Specifies a quantity has dimensions of length
+///
+/// \tparam QuantityType The quantity to check
+template <typename QuantityType>
+concept Length = LengthUnit<QuantityType::Units>;
+
+/// \brief Specifies a quantity has dimensions of time
+///
+/// \tparam QuantityType The quantity to check
+template <typename QuantityType>
+concept Luminosity = LuminosityUnit<QuantityType::Units>;
+
+/// \brief Specifies a quantity has dimensions of mass
+///
+/// \tparam QuantityType The quantity to check
+template <typename QuantityType>
+concept Mass = MassUnit<QuantityType::Units>;
+
+/// \brief Specifies a quantity has dimensions of temperature
+///
+/// \tparam QuantityType The quantity to check
+template <typename QuantityType>
+concept Temperature = TemperatureUnit<QuantityType::Units>;
+
+/// \brief Specifies a quantity has dimensions of time
+///
+/// \tparam QuantityType The quantity to check
+template <typename QuantityType>
+concept Time = TimeUnit<QuantityType::Units>;
 } // namespace Maxwell
 
 namespace std
