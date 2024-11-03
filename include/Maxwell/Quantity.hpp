@@ -206,11 +206,19 @@ class BasicQuantity
 
     template <typename Up, Unit auto Other>
         requires(std::constructible_from<MagnitudeType, std::add_rvalue_reference_t<Up>>) &&
-                    (!(std::same_as<Up, MagnitudeType> && Other == U)) && UnitConvertibleTo<Other, Units>
-    auto operator=([[maybe_unused]] BasicQuantity<Up, Other> q) noexcept(
-        std::is_nothrow_constructible_v<MagnitudeType, std::add_rvalue_reference_t<Up>>) -> BasicQuantity&
+                (!(std::same_as<Up, MagnitudeType> && Other == U)) && UnitConvertibleTo<Other, Units>
+    BasicQuantity& operator=(BasicQuantity<Up, Other> q) noexcept(
+        std::is_nothrow_constructible_v<MagnitudeType, std::add_rvalue_reference_t<Up>>)
     {
         (*this).swap(q);
+        return *this;
+    }
+
+    template <typename Rep, typename Period>
+        requires TimeUnit<Units> && std::constructible_from<MagnitudeType, Rep>
+    BasicQuantity& operator=(std::chrono::duration<Rep, Period> dur)
+    {
+        (*this).swap(BasicQuantity{dur});
         return *this;
     }
 
@@ -223,7 +231,7 @@ class BasicQuantity
     /// \post \c other has the old magnitude of \c *this and \c *this has the old magnitude of \c other
     ///
     /// \throws Any exceptions thrown by swapping the magnitudes of the quantities
-    auto swap(BasicQuantity& other) noexcept(std::is_nothrow_swappable_v<MagnitudeType>)
+    void swap(BasicQuantity& other) noexcept(std::is_nothrow_swappable_v<MagnitudeType>)
     {
         using std::swap;
         swap(other.magnitude_, magnitude_);
