@@ -10,3 +10,8 @@ The most basic way to use Maxwell is to use it as a header only library. Simple 
 The most commonly used type in the library is the `Quantity` class template. This essentially represents a `double` with an extra units tag, allowing for verifying the units of all expressions.
 
 The `Quantity` class template can (and should) be used anywhere a `double` can be used!
+
+## `BasicQuantity` Type 
+Class template `BasicQuantity` is the fundamental type in Maxwell; it represents a quantity that has a magnitude and units. The type of the magnitude can be any C++ type that isn't `cv`-qualified. For convenience, the type aliases `Quantity` and `IQuantity` are provided
+* `Quantity` is an alias of `BasicQuantity` whose magnitude type is `double`
+* `IQuantity` is an alias of `BasicQuantity` whose magnitude type is `int`
