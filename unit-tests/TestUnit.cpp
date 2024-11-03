@@ -1,7 +1,9 @@
 #include "Unit.hpp"
+#include "UnitRepo.hpp"
 #include "internal/Measure.hpp"
 
 #include <gtest/gtest.h>
+#include <type_traits>
 
 using namespace Maxwell;
 
@@ -252,4 +254,34 @@ TEST(TestUnit, TestToSIBaseUnits)
     EXPECT_TRUE((std::ratio_equal_v<decltype(time)::Offset, Internal::_detail::zero>));
 
     EXPECT_TRUE((std::same_as<decltype(u)::Tag, void>));
+}
+
+TEST(TestUnit, TestUnitConcept)
+{
+    using BaseType  = std::remove_cvref_t<MeterUnitType>;
+    using ConstType = std::add_const_t<BaseType>;
+    using LRefType  = std::add_lvalue_reference_t<BaseType>;
+    using RRefType  = std::add_rvalue_reference_t<BaseType>;
+    using CLRefType = std::add_const_t<LRefType>;
+    using CRRefType = std::add_const_t<RRefType>;
+
+    EXPECT_TRUE(Unit<BaseType>);
+    EXPECT_TRUE(Unit<ConstType>);
+    EXPECT_TRUE(Unit<LRefType>);
+    EXPECT_TRUE(Unit<RRefType>);
+    EXPECT_TRUE(Unit<CLRefType>);
+    EXPECT_TRUE(Unit<CRRefType>);
+}
+
+TEST(TestUnit, TestUnitless)
+{
+    EXPECT_FALSE(Unitless<moleUnit>);
+    EXPECT_FALSE(Unitless<ampereUnit>);
+    EXPECT_FALSE(Unitless<meterUnit>);
+    EXPECT_FALSE(Unitless<candelaUnit>);
+    EXPECT_FALSE(Unitless<gramUnit>);
+    EXPECT_FALSE(Unitless<kelvinUnit>);
+    EXPECT_FALSE(Unitless<secondUnit>);
+    EXPECT_FALSE(Unitless<radianUnit>);
+    EXPECT_TRUE(Unitless<unitlessUnit>);
 }

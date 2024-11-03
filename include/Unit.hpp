@@ -12,7 +12,9 @@
 #include <array>
 #include <concepts>
 #include <string>
+#include <type_traits>
 
+#include "internal/Concepts.hpp"
 #include "internal/Measure.hpp"
 
 /// \namespace Maxwell
@@ -296,56 +298,56 @@ constexpr UnitType<Internal::baseMeasure, Internal::nullMeasure, Internal::nullM
                    Internal::nullMeasure, Internal::nullMeasure, Internal::nullMeasure>
     moleUnit;
 /// Type alias for SI unit "mole"
-using MoleUnitType = decltype(moleUnit);
+using MoleUnitType = std::remove_const_t<decltype(moleUnit)>;
 
 /// SI unit "ampere"
 constexpr UnitType<Internal::nullMeasure, Internal::baseMeasure, Internal::nullMeasure, Internal::nullMeasure,
                    Internal::nullMeasure, Internal::nullMeasure, Internal::nullMeasure>
     ampereUnit;
 /// Type alias for SI unit "ampere"
-using AmpereUnitType = decltype(ampereUnit);
+using AmpereUnitType = std::remove_const_t<decltype(ampereUnit)>;
 
 /// SI unit "meter"
 constexpr UnitType<Internal::nullMeasure, Internal::nullMeasure, Internal::baseMeasure, Internal::nullMeasure,
                    Internal::nullMeasure, Internal::nullMeasure, Internal::nullMeasure>
     meterUnit;
 /// Type alias for SI unit "meter"
-using MeterUnitType = decltype(meterUnit);
+using MeterUnitType = std::remove_const_t<decltype(meterUnit)>;
 
 /// SI unit "candela"
 constexpr UnitType<Internal::nullMeasure, Internal::nullMeasure, Internal::nullMeasure, Internal::baseMeasure,
                    Internal::nullMeasure, Internal::nullMeasure, Internal::nullMeasure>
     candelaUnit;
 /// Type alias for SI unit "candela"
-using CandelaUnitType = decltype(candelaUnit);
+using CandelaUnitType = std::remove_const_t<decltype(candelaUnit)>;
 
 /// SI unit "gram"
 constexpr UnitType<Internal::nullMeasure, Internal::nullMeasure, Internal::nullMeasure, Internal::nullMeasure,
                    Internal::baseMeasure, Internal::nullMeasure, Internal::nullMeasure>
     gramUnit;
 /// Type alias for SI unit "gram"
-using GramUnitType = decltype(gramUnit);
+using GramUnitType = std::remove_const_t<decltype(gramUnit)>;
 
 /// SI unit "Kelvin"
 constexpr UnitType<Internal::nullMeasure, Internal::nullMeasure, Internal::nullMeasure, Internal::nullMeasure,
                    Internal::nullMeasure, Internal::baseMeasure, Internal::nullMeasure>
     kelvinUnit;
 /// Type alias for SI unit Kelvin
-using KelvinUnitType = decltype(kelvinUnit);
+using KelvinUnitType = std::remove_const_t<decltype(kelvinUnit)>;
 
 /// SI unit "second"
 constexpr UnitType<Internal::nullMeasure, Internal::nullMeasure, Internal::nullMeasure, Internal::nullMeasure,
                    Internal::nullMeasure, Internal::nullMeasure, Internal::baseMeasure>
     secondUnit;
 /// Type alias for SI unit "second"
-using SecondUnitType = decltype(secondUnit);
+using SecondUnitType = std::remove_const_t<decltype(secondUnit)>;
 
 /// Constant indidcating lack of units
 constexpr UnitType<Internal::nullMeasure, Internal::nullMeasure, Internal::nullMeasure, Internal::nullMeasure,
                    Internal::nullMeasure, Internal::nullMeasure, Internal::nullMeasure>
     unitlessUnit;
 /// Type alias for constant indicating lack of units
-using UnitlessUnitType = decltype(unitlessUnit);
+using UnitlessUnitType = std::remove_const_t<decltype(unitlessUnit)>;
 
 // -- Unit Concepts ---
 
@@ -368,6 +370,9 @@ struct _is_unit<UnitType<Amount_, Current_, Length_, Luminosity_, Mass_, Tempera
 
 /// \brief Specifies a type is an instantiation of the \c UnitType class template
 ///
+/// Specifies a type is an instantiation of the \c UnitType class template, ignoring
+/// cv-qualifiers and references.
+///
 /// \tparam U the type to check
 template <typename U>
 concept Unit = _detail::_is_unit<std::remove_cvref_t<U>>::value;
@@ -376,7 +381,7 @@ concept Unit = _detail::_is_unit<std::remove_cvref_t<U>>::value;
 ///
 /// \tparam U the unit to check
 template <auto U>
-concept Unitless = std::same_as<std::remove_cvref_t<decltype(U)>, UnitlessUnitType>;
+concept Unitless = Internal::Similar<decltype(U), UnitlessUnitType>;
 
 template <auto From, auto To>
 concept AmountConvertibleTo =

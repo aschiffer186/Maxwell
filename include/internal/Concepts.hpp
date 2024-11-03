@@ -77,6 +77,13 @@ struct is_chrono_dur<std::chrono::duration<Rep, Period>> : std::true_type
 template <typename T>
 concept ChronoDuration = is_chrono_dur<std::remove_cvref_t<T>>::value;
 } // namespace _detail
+
+/// \brief Specifies two types are the same up to cvref-qualifiers
+///
+/// \tparam The first type to check
+/// \tparam The second type to check
+template <typename T, typename U>
+concept Similar = std::same_as<std::remove_cvref_t<T>, std::remove_cvref_t<U>>;
 /// \endcond
 } // namespace Maxwell::Internal
 

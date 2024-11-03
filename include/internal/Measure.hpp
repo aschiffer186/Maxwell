@@ -173,7 +173,10 @@ struct _is_measure<MeasureType<Power_, Multiplier, Scale_, Offset_>> : std::true
 } // namespace _detail
 /// \endcond
 
-/// \brief Specifies a type is an instantiation of \c MeasureType
+/// \brief Specifies a type is an instantiation of the \c MeasureType class template
+///
+/// Specifies a type is an instantiation of the \c MeasureType class template, ignoring cv-qualfiers
+/// and references.
 ///
 /// \tparam M the type to check
 template <typename M>
