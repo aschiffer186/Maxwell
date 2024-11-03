@@ -1,13 +1,10 @@
-/**
- * @file Quantity.hpp
- * @author Alex Schiffer
- * @brief Definition of Quantity class template
- * @version 0.1
- * @date 2024-11-02
- *
- * @copyright Copyright (c) 2024
- *
- */
+/// \file Quantity.hpp
+/// \author Alex Schiffer
+/// \brief Definition of Quantity class template
+/// \version 0.1
+/// \date 2024-11-02
+///
+/// \copyright Copyright (c) 2024
 #ifndef QUANTITY_HPP
 #define QUANTITY_HPP
 
@@ -71,8 +68,8 @@ constexpr double chronoConversionFactor()
 ///
 /// \sa UnitType
 ///
-/// @tparam T the type of the quantity's magnitude
-/// @tparam U the quantity's units
+/// \tparam T the type of the quantity's magnitude
+/// \tparam U the quantity's units
 template <typename T, Unit auto U>
 class BasicQuantity
 {

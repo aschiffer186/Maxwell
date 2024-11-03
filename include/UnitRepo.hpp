@@ -1,13 +1,10 @@
-/**
- * @file UnitRepo.hpp
- * @author Alex Schiffer
- * @brief File containing definition of common units and macros to create new units
- * @version 0.1
- * @date 2024-11-02
- *
- * @copyright Copyright (c) 2024
- *
- */
+/// \file UnitRepo.hpp
+/// \author Alex Schiffer
+/// \brief File containing definition of common units and macros to create new units
+/// \version 0.1
+/// \date 2024-11-02
+///
+/// \copyright Copyright (c) 2024
 #ifndef UNIT_REPO_HPP
 #define UNIT_REPO_HPP
 

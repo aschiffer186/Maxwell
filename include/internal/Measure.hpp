@@ -1,13 +1,13 @@
-/**
- * @file Measure.hpp
- * @author Alex Schiffer
- * @brief Definition of measure type and associated functions
- * @version 0.1
- * @date 2024-11-02
- *
- * @copyright Copyright (c) 2024
- *
- */
+///
+/// \file Measure.hpp
+/// \author Alex Schiffer
+/// \brief Definition of measure type and associated functions
+/// \version 0.1
+/// \date 2024-11-02
+///
+/// \copyright Copyright (c) 2024
+///
+///
 #ifndef MEASURE_HPP
 #define MEASURE_HPP
 
@@ -43,8 +43,8 @@ concept RatioLike = is_ratio<Tp>::value;
 } // namespace _detail
 /// \endcond
 
-/// @class MeasureType
-/// @brief Represents one fundamental quantity in the SI system
+/// \class MeasureType
+/// \brief Represents one fundamental quantity in the SI system
 ///
 /// <tt>class MeasureType</tt> represents one dimension used
 /// in the SI system. It consists of a base unit and the transformations
@@ -74,24 +74,24 @@ struct MeasureType
     using Offset                              = Offset_;
 
     /// \fn power
-    /// @brief Returns the power the measure is raised to
+    /// \brief Returns the power the measure is raised to
     ///
-    /// @return The power the measure is raised to
+    /// \return The power the measure is raised to
     consteval std::intmax_t power() const noexcept
     {
         return Power;
     }
 
     /// \fn multiplier
-    /// @brief Returns the metric prefix of the measure
-    /// @return The metric prefix of the measure
+    /// \brief Returns the metric prefix of the measure
+    /// \return The metric prefix of the measure
     std::intmax_t consteval multiplier() const noexcept
     {
         return Multiplier;
     }
 
     /// \fn adjustMultiplier
-    /// @brief Adjusts the multiplier by the specified amount
+    /// \brief Adjusts the multiplier by the specified amount
     ///
     /// Creates a new measure whose multiplier is equivalent to
     /// \code Multiplier + Adjustment \endcode
@@ -99,8 +99,8 @@ struct MeasureType
     /// \post The returned measure has a power of \c Power and a
     ///       multiplier equal to <tt>Multiplier + Adjustment</tt>
     ///
-    /// @tparam Adjustment the amount to adjust the measure by
-    /// @return A new masure with the adjusted prefix
+    /// \tparam Adjustment the amount to adjust the measure by
+    /// \return A new masure with the adjusted prefix
     template <std::intmax_t Adjustment>
     consteval auto adjustMultiplier() const noexcept
     {
@@ -108,7 +108,7 @@ struct MeasureType
     }
 
     /// \fn isBaseMeasure
-    /// @brief Returns true if the measure is a base measure
+    /// \brief Returns true if the measure is a base measure
     ///
     /// Returns true if the measure is a base measure, i.e. if the
     /// following condition is true
@@ -117,7 +117,7 @@ struct MeasureType
     /// \endcode
     /// In general, this corresponds with an SI base unit except
     /// for mass, where this measure returns true for gram, not kilogram.
-    /// @return true if the measure is a base measure
+    /// \return true if the measure is a base measure
     consteval bool isBaseMeasure() const noexcept
     {
         return Power_ == 1 && Multiplier_ == 0 && std::ratio_equal_v<Scale, _detail::one> &&
@@ -173,15 +173,15 @@ struct _is_measure<MeasureType<Power_, Multiplier, Scale_, Offset_>> : std::true
 } // namespace _detail
 /// \endcond
 
-/// @brief Specifies a type is an instantiation of \c MeasureType
+/// \brief Specifies a type is an instantiation of \c MeasureType
 ///
-/// @tparam M the type to check
+/// \tparam M the type to check
 template <typename M>
 concept Measure = _detail::_is_measure<std::remove_cvref_t<M>>::value;
 
 // --- Measure Conversion ---
 
-/// @brief Return if measure is convertible to another measure
+/// \brief Return if measure is convertible to another measure
 ///
 /// Specifies \c From is convertible to \c To. Two measures are
 /// convertible if there is a constant C such that
@@ -200,16 +200,16 @@ consteval bool isMeasureConvertible(Measure auto from, Measure auto to) noexcept
 
 // --- Measure Type Comparison ---
 
-/// @brief Compares two \c MeasureTypes for equality
+/// \brief Compares two \c MeasureTypes for equality
 ///
 /// Compares two \c MeasureTypes for equality.
 /// Two \c MeasureTypes are equal if and only if they have the
 /// same power, multiplier, scale factor, and offset. This implies they are the same type.
 ///
-/// @param lhs one measure to compare for equality
-/// @param rhs the other measure to compare for equality
+/// \param lhs one measure to compare for equality
+/// \param rhs the other measure to compare for equality
 ///
-/// @return true if the measures are equal
+/// \return true if the measures are equal
 constexpr bool operator==(Measure auto lhs, Measure auto rhs) noexcept
 {
     return std::same_as<std::remove_cvref_t<decltype(lhs)>, std::remove_cvref_t<decltype(rhs)>>;

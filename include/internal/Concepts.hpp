@@ -1,13 +1,13 @@
-/**
- * @file Concepts.hpp
- * @author Alex Schiffer
- * @brief Utility concepts not intended to be uesd by consumers of the library.
- * @version 0.1
- * @date 2024-11-02
- *
- * @copyright Copyright (c) 2024
- *
- */
+///
+/// \file Concepts.hpp
+/// \author Alex Schiffer
+/// \brief Utility concepts not intended to be uesd by consumers of the library.
+/// \version 0.1
+/// \date 2024-11-02
+///
+/// \copyright Copyright (c) 2024
+///
+///
 #ifndef CONCEPTS_HPP
 #define CONCEPTS_HPP
 
