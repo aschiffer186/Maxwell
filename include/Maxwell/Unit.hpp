@@ -603,7 +603,7 @@ concept TimeUnit = UnitConvertibleTo<U, secondUnit>;
 /// \param rhs th second unit to compare for equality
 constexpr bool operator==(Unit auto lhs, Unit auto rhs) noexcept
 {
-    return std::same_as<std::remove_cvref_t<decltype(lhs)>, std::remove_cvref_t<decltype(rhs)>>;
+    return Internal::Similar<decltype(lhs), decltype(rhs)>;
 }
 
 // --- Unit conversions ---
