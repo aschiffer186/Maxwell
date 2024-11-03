@@ -13,6 +13,7 @@
 #include <format>
 #include <functional>
 #include <iterator>
+#include <limits>
 #include <ostream>
 #include <string_view>
 #include <type_traits>
@@ -57,10 +58,10 @@ constexpr double chronoConversionFactor()
 } // namespace Internal::_detail
 /// \endcond
 
-/// \class Quantity
+/// \class BasicQuantity
 /// \brief A dimensioned quantity
 ///
-/// <tt>class Quantity</tt> represents a value that has both a magnitude
+/// <tt>class BasicQuantity</tt> represents a value that has both a magnitude
 /// and units. The units are part of the quantity's type, allowing for
 /// verification of unit coherency and conversion of units at compile-time.
 /// A program is ill-formed if an invalid operation is performed between
@@ -73,6 +74,9 @@ constexpr double chronoConversionFactor()
 template <typename T, Unit auto U>
 class BasicQuantity
 {
+    static_assert(!std::is_const_v<T>);
+    static_assert(!std::is_volatile_v<T>);
+
     template <typename D>
     static constexpr bool implicitFromChrono = Internal::_detail::EnableImplicitFromChrono<D, T, U>;
 
@@ -315,6 +319,11 @@ struct hash<Maxwell::BasicQuantity<M, U>>
     {
         hash<M>{}(q.toSIBaseUnits().magnitude());
     }
+};
+
+template <typename M, Maxwell::Unit auto U>
+struct numeric_limits<Maxwell::BasicQuantity<M, U>> : numeric_limits<M>
+{
 };
 } // namespace std
 #endif

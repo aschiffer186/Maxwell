@@ -15,17 +15,27 @@
 #include <type_traits>
 namespace Maxwell::Internal
 {
-template <typename Tp>
-concept AddEnabled = requires(Tp a, Tp b) { a + b; };
-
+/// \brief Specifies two types can be added together
+/// \tparam Tp The left hand side type of the addition
+/// \tparam Up The right hand side type of the addition
 template <typename Tp, typename Up>
 concept AddEnabledWith = requires(Tp a, Up b) { a + b; };
 
+/// \brief Specifies a type supports addition with itself
+/// \tparam Tp The type to check
 template <typename Tp>
-concept NothrowAddEnabled = AddEnabled<Tp> && requires(Tp a, Tp b) { noexcept(a + b); };
+concept AddEnabled = AddEnabledWith<Tp, Tp>;
 
+/// \brief Specifies two types can be added together and the addition is \c noexcept
+/// \tparam Tp The left hand side type of the addition
+/// \tparam Up The right hand side type of the addition
 template <typename Tp, typename Up>
 concept NothrowAddEnabledWith = AddEnabledWith<Tp, Up> && requires(Tp a, Up b) { noexcept(a + b); };
+
+/// \brief Specifies a type supports addition with itself andthe addition is \c noexcept
+/// \tparam Tp The type to check
+template <typename Tp>
+concept NothrowAddEnabled = NothrowAddEnabledWith<Tp, Tp>;
 
 template <typename Tp>
 concept SubtractEnabled = requires(Tp a, Tp b) { a - b; };
@@ -51,6 +61,7 @@ concept DivideEnabled = requires(Tp a, Tp b) { a / b; };
 template <typename Tp>
 concept NothrowDivideEnabled = DivideEnabled<Tp> && requires(Tp a, Tp b) { noexcept(a / b); };
 
+/// \cond
 namespace _detail
 {
 template <typename>
@@ -66,6 +77,7 @@ struct is_chrono_dur<std::chrono::duration<Rep, Period>> : std::true_type
 template <typename T>
 concept ChronoDuration = is_chrono_dur<std::remove_cvref_t<T>>::value;
 } // namespace _detail
+/// \endcond
 } // namespace Maxwell::Internal
 
 #endif

@@ -131,7 +131,7 @@ struct UnitType
         return UnitType<Amount, Current, Length, Luminosity, Mass, Temperature, Time, T>{};
     }
 
-    /// \brief Adjusts the mulltiplier of the amount dimension
+    /// \brief Adjusts the multiplier of the amount dimension
     ///
     /// Returns a new \c UnitType with the same dimensions as \c *this, but
     /// with an adjusted multiplier for the amount dimension
@@ -140,6 +140,7 @@ struct UnitType
     /// \code
     ///     adjustMultiplier<Adjustment().amount().magnitude() == this->amount().magnitude() + Adjstument
     /// \endcode
+    /// \post \c *this is unmodified
     ///
     /// \tparam The amount to adjust the multiplier of the amount dimension by
     /// \return A new unit with the amount multiplier adjusted
@@ -150,6 +151,19 @@ struct UnitType
                         Time, Tag>{};
     }
 
+    /// \brief Adjusts the multiplier of the current dimension
+    ///
+    /// Returns a new \c UnitType with the same dimensions as \c *this, but
+    /// with an adjusted multiplier for the current dimension
+    ///
+    /// \post the unit returned has the same dimensions as \c *this and
+    /// \code
+    ///     adjustMultiplier<Adjustment().current().magnitude() == this->current().magnitude() + Adjstument
+    /// \endcode
+    /// \post \c *this is unmodified
+    ///
+    /// \tparam The amount to adjust the multiplier of the current dimension by
+    /// \return A new unit with the current multiplier adjusted
     template <std::intmax_t Adjustment>
     consteval auto adjustMultiplierCurrent() const noexcept
     {
@@ -157,6 +171,19 @@ struct UnitType
                         Time, Tag>{};
     }
 
+    /// \brief Adjusts the multiplier of the length dimension
+    ///
+    /// Returns a new \c UnitType with the same dimensions as \c *this, but
+    /// with an adjusted multiplier for the length dimension
+    ///
+    /// \post the unit returned has the same dimensions as \c *this and
+    /// \code
+    ///     adjustMultiplier<Adjustment().length().magnitude() == this->length().magnitude() + Adjstument
+    /// \endcode
+    /// \post \c *this is unmodified
+    ///
+    /// \tparam The amount to adjust the multiplier of the length dimension by
+    /// \return A new unit with the length multiplier adjusted
     template <std::intmax_t Adjustment>
     consteval auto adjustMultiplierLength() const noexcept
     {
@@ -164,6 +191,19 @@ struct UnitType
                         Time, Tag>{};
     }
 
+    /// \brief Adjusts the multiplier of the luminosity dimension
+    ///
+    /// Returns a new \c UnitType with the same dimensions as \c *this, but
+    /// with an adjusted multiplier for the luminosity dimension
+    ///
+    /// \post the unit returned has the same dimensions as \c *this and
+    /// \code
+    ///     adjustMultiplier<Adjustment().luminosity().magnitude() == this->luminosity().magnitude() + Adjstument
+    /// \endcode
+    /// \post \c *this is unmodified
+    ///
+    /// \tparam The amount to adjust the multiplier of the luminosity dimension by
+    /// \return A new unit with the luminosity multiplier adjusted
     template <std::intmax_t Adjustment>
     consteval auto adjustMultiplierLuminosity() const noexcept
     {
@@ -171,6 +211,19 @@ struct UnitType
                         Time, Tag>{};
     }
 
+    /// \brief Adjusts the multiplier of the mass dimension
+    ///
+    /// Returns a new \c UnitType with the same dimensions as \c *this, but
+    /// with an adjusted multiplier for the mass dimension
+    ///
+    /// \post the unit returned has the same dimensions as \c *this and
+    /// \code
+    ///     adjustMultiplier<Adjustment().mass().magnitude() == this->mass().magnitude() + Adjstument
+    /// \endcode
+    /// \post \c *this is unmodified
+    ///
+    /// \tparam The amount to adjust the multiplier of the mass dimension by
+    /// \return A new unit with the mass multiplier adjusted
     template <std::intmax_t Adjustment>
     consteval auto adjustMultiplierMass() const noexcept
     {
@@ -178,6 +231,19 @@ struct UnitType
                         Time, Tag>{};
     }
 
+    /// \brief Adjusts the multiplier of the temperatue dimension
+    ///
+    /// Returns a new \c UnitType with the same dimensions as \c *this, but
+    /// with an adjusted multiplier for the temperatue dimension
+    ///
+    /// \post the unit returned has the same dimensions as \c *this and
+    /// \code
+    ///     adjustMultiplier<Adjustment().temperatue().magnitude() == this->temperatue().magnitude() + Adjstument
+    /// \endcode
+    /// \post \c *this is unmodified
+    ///
+    /// \tparam The amount to adjust the multiplier of the temperatue dimension by
+    /// \return A new unit with the temperatue multiplier adjusted
     template <std::intmax_t Adjustment>
     consteval auto adjustMultiplierTemperature() const noexcept
     {
@@ -185,11 +251,41 @@ struct UnitType
                         Time, Tag>{};
     }
 
+    /// \brief Adjusts the multiplier of the time dimension
+    ///
+    /// Returns a new \c UnitType with the same dimensions as \c *this, but
+    /// with an adjusted multiplier for the time dimension
+    ///
+    /// \post The unit returned has the same dimensions as \c *this and
+    /// \code
+    ///     adjustMultiplier<Adjustment().time().magnitude() == this->time().magnitude() + Adjstument
+    /// \endcode
+    /// \post \c *this is unmodified
+    ///
+    /// \tparam The amount to adjust the multiplier of the time dimension by
+    /// \return A new unit with the time multiplier adjusted
     template <std::intmax_t Adjustment>
     consteval auto adjustMultiplierTime() const noexcept
     {
         return UnitType<Amount, Current, Length, Luminosity, Mass, Temperature,
                         Time.template adjustMultiplier<Adjustment>(), Tag>{};
+    }
+
+    /// \brief Converts a unit to SI base units
+    ///
+    /// Returns a new \c UnitType with the same dimesions as \c *this, but expressed
+    /// entirely in SI base units.
+    ///
+    /// \post The retuned unit is in SI base units.
+    ///
+    /// \return The equivalent unit in SI base units
+    consteval auto toSIBaseUnits() const noexcept
+    {
+        const UnitType<Amount.toCoherentMeasure(), Current.toCoherentMeasure(), Length.toCoherentMeasure(),
+                       Luminosity.toCoherentMeasure(), Mass.toCoherentMeasure(), Temperature.toCoherentMeasure(),
+                       Time.toCoherentMeasure(), void>
+            u{};
+        return u.template adjustMultiplierMass<3>();
     }
 };
 
@@ -203,8 +299,8 @@ constexpr UnitType<Internal::baseMeasure, Internal::nullMeasure, Internal::nullM
 using MoleUnitType = decltype(moleUnit);
 
 /// SI unit "ampere"
-constexpr UnitType<Internal::nullMeasure, Internal::baseMeasure, Internal::nullMeasure, Internal::baseMeasure,
-                   Internal::nullMeasure, Internal::baseMeasure, Internal::nullMeasure>
+constexpr UnitType<Internal::nullMeasure, Internal::baseMeasure, Internal::nullMeasure, Internal::nullMeasure,
+                   Internal::nullMeasure, Internal::nullMeasure, Internal::nullMeasure>
     ampereUnit;
 /// Type alias for SI unit "ampere"
 using AmpereUnitType = decltype(ampereUnit);
