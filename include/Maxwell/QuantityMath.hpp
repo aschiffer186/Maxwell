@@ -11,7 +11,9 @@
 #include <cmath>
 
 #include "Quantity.hpp"
+#include "QuantityRepo.hpp"
 #include "Unit.hpp"
+#include "UnitRepo.hpp"
 
 namespace Maxwell
 {
@@ -58,6 +60,77 @@ BasicQuantity<M, U> fmin(BasicQuantity<M, U> x, BasicQuantity<M, U> y)
     return std::fmin(x.magnitude(), y.magnitude());
 }
 
+double cos(Angle auto q)
+{
+    if constexpr (decltype(q)::Units == radianUnit)
+    {
+        return std::cos(q.magnitude());
+    }
+    else
+    {
+        return std::cos(Radian{q}.magnitude());
+    }
+}
+
+double sin(Angle auto q)
+{
+    if constexpr (decltype(q)::Units == radianUnit)
+    {
+        return std::sin(q.magnitude());
+    }
+    else
+    {
+        return std::sin(Radian{q}.magnitude());
+    }
+}
+
+double tan(Angle auto q)
+{
+    if constexpr (decltype(q)::Units == radianUnit)
+    {
+        return std::tan(q.magnitude());
+    }
+    else
+    {
+        return std::tan(Radian{q}.magnitude());
+    }
+}
+
+double cot(Angle auto q)
+{
+    if constexpr (decltype(q)::Units == radianUnit)
+    {
+        return std::tan(std::numbers::pi / 2.0 - q.magnitude());
+    }
+    else
+    {
+        return std::tan(std::numbers::pi / 2.0 - Radian{q}.magnitude());
+    }
+}
+
+double csc(Angle auto q)
+{
+    if constexpr (decltype(q)::Units == radianUnit)
+    {
+        return 1.0 / std::sin(q.magnitude());
+    }
+    else
+    {
+        return 1.0 / std::sin(Radian{q}.magnitude());
+    }
+}
+
+double sec(Angle auto q)
+{
+    if constexpr (decltype(q)::Units == radianUnit)
+    {
+        return 1.0 / std::cos(q.magnitude());
+    }
+    else
+    {
+        return 1.0 / std::cos(Radian{q}.magnitude());
+    }
+}
 } // namespace Maxwell
 
 #endif
