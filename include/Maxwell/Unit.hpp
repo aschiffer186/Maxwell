@@ -50,7 +50,7 @@ namespace Maxwell
 /// \tparam Tag_ the tag of the unit (see above)
 template <Internal::Measure auto Amount_, Internal::Measure auto Current_, Internal::Measure auto Length_,
           Internal::Measure auto Luminosity_, Internal::Measure auto Mass_, Internal::Measure auto Temperature_,
-          Internal::Measure auto Time_, typename Tag_ = void>
+          Internal::Measure auto Time_, typename Tag_ = void, std::intmax_t ExtraMultiplier_ = 0>
 struct UnitType
 {
     /// The amount dimension of the unit
@@ -117,6 +117,13 @@ struct UnitType
     consteval Internal::Measure auto time() const noexcept
     {
         return Time;
+    }
+
+    /// \brief Return the extra multiplier
+    /// \return The extra multiplier of the unit
+    consteval std::intmax_t multiplier() const noexcept
+    {
+        return ExtraMultiplier_;
     }
 
     /// \brief Adds a tag to the unit
@@ -272,6 +279,26 @@ struct UnitType
                         Time.template adjustMultiplier<Adjustment>(), Tag>{};
     }
 
+    /// \brief Adjusts the extra multiplier of the unit
+    ///
+    /// Returns a new \c UnitType with the same dimensions as \c *this, but
+    /// with an adjusted multiplier for the xtra multiplier
+    ///
+    /// \post the unit returned has the same dimensions as \c *this and
+    /// \code
+    ///     adjustMultiplier<Adjustment().multiplier() == this->multiplier() + Adjstument
+    /// \endcode
+    /// \post \c *this is unmodified
+    ///
+    /// \tparam The amount to adjust the extra multiplier by
+    /// \return A new unit with the extra multiplier adjusted
+    template <std::intmax_t Adjustment>
+    consteval auto adjustMultiplierExtra() const noexcept
+    {
+        return UnitType<Amount, Current, Length, Luminosity, Mass, Temperature, Time, Tag,
+                        ExtraMultiplier_ + Adjustment>{};
+    }
+
     /// \brief Converts a unit to SI base units
     ///
     /// Returns a new \c UnitType with the same dimesions as \c *this, but expressed
@@ -360,8 +387,9 @@ struct _is_unit : std::false_type
 
 template <Internal::Measure auto Amount_, Internal::Measure auto Current_, Internal::Measure auto Length_,
           Internal::Measure auto Luminosity_, Internal::Measure auto Mass_, Internal::Measure auto Temperature_,
-          Internal::Measure auto Time_, typename Tag_>
-struct _is_unit<UnitType<Amount_, Current_, Length_, Luminosity_, Mass_, Temperature_, Time_, Tag_>> : std::true_type
+          Internal::Measure auto Time_, typename Tag_, std::intmax_t Extra_>
+struct _is_unit<UnitType<Amount_, Current_, Length_, Luminosity_, Mass_, Temperature_, Time_, Tag_, Extra_>>
+    : std::true_type
 {
 };
 } // namespace _detail
@@ -671,6 +699,7 @@ constexpr double conversionFactor(Unit auto from, Unit auto to) noexcept
     conversionFactor *= _detail::conversionFactorPrefix(from.mass().multiplier(), to.mass().multiplier());
     conversionFactor *= _detail::conversionFactorPrefix(from.temperature().multiplier(), to.temperature().multiplier());
     conversionFactor *= _detail::conversionFactorPrefix(from.time().multiplier(), to.time().multiplier());
+    conversionFactor *= _detail::conversionFactorPrefix(from.multiplier(), to.multiplier());
     conversionFactor *= tagConversionFactor(from, to);
     return conversionFactor;
 }
