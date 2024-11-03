@@ -122,6 +122,7 @@ constexpr auto radianUnit = unitlessUnit.addTag<_detail::RadianTag>();
 template <>
 inline const std::string unitString<radianUnit> = "rad";
 using radianUnitType                            = decltype(radianUnit);
+MAKE_METRIC_PREFIXES(radianUnit, Time)
 
 constexpr auto degreeUnit = unitlessUnit.addTag<_detail::DegreeTag>();
 template <>

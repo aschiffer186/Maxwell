@@ -297,56 +297,56 @@ constexpr UnitType<Internal::baseMeasure, Internal::nullMeasure, Internal::nullM
                    Internal::nullMeasure, Internal::nullMeasure, Internal::nullMeasure>
     moleUnit;
 /// Type alias for SI unit "mole"
-using MoleUnitType = std::remove_const_t<decltype(moleUnit)>;
+using moleUnitType = std::remove_const_t<decltype(moleUnit)>;
 
 /// SI unit "ampere"
 constexpr UnitType<Internal::nullMeasure, Internal::baseMeasure, Internal::nullMeasure, Internal::nullMeasure,
                    Internal::nullMeasure, Internal::nullMeasure, Internal::nullMeasure>
     ampereUnit;
 /// Type alias for SI unit "ampere"
-using AmpereUnitType = std::remove_const_t<decltype(ampereUnit)>;
+using ampereUnitType = std::remove_const_t<decltype(ampereUnit)>;
 
 /// SI unit "meter"
 constexpr UnitType<Internal::nullMeasure, Internal::nullMeasure, Internal::baseMeasure, Internal::nullMeasure,
                    Internal::nullMeasure, Internal::nullMeasure, Internal::nullMeasure>
     meterUnit;
 /// Type alias for SI unit "meter"
-using MeterUnitType = std::remove_const_t<decltype(meterUnit)>;
+using meterUnitType = std::remove_const_t<decltype(meterUnit)>;
 
 /// SI unit "candela"
 constexpr UnitType<Internal::nullMeasure, Internal::nullMeasure, Internal::nullMeasure, Internal::baseMeasure,
                    Internal::nullMeasure, Internal::nullMeasure, Internal::nullMeasure>
     candelaUnit;
 /// Type alias for SI unit "candela"
-using CandelaUnitType = std::remove_const_t<decltype(candelaUnit)>;
+using candelaUnitType = std::remove_const_t<decltype(candelaUnit)>;
 
 /// SI unit "gram"
 constexpr UnitType<Internal::nullMeasure, Internal::nullMeasure, Internal::nullMeasure, Internal::nullMeasure,
                    Internal::baseMeasure, Internal::nullMeasure, Internal::nullMeasure>
     gramUnit;
 /// Type alias for SI unit "gram"
-using GramUnitType = std::remove_const_t<decltype(gramUnit)>;
+using gramUnitType = std::remove_const_t<decltype(gramUnit)>;
 
 /// SI unit "Kelvin"
 constexpr UnitType<Internal::nullMeasure, Internal::nullMeasure, Internal::nullMeasure, Internal::nullMeasure,
                    Internal::nullMeasure, Internal::baseMeasure, Internal::nullMeasure>
     kelvinUnit;
 /// Type alias for SI unit Kelvin
-using KelvinUnitType = std::remove_const_t<decltype(kelvinUnit)>;
+using kelvinUnitType = std::remove_const_t<decltype(kelvinUnit)>;
 
 /// SI unit "second"
 constexpr UnitType<Internal::nullMeasure, Internal::nullMeasure, Internal::nullMeasure, Internal::nullMeasure,
                    Internal::nullMeasure, Internal::nullMeasure, Internal::baseMeasure>
     secondUnit;
 /// Type alias for SI unit "second"
-using SecondUnitType = std::remove_const_t<decltype(secondUnit)>;
+using secondUnitType = std::remove_const_t<decltype(secondUnit)>;
 
 /// Constant indidcating lack of units
 constexpr UnitType<Internal::nullMeasure, Internal::nullMeasure, Internal::nullMeasure, Internal::nullMeasure,
                    Internal::nullMeasure, Internal::nullMeasure, Internal::nullMeasure>
     unitlessUnit;
 /// Type alias for constant indicating lack of units
-using UnitlessUnitType = std::remove_const_t<decltype(unitlessUnit)>;
+using unitlessUnitType = std::remove_const_t<decltype(unitlessUnit)>;
 
 // -- Unit Concepts ---
 
@@ -372,52 +372,129 @@ struct _is_unit<UnitType<Amount_, Current_, Length_, Luminosity_, Mass_, Tempera
 /// Specifies a type is an instantiation of the \c UnitType class template, ignoring
 /// cv-qualifiers and references.
 ///
-/// \tparam U the type to check
+/// \tparam U The type to check
 template <typename U>
 concept Unit = _detail::_is_unit<std::remove_cvref_t<U>>::value;
 
 /// \brief Specifies a unit is unitless
 ///
-/// \tparam U the unit to check
+/// \tparam U The unit to check
 template <auto U>
-concept Unitless = Internal::Similar<decltype(U), UnitlessUnitType>;
+concept Unitless = Internal::Similar<decltype(U), unitlessUnitType>;
 
+/// \brief Specfies amount dimension \c From can be converted to amount dimension \c To
+///
+/// Specifies amount dimension \c From can be converted to amount dimension \c To,
+/// this conversion is possible if both dimensions have the same power.
+///
+/// \tparam From The starting dimension
+/// \tparam To The target dimension
 template <auto From, auto To>
 concept AmountConvertibleTo =
     Internal::Measure<decltype(From)> && Internal::Measure<decltype(To)> && Internal::isMeasureConvertible(From, To);
 
+/// \brief Specfies current dimension \c From can be converted to current dimension \c To
+///
+/// Specifies current dimension \c From can be converted to current dimension \c To,
+/// this conversion is possible if both dimensions have the same power.
+///
+/// \tparam From The starting dimension
+/// \tparam To The target dimension
 template <auto From, auto To>
 concept CurrentConvertibleTo =
     Internal::Measure<decltype(From)> && Internal::Measure<decltype(To)> && Internal::isMeasureConvertible(From, To);
 
+/// \brief Specfies length dimension \c From can be converted to length dimension \c To
+///
+/// Specifies length dimension \c From can be converted to length dimension \c To,
+/// this conversion is possible if both dimensions have the same power.
+///
+/// \tparam From The starting dimension
+/// \tparam To The target dimension
 template <auto From, auto To>
 concept LengthConvertibleTo =
     Internal::Measure<decltype(From)> && Internal::Measure<decltype(To)> && Internal::isMeasureConvertible(From, To);
 
+/// \brief Specfies luminosity dimension \c From can be converted to luminosity dimension \c To
+///
+/// Specifies luminosity dimension \c From can be converted to luminosity dimension \c To,
+/// this conversion is possible if both dimensions have the same power.
+///
+/// \tparam From The starting dimension
+/// \tparam To The target dimension
 template <auto From, auto To>
 concept LuminosityConvertibleTo =
     Internal::Measure<decltype(From)> && Internal::Measure<decltype(To)> && Internal::isMeasureConvertible(From, To);
 
+/// \brief Specfies mass dimension \c From can be converted to mass dimension \c To
+///
+/// Specifies mass dimension \c From can be converted to mass dimension \c To,
+/// this conversion is possible if both dimensions have the same power.
+///
+/// \tparam From The starting dimension
+/// \tparam To The target dimension
 template <auto From, auto To>
 concept MassConvertibleTo =
     Internal::Measure<decltype(From)> && Internal::Measure<decltype(To)> && Internal::isMeasureConvertible(From, To);
 
+/// \brief Specfies temperature dimension \c From can be converted to temperature dimension \c To
+///
+/// Specifies temperature dimension \c From can be converted to temperature dimension \c To,
+/// this conversion is possible if both dimensions have the same power.
+///
+/// \tparam From The starting dimension
+/// \tparam To The target dimension
 template <auto From, auto To>
 concept TemperatureConvertibleTo =
     Internal::Measure<decltype(From)> && Internal::Measure<decltype(To)> && Internal::isMeasureConvertible(From, To);
 
+/// \brief Specfies time dimension \c From can be converted to time dimension \c To
+///
+/// Specifies time dimension \c From can be converted to time dimension \c To,
+/// this conversion is possible if both dimensions have the same power.
+///
+/// \tparam From The starting dimension
+/// \tparam To The target dimension
 template <auto From, auto To>
 concept TimeConvertibleTo =
     Internal::Measure<decltype(From)> && Internal::Measure<decltype(To)> && Internal::isMeasureConvertible(From, To);
 
-template <typename, typename>
-struct is_tag_convertible : std::false_type
+/// \brief Type trait indicating two tags are convertible
+///
+/// Type trait indicating two tags are convertible. To indicate
+/// two tags are convertible, specialize this trait for the tags
+/// and inherit from \c std::true_type. By default, two different
+/// tags are not convertible. Note, this trait should be specialized
+/// for both \c From to \c To and \c To to \c From.
+///
+/// \sa \c TagConvertibleTo
+/// \tparam From The starting tag
+/// \tparam To The target tag
+template <typename From, typename To>
+struct is_tag_convertible : std::is_same<From, To>
 {
 };
 
+/// \brief Specfies tag \c From can be converted to \c Tag to.
+///
+/// Specfies tag \c From can be converted to \c Tag to. This concept evaluates
+/// to \c false unless the struct \c is_tag_convertible is specialized for
+/// \c From and \c To
+///
+/// \sa \c is_tag_convertible
+/// \tparam From The starting tag
+/// \tparam To The target tag
 template <typename From, typename To>
 concept TagConvertibleTo = is_tag_convertible<From, To>::value;
 
+/// \brief Specifies unit \c From can be converted to unit \c To
+///
+/// Specifies unit \c From can be converted to unit \c To. \c From can be converted to
+/// \c To if all of all the dimensions of \c From can be converted to the corresponding
+/// dimensions of \c To and the tag of \c From can be converted to the \c Tag of to.
+///
+/// \tparam From The starting unit
+/// \tparam To the target unit
 template <auto From, auto To>
 concept UnitConvertibleTo =
     Unit<decltype(From)> && Unit<decltype(To)> && AmountConvertibleTo<From.amount(), To.amount()> &&

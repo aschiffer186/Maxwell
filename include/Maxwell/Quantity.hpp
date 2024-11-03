@@ -324,6 +324,7 @@ struct hash<Maxwell::BasicQuantity<M, U>>
 template <typename M, Maxwell::Unit auto U>
 struct numeric_limits<Maxwell::BasicQuantity<M, U>> : numeric_limits<M>
 {
+    static constexpr bool is_specialized = true;
 };
 } // namespace std
 #endif

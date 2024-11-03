@@ -4,6 +4,7 @@
 
 #include <gtest/gtest.h>
 #include <type_traits>
+#include <utility>
 
 using namespace Maxwell;
 
@@ -258,7 +259,7 @@ TEST(TestUnit, TestToSIBaseUnits)
 
 TEST(TestUnit, TestUnitConcept)
 {
-    using BaseType  = std::remove_cvref_t<MeterUnitType>;
+    using BaseType  = std::remove_cvref_t<meterUnitType>;
     using ConstType = std::add_const_t<BaseType>;
     using LRefType  = std::add_lvalue_reference_t<BaseType>;
     using RRefType  = std::add_rvalue_reference_t<BaseType>;
@@ -284,4 +285,55 @@ TEST(TestUnit, TestUnitless)
     EXPECT_FALSE(Unitless<secondUnit>);
     EXPECT_FALSE(Unitless<radianUnit>);
     EXPECT_TRUE(Unitless<unitlessUnit>);
+}
+
+// --- Type Parameterized Tests ---
+template <typename T>
+class UnitIncompatabilityTest : public testing::Test
+{
+  public:
+    static inline constexpr T                       value{};
+    static inline constexpr typename T::first_type  first  = value.first;
+    static inline constexpr typename T::second_type second = value.second;
+};
+
+using IncompatibleUnits =
+    ::testing::Types<std::pair<moleUnitType, ampereUnitType>, std::pair<ampereUnitType, candelaUnitType>,
+                     std::pair<candelaUnitType, gramUnitType>, std::pair<gramUnitType, kelvinUnitType>,
+                     std::pair<kelvinUnitType, secondUnitType>, std::pair<secondUnitType, radianUnitType>,
+                     std::pair<radianUnitType, unitlessUnitType>>;
+TYPED_TEST_SUITE(UnitIncompatabilityTest, IncompatibleUnits);
+
+TYPED_TEST(UnitIncompatabilityTest, TestUnitIncompatability)
+{
+    constexpr auto first  = TestFixture::first;
+    constexpr auto second = TestFixture::second;
+
+    EXPECT_FALSE((UnitConvertibleTo<first, second>));
+    EXPECT_FALSE((UnitConvertibleTo<second, first>));
+}
+
+template <typename T>
+class UnitCompatabilityTest : public testing::Test
+{
+  public:
+    static inline constexpr T                       value{};
+    static inline constexpr typename T::first_type  first  = value.first;
+    static inline constexpr typename T::second_type second = value.second;
+};
+
+using CompatibleUnits =
+    ::testing::Types<std::pair<moleUnitType, kilomoleUnitType>, std::pair<ampereUnitType, kiloampereUnitType>,
+                     std::pair<meterUnitType, kilometerUnitType>, std::pair<candelaUnitType, kilocandelaUnitType>,
+                     std::pair<gramUnitType, kilogramUnitType>, std::pair<kelvinUnitType, kilokelvinUnitType>,
+                     std::pair<secondUnitType, kilosecondUnitType>, std::pair<radianUnitType, kiloradianUnitType>>;
+TYPED_TEST_SUITE(UnitCompatabilityTest, CompatibleUnits);
+
+TYPED_TEST(UnitCompatabilityTest, CompatibleUnits)
+{
+    constexpr auto first  = TestFixture::first;
+    constexpr auto second = TestFixture::second;
+
+    EXPECT_TRUE((UnitConvertibleTo<first, second>));
+    EXPECT_TRUE((UnitConvertibleTo<second, first>));
 }
