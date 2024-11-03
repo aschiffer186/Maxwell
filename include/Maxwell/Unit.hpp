@@ -5,7 +5,6 @@
 /// \date 2024-11-02
 ///
 /// \copyright Copyright (c) 2024
-///
 #ifndef UNIT_HPP
 #define UNIT_HPP
 
