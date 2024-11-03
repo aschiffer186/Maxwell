@@ -402,7 +402,7 @@ struct UnitType
     template <Internal::_detail::RatioLike Adjustment>
     consteval auto adjustScaleMass() const noexcept
     {
-        constexpr Internal::Measure auto oldMeasure = Length;
+        constexpr Internal::Measure auto oldMeasure = Mass;
         using OldScale                              = decltype(oldMeasure)::Scale;
         using NewScale                              = std::ratio_multiply<OldScale, Adjustment>;
         constexpr Internal::MeasureType<oldMeasure.power(), oldMeasure.multiplier(), NewScale,
@@ -424,7 +424,7 @@ struct UnitType
     template <Internal::_detail::RatioLike Adjustment>
     consteval auto adjustScaleTemperature() const noexcept
     {
-        constexpr Internal::Measure auto oldMeasure = Length;
+        constexpr Internal::Measure auto oldMeasure = Temperature;
         using OldScale                              = decltype(oldMeasure)::Scale;
         using NewScale                              = std::ratio_multiply<OldScale, Adjustment>;
         constexpr Internal::MeasureType<oldMeasure.power(), oldMeasure.multiplier(), NewScale,
