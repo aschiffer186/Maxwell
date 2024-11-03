@@ -532,11 +532,10 @@ concept CurrentUnit = Unit<decltype(U)> && U.amount() == Internal::nullMeasure &
 ///
 /// \tparam U The unit to check
 template <auto U>
-concept LengthUnit =
-    Unit<decltype(U)> && U.amount().power() == Internal::nullMeasure && U.current() == Internal::nullMeasure &&
-    U.length().power() == 1 && U.luminosity() == Internal::nullMeasure && U.mass() == Internal::nullMeasure &&
-    U.temperature() == Internal::nullMeasure && U.time() == Internal::nullMeasure &&
-    Internal::Similar<typename decltype(U)::Tag, void>;
+concept LengthUnit = Unit<decltype(U)> && U.amount() == Internal::nullMeasure && U.current() == Internal::nullMeasure &&
+                     U.length().power() == 1 && U.luminosity() == Internal::nullMeasure &&
+                     U.mass() == Internal::nullMeasure && U.temperature() == Internal::nullMeasure &&
+                     U.time() == Internal::nullMeasure && Internal::Similar<typename decltype(U)::Tag, void>;
 
 /// \brief Specifies a unit has dimensions of luminosity
 ///

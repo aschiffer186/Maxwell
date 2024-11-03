@@ -299,8 +299,17 @@ std::ostream& operator<<(std::ostream& os, const BasicQuantity<M, U>& q)
 }
 
 // --- Quantity Type Traits ---
-template <typename T>
-concept Amount = AmountUnit<T::Units>;
+/// \brief Specifies a quantity has dimensions of amount
+///
+/// \tparam QuantityType The quantity to check
+template <typename QuantityType>
+concept Amount = AmountUnit<QuantityType::Units>;
+
+/// \brief Specifies a quantity has dimensions of current
+///
+/// \tparam QuantityType The quantity to check
+template <typename QuantityType>
+concept Current = CurrentUnit<QuantityType::Units>;
 } // namespace Maxwell
 
 namespace std

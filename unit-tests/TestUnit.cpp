@@ -298,6 +298,29 @@ TEST(TestUnit, TestUnitTraits)
     EXPECT_FALSE(AmountUnit<kelvinUnit>);
     EXPECT_FALSE(AmountUnit<secondUnit>);
     EXPECT_FALSE(AmountUnit<radianUnit>);
+    EXPECT_FALSE(AmountUnit<unitlessUnit>);
+
+    EXPECT_FALSE(CurrentUnit<moleUnit>);
+    EXPECT_TRUE(CurrentUnit<ampereUnit>);
+    EXPECT_TRUE(CurrentUnit<kiloampereUnit>);
+    EXPECT_FALSE(CurrentUnit<meterUnit>);
+    EXPECT_FALSE(CurrentUnit<candelaUnit>);
+    EXPECT_FALSE(CurrentUnit<gramUnit>);
+    EXPECT_FALSE(CurrentUnit<kelvinUnit>);
+    EXPECT_FALSE(CurrentUnit<secondUnit>);
+    EXPECT_FALSE(CurrentUnit<radianUnit>);
+    EXPECT_FALSE(CurrentUnit<unitlessUnit>);
+
+    EXPECT_FALSE(LengthUnit<moleUnit>);
+    EXPECT_FALSE(LengthUnit<ampereUnit>);
+    EXPECT_TRUE(LengthUnit<meterUnit>);
+    EXPECT_TRUE(LengthUnit<kilometerUnit>);
+    EXPECT_FALSE(LengthUnit<candelaUnit>);
+    EXPECT_FALSE(LengthUnit<gramUnit>);
+    EXPECT_FALSE(LengthUnit<kelvinUnit>);
+    EXPECT_FALSE(LengthUnit<secondUnit>);
+    EXPECT_FALSE(LengthUnit<radianUnit>);
+    EXPECT_FALSE(LengthUnit<unitlessUnit>);
 }
 
 // --- Type Parameterized Tests ---
