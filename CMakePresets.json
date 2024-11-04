@@ -1,0 +1,86 @@
+{
+    "version": 6,
+    "configurePresets": [
+        {
+            "name": "C++-setup",
+            "hidden": true,
+            "cacheVariables": {
+                "CMAKE_CXX_STANDARD": "20",
+                "CMAKE_CXX_EXTENSIONS": "Off",
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "true"
+            },
+            "binaryDir": "build/${presetName}"
+        },
+        {
+            "name": "gcc-setup",
+            "inherits": "C++-setup",
+            "hidden": true,
+            "cacheVariables": {
+                "CMAKE_CXX_FLAGS": "-Wall -Wextra -Werror -pedantic"
+            }
+        },
+        {
+            "name": "ninja-debug",
+            "displayName": "Ninja (Debug)",
+            "description": "Configure Ninja for debug build",
+            "inherits": "gcc-setup",
+            "generator": "Ninja",
+            "cacheVariables": {
+                "CMAKE_CXX_FLAGS_DEBUG": "-O0 -g"
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "ninja-debug",
+            "configurePreset": "ninja-debug",
+            "displayName": "Ninja (Debug)",
+            "description": "Build with Ninja in debug mode",
+            "configuration": "Debug"
+        }
+    ],
+    "testPresets": [
+        {
+            "name": "default",
+            "configurePreset": "ninja-debug",
+            "displayName": "Default",
+            "description": "Run unit tests from debug build",
+            "configuration": "Debug",
+            "output": {
+                "outputOnFailure": true
+            }
+        }
+    ],
+    "workflowPresets": [
+        {
+            "name": "debug-build-only",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "ninja-debug"
+                },
+                {
+                    "type": "build",
+                    "name": "ninja-debug"
+                }
+            ]
+        },
+        {
+            "name": "run-tests",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "ninja-debug"
+                },
+                {
+                    "type": "build",
+                    "name": "ninja-debug"
+                },
+                {
+                    "type": "test",
+                    "name": "default"
+                }
+            ]
+        }
+    ]
+}
