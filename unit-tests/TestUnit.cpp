@@ -553,6 +553,39 @@ TEST(TestUnit, TestUnitEquality)
     EXPECT_FALSE(u3 != u2);
 }
 
+TEST(TestUnit, TestUnitConversionOffset)
+{
+    // Amount
+    const double conversion1 = conversionFactor(footUnit, mileUnit);
+    const double conversion2 = conversionFactor(mileUnit, footUnit);
+    const double conversion3 = conversionFactor(footUnit, meterUnit);
+    const double conversion4 = conversionFactor(meterUnit, footUnit);
+
+    EXPECT_FLOAT_EQ(conversion1, 1.0 / 5'280.0);
+    EXPECT_FLOAT_EQ(conversion2, 5'280.0);
+    EXPECT_FLOAT_EQ(conversion3, 0.3048);
+    EXPECT_FLOAT_EQ(conversion4, 1.0 / 0.3048);
+
+    const double conversion5 = conversionFactor(kilogramUnit, poundUnit);
+    const double conversion6 = conversionFactor(poundUnit, kilogramUnit);
+
+    EXPECT_FLOAT_EQ(conversion5, 2.2046226);
+    EXPECT_FLOAT_EQ(conversion6, 1.0 / 2.2046226);
+
+    const double conversion7 = conversionFactor(yearUnit, dayUnit);
+    const double conversion8 = conversionFactor(dayUnit, yearUnit);
+
+    EXPECT_FLOAT_EQ(conversion7, 365.0);
+    EXPECT_FLOAT_EQ(conversion8, 1.0 / 365.0);
+
+    const Unit auto from = meterUnit / secondUnit;
+    const Unit auto to   = mileUnit / hourUnit;
+
+    const double conversion9 = conversionFactor(from, to);
+
+    EXPECT_FLOAT_EQ(conversion9, 2.23694);
+}
+
 // --- Type Parameterized Tests ---
 template <typename T>
 class UnitIncompatabilityTest : public testing::Test

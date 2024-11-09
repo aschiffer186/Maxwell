@@ -12,22 +12,50 @@
             "binaryDir": "build/${presetName}"
         },
         {
-            "name": "gcc-setup",
+            "name": "gcc-setup-debug",
             "inherits": "C++-setup",
             "hidden": true,
             "cacheVariables": {
-                "CMAKE_CXX_FLAGS": "-Wall -Wextra -Werror -pedantic"
+                "CMAKE_CXX_FLAGS": "-Wall -Wextra -Werror -pedantic -O0 -g",
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        },
+        {
+            "name": "gcc-setup-release",
+            "inherits": "C++-setup",
+            "hidden": true,
+            "cacheVariables": {
+                "CMAKE_CXX_FLAGS": "-Wall -Wextra -Werror -pedantic -O2 -DNDEBUG",
+                "CMAKE_BUILD_TYPE": "Release"
             }
         },
         {
             "name": "ninja-debug",
             "displayName": "Ninja (Debug)",
-            "description": "Configure Ninja for debug build",
-            "inherits": "gcc-setup",
-            "generator": "Ninja",
-            "cacheVariables": {
-                "CMAKE_CXX_FLAGS_DEBUG": "-O0 -g"
-            }
+            "description": "Configure to build with Ninja in debug mode",
+            "inherits": "gcc-setup-debug",
+            "generator": "Ninja"
+        },
+        {
+            "name": "ninja-release",
+            "displayName": "Ninja (Release)",
+            "description": "Configure to build with Ninja in release mode",
+            "inherits": "gcc-setup-release",
+            "generator": "Ninja"
+        },
+        {
+            "name": "make-debug",
+            "displayName": "Make (Debug)",
+            "description": "Configure to build with Makefiles in debug mode",
+            "inherits": "gcc-setup-debug",
+            "generator": "Unix Makefiles"
+        },
+        {
+            "name": "make-release",
+            "displayName": "Make (Release)",
+            "description": "Configure to build with Makefiles in release mode",
+            "inherits": "gcc-setup-release",
+            "generator": "Unix Makefiles"
         }
     ],
     "buildPresets": [
@@ -37,6 +65,27 @@
             "displayName": "Ninja (Debug)",
             "description": "Build with Ninja in debug mode",
             "configuration": "Debug"
+        },
+        {
+            "name": "ninja-release",
+            "configurePreset": "ninja-release",
+            "displayName": "Ninja (Relase)",
+            "description": "Build with Ninja in release mode",
+            "configuration": "Release"
+        },
+        {
+            "name": "make-debug",
+            "configurePreset": "make-debug",
+            "displayName": "Makefiles (Debug)",
+            "description": "Build with Makefiles in debug mode",
+            "configuration": "Debug"
+        },
+        {
+            "name": "make-release",
+            "configurePreset": "make-release",
+            "displayName": "Makefiles (Relase)",
+            "description": "Build with Makefiles in release mode",
+            "configuration": "Release"
         }
     ],
     "testPresets": [

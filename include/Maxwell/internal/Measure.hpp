@@ -231,17 +231,21 @@ constexpr Measure auto operator*(Measure auto lhs, Measure auto rhs) noexcept
 {
     using LHSType = decltype(lhs);
     using RHSType = decltype(rhs);
-    if constexpr (lhs.multiplier() == rhs.multiplier() &&
-                  std::ratio_equal_v<typename LHSType::Scale, typename RHSType::Scale> &&
-                  std::ratio_equal_v<typename LHSType::Offset, typename RHSType::Offset>)
-    {
-        return MeasureType<lhs.power() + rhs.power(), lhs.multiplier(), typename LHSType::Scale,
-                           typename RHSType::Offset>{};
-    }
-    else
-    {
-        return MeasureType<lhs.power() + rhs.power(), 0, _detail::one, _detail::zero>{};
-    }
+
+    constexpr auto multiplier = (lhs.multiplier() == rhs.multiplier()) ? lhs.multiplier() : 0;
+
+    // if constexpr (lhs.multiplier() == rhs.multiplier() &&
+    //               std::ratio_equal_v<typename LHSType::Offset, typename RHSType::Offset>)
+    // {
+    //     return MeasureType<lhs.power() + rhs.power(), lhs.multiplier(), typename LHSType::Scale,
+    //                        typename RHSType::Offset>{};
+    // }
+    // else
+    // {
+    //     return MeasureType<lhs.power() + rhs.power(), 0, _detail::one, _detail::zero>{};
+    // }
+    return MeasureType<lhs.power() + rhs.power(), multiplier,
+                       std::ratio_multiply<typename LHSType::Scale, typename RHSType::Scale>, _detail::zero>{};
 }
 
 /// \brief Divides two measures
@@ -255,19 +259,22 @@ constexpr Measure auto operator*(Measure auto lhs, Measure auto rhs) noexcept
 /// \return the quotient of \c lhs and \c rhs
 constexpr Measure auto operator/(Measure auto lhs, Measure auto rhs) noexcept
 {
-    using LHSType = decltype(lhs);
-    using RHSType = decltype(rhs);
-    if constexpr (lhs.multiplier() == rhs.multiplier() &&
-                  std::ratio_equal_v<typename LHSType::Scale, typename RHSType::Scale> &&
-                  std::ratio_equal_v<typename LHSType::Offset, typename RHSType::Offset>)
-    {
-        return MeasureType<lhs.power() - rhs.power(), lhs.multiplier(), typename LHSType::Scale,
-                           typename RHSType::Offset>{};
-    }
-    else
-    {
-        return MeasureType<lhs.power() - rhs.power(), 0, _detail::one, _detail::zero>{};
-    }
+    using LHSType             = decltype(lhs);
+    using RHSType             = decltype(rhs);
+    constexpr auto multiplier = (lhs.multiplier() == rhs.multiplier()) ? lhs.multiplier() : 0;
+
+    // if constexpr (lhs.multiplier() == rhs.multiplier() &&
+    //               std::ratio_equal_v<typename LHSType::Offset, typename RHSType::Offset>)
+    // {
+    //     return MeasureType<lhs.power() + rhs.power(), lhs.multiplier(), typename LHSType::Scale,
+    //                        typename RHSType::Offset>{};
+    // }
+    // else
+    // {
+    //     return MeasureType<lhs.power() + rhs.power(), 0, _detail::one, _detail::zero>{};
+    // }
+    return MeasureType<lhs.power() - rhs.power(), multiplier,
+                       std::ratio_divide<typename LHSType::Scale, typename RHSType::Scale>, _detail::zero>{};
 }
 } // namespace Maxwell::Internal
 

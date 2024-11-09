@@ -271,18 +271,18 @@ MAKE_UNIT(cubicMeter, squareMeterUnit * meterUnit)
 MAKE_SCALED_UNIT_WITH_DESC(liter, candelaUnit, (std::ratio<1'000, 1>), Length, "L")
 
 // Imperial units 
-MAKE_SCALED_UNIT_WITH_DESC(foot, meterUnit, (std::ratio<328'084, 100'000>), Length, "ft")
-MAKE_SCALED_UNIT_WITH_DESC(inch, footUnit, (std::ratio<1, 12>), Length, "in")
-MAKE_SCALED_UNIT_WITH_DESC(yard, footUnit, (std::ratio<3, 1>), Length, "yd")
-MAKE_SCALED_UNIT_WITH_DESC(mile, footUnit, (std::ratio<5'280, 1>), Length, "mi")
+MAKE_SCALED_UNIT_WITH_DESC(foot, meterUnit, (std::ratio<3'280'839'895, 1'000'000'000>), Length, "ft")
+MAKE_SCALED_UNIT_WITH_DESC(inch, footUnit, (std::ratio<12, 1>), Length, "in")
+MAKE_SCALED_UNIT_WITH_DESC(yard, footUnit, (std::ratio<1, 3>), Length, "yd")
+MAKE_SCALED_UNIT_WITH_DESC(mile, footUnit, (std::ratio<1, 5'280>), Length, "mi")
 
-MAKE_SCALED_UNIT_WITH_DESC(pound, kilogramUnit, (std::ratio<453'592, 1'000'000)>, Mass, "lb")
+MAKE_SCALED_UNIT_WITH_DESC(pound, kilogramUnit, (std::ratio<22'046'226'218, 10'000'000'000>), Mass, "lb")
 
-MAKE_SCALED_UNIT_WITH_DESC(minute, secondUnit, (std::ratio<60, 1>), Time, "min")
-MAKE_SCALED_UNIT_WITH_DESC(hour, minuteUnit, (std::ratio<60, 1>), Time, "hr")
-MAKE_SCALED_UNIT_WITH_DESC(day, hourUnit, (std::ratio<24, 1>), Time, "day")
-MAKE_SCALED_UNIT_WITH_DESC(week, dayUnit, (std::ratio<7, 1>), Time, "week")
-MAKE_SCALED_UNIT_WITH_DESC(year, dayUnit, (std::ratio<52, 1>), Time, "yr")
+MAKE_SCALED_UNIT_WITH_DESC(minute, secondUnit, (std::ratio<1, 60>), Time, "min")
+MAKE_SCALED_UNIT_WITH_DESC(hour, minuteUnit, (std::ratio<1, 60>), Time, "hr")
+MAKE_SCALED_UNIT_WITH_DESC(day, hourUnit, (std::ratio<1, 24>), Time, "day")
+MAKE_SCALED_UNIT_WITH_DESC(week, dayUnit, (std::ratio<1, 7>), Time, "week")
+MAKE_SCALED_UNIT_WITH_DESC(year, dayUnit, (std::ratio<1, 365>), Time, "yr")
 
 // clang-format on
 #undef ESC

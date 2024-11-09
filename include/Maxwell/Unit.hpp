@@ -877,27 +877,48 @@ constexpr double conversionFactor(Unit auto from, Unit auto to) noexcept
     conversionFactor *= tagConversionFactor(from, to);
 
     // Convert ratios
-    conversionFactor *= _detail::conversionFactorOffset<typename From::Amount::Scale, typename To::Amount::Scale>();
-    conversionFactor *= _detail::conversionFactorOffset<typename From::Current::Scale, typename To::Current::Scale>();
-    conversionFactor *= _detail::conversionFactorOffset<typename From::Length::Scale, typename To::Length::Scale>();
     conversionFactor *=
-        _detail::conversionFactorOffset<typename From ::Luminosity::Scale, typename To::Luminosity::Scale>();
-    conversionFactor *= _detail::conversionFactorOffset<typename From::Mass::Scale, typename To::Mass::Scale>();
+        _detail::conversionFactorOffset<typename decltype(From::Amount)::Scale, typename decltype(To::Amount)::Scale>();
+    conversionFactor *= _detail::conversionFactorOffset<typename decltype(From::Current)::Scale,
+                                                        typename decltype(To::Current)::Scale>();
     conversionFactor *=
-        _detail::conversionFactorOffset<typename From::Temperature::Scale, typename To::Temperature::Scale>();
-    conversionFactor *= _detail::conversionFactorOffset<typename From::Time::Scale, typename To::Time::Scale>();
+        _detail::conversionFactorOffset<typename decltype(From::Length)::Scale, typename decltype(To::Length)::Scale>();
+    conversionFactor *= _detail::conversionFactorOffset<typename decltype(From::Luminosity)::Scale,
+                                                        typename decltype(To::Luminosity)::Scale>();
+    conversionFactor *=
+        _detail::conversionFactorOffset<typename decltype(From::Mass)::Scale, typename decltype(To::Mass)::Scale>();
+    conversionFactor *= _detail::conversionFactorOffset<typename decltype(From::Temperature)::Scale,
+                                                        typename decltype(To::Temperature)::Scale>();
+    conversionFactor *=
+        _detail::conversionFactorOffset<typename decltype(From::Time)::Scale, typename decltype(To::Time)::Scale>();
     return conversionFactor;
 }
 
 /// \brief Multiplies two units
+///
+/// Multiplies two units; the dimensions of the resulting unit is the product of
+/// the dimensions of lhs and rhs. This function carries forward the tag and the multipliler
+/// of the first unit in the multiplication.
+///
+/// \param lhs The left hand side of the multiplication
+/// \param rhs The right hand side of the multiplication
+/// \return The product of two units
 consteval Unit auto operator*(Unit auto lhs, Unit auto rhs) noexcept
 {
     return UnitType<lhs.amount() * rhs.amount(), lhs.current() * rhs.current(), lhs.length() * rhs.length(),
                     lhs.luminosity() * rhs.luminosity(), lhs.mass() * rhs.mass(), lhs.temperature() * rhs.temperature(),
-                    lhs.time() * rhs.time(), typename decltype(lhs)::Tag>{};
+                    lhs.time() * rhs.time(), typename decltype(lhs)::Tag, lhs.multiplier()>{};
 }
 
 /// \brief Divides two units
+///
+/// Divides two units; the dimensions of the resulting unit is the division of
+/// the dimensions of lhs and rhs. This function carries forward the tag and the multipliler
+/// of the first unit in the multiplication.
+///
+/// \param lhs The dividend
+/// \param rhs The divisor
+/// \return The quotient of two units
 consteval Unit auto operator/(Unit auto lhs, Unit auto rhs) noexcept
 {
     return UnitType<lhs.amount() / rhs.amount(), lhs.current() / rhs.current(), lhs.length() / rhs.length(),
@@ -907,29 +928,53 @@ consteval Unit auto operator/(Unit auto lhs, Unit auto rhs) noexcept
 
 // --- Metric Prefixes ---
 
+/// Metric prefix "quetta" (10^30)
 constexpr std::intmax_t quetta = 30;
+/// Metric prefix ronna (10^27)
 constexpr std::intmax_t ronna  = 27;
+/// Metric prefix yotta (10^24)
 constexpr std::intmax_t yotta  = 24;
+/// Metric prefix zetta (10^21)
 constexpr std::intmax_t zetta  = 21;
+/// Metric prefix exa (10^18)
 constexpr std::intmax_t exa    = 18;
+/// Metric prefix peta (10^15)
 constexpr std::intmax_t peta   = 15;
+/// Metric prefix tera (10^12)
 constexpr std::intmax_t tera   = 12;
+/// Metric prefix giga (10^9)
 constexpr std::intmax_t giga   = 9;
+/// Metric prefix mega (10^6)
 constexpr std::intmax_t mega   = 6;
+/// Metric prefix kilo (10^3)
 constexpr std::intmax_t kilo   = 3;
+/// Metric prefix hecto (10^2)
 constexpr std::intmax_t hecto  = 2;
+/// Metric prefix deca (10^1)
 constexpr std::intmax_t deca   = 1;
+/// Metric prefix deci (10^-1)
 constexpr std::intmax_t deci   = -1;
+/// Metric prefix centi (10^-2)
 constexpr std::intmax_t centi  = -2;
+/// Metric prefix milli (10^-3)
 constexpr std::intmax_t milli  = -3;
+/// Metric prefix micro (10^-6)
 constexpr std::intmax_t micro  = -6;
+/// Metric prefix nano (10^-9)
 constexpr std::intmax_t nano   = -9;
+/// Metric prefix pico (10^-12)
 constexpr std::intmax_t pico   = -12;
+/// Metric prefix femto (10^-15)
 constexpr std::intmax_t femto  = -15;
+/// Metric prefix atto (10^-18)
 constexpr std::intmax_t atto   = -18;
+/// Metric prefix zepto (10^-21)
 constexpr std::intmax_t zepto  = -21;
+/// Metric prefix yocto (10^-24)
 constexpr std::intmax_t yocto  = -24;
+/// Metric prefix ronto (10^-27)
 constexpr std::intmax_t ronto  = -27;
+/// Metric prefix quecto (10^-30)
 constexpr std::intmax_t quecto = -30;
 
 // --- Formatting ---

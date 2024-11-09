@@ -14,6 +14,7 @@
 #include <format>
 #include <functional>
 #include <initializer_list>
+#include <iostream>
 #include <iterator>
 #include <limits>
 #include <ostream>
@@ -28,6 +29,9 @@
 /// \namespace Maxwell
 namespace Maxwell
 {
+template <typename T, Unit auto U>
+class BasicQuantity;
+
 /// \cond
 namespace Internal::_detail
 {
@@ -46,6 +50,7 @@ template <typename D, Unit auto U>
     requires TimeUnit<U>
 constexpr double chronoConversionFactor()
 {
+    // using Period = D::period;
     if (std::ratio_equal_v<typename decltype(U.time())::Scale, Internal::_detail::one>)
     {
         // Detailing with second, potentially scaled by a metric prefix
@@ -57,6 +62,33 @@ constexpr double chronoConversionFactor()
         return 1.0;
     }
 }
+
+template <typename D, Unit auto U>
+    requires TimeUnit<U>
+constexpr double toChronoConversionFactor()
+{
+    // using Period = D::period;
+    if (std::ratio_equal_v<typename decltype(U.time())::Scale, Internal::_detail::one>)
+    {
+        // Detailing with second, potentially scaled by a metric prefix
+        [[maybe_unused]] constexpr std::intmax_t multiplier = U.time().multiplier();
+        return 1.0;
+    }
+    else
+    {
+        return 1.0;
+    }
+}
+
+template <typename>
+struct is_basic_quantity : std::false_type
+{
+};
+
+template <typename M, Unit auto U>
+struct is_basic_quantity<BasicQuantity<M, U>> : std::true_type
+{
+};
 } // namespace Internal::_detail
 /// \endcond
 
@@ -76,10 +108,11 @@ constexpr double chronoConversionFactor()
 template <typename T, Unit auto U>
 class BasicQuantity
 {
-    static_assert(!std::is_const_v<T>);
-    static_assert(!std::is_volatile_v<T>);
-    static_assert(!Internal::Similar<T, std::in_place_t>);
-    static_assert(!Internal::_detail::ChronoDuration<T>);
+    static_assert(!std::is_const_v<T>, "Magnitude cannot be const");
+    static_assert(!std::is_volatile_v<T>, "Magnitude cannot be volatile");
+    static_assert(!Internal::Similar<T, std::in_place_t>, "Magnitude cannot be std::in_place_t");
+    static_assert(!Internal::_detail::ChronoDuration<T>, "Magnitude cannot be a std::chrono::duration");
+    static_assert(!Internal::_detail::is_basic_quantity<T>::value, "Magnitude cannot be a basic quantity!");
 
     template <typename D>
     static constexpr bool implicitFromChrono = Internal::_detail::EnableImplicitFromChrono<D, T, U>;
@@ -132,12 +165,13 @@ class BasicQuantity
     ///
     /// \throws Any exceptions thrown by the constructor of \c MagnitudeType
     template <typename Up>
-        requires(!std::same_as<Up, MagnitudeType>) &&
-                (!Internal::_detail::ChronoDuration<Up>) && std::constructible_from<MagnitudeType, Up&&>
+        requires(!Internal::_detail::ChronoDuration<Up>) && std::constructible_from<MagnitudeType, Up> &&
+                (!Internal::_detail::is_basic_quantity<std::remove_cvref_t<Up>>::value)
     constexpr explicit(UnitlessUnit<Units>)
-        BasicQuantity(Up&& magnitude) noexcept(std::is_nothrow_constructible_v<MagnitudeType, Up&&>)
+        BasicQuantity(Up&& magnitude) noexcept(std::is_nothrow_constructible_v<MagnitudeType, Up>)
         : magnitude_(std::forward<Up>(magnitude))
     {
+        std::cout << "Single argument template constructor\n";
     }
 
     /// \c Constructor
@@ -198,7 +232,7 @@ class BasicQuantity
     template <typename Up, Unit auto Other>
         requires(std::constructible_from<MagnitudeType, std::add_rvalue_reference_t<Up>>) &&
                 (!(std::same_as<Up, MagnitudeType> && Other == U)) && UnitConvertibleTo<Other, Units>
-    constexpr BasicQuantity([[maybe_unused]] BasicQuantity<Up, Other> q) noexcept(
+    constexpr BasicQuantity(BasicQuantity<Up, Other> q) noexcept(
         std::is_nothrow_constructible_v<MagnitudeType, std::add_rvalue_reference_t<Up>>)
         : magnitude_(q.magnitude() * conversionFactor(Other, Units))
     {
@@ -206,7 +240,7 @@ class BasicQuantity
 
     template <typename Up, Unit auto Other>
         requires(std::constructible_from<MagnitudeType, std::add_rvalue_reference_t<Up>>) &&
-                (!(std::same_as<Up, MagnitudeType> && Other == U)) && UnitConvertibleTo<Other, Units>
+                UnitConvertibleTo<Other, Units>
     BasicQuantity& operator=(BasicQuantity<Up, Other> q) noexcept(
         std::is_nothrow_constructible_v<MagnitudeType, std::add_rvalue_reference_t<Up>>)
     {
@@ -283,7 +317,8 @@ class BasicQuantity
                                                      Units>) operator std::chrono::duration<Rep, Period>() const
         requires TimeUnit<Units>
     {
-        return std::chrono::duration<Rep, Period>{};
+        return std::chrono::duration<Rep, Period>{
+            magnitude_ * Internal::_detail::toChronoConversionFactor<std::chrono::duration<Rep, Period>, Units>()};
     }
 
     // --- Arithmetic Functions ---
@@ -322,12 +357,37 @@ class BasicQuantity
         return *this;
     }
 
+    template <typename Up>
+        requires Internal::MultiplyEnabledWith<MagnitudeType, Up>
+    constexpr BasicQuantity& operator*=(const Up& value) noexcept(
+        Internal::NothrowMultiplyEnabledWith<MagnitudeType, Up>)
+    {
+        magnitude_ = magnitude_ * value;
+        return *this;
+    }
+
+    template <typename Up>
+        requires Internal::DivideEnabledWith<MagnitudeType, Up>
+    constexpr BasicQuantity& operator/=(const Up& value) noexcept(Internal::NothrowDivideEnabledWith<MagnitudeType, Up>)
+    {
+        magnitude_ = magnitude_ / value;
+        return *this;
+    }
+
+    template <typename Up>
+        requires Internal::ModuloEnabledWith<MagnitudeType, Up>
+    constexpr BasicQuantity& operator%=(const Up& value) noexcept(Internal::NothrowModuloEnabledWith<MagnitudeType, Up>)
+    {
+        magnitude_ = magnitude_ % value;
+        return *this;
+    }
+
   private:
     MagnitudeType magnitude_{};
 };
 
-// --- CTAD for construction from std::chrono::duration 
-template<typename Rep, typename Period> 
+// --- CTAD for construction from std::chrono::duration
+template <typename Rep, typename Period>
 BasicQuantity(std::chrono::duration<Rep, Period>) -> BasicQuantity<Rep, secondUnit>;
 
 /// \brief Convenience type alias for common case where \c MagnitudeType is \c double

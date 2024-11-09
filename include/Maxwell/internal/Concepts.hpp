@@ -105,6 +105,28 @@ concept NothrowDivideEnabledWith = DivideEnabledWith<Tp, Up> && requires(Tp a, U
 template <typename Tp>
 concept NothrowDivideEnabled = NothrowDivideEnabledWith<Tp, Tp>;
 
+/// \brief Specifies modulus can be computed between two types
+/// \tparam Tp The left hand side type of the modulo
+/// \tparam Up The right hand side type of the modulo
+template <typename Tp, typename Up>
+concept ModuloEnabledWith = requires(Tp a, Tp b) { a % b; };
+
+/// \brief Specifies modulus can be computed for a type
+/// \tparam Tp The type to check
+template <typename Tp>
+concept ModuleEnabled = ModuloEnabledWith<Tp, Tp>;
+
+/// \brief Specifies modulus can be computed between two types and the calculation does not throw exceptions.
+/// \tparam Tp The left hand side type of the modulo
+/// \tparam Up The right hand side type of the modulo
+template <typename Tp, typename Up>
+concept NothrowModuloEnabledWith = ModuloEnabledWith<Tp, Up> && requires(Tp a, Tp b) { noexcept(a % b); };
+
+/// \brief Specifies modulus can be computed for a type and the calculation does not throw exceptions.
+/// \tparam Tp The type to check
+template <typename Tp>
+concept NothrowModuloEnabled = NothrowMultiplyEnabledWith<Tp, Tp>;
+
 /// \cond
 namespace _detail
 {
