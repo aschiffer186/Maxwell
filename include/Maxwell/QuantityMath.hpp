@@ -1,4 +1,4 @@
-/// \file Quantity.hpp
+/// \file QuantityMath.hpp
 /// \author Alex Schiffer
 /// \brief Wrapper around cmath functions for quantities
 /// \version 0.1
@@ -17,6 +17,11 @@
 
 namespace Maxwell
 {
+/// \brief Computes the absolute value of a \c BasicQuantity
+///
+/// \tparam M The type of the magnitude of \c x
+/// \tparam U The units of \c xs
+/// \return The absolute value of x
 template <typename M, Unit auto U>
 BasicQuantity<M, U> abs(BasicQuantity<M, U> x)
 {
@@ -130,6 +135,50 @@ double sec(Angle auto q)
     {
         return 1.0 / std::cos(Radian{q}.magnitude());
     }
+}
+
+inline Radian asin(double x)
+{
+    return Radian(std::asin(x));
+}
+
+inline Degree asind(double x)
+{
+    const double radianMagnitude(std::asin(x));
+    return Degree{radianMagnitude * conversionFactor(radianUnit, degreeUnit)};
+}
+
+inline Radian cos(double x)
+{
+    return Radian(std::cos(x));
+}
+
+inline Degree cosd(double x)
+{
+    const double radianMagnitude(std::cos(x));
+    return Degree{radianMagnitude * conversionFactor(radianUnit, degreeUnit)};
+}
+
+inline Radian atan(double x)
+{
+    return Radian(std::atan(x));
+}
+
+inline Degree atand(double x)
+{
+    const double radianMagnitude(std::atan(x));
+    return Degree{radianMagnitude * conversionFactor(radianUnit, degreeUnit)};
+}
+
+inline Radian atan2(double y, double x)
+{
+    return Radian(std::atan2(y, x));
+}
+
+inline Degree atan2d(double y, double x)
+{
+    const double radianMagnitude(std::atan2(y, x));
+    return Degree{radianMagnitude * conversionFactor(radianUnit, degreeUnit)};
 }
 } // namespace Maxwell
 
