@@ -12,7 +12,15 @@ The most commonly used type in the library is the `Quantity` class template. Thi
 The `Quantity` class template can (and should) be used anywhere a `double` can be used!
 
 ## Using Type Deduction
-Generally, using `auto` as the result of the operations on `BasicQuantities` will have unexpected results. It means you accepet the result of the calculation as is. Multiplication and division of units always returns a `BasicQuantity` whose units are SI base units. It is better to specify the units of the quantity you expect explicitly.
+Generally, using `auto` as the result of the operations on `BasicQuantities` will have unexpected results. It means you accepet the result of the calculation as is. Addition and subtrtaction of units returns a `BasicQuantity` whose units are the same as th left hand side of the addition or subtraction Multiplication and division of units always returns a `BasicQuantity` whose units are SI base units. It is better to specify the units of the quantity you expect explicitly.
+
+```c++
+auto q1 = 1.0_m + 2.0_ft // Result is in m
+auto q2 = 2.0_ft + 1.0_m // Result is in ft
+
+auto q4 = 1.0_ft * 2.0_ft // Result is in m^2
+auto q3 = 1.0_mi / 3.0_hr // Result is in m/s
+```
 
 # `BasicQuantity` Type 
 Class template `BasicQuantity` is the fundamental type in Maxwell; it represents a quantity that has a magnitude and units. The type of the magnitude can be any C++ type that isn't `cv`-qualified. For convenience, the type aliases `Quantity` and `IQuantity` are provided
