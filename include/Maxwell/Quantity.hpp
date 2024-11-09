@@ -421,6 +421,96 @@ constexpr auto operator-(BasicQuantity<M1, U1>        lhs,
     return lhs -= rhs;
 }
 
+/// \brief Calculates the product between two \c BasicQuantities
+///
+/// Calculates the product between two \c BasicQuantities. Both quantities are converted
+/// to SI base units prior to the multiplication being performed and the product of the
+/// units will be in SI base units
+///
+/// \pre The mangitude of \c lhs can be multiplied with the magnitude of \c rhs
+///
+/// \tparam M1 The type of the magnitude of the left hand side of the multiplication
+/// \tparam U1 The units of the left hand side of the multiplication
+/// \tparam M2 The type of the magnitude of the left hand side of the multiplication
+/// \tparam U2 The units of the left hand side of the multiplication
+/// \param lhs The left hand side of the multiplication
+/// \param rhs The right hand side of the multiplication
+/// \return The product of \c lhs and \c rhs
+/// \throw Any exception thrown by multiplying \c lhs.magnitude() and \c rhs.magnitude()
+template <typename M1, Unit auto U1, typename M2, Unit auto U2>
+    requires Internal::MultiplyEnabledWith<M1, M2>
+constexpr auto operator*(const BasicQuantity<M1, U1>  lhs,
+                         const BasicQuantity<M2, U2>& rhs) noexcept(Internal::NothrowMultiplyEnabledWith<M1, M2>)
+{
+    const auto lhsSIBase = lhs.toSIBaseUnits();
+    const auto rhsSIBase = rhs.toSIBaseUnits();
+
+    constexpr Unit auto outputUnits = lhsSIBase.units() * rhsSIBase.units();
+    return BasicQuantity<decltype(lhs.magnitude() * rhs.magnitude()), outputUnits>(lhsSIBase.magnitude() *
+                                                                                   rhsSIBase.magnitude());
+}
+
+/// \brief Calculates the quotient between two \c BasicQuantities
+///
+/// Calculates the quotient between two \c BasicQuantities. Both quantities are converted
+/// to SI base units prior to the divison being performed and the quotient of the
+/// units will be in SI base units
+///
+/// \pre The mangitude of \c lhs can be multiplied with the magnitude of \c rhs
+///
+/// \tparam M1 The type of the magnitude of the left hand side of the division
+/// \tparam U1 The units of the left hand side of the division
+/// \tparam M2 The type of the magnitude of the left hand side of the division
+/// \tparam U2 The units of the left hand side of the division
+/// \param lhs The left hand side of the division
+/// \param rhs The right hand side of the division
+/// \return The quotient of \c lhs and \c rhs
+/// \throw Any exception thrown by dividing \c lhs.magnitude() by \c rhs.magnitude()
+template <typename M1, Unit auto U1, typename M2, Unit auto U2>
+    requires Internal::MultiplyEnabledWith<M1, M2>
+constexpr auto operator/(const BasicQuantity<M1, U1>  lhs,
+                         const BasicQuantity<M2, U2>& rhs) noexcept(Internal::NothrowMultiplyEnabledWith<M1, M2>)
+{
+    const auto lhsSIBase = lhs.toSIBaseUnits();
+    const auto rhsSIBase = rhs.toSIBaseUnits();
+
+    constexpr Unit auto outputUnits = lhsSIBase.units() / rhsSIBase.units();
+    return BasicQuantity<decltype(lhs.magnitude() / rhs.magnitude()), outputUnits>(lhsSIBase.magnitude() *
+                                                                                   rhsSIBase.magnitude());
+}
+
+template <typename M1, Unit auto U1, typename M2>
+    requires Internal::MultiplyEnabledWith<M1, M2>
+constexpr auto operator*(const BasicQuantity<M1, U1>& lhs, const M2& rhs) noexcept(
+    Internal::NothrowMultiplyEnabledWith<M1, M2>) -> BasicQuantity<decltype(lhs.magnitude() * rhs), U1>
+{
+    return BasicQuantity<decltype(lhs.magnitude() * rhs), U1>(lhs.magnitude() * rhs);
+}
+
+template <typename M1, Unit auto U1, typename M2>
+    requires Internal::MultiplyEnabledWith<M1, M2>
+constexpr auto operator*(const M2& lhs, const BasicQuantity<M1, U1>& rhs) noexcept(
+    Internal::NothrowMultiplyEnabledWith<M1, M2>) -> BasicQuantity<decltype(lhs.magnitude() * rhs), U1>
+{
+    return rhs * lhs;
+}
+
+template <typename M1, Unit auto U1, typename M2>
+    requires Internal::MultiplyEnabledWith<M1, M2>
+constexpr auto operator/(const BasicQuantity<M1, U1>& lhs, const M2& rhs) noexcept(
+    Internal::NothrowMultiplyEnabledWith<M1, M2>) -> BasicQuantity<decltype(lhs.magnitude() / rhs), U1>
+{
+    return BasicQuantity<decltype(lhs.magnitude() / rhs), U1>(lhs.magnitude() * rhs);
+}
+
+template <typename M1, Unit auto U1, typename M2>
+    requires Internal::MultiplyEnabledWith<M1, M2>
+constexpr auto operator/(const M2& lhs, const BasicQuantity<M1, U1>& rhs) noexcept(
+    Internal::NothrowMultiplyEnabledWith<M1, M2>) -> BasicQuantity<decltype(lhs.magnitude() / rhs), U1>
+{
+    return BasicQuantity<decltype(lhs.magnitude() / rhs), U1>(lhs.magnitude() * rhs);
+}
+
 // --- Formatting ---
 template <typename M, Unit auto U>
 std::ostream& operator<<(std::ostream& os, const BasicQuantity<M, U>& q)
