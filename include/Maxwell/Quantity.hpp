@@ -20,7 +20,9 @@
 #include <ostream>
 #include <string_view>
 #include <type_traits>
+#include <unordered_map>
 #include <utility>
+#include <vector>
 
 #include "Unit.hpp"
 #include "internal/Concepts.hpp"
@@ -241,7 +243,7 @@ class BasicQuantity
     template <typename Up, Unit auto Other>
         requires(std::constructible_from<MagnitudeType, std::add_rvalue_reference_t<Up>>) &&
                 UnitConvertibleTo<Other, Units>
-    BasicQuantity& operator=(BasicQuantity<Up, Other> q) noexcept(
+    constexpr BasicQuantity& operator=(BasicQuantity<Up, Other> q) noexcept(
         std::is_nothrow_constructible_v<MagnitudeType, std::add_rvalue_reference_t<Up>>)
     {
         (*this).swap(q);
@@ -256,6 +258,13 @@ class BasicQuantity
         return *this;
     }
 
+    template <typename Up>
+        requires std::constructible_from<MagnitudeType, Up> && UnitlessUnit<Units>
+    constexpr BasicQuantity& operator=(Up up) noexcept(std::is_nothrow_constructible_v<MagnitudeType, Up>)
+    {
+        (*this).swap(BasicQuantity(std::move(up)));
+        return *this;
+    }
     // --- Core Language Functions ---
 
     /// \brief Swaps two quantities
@@ -573,16 +582,12 @@ concept Unitless = UnitlessUnit<QuantityType::Units>;
 
 // --- Specialization of standard library templates ---
 
-/// \namespace std
-/// \brief Specialization of standard library templates
-namespace std
-{
 /// \brief Specialization of \c std::formatter for \c BasicQuantity
 ///
 /// \tparam M The type of the magnitude of the \c BasicQuantity
 /// \tparam U The units of the \c BasicQuantity
 template <typename M, Maxwell::Unit auto U>
-struct formatter<Maxwell::BasicQuantity<M, U>>
+struct std::formatter<Maxwell::BasicQuantity<M, U>>
 {
     constexpr auto parse(std::format_parse_context& ctx)
     {
@@ -648,7 +653,7 @@ struct formatter<Maxwell::BasicQuantity<M, U>>
 /// of the magnitude of a quantity after converting to SI base units. This ensures
 /// that equal instances of \c BasicQuantity have equal hash values.
 template <typename M, Maxwell::Unit auto U>
-struct hash<Maxwell::BasicQuantity<M, U>>
+struct std::hash<Maxwell::BasicQuantity<M, U>>
 {
     size_t operator()(const Maxwell::BasicQuantity<M, U>& q) noexcept(noexcept(hash<M>{q.magnitude()}))
     {
@@ -656,14 +661,122 @@ struct hash<Maxwell::BasicQuantity<M, U>>
     }
 };
 
+/// \cond
+namespace Internal::_detail
+{
+template <typename M>
+constexpr bool supports_limits = std::numeric_limits<M>::is_specialized;
+}
+/// \endcond
+
 /// \brief Specialization of \c std::numeric_limits for \c BasicQuantity
 ///
 /// Specialization of \c std::numeric_limits for \c BasicQuantity. Provides
 /// values equivalent to \c std::numeric_limits<M>.
 template <typename M, Maxwell::Unit auto U>
-struct numeric_limits<Maxwell::BasicQuantity<M, U>> : numeric_limits<M>
+    requires Internal::_detail::supports_limits<M>
+struct std::numeric_limits<Maxwell::BasicQuantity<M, U>>
 {
+  private:
+    using BaseType   = std::remove_cv_t<M>;
+    using BaseLimits = std::numeric_limits<BaseType>;
+
+  public:
     static constexpr bool is_specialized = true;
+
+    static constexpr bool is_signed = BaseLimits::is_signed;
+
+    static constexpr bool is_integer = BaseLimits::is_integer;
+
+    static constexpr bool is_exact = BaseLimits::is_exact;
+
+    static constexpr bool has_infinity = BaseLimits::has_infinity;
+
+    static constexpr bool has_quiet_NaN = BaseLimits::has_quiet_NaN;
+
+    static constexpr bool has_signaling_NaN = BaseLimits::has_signaling_NaN;
+
+    static constexpr bool has_denorm = BaseLimits::has_denorm;
+
+    static constexpr bool has_denorm_loss = BaseLimits::has_denorm_loss;
+
+    static constexpr std::float_round_style round_style = BaseLimits::round_style;
+
+    static constexpr bool is_iec559 = BaseLimits::is_iec559;
+
+    static constexpr bool is_bounded = BaseLimits::is_bounded;
+
+    static constexpr bool is_modulo = BaseLimits::is_modulo;
+
+    static constexpr int digits = BaseLimits::digits;
+
+    static constexpr int digits10 = BaseLimits::digits10;
+
+    static constexpr int max_digits10 = BaseLimits::max_digits10;
+
+    static constexpr int radix = BaseLimits::radix;
+
+    static constexpr int min_exponent = BaseLimits::min_exponent;
+
+    static constexpr int min_exponent10 = BaseLimits::min_exponent10;
+
+    static constexpr int max_exponent = BaseLimits::max_exponent;
+
+    static constexpr int max_exponent10 = BaseLimits::max_exponent10;
+
+    static constexpr bool traps = BaseLimits::traps;
+
+    static constexpr bool tinyness_before = BaseLimits::tinyness_before;
+
+    static Maxwell::BasicQuantity<M, U> min() noexcept
+    {
+        return Maxwell::BasicQuantity<M, U>{BaseLimits::min()};
+    }
+
+    static Maxwell::BasicQuantity<M, U> lowest() noexcept
+    {
+        return Maxwell::BasicQuantity<M, U>{BaseLimits::lowest()};
+    }
+
+    static Maxwell::BasicQuantity<M, U> max() noexcept
+    {
+        return Maxwell::BasicQuantity<M, U>{BaseLimits::max()};
+    }
+
+    static Maxwell::BasicQuantity<M, U> epsilon() noexcept
+    {
+        return Maxwell::BasicQuantity<M, U>{BaseLimits::epsilon()};
+    }
+
+    static Maxwell::BasicQuantity<M, U> round_error() noexcept
+    {
+        return Maxwell::BasicQuantity<M, U>{BaseLimits::epsilon()};
+    }
+
+    static Maxwell::BasicQuantity<M, U> infinity() noexcept
+    {
+        return Maxwell::BasicQuantity<M, U>{BaseLimits::infinity()};
+    }
+
+    static Maxwell::BasicQuantity<M, U> quiet_NaN() noexcept
+    {
+        return Maxwell::BasicQuantity<M, U>{BaseLimits::quiet_NaN()};
+    }
+
+    static Maxwell::BasicQuantity<M, U> signaling_NaN() noexcept
+    {
+        return Maxwell::BasicQuantity<M, U>{BaseLimits::signaling_NaN()};
+    }
+
+    static Maxwell::BasicQuantity<M, U> denorm_min() noexcept
+    {
+        return Maxwell::BasicQuantity<M, U>{BaseLimits::denorm_min()};
+    }
 };
-} // namespace std
+
+template <typename M, Maxwell::Unit auto U>
+    requires Internal::_detail::supports_limits<M>
+struct std::numeric_limits<const Maxwell::BasicQuantity<M, U>> : std::numeric_limits<Maxwell::BasicQuantity<M, U>>
+{
+};
 #endif

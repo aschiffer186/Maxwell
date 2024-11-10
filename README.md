@@ -22,6 +22,23 @@ auto q4 = 1.0_ft * 2.0_ft // Result is in m^2
 auto q3 = 1.0_mi / 3.0_hr // Result is in m/s
 ```
 
+# Integration with C++ Standard Library. 
+The `BasicQuantity` type behaves well with types in the standard library.
+## Container Support
+`BasicQuantity` specializes `std::hash` whenever its magnitude type specializes `std::hash`, allowing it to be used in unordered containers (e.g. `std::unordered_map` and `std::unordered_set`). It provides an `operator <` when its magnitude type provides `operator <` allowing it to be used with ordered containers (e.g. `std::map` and `std::set`)
+
+## Formatting Support
+`BasicQuantity` specializes `std::formatter`, allowing it to be used in `std::format` and `std::print` (C++ 23 and later). It also provides an overloaded `operator <<` for easy printing to output streams.
+
+## Integration with C++ Math Library
+Maxwell provides type-safe wrappers around most functions in the `<cmath>` header, elimining the need 
+to step outside of the type safety provided by Maxwell. These functions also follow the `constexpr` supported provided in C++23 and C++26.
+
+## Integration with Chrono Library
+`BasicQuantity` can be constructed from and converted to an instance of `std::chrono::duration` when the `BasicQuantity` has units of time. This construction and conversion is implict when no information is loss. 
+
+Class template argument deduction is available when constructing from a `std::chrono::duration` when the period of the duration matches a unit in Maxwell.
+
 # `BasicQuantity` Type 
 Class template `BasicQuantity` is the fundamental type in Maxwell; it represents a quantity that has a magnitude and units. The type of the magnitude can be any C++ type that isn't `cv`-qualified. For convenience, the type aliases `Quantity` and `IQuantity` are provided
 * `Quantity` is an alias of `BasicQuantity` whose magnitude type is `double`
@@ -32,16 +49,3 @@ Athough the `BasicQuantity` template will most commonly be instantiated with a `
 // Creates a quantity that is a vector of meters
 Maxwell::BasicQuantity<std::vector<double>, Maxwell::meterUnit> q(std::in_place, {1.0, 2.0, 3.0}); 
 ```
-
-# Integration with C++ Standard Library. 
-The `BasicQuantity` type behaves well with types in the standard library.
-## Container Support
-`BasicQuantity` specializes `std::hash` whenever its magnitude type specializes `std::hash`, allowing it to be used in unordered containers (e.g. `std::unordered_map` and `std::unordered_set`). It provides an `operator <` when its magnitude type provides `operator <` allowing it to be used with ordered containers (e.g. `std::map` and `std::set`)
-
-## Formatting Support
-`BasicQuantity` specializes `std::formatter`, allowing it to be used in `std::format` and `std::print` (C++ 23 and later). It also provides an overloaded `operator <<` for easy printing to output streams.
-
-## Integration with Chrono Library
-`BasicQuantity` can be constructed from and converted to an instance of `std::chrono::duration` when the `BasicQuantity` has units of time. This construction and conversion is implict when no information is loss. 
-
-Class template argument deduction is available when constructing from a `std::chrono::duration` when the period of the duration matches a unit in Maxwell.
