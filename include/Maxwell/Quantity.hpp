@@ -14,7 +14,6 @@
 #include <format>
 #include <functional>
 #include <initializer_list>
-#include <iostream>
 #include <iterator>
 #include <limits>
 #include <ostream>
@@ -41,15 +40,29 @@ constexpr bool implicit_unit_conversion() noexcept
     return true;
 }
 
+template <typename Period, ratio_like Scale>
+constexpr bool implicit_chrono_conversion() noexcept
+{
+    return true;
+}
+
 template <typename D, typename M, auto U>
-concept EnableImplicitFromChrono =
+concept enable_implicit_from_chrono =
     unit<decltype(U)> && chrono_duration<D> &&
-    implicit_unit_conversion<typename D::period, typename decltype(U.get_time())::scale>() &&
-    std::convertible_to<typename D::rep, M>;
+    (std::chrono::treat_as_floating_point_v<M> ||
+     implicit_unit_conversion<typename D::period, decltype(decltype(U)::time)::scale>()) &&
+    std::constructible_from<M, typename D::rep>;
+
+template <typename D, typename M, auto U>
+concept enable_implicit_to_chrono =
+    unit<decltype(U)> && chrono_duration<D> &&
+    (std::chrono::treat_as_floating_point_v<typename D::rep> ||
+     implicit_chrono_conversion<typename D::period, decltype(decltype(U)::time)::scale>()) &&
+    std::constructible_from<typename D::rep, M>;
 
 template <typename D, unit auto U>
     requires time_unit<U>
-constexpr double chrono_conversion_factor()
+constexpr double from_chrono_conversion_factor()
 {
     // using Period = D::period;
     if (std::ratio_equal_v<typename decltype(U.get_time())::scale, internal::_detail::one>)
@@ -116,7 +129,7 @@ class basic_quantity
     static_assert(!internal::_detail::is_basic_quantity<T>::value, "Magnitude cannot be a basic quantity!");
 
     template <typename D>
-    static constexpr bool implicitFromChrono = internal::_detail::EnableImplicitFromChrono<D, T, U>;
+    static constexpr bool implicit_from_chrono = internal::_detail::enable_implicit_from_chrono<D, T, U>;
 
   public:
     /// The type of the quantity's magnitude
@@ -172,7 +185,6 @@ class basic_quantity
         basic_quantity(Up&& magnitude) noexcept(std::is_nothrow_constructible_v<magnitude_type, Up>)
         : magnitude_(std::forward<Up>(magnitude))
     {
-        std::cout << "Single argument template constructor\n";
     }
 
     /// \c Constructor
@@ -223,10 +235,10 @@ class basic_quantity
     /// \throw any exceptions thrown by \c dur or by the constructor of \c magnitude_type
     template <typename Rep, typename Period>
         requires time_unit<units> && std::constructible_from<magnitude_type, Rep>
-    constexpr explicit(!implicitFromChrono<std::chrono::duration<Rep, Period>>)
+    constexpr explicit(!implicit_from_chrono<std::chrono::duration<Rep, Period>>)
         basic_quantity(std::chrono::duration<Rep, Period> dur)
         : magnitude_(dur.count() *
-                     internal::_detail::chrono_conversion_factor<std::chrono::duration<Rep, Period>, units>())
+                     internal::_detail::from_chrono_conversion_factor<std::chrono::duration<Rep, Period>, units>())
     {
     }
 
@@ -321,9 +333,10 @@ class basic_quantity
     }
 
     template <typename Rep, typename Period>
+        requires internal::multiply_enabled_with<magnitude_type, Rep>
     constexpr explicit(
-        !internal::_detail::EnableImplicitFromChrono<std::chrono::duration<Rep, Period>, magnitude_type,
-                                                     units>) operator std::chrono::duration<Rep, Period>() const
+        !internal::_detail::enable_implicit_to_chrono<std::chrono::duration<Rep, Period>, magnitude_type,
+                                                      units>) operator std::chrono::duration<Rep, Period>() const
         requires time_unit<units>
     {
         return std::chrono::duration<Rep, Period>{
@@ -394,6 +407,32 @@ class basic_quantity
         return *this;
     }
 
+    constexpr basic_quantity& operator++() noexcept
+    {
+        ++magnitude_;
+        return *this;
+    }
+
+    constexpr basic_quantity operator++(int) noexcept
+    {
+        basic_quantity temp(*this);
+        ++(*this);
+        return temp;
+    }
+
+    constexpr basic_quantity& operator--() noexcept
+    {
+        --magnitude_;
+        return *this;
+    }
+
+    constexpr basic_quantity operator--(int) noexcept
+    {
+        basic_quantity temp(*this);
+        --(*this);
+        return temp;
+    }
+
   private:
     magnitude_type magnitude_{};
 };
@@ -462,8 +501,8 @@ constexpr auto operator*(const basic_quantity<M1, U1>  lhs,
     -> basic_quantity<decltype(lhs.get_magnitude() * rhs.get_magnitude()),
                       U1.to_SI_base_units() * U2.to_SI_base_units()>
 {
-    const auto lhsSIBase = lhs.toSIBaseunits();
-    const auto rhsSIBase = rhs.toSIBaseunits();
+    const auto lhsSIBase = lhs.to_SI_base_units();
+    const auto rhsSIBase = rhs.to_SI_base_units();
 
     constexpr unit auto outputunits = lhsSIBase.units() * rhsSIBase.units();
     return basic_quantity<decltype(lhs.magnitude() * rhs.magnitude()), outputunits>(lhsSIBase.magnitude() *
@@ -488,12 +527,12 @@ constexpr auto operator*(const basic_quantity<M1, U1>  lhs,
 /// \throw Any exception thrown by dividing \c lhs.magnitude() by \c rhs.magnitude()
 template <typename M1, unit auto U1, typename M2, unit auto U2>
     requires internal::multiply_enabled_with<M1, M2>
-constexpr auto operator/(const basic_quantity<M1, U1>  lhs,
+constexpr auto operator/(const basic_quantity<M1, U1>& lhs,
                          const basic_quantity<M2, U2>& rhs) noexcept(internal::nothrow_multiply_enabled_with<M1, M2>)
     -> basic_quantity<decltype(lhs.magnitude() / rhs.magnitude()), U1.toSIBaseunits() / U2.toSIBaseunits()>
 {
-    const auto lhsSIBase = lhs.toSIBaseunits();
-    const auto rhsSIBase = rhs.toSIBaseunits();
+    const auto lhsSIBase = lhs.to_SI_base_units();
+    const auto rhsSIBase = rhs.to_SI_base_units();
 
     constexpr unit auto outputunits = lhsSIBase.units() / rhsSIBase.units();
     return basic_quantity<decltype(lhs.magnitude() / rhs.magnitude()), outputunits>(lhsSIBase.magnitude() *
@@ -626,8 +665,8 @@ struct std::formatter<maxwell::basic_quantity<M, U>>
 
     auto format(const maxwell::basic_quantity<M, U>& q, std::format_context& ctx) const
     {
-        std::string temp;
-        const auto  actual = (inSIBaseunits_) ? q.toSIBaseunits() : q;
+        std::string              temp;
+        const maxwell::unit auto actual = (inSIBaseunits_) ? q.to_SI_base_units() : q;
         if (unitsOnly_)
         {
             std::format_to(std::back_inserter(temp), "{}", maxwell::unit_string<decltype(actual)::units>);

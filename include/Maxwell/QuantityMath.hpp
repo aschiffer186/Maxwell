@@ -115,6 +115,8 @@ CONSTEXPR26 basic_quantity<M, U> expm1(basic_quantity<M, U> x)
     return basic_quantity<M, U>(std::expm1(x.magnitude()));
 }
 
+
+
 CONSTEXPR26 double cos(angle auto q)
 {
     if constexpr (decltype(q)::units == radian_unit)

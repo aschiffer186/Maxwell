@@ -30,6 +30,7 @@ TEST(TestQuantity, TestDefaultConstructor)
     EXPECT_FLOAT_EQ(m.magnitude(), double{});
 
     constexpr meter m2{};
+
     EXPECT_FLOAT_EQ(m2.magnitude(), double{});
 }
 
