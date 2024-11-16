@@ -90,10 +90,20 @@
     ],
     "testPresets": [
         {
-            "name": "default",
+            "name": "ninja",
             "configurePreset": "ninja-debug",
-            "displayName": "Default",
-            "description": "Run unit tests from debug build",
+            "displayName": "Unit-Tests (Ninja)",
+            "description": "Run unit tests from debug build (Ninja)",
+            "configuration": "Debug",
+            "output": {
+                "outputOnFailure": true
+            }
+        },
+        {
+            "name": "make",
+            "configurePreset": "make-debug",
+            "displayName": "Unit-Tests (Makefile)",
+            "description": "Run unit tests from debug build (Makefile)",
             "configuration": "Debug",
             "output": {
                 "outputOnFailure": true
@@ -102,7 +112,9 @@
     ],
     "workflowPresets": [
         {
-            "name": "debug-build-only",
+            "name": "ninja-debug-build",
+            "displayName": "Ninja Debug Build",
+            "description": "Configure and build debug build with Ninja",
             "steps": [
                 {
                     "type": "configure",
@@ -115,7 +127,9 @@
             ]
         },
         {
-            "name": "run-tests",
+            "name": "ninja-run-tests",
+            "displayName": "Ninja Unit Tests",
+            "description": "Configure, build, and run unit tests with Ninja",
             "steps": [
                 {
                     "type": "configure",
@@ -127,7 +141,41 @@
                 },
                 {
                     "type": "test",
-                    "name": "default"
+                    "name": "ninja"
+                }
+            ]
+        },
+        {
+            "name": "make-debug-build",
+            "displayName": "Makefiles Debug Build",
+            "description": "Configure and build debug build with Makefiles",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "make-debug"
+                },
+                {
+                    "type": "build",
+                    "name": "make-debug"
+                }
+            ]
+        },
+        {
+            "name": "make-run-tests",
+            "displayName": "Makefiles Unit Tests",
+            "description": "Configure, build, and run unit tests with Makefiles",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "make-debug"
+                },
+                {
+                    "type": "build",
+                    "name": "make-debug"
+                },
+                {
+                    "type": "test",
+                    "name": "make"
                 }
             ]
         }

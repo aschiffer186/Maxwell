@@ -19,16 +19,16 @@
 
 /// \namespace Maxwell
 /// \brief Public declarations to be used by consumers of the library
-namespace Maxwell
+namespace maxwell
 {
-/// \class UnitType
+/// \class unit_type
 /// \brief Definition of unit of measurement
 ///
-/// A \c UnitType represents a unit of measurement. It represents a unit derived from the SI base units
-/// (with the exception of the base unit of mass is the gram, not te kilogram). A \c UnitType is the product
+/// A \c unit_type represents a unit of measurement. It represents a unit derived from the SI base units
+/// (with the exception of the base unit of mass is the gram, not te kilogram). A \c unit_type is the product
 /// of the base units specified by the template parameters, possibly scaled by an appropriate power of exponentiation.
-/// The base units are part of the units type, so two instantiations of \c UnitType are the same type if and only if
-/// they represent the same unit. If a unit does not have a particular dimension, use \c nullMeasure as the template
+/// The base units are part of the units type, so two instantiations of \c unit_type are the same type if and only if
+/// they represent the same unit. If a unit does not have a particular dimension, use \c null_measure as the template
 /// parameter for that dimension.
 ///
 /// Some units have identical dimensions; different units with the same dimensions can be distinguinshed by providing
@@ -41,495 +41,497 @@ namespace Maxwell
 /// units type (e.g. it is possible to perform transformations on values of units or compare two units with \c ==
 /// instead of needing to use metafunctions).
 ///
-/// \tparam Amount_ The amount dimension of the unit
+/// \tparam amount_ The amount dimension of the unit
 /// \tparam Currrent_ The current dimension of the unit
-/// \tparam Length_ The length dimension of the unit
-/// \tparam Luminosity_ The luminosity dimension of the unit
-/// \tparam Mass_ The mass dimension of the unit
+/// \tparam length_ The length dimension of the unit
+/// \tparam luminosity_ The luminosity dimension of the unit
+/// \tparam mass_ The mass dimension of the unit
 /// \tparam Temerature_ The temperature dimension of the unit
-/// \tparam Time_ The time dimension of the unit
-/// \tparam Tag_ The tag of the unit (see above)
+/// \tparam time_ The time dimension of the unit
+/// \tparam tag_ The tag of the unit (see above)
 /// \tparam ExtraMultiplier_ Extra multiplier for dimensionless units that are not unitless
-template <Internal::Measure auto Amount_, Internal::Measure auto Current_, Internal::Measure auto Length_,
-          Internal::Measure auto Luminosity_, Internal::Measure auto Mass_, Internal::Measure auto Temperature_,
-          Internal::Measure auto Time_, typename Tag_ = void, std::intmax_t ExtraMultiplier_ = 0>
-struct UnitType
+template <internal::measure auto amount_, internal::measure auto current_, internal::measure auto length_,
+          internal::measure auto luminosity_, internal::measure auto mass_, internal::measure auto temperature_,
+          internal::measure auto time_, typename tag_ = void, std::intmax_t ExtraMultiplier_ = 0>
+struct unit_type
 {
     /// The amount dimension of the unit
-    static constexpr Internal::Measure auto Amount      = Amount_;
+    static constexpr internal::measure auto amount      = amount_;
     /// The current dimension of the unit
-    static constexpr Internal::Measure auto Current     = Current_;
+    static constexpr internal::measure auto current     = current_;
     /// The length dimension of the unit
-    static constexpr Internal::Measure auto Length      = Length_;
+    static constexpr internal::measure auto length      = length_;
     /// The luminosity dimension of the unit
-    static constexpr Internal::Measure auto Luminosity  = Luminosity_;
+    static constexpr internal::measure auto luminosity  = luminosity_;
     /// The mass dimension of the unit
-    static constexpr Internal::Measure auto Mass        = Mass_;
+    static constexpr internal::measure auto mass        = mass_;
     /// The temperature dimension of the unit
-    static constexpr Internal::Measure auto Temperature = Temperature_;
+    static constexpr internal::measure auto temperature = temperature_;
     /// The time dimension of the unit
-    static constexpr Internal::Measure auto Time        = Time_;
+    static constexpr internal::measure auto time        = time_;
     /// The tag of the unit
-    using Tag                                           = Tag_;
+    using tag                                           = tag_;
 
     /// \brief Return the amount dimension of the unit
     /// \return The amount dimension of the unit
-    consteval Internal::Measure auto amount() const noexcept
+    consteval internal::measure auto get_amount() const noexcept
     {
-        return Amount;
+        return amount;
     }
 
     /// \brief Return the current dimension of the unit
     /// \return The current dimension of the unit
-    consteval Internal::Measure auto current() const noexcept
+    consteval internal::measure auto get_current() const noexcept
     {
-        return Current;
+        return current;
     }
 
     /// \brief Return the length dimension of the unit
     /// \return The length dimension of the unit
-    consteval Internal::Measure auto length() const noexcept
+    consteval internal::measure auto get_length() const noexcept
     {
-        return Length;
+        return length;
     }
 
     /// \brief Return the luminosity dimension of the unit
     /// \return The luminosity dimension of the unit
-    consteval Internal::Measure auto luminosity() const noexcept
+    consteval internal::measure auto get_luminosity() const noexcept
     {
-        return Luminosity;
+        return luminosity;
     }
 
     /// \brief Return the mass dimension of the unit
     /// \return The mass dimension of the unit
-    consteval Internal::Measure auto mass() const noexcept
+    consteval internal::measure auto get_mass() const noexcept
     {
-        return Mass;
+        return mass;
     }
 
     /// \brief Return the temperature dimension of the unit
     /// \return The temperature dimension of the unit
-    consteval Internal::Measure auto temperature() const noexcept
+    consteval internal::measure auto get_temperature() const noexcept
     {
-        return Temperature;
+        return temperature;
     }
 
     /// \brief Return the time dimension of the unit
     /// \return The time dimension of the unit
-    consteval Internal::Measure auto time() const noexcept
+    consteval internal::measure auto get_time() const noexcept
     {
-        return Time;
+        return time;
     }
 
     /// \brief Return the extra multiplier
     /// \return The extra multiplier of the unit
-    consteval std::intmax_t multiplier() const noexcept
+    consteval std::intmax_t get_multiplier() const noexcept
     {
         return ExtraMultiplier_;
     }
 
     /// \brief Adds a tag to the unit
     ///
-    /// Creates a new \c UnitType with the same dimensions as \c *this,
+    /// Creates a new \c unit_type with the same dimensions as \c *this,
     /// but with the specified tag.
     ///
     /// \tparam T the tag to add
     /// \return the modified unit
     template <typename T>
-    consteval auto addTag() const noexcept
+    consteval auto add_tag() const noexcept
     {
-        return UnitType<Amount, Current, Length, Luminosity, Mass, Temperature, Time, T>{};
+        return unit_type<amount, current, length, luminosity, mass, temperature, time, T>{};
     }
 
     /// \brief Adjusts the multiplier of the amount dimension
     ///
-    /// Returns a new \c UnitType with the same dimensions as \c *this, but
+    /// Returns a new \c unit_type with the same dimensions as \c *this, but
     /// with an adjusted multiplier for the amount dimension
     ///
     /// \post the unit returned has the same dimensions as \c *this and
     /// \code
-    ///     adjustMultiplier<Adjustment().amount().magnitude() == this->amount().magnitude() + Adjstument
+    ///     adjust_multiplier<Adjustment().amount().magnitude() == this->amount().magnitude() + Adjstument
     /// \endcode
     /// \post \c *this is unmodified
     ///
     /// \tparam The amount to adjust the multiplier of the amount dimension by
     /// \return A new unit with the amount multiplier adjusted
     template <std::intmax_t Adjustment>
-    consteval auto adjustMultiplierAmount() const noexcept
+    consteval auto adjust_multiplier_amount() const noexcept
     {
-        return UnitType<Amount.template adjustMultiplier<Adjustment>(), Current, Length, Luminosity, Mass, Temperature,
-                        Time, Tag>{};
+        return unit_type<amount.template adjust_multiplier<Adjustment>(), current, length, luminosity, mass,
+                         temperature, time, tag>{};
     }
 
     /// \brief Adjusts the multiplier of the current dimension
     ///
-    /// Returns a new \c UnitType with the same dimensions as \c *this, but
+    /// Returns a new \c unit_type with the same dimensions as \c *this, but
     /// with an adjusted multiplier for the current dimension
     ///
     /// \post the unit returned has the same dimensions as \c *this and
     /// \code
-    ///     adjustMultiplier<Adjustment().current().magnitude() == this->current().magnitude() + Adjstument
+    ///     adjust_multiplier<Adjustment().current().magnitude() == this->current().magnitude() + Adjstument
     /// \endcode
     /// \post \c *this is unmodified
     ///
     /// \tparam The amount to adjust the multiplier of the current dimension by
     /// \return A new unit with the current multiplier adjusted
     template <std::intmax_t Adjustment>
-    consteval auto adjustMultiplierCurrent() const noexcept
+    consteval auto adjust_multiplier_current() const noexcept
     {
-        return UnitType<Amount, Current.template adjustMultiplier<Adjustment>(), Length, Luminosity, Mass, Temperature,
-                        Time, Tag>{};
+        return unit_type<amount, current.template adjust_multiplier<Adjustment>(), length, luminosity, mass,
+                         temperature, time, tag>{};
     }
 
     /// \brief Adjusts the multiplier of the length dimension
     ///
-    /// Returns a new \c UnitType with the same dimensions as \c *this, but
+    /// Returns a new \c unit_type with the same dimensions as \c *this, but
     /// with an adjusted multiplier for the length dimension
     ///
     /// \post the unit returned has the same dimensions as \c *this and
     /// \code
-    ///     adjustMultiplier<Adjustment().length().magnitude() == this->length().magnitude() + Adjstument
+    ///     adjust_multiplier<Adjustment().length().magnitude() == this->length().magnitude() + Adjstument
     /// \endcode
     /// \post \c *this is unmodified
     ///
     /// \tparam The amount to adjust the multiplier of the length dimension by
     /// \return A new unit with the length multiplier adjusted
     template <std::intmax_t Adjustment>
-    consteval auto adjustMultiplierLength() const noexcept
+    consteval auto adjust_multiplier_length() const noexcept
     {
-        return UnitType<Amount, Current, Length.template adjustMultiplier<Adjustment>(), Luminosity, Mass, Temperature,
-                        Time, Tag>{};
+        return unit_type<amount, current, length.template adjust_multiplier<Adjustment>(), luminosity, mass,
+                         temperature, time, tag>{};
     }
 
     /// \brief Adjusts the multiplier of the luminosity dimension
     ///
-    /// Returns a new \c UnitType with the same dimensions as \c *this, but
+    /// Returns a new \c unit_type with the same dimensions as \c *this, but
     /// with an adjusted multiplier for the luminosity dimension
     ///
     /// \post the unit returned has the same dimensions as \c *this and
     /// \code
-    ///     adjustMultiplier<Adjustment().luminosity().magnitude() == this->luminosity().magnitude() + Adjstument
+    ///     adjust_multiplier<Adjustment().luminosity().magnitude() == this->luminosity().magnitude() + Adjstument
     /// \endcode
     /// \post \c *this is unmodified
     ///
     /// \tparam The amount to adjust the multiplier of the luminosity dimension by
     /// \return A new unit with the luminosity multiplier adjusted
     template <std::intmax_t Adjustment>
-    consteval auto adjustMultiplierLuminosity() const noexcept
+    consteval auto adjust_multiplier_luminosity() const noexcept
     {
-        return UnitType<Amount, Current, Length, Luminosity.template adjustMultiplier<Adjustment>(), Mass, Temperature,
-                        Time, Tag>{};
+        return unit_type<amount, current, length, luminosity.template adjust_multiplier<Adjustment>(), mass,
+                         temperature, time, tag>{};
     }
 
     /// \brief Adjusts the multiplier of the mass dimension
     ///
-    /// Returns a new \c UnitType with the same dimensions as \c *this, but
+    /// Returns a new \c unit_type with the same dimensions as \c *this, but
     /// with an adjusted multiplier for the mass dimension
     ///
     /// \post the unit returned has the same dimensions as \c *this and
     /// \code
-    ///     adjustMultiplier<Adjustment().mass().magnitude() == this->mass().magnitude() + Adjstument
+    ///     adjust_multiplier<Adjustment().mass().magnitude() == this->mass().magnitude() + Adjstument
     /// \endcode
     /// \post \c *this is unmodified
     ///
     /// \tparam The amount to adjust the multiplier of the mass dimension by
     /// \return A new unit with the mass multiplier adjusted
     template <std::intmax_t Adjustment>
-    consteval auto adjustMultiplierMass() const noexcept
+    consteval auto adjust_multiplier_mass() const noexcept
     {
-        return UnitType<Amount, Current, Length, Luminosity, Mass.template adjustMultiplier<Adjustment>(), Temperature,
-                        Time, Tag>{};
+        return unit_type<amount, current, length, luminosity, mass.template adjust_multiplier<Adjustment>(),
+                         temperature, time, tag>{};
     }
 
     /// \brief Adjusts the multiplier of the temperatue dimension
     ///
-    /// Returns a new \c UnitType with the same dimensions as \c *this, but
+    /// Returns a new \c unit_type with the same dimensions as \c *this, but
     /// with an adjusted multiplier for the temperatue dimension
     ///
     /// \post the unit returned has the same dimensions as \c *this and
     /// \code
-    ///     adjustMultiplier<Adjustment().temperatue().magnitude() == this->temperatue().magnitude() + Adjstument
+    ///     adjust_multiplier<Adjustment().temperatue().magnitude() == this->temperatue().magnitude() + Adjstument
     /// \endcode
     /// \post \c *this is unmodified
     ///
     /// \tparam The amount to adjust the multiplier of the temperatue dimension by
     /// \return A new unit with the temperatue multiplier adjusted
     template <std::intmax_t Adjustment>
-    consteval auto adjustMultiplierTemperature() const noexcept
+    consteval auto adjust_multiplier_temperature() const noexcept
     {
-        return UnitType<Amount, Current, Length, Luminosity, Mass, Temperature.template adjustMultiplier<Adjustment>(),
-                        Time, Tag>{};
+        return unit_type<amount, current, length, luminosity, mass,
+                         temperature.template adjust_multiplier<Adjustment>(), time, tag>{};
     }
 
     /// \brief Adjusts the multiplier of the time dimension
     ///
-    /// Returns a new \c UnitType with the same dimensions as \c *this, but
+    /// Returns a new \c unit_type with the same dimensions as \c *this, but
     /// with an adjusted multiplier for the time dimension
     ///
     /// \post The unit returned has the same dimensions as \c *this and
     /// \code
-    ///     adjustMultiplier<Adjustment().time().magnitude() == this->time().magnitude() + Adjstument
+    ///     adjust_multiplier<Adjustment().time().magnitude() == this->time().magnitude() + Adjstument
     /// \endcode
     /// \post \c *this is unmodified
     ///
     /// \tparam The amount to adjust the multiplier of the time dimension by
     /// \return A new unit with the time multiplier adjusted
     template <std::intmax_t Adjustment>
-    consteval auto adjustMultiplierTime() const noexcept
+    consteval auto adjust_multiplier_time() const noexcept
     {
-        return UnitType<Amount, Current, Length, Luminosity, Mass, Temperature,
-                        Time.template adjustMultiplier<Adjustment>(), Tag>{};
+        return unit_type<amount, current, length, luminosity, mass, temperature,
+                         time.template adjust_multiplier<Adjustment>(), tag>{};
     }
 
     /// \brief Adjusts the extra multiplier of the unit
     ///
-    /// Returns a new \c UnitType with the same dimensions as \c *this, but
+    /// Returns a new \c unit_type with the same dimensions as \c *this, but
     /// with an adjusted multiplier for the extra multiplier
     ///
     /// \post the unit returned has the same dimensions as \c *this and
     /// \code
-    ///     adjustMultiplier<Adjustment().multiplier() == this->multiplier() + Adjstument
+    ///     adjust_multiplier<Adjustment().get_multiplier() == this->multiplier() + Adjstument
     /// \endcode
     /// \post \c *this is unmodified
     ///
     /// \tparam The amount to adjust the extra multiplier by
     /// \return A new unit with the extra multiplier adjusted
     template <std::intmax_t Adjustment>
-    consteval auto adjustMultiplierExtra() const noexcept
+    consteval auto adjust_multiplier_extra() const noexcept
     {
-        return UnitType<Amount, Current, Length, Luminosity, Mass, Temperature, Time, Tag,
-                        ExtraMultiplier_ + Adjustment>{};
+        return unit_type<amount, current, length, luminosity, mass, temperature, time, tag,
+                         ExtraMultiplier_ + Adjustment>{};
     }
 
     /// \brief Adjusts the scale factor of the amount dimension of the unit
     ///
-    /// Returns a new \c UnitType with the same dimension, but whose amount dimension
+    /// Returns a new \c unit_type with the same dimension, but whose amount dimension
     /// has been multiplied by the specified value.
     ///
     /// \post The scale factor of the amount dimension of the return unit is equal to the scale factor
     ///       of \c *this time adjustment
     ///
     /// \tparam Adjustment The amount to multiply the scale factor of the amount dimension by
-    /// \return A \c UnitType whose amount dimension has been scaled
-    template <Internal::_detail::RatioLike Adjustment>
-    consteval auto adjustScaleAmount() const noexcept
+    /// \return A \c unit_type whose amount dimension has been scaled
+    template <internal::_detail::ratio_like Adjustment>
+    consteval auto adjust_scale_amount() const noexcept
     {
-        constexpr Internal::Measure auto oldMeasure = Amount;
-        using OldScale                              = decltype(oldMeasure)::Scale;
+        constexpr internal::measure auto oldMeasure = amount;
+        using OldScale                              = decltype(oldMeasure)::scale;
         using NewScale                              = std::ratio_multiply<OldScale, Adjustment>;
-        constexpr Internal::MeasureType<oldMeasure.power(), oldMeasure.multiplier(), NewScale,
-                                        typename decltype(oldMeasure)::Offset>
+        constexpr internal::measure_type<oldMeasure.get_power(), oldMeasure.get_multiplier(), NewScale,
+                                         typename decltype(oldMeasure)::offset>
             newMeasure{};
-        return UnitType<newMeasure, Current, Length, Luminosity, Mass, Temperature, Time, Tag, ExtraMultiplier_>{};
+        return unit_type<newMeasure, current, length, luminosity, mass, temperature, time, tag, ExtraMultiplier_>{};
     }
 
     /// \brief Adjusts the scale factor of the current dimension of the unit
     ///
-    /// Returns a new \c UnitType with the same dimension, but whose current dimension
+    /// Returns a new \c unit_type with the same dimension, but whose current dimension
     /// has been multiplied by the specified value.
     ///
     /// \post The scale factor of the current dimension of the return unit is equal to the scale factor
     ///       of \c *this time adjustment
     ///
     /// \tparam Adjustment The amount to multiply the scale factor of the current dimension by
-    /// \return A \c UnitType whose current dimension has been scaled
-    template <Internal::_detail::RatioLike Adjustment>
-    consteval auto adjustScaleCurrent() const noexcept
+    /// \return A \c unit_type whose current dimension has been scaled
+    template <internal::_detail::ratio_like Adjustment>
+    consteval auto adjust_scale_current() const noexcept
     {
-        constexpr Internal::Measure auto oldMeasure = Current;
-        using OldScale                              = decltype(oldMeasure)::Scale;
+        constexpr internal::measure auto oldMeasure = current;
+        using OldScale                              = decltype(oldMeasure)::scale;
         using NewScale                              = std::ratio_multiply<OldScale, Adjustment>;
-        constexpr Internal::MeasureType<oldMeasure.power(), oldMeasure.multiplier(), NewScale,
-                                        typename decltype(oldMeasure)::Offset>
+        constexpr internal::measure_type<oldMeasure.get_power(), oldMeasure.get_multiplier(), NewScale,
+                                         typename decltype(oldMeasure)::offset>
             newMeasure{};
-        return UnitType<Amount, newMeasure, Length, Luminosity, Mass, Temperature, Time, Tag, ExtraMultiplier_>{};
+        return unit_type<amount, newMeasure, length, luminosity, mass, temperature, time, tag, ExtraMultiplier_>{};
     }
 
     /// \brief Adjusts the scale factor of the length dimension of the unit
     ///
-    /// Returns a new \c UnitType with the same dimension, but whose length dimension
+    /// Returns a new \c unit_type with the same dimension, but whose length dimension
     /// has been multiplied by the specified value.
     ///
     /// \post The scale factor of the length dimension of the return unit is equal to the scale factor
     ///       of \c *this time adjustment
     ///
     /// \tparam Adjustment The amount to multiply the scale factor of the length dimension by
-    /// \return A \c UnitType whose length dimension has been scaled
-    template <Internal::_detail::RatioLike Adjustment>
-    consteval auto adjustScaleLength() const noexcept
+    /// \return A \c unit_type whose length dimension has been scaled
+    template <internal::_detail::ratio_like Adjustment>
+    consteval auto adjust_scale_length() const noexcept
     {
-        constexpr Internal::Measure auto oldMeasure = Length;
-        using OldScale                              = decltype(oldMeasure)::Scale;
+        constexpr internal::measure auto oldMeasure = length;
+        using OldScale                              = decltype(oldMeasure)::scale;
         using NewScale                              = std::ratio_multiply<OldScale, Adjustment>;
-        constexpr Internal::MeasureType<oldMeasure.power(), oldMeasure.multiplier(), NewScale,
-                                        typename decltype(oldMeasure)::Offset>
+        constexpr internal::measure_type<oldMeasure.get_power(), oldMeasure.get_multiplier(), NewScale,
+                                         typename decltype(oldMeasure)::offset>
             newMeasure{};
-        return UnitType<Amount, Current, newMeasure, Luminosity, Mass, Temperature, Time, Tag, ExtraMultiplier_>{};
+        return unit_type<amount, current, newMeasure, luminosity, mass, temperature, time, tag, ExtraMultiplier_>{};
     }
 
     /// \brief Adjusts the scale factor of the luminosity dimension of the unit
     ///
-    /// Returns a new \c UnitType with the same dimension, but whose luminosity dimension
+    /// Returns a new \c unit_type with the same dimension, but whose luminosity dimension
     /// has been multiplied by the specified value.
     ///
     /// \post The scale factor of the luminosity dimension of the return unit is equal to the scale factor
     ///       of \c *this time adjustment
     ///
     /// \tparam Adjustment The amount to multiply the scale factor of the luminosity dimension by
-    /// \return A \c UnitType whose amount dimension has been scaled
-    template <Internal::_detail::RatioLike Adjustment>
-    consteval auto adjustScaleLuminosity() const noexcept
+    /// \return A \c unit_type whose amount dimension has been scaled
+    template <internal::_detail::ratio_like Adjustment>
+    consteval auto adjust_scale_luminosity() const noexcept
     {
-        constexpr Internal::Measure auto oldMeasure = Luminosity;
-        using OldScale                              = decltype(oldMeasure)::Scale;
+        constexpr internal::measure auto oldMeasure = luminosity;
+        using OldScale                              = decltype(oldMeasure)::scale;
         using NewScale                              = std::ratio_multiply<OldScale, Adjustment>;
-        constexpr Internal::MeasureType<oldMeasure.power(), oldMeasure.multiplier(), NewScale,
-                                        typename decltype(oldMeasure)::Offset>
+        constexpr internal::measure_type<oldMeasure.get_power(), oldMeasure.get_multiplier(), NewScale,
+                                         typename decltype(oldMeasure)::offset>
             newMeasure{};
-        return UnitType<Amount, Current, Length, newMeasure, Mass, Temperature, Time, Tag, ExtraMultiplier_>{};
+        return unit_type<amount, current, length, newMeasure, mass, temperature, time, tag, ExtraMultiplier_>{};
     }
 
     /// \brief Adjusts the scale factor of the mass dimension of the unit
     ///
-    /// Returns a new \c UnitType with the same dimension, but whose mass dimension
+    /// Returns a new \c unit_type with the same dimension, but whose mass dimension
     /// has been multiplied by the specified value.
     ///
     /// \post The scale factor of the mass dimension of the return unit is equal to the scale factor
     ///       of \c *this time adjustment
     ///
     /// \tparam Adjustment The amount to multiply the scale factor of the mass dimension by
-    /// \return A \c UnitType whose mass dimension has been scaled
-    template <Internal::_detail::RatioLike Adjustment>
-    consteval auto adjustScaleMass() const noexcept
+    /// \return A \c unit_type whose mass dimension has been scaled
+    template <internal::_detail::ratio_like Adjustment>
+    consteval auto adjust_scale_mass() const noexcept
     {
-        constexpr Internal::Measure auto oldMeasure = Mass;
-        using OldScale                              = decltype(oldMeasure)::Scale;
+        constexpr internal::measure auto oldMeasure = mass;
+        using OldScale                              = decltype(oldMeasure)::scale;
         using NewScale                              = std::ratio_multiply<OldScale, Adjustment>;
-        constexpr Internal::MeasureType<oldMeasure.power(), oldMeasure.multiplier(), NewScale,
-                                        typename decltype(oldMeasure)::Offset>
+        constexpr internal::measure_type<oldMeasure.get_power(), oldMeasure.get_multiplier(), NewScale,
+                                         typename decltype(oldMeasure)::offset>
             newMeasure{};
-        return UnitType<Amount, Current, Length, Luminosity, newMeasure, Temperature, Time, Tag, ExtraMultiplier_>{};
+        return unit_type<amount, current, length, luminosity, newMeasure, temperature, time, tag, ExtraMultiplier_>{};
     }
 
     /// \brief Adjusts the scale factor of the temperature dimension of the unit
     ///
-    /// Returns a new \c UnitType with the same dimension, but whose temperature dimension
+    /// Returns a new \c unit_type with the same dimension, but whose temperature dimension
     /// has been multiplied by the specified value.
     ///
     /// \post The scale factor of the temperature dimension of the return unit is equal to the scale factor
     ///       of \c *this time adjustment
     ///
     /// \tparam Adjustment The amount to multiply the scale factor of the temperature dimension by
-    /// \return A \c UnitType whose temperature dimension has been scaled
-    template <Internal::_detail::RatioLike Adjustment>
-    consteval auto adjustScaleTemperature() const noexcept
+    /// \return A \c unit_type whose temperature dimension has been scaled
+    template <internal::_detail::ratio_like Adjustment>
+    consteval auto adjust_scale_temperature() const noexcept
     {
-        constexpr Internal::Measure auto oldMeasure = Temperature;
-        using OldScale                              = decltype(oldMeasure)::Scale;
+        constexpr internal::measure auto oldMeasure = temperature;
+        using OldScale                              = decltype(oldMeasure)::scale;
         using NewScale                              = std::ratio_multiply<OldScale, Adjustment>;
-        constexpr Internal::MeasureType<oldMeasure.power(), oldMeasure.multiplier(), NewScale,
-                                        typename decltype(oldMeasure)::Offset>
+        constexpr internal::measure_type<oldMeasure.get_power(), oldMeasure.get_multiplier(), NewScale,
+                                         typename decltype(oldMeasure)::offset>
             newMeasure{};
-        return UnitType<Amount, Current, Length, Luminosity, Mass, newMeasure, Time, Tag, ExtraMultiplier_>{};
+        return unit_type<amount, current, length, luminosity, mass, newMeasure, time, tag, ExtraMultiplier_>{};
     }
 
     /// \brief Adjusts the scale factor of the time dimension of the unit
     ///
-    /// Returns a new \c UnitType with the same dimension, but whose time dimension
+    /// Returns a new \c unit_type with the same dimension, but whose time dimension
     /// has been multiplied by the specified value.
     ///
     /// \post The scale factor of the time dimension of the return unit is equal to the scale factor
     ///       of \c *this time adjustment
     ///
     /// \tparam Adjustment The amount to multiply the scale factor of the time dimension by
-    /// \return A \c UnitType whose time dimension has been scaled
-    template <Internal::_detail::RatioLike Adjustment>
-    consteval auto adjustScaleTime() const noexcept
+    /// \return A \c unit_type whose time dimension has been scaled
+    template <internal::_detail::ratio_like Adjustment>
+    consteval auto adjust_scale_time() const noexcept
     {
-        constexpr Internal::Measure auto oldMeasure = Time;
-        using OldScale                              = decltype(oldMeasure)::Scale;
+        constexpr internal::measure auto oldMeasure = time;
+        using OldScale                              = decltype(oldMeasure)::scale;
         using NewScale                              = std::ratio_multiply<OldScale, Adjustment>;
-        constexpr Internal::MeasureType<oldMeasure.power(), oldMeasure.multiplier(), NewScale,
-                                        typename decltype(oldMeasure)::Offset>
+        constexpr internal::measure_type<oldMeasure.get_power(), oldMeasure.get_multiplier(), NewScale,
+                                         typename decltype(oldMeasure)::offset>
             newMeasure{};
-        return UnitType<Amount, Current, Length, Luminosity, Mass, Temperature, newMeasure, Tag, ExtraMultiplier_>{};
+        return unit_type<amount, current, length, luminosity, mass, temperature, newMeasure, tag, ExtraMultiplier_>{};
     }
 
     /// \brief Converts a unit to SI base units
     ///
-    /// Returns a new \c UnitType with the same dimesions as \c *this, but expressed
+    /// Returns a new \c unit_type with the same dimesions as \c *this, but expressed
     /// entirely in SI base units.
     ///
     /// \post The retuned unit is in SI base units.
     ///
     /// \return The equivalent unit in SI base units
-    consteval auto toSIBaseUnits() const noexcept
+    consteval auto to_SI_base_units() const noexcept
     {
-        const UnitType<Amount.toCoherentMeasure(), Current.toCoherentMeasure(), Length.toCoherentMeasure(),
-                       Luminosity.toCoherentMeasure(), Mass.toCoherentMeasure(), Temperature.toCoherentMeasure(),
-                       Time.toCoherentMeasure(), void>
+        const unit_type<amount.to_coherent_measure(), current.to_coherent_measure(), length.to_coherent_measure(),
+                        luminosity.to_coherent_measure(), mass.to_coherent_measure(), temperature.to_coherent_measure(),
+                        time.to_coherent_measure(), void>
             u{};
-        return u.template adjustMultiplierMass<3>();
+        return u.template adjust_multiplier_mass<3>();
     }
 };
 
 // --- Base units ---
 
 /// SI unit "mole"
-constexpr UnitType<Internal::baseMeasure, Internal::nullMeasure, Internal::nullMeasure, Internal::nullMeasure,
-                   Internal::nullMeasure, Internal::nullMeasure, Internal::nullMeasure>
-    moleUnit;
+constexpr unit_type<internal::base_measure, internal::null_measure, internal::null_measure, internal::null_measure,
+                    internal::null_measure, internal::null_measure, internal::null_measure>
+    mole_unit;
 /// Type alias for SI unit "mole"
-using moleUnitType = std::remove_const_t<decltype(moleUnit)>;
+using mole_unit_type = std::remove_const_t<decltype(mole_unit)>;
 
 /// SI unit "ampere"
-constexpr UnitType<Internal::nullMeasure, Internal::baseMeasure, Internal::nullMeasure, Internal::nullMeasure,
-                   Internal::nullMeasure, Internal::nullMeasure, Internal::nullMeasure>
-    ampereUnit;
+constexpr unit_type<internal::null_measure, internal::base_measure, internal::null_measure, internal::null_measure,
+                    internal::null_measure, internal::null_measure, internal::null_measure>
+    ampere_unit;
 /// Type alias for SI unit "ampere"
-using ampereUnitType = std::remove_const_t<decltype(ampereUnit)>;
+using ampere_unit_type = std::remove_const_t<decltype(ampere_unit)>;
 
 /// SI unit "meter"
-constexpr UnitType<Internal::nullMeasure, Internal::nullMeasure, Internal::baseMeasure, Internal::nullMeasure,
-                   Internal::nullMeasure, Internal::nullMeasure, Internal::nullMeasure>
-    meterUnit;
+constexpr unit_type<internal::null_measure, internal::null_measure, internal::base_measure, internal::null_measure,
+                    internal::null_measure, internal::null_measure, internal::null_measure>
+    meter_unit;
 /// Type alias for SI unit "meter"
-using meterUnitType = std::remove_const_t<decltype(meterUnit)>;
+using meter_unit_type = std::remove_const_t<decltype(meter_unit)>;
 
 /// SI unit "candela"
-constexpr UnitType<Internal::nullMeasure, Internal::nullMeasure, Internal::nullMeasure, Internal::baseMeasure,
-                   Internal::nullMeasure, Internal::nullMeasure, Internal::nullMeasure>
-    candelaUnit;
+constexpr unit_type<internal::null_measure, internal::null_measure, internal::null_measure, internal::base_measure,
+                    internal::null_measure, internal::null_measure, internal::null_measure>
+    candela_unit;
 /// Type alias for SI unit "candela"
-using candelaUnitType = std::remove_const_t<decltype(candelaUnit)>;
+using candela_unit_type = std::remove_const_t<decltype(candela_unit)>;
 
 /// SI unit "gram"
-constexpr UnitType<Internal::nullMeasure, Internal::nullMeasure, Internal::nullMeasure, Internal::nullMeasure,
-                   Internal::baseMeasure, Internal::nullMeasure, Internal::nullMeasure>
-    gramUnit;
+constexpr unit_type<internal::null_measure, internal::null_measure, internal::null_measure, internal::null_measure,
+                    internal::base_measure, internal::null_measure, internal::null_measure>
+    gram_unit;
 /// Type alias for SI unit "gram"
-using gramUnitType = std::remove_const_t<decltype(gramUnit)>;
+using gram_unit_type = std::remove_const_t<decltype(gram_unit)>;
 
 /// SI unit "Kelvin"
-constexpr UnitType<Internal::nullMeasure, Internal::nullMeasure, Internal::nullMeasure, Internal::nullMeasure,
-                   Internal::nullMeasure, Internal::baseMeasure, Internal::nullMeasure>
-    kelvinUnit;
+constexpr unit_type<internal::null_measure, internal::null_measure, internal::null_measure, internal::null_measure,
+                    internal::null_measure, internal::base_measure, internal::null_measure>
+    kelvin_unit;
 /// Type alias for SI unit Kelvin
-using kelvinUnitType = std::remove_const_t<decltype(kelvinUnit)>;
+using kelvin_unit_type = std::remove_const_t<decltype(kelvin_unit)>;
 
 /// SI unit "second"
-constexpr UnitType<Internal::nullMeasure, Internal::nullMeasure, Internal::nullMeasure, Internal::nullMeasure,
-                   Internal::nullMeasure, Internal::nullMeasure, Internal::baseMeasure>
-    secondUnit;
+constexpr unit_type<internal::null_measure, internal::null_measure, internal::null_measure, internal::null_measure,
+                    internal::null_measure, internal::null_measure, internal::base_measure>
+    second_unit;
 /// Type alias for SI unit "second"
-using secondUnitType = std::remove_const_t<decltype(secondUnit)>;
+using second_unit_type = std::remove_const_t<decltype(second_unit)>;
 
 /// Constant indidcating lack of units
-constexpr UnitType<Internal::nullMeasure, Internal::nullMeasure, Internal::nullMeasure, Internal::nullMeasure,
-                   Internal::nullMeasure, Internal::nullMeasure, Internal::nullMeasure>
-    unitlessUnit;
-/// Type alias for constant indicating lack of units
-using unitlessUnitType = std::remove_const_t<decltype(unitlessUnit)>;
+// constexpr unit_type<internal::null_measure, internal::null_measure, internal::null_measure, internal::null_measure,
+//                     internal::null_measure, internal::null_measure, internal::null_measure>
+//     unitless_unit;
+// /// Type alias for constant indicating lack of units
+using unitless_unit_type =
+    unit_type<internal::null_measure, internal::null_measure, internal::null_measure, internal::null_measure,
+              internal::null_measure, internal::null_measure, internal::null_measure>;
 
 // -- Unit Concepts ---
 
@@ -541,30 +543,30 @@ struct _is_unit : std::false_type
 {
 };
 
-template <Internal::Measure auto Amount_, Internal::Measure auto Current_, Internal::Measure auto Length_,
-          Internal::Measure auto Luminosity_, Internal::Measure auto Mass_, Internal::Measure auto Temperature_,
-          Internal::Measure auto Time_, typename Tag_, std::intmax_t Extra_>
-struct _is_unit<UnitType<Amount_, Current_, Length_, Luminosity_, Mass_, Temperature_, Time_, Tag_, Extra_>>
+template <internal::measure auto amount_, internal::measure auto current_, internal::measure auto length_,
+          internal::measure auto luminosity_, internal::measure auto mass_, internal::measure auto temperature_,
+          internal::measure auto time_, typename tag_, std::intmax_t Extra_>
+struct _is_unit<unit_type<amount_, current_, length_, luminosity_, mass_, temperature_, time_, tag_, Extra_>>
     : std::true_type
 {
 };
 } // namespace _detail
 /// \endcond
 
-/// \brief Specifies a type is an instantiation of the \c UnitType class template
+/// \brief Specifies a type is an instantiation of the \c unit_type class template
 ///
-/// Specifies a type is an instantiation of the \c UnitType class template, ignoring
+/// Specifies a type is an instantiation of the \c unit_type class template, ignoring
 /// cv-qualifiers and references.
 ///
 /// \tparam U The type to check
 template <typename U>
-concept Unit = _detail::_is_unit<std::remove_cvref_t<U>>::value;
+concept unit = _detail::_is_unit<std::remove_cvref_t<U>>::value;
 
 /// \brief Specifies a unit is unitless
 ///
 /// \tparam U The unit to check
 template <auto U>
-concept UnitlessUnit = Internal::Similar<decltype(U), unitlessUnitType>;
+concept unitless_unit = internal::similar<decltype(U), unitless_unit_type>;
 
 /// \brief Specfies amount dimension \c From can be converted to amount dimension \c To
 ///
@@ -574,8 +576,8 @@ concept UnitlessUnit = Internal::Similar<decltype(U), unitlessUnitType>;
 /// \tparam From The starting dimension
 /// \tparam To The target dimension
 template <auto From, auto To>
-concept AmountConvertibleTo =
-    Internal::Measure<decltype(From)> && Internal::Measure<decltype(To)> && Internal::isMeasureConvertible(From, To);
+concept amount_convertible_to =
+    internal::measure<decltype(From)> && internal::measure<decltype(To)> && internal::is_measure_convertible(From, To);
 
 /// \brief Specfies current dimension \c From can be converted to current dimension \c To
 ///
@@ -585,8 +587,8 @@ concept AmountConvertibleTo =
 /// \tparam From The starting dimension
 /// \tparam To The target dimension
 template <auto From, auto To>
-concept CurrentConvertibleTo =
-    Internal::Measure<decltype(From)> && Internal::Measure<decltype(To)> && Internal::isMeasureConvertible(From, To);
+concept current_convertible_to =
+    internal::measure<decltype(From)> && internal::measure<decltype(To)> && internal::is_measure_convertible(From, To);
 
 /// \brief Specfies length dimension \c From can be converted to length dimension \c To
 ///
@@ -596,8 +598,8 @@ concept CurrentConvertibleTo =
 /// \tparam From The starting dimension
 /// \tparam To The target dimension
 template <auto From, auto To>
-concept LengthConvertibleTo =
-    Internal::Measure<decltype(From)> && Internal::Measure<decltype(To)> && Internal::isMeasureConvertible(From, To);
+concept length_convertible_to =
+    internal::measure<decltype(From)> && internal::measure<decltype(To)> && internal::is_measure_convertible(From, To);
 
 /// \brief Specfies luminosity dimension \c From can be converted to luminosity dimension \c To
 ///
@@ -607,8 +609,8 @@ concept LengthConvertibleTo =
 /// \tparam From The starting dimension
 /// \tparam To The target dimension
 template <auto From, auto To>
-concept LuminosityConvertibleTo =
-    Internal::Measure<decltype(From)> && Internal::Measure<decltype(To)> && Internal::isMeasureConvertible(From, To);
+concept luminosity_convertible_to =
+    internal::measure<decltype(From)> && internal::measure<decltype(To)> && internal::is_measure_convertible(From, To);
 
 /// \brief Specfies mass dimension \c From can be converted to mass dimension \c To
 ///
@@ -618,8 +620,8 @@ concept LuminosityConvertibleTo =
 /// \tparam From The starting dimension
 /// \tparam To The target dimension
 template <auto From, auto To>
-concept MassConvertibleTo =
-    Internal::Measure<decltype(From)> && Internal::Measure<decltype(To)> && Internal::isMeasureConvertible(From, To);
+concept mass_convertible_to =
+    internal::measure<decltype(From)> && internal::measure<decltype(To)> && internal::is_measure_convertible(From, To);
 
 /// \brief Specfies temperature dimension \c From can be converted to temperature dimension \c To
 ///
@@ -629,8 +631,8 @@ concept MassConvertibleTo =
 /// \tparam From The starting dimension
 /// \tparam To The target dimension
 template <auto From, auto To>
-concept TemperatureConvertibleTo =
-    Internal::Measure<decltype(From)> && Internal::Measure<decltype(To)> && Internal::isMeasureConvertible(From, To);
+concept temperature_convertible_to =
+    internal::measure<decltype(From)> && internal::measure<decltype(To)> && internal::is_measure_convertible(From, To);
 
 /// \brief Specfies time dimension \c From can be converted to time dimension \c To
 ///
@@ -640,8 +642,8 @@ concept TemperatureConvertibleTo =
 /// \tparam From The starting dimension
 /// \tparam To The target dimension
 template <auto From, auto To>
-concept TimeConvertibleTo =
-    Internal::Measure<decltype(From)> && Internal::Measure<decltype(To)> && Internal::isMeasureConvertible(From, To);
+concept time_convertible_to =
+    internal::measure<decltype(From)> && internal::measure<decltype(To)> && internal::is_measure_convertible(From, To);
 
 /// \brief Type trait indicating two tags are convertible
 ///
@@ -651,7 +653,7 @@ concept TimeConvertibleTo =
 /// tags are not convertible. Note, this trait should be specialized
 /// for both \c From to \c To and \c To to \c From.
 ///
-/// \sa \c TagConvertibleTo
+/// \sa \c tag_convertible_to
 /// \tparam From The starting tag
 /// \tparam To The target tag
 template <typename From, typename To>
@@ -659,9 +661,9 @@ struct is_tag_convertible : std::is_same<From, To>
 {
 };
 
-/// \brief Specfies tag \c From can be converted to \c Tag to.
+/// \brief Specfies tag \c From can be converted to \c tag to.
 ///
-/// Specfies tag \c From can be converted to \c Tag to. This concept evaluates
+/// Specfies tag \c From can be converted to \c tag to. This concept evaluates
 /// to \c false unless the struct \c is_tag_convertible is specialized for
 /// \c From and \c To
 ///
@@ -669,13 +671,13 @@ struct is_tag_convertible : std::is_same<From, To>
 /// \tparam From The starting tag
 /// \tparam To The target tag
 template <typename From, typename To>
-concept TagConvertibleTo = is_tag_convertible<From, To>::value;
+concept tag_convertible_to = is_tag_convertible<From, To>::value;
 
 /// \brief Specifies unit \c From can be converted to unit \c To
 ///
 /// Specifies unit \c From can be converted to unit \c To. \c From can be converted to
 /// \c To if all of all the dimensions of \c From can be converted to the corresponding
-/// dimensions of \c To and the tag of \c From can be converted to the \c Tag of to.
+/// dimensions of \c To and the tag of \c From can be converted to the \c tag of to.
 ///
 /// Convertibility is a symmetric relation, if \c From is convertible to \c To, then \c To
 /// is convertible to \c From.
@@ -683,12 +685,15 @@ concept TagConvertibleTo = is_tag_convertible<From, To>::value;
 /// \tparam From The starting unit
 /// \tparam To the target unit
 template <auto From, auto To>
-concept UnitConvertibleTo =
-    Unit<decltype(From)> && Unit<decltype(To)> && AmountConvertibleTo<From.amount(), To.amount()> &&
-    CurrentConvertibleTo<From.current(), To.current()> && LengthConvertibleTo<From.length(), To.length()> &&
-    LuminosityConvertibleTo<From.luminosity(), To.luminosity()> && MassConvertibleTo<From.mass(), To.mass()> &&
-    TemperatureConvertibleTo<From.temperature(), To.temperature()> && TimeConvertibleTo<From.time(), To.time()> &&
-    TagConvertibleTo<typename decltype(From)::Tag, typename decltype(To)::Tag>;
+concept unit_convertible_to =
+    unit<decltype(From)> && unit<decltype(To)> && amount_convertible_to<From.get_amount(), To.get_amount()> &&
+    current_convertible_to<From.get_current(), To.get_current()> &&
+    length_convertible_to<From.get_length(), To.get_length()> &&
+    luminosity_convertible_to<From.get_luminosity(), To.get_luminosity()> &&
+    mass_convertible_to<From.get_mass(), To.get_mass()> &&
+    temperature_convertible_to<From.get_temperature(), To.get_temperature()> &&
+    time_convertible_to<From.get_time(), To.get_time()> &&
+    tag_convertible_to<typename decltype(From)::tag, typename decltype(To)::tag>;
 
 // --- Unit Traits ---
 /// \brief Specifies a unit has dimensions of amount
@@ -697,7 +702,7 @@ concept UnitConvertibleTo =
 ///
 /// \tparam U The unit to check
 template <auto U>
-concept AmountUnit = UnitConvertibleTo<U, moleUnit>;
+concept amount_unit = unit_convertible_to<U, mole_unit>;
 
 /// \brief Specifies a unit has dimensions of current
 ///
@@ -705,7 +710,7 @@ concept AmountUnit = UnitConvertibleTo<U, moleUnit>;
 ///
 /// \tparam U The unit to check
 template <auto U>
-concept CurrentUnit = UnitConvertibleTo<U, ampereUnit>;
+concept current_unit = unit_convertible_to<U, ampere_unit>;
 
 /// \brief Specifies a unit has dimensions of length
 ///
@@ -713,7 +718,7 @@ concept CurrentUnit = UnitConvertibleTo<U, ampereUnit>;
 ///
 /// \tparam U The unit to check
 template <auto U>
-concept LengthUnit = UnitConvertibleTo<U, meterUnit>;
+concept length_unit = unit_convertible_to<U, meter_unit>;
 
 /// \brief Specifies a unit has dimensions of luminosity
 ///
@@ -721,7 +726,7 @@ concept LengthUnit = UnitConvertibleTo<U, meterUnit>;
 ///
 /// \tparam U The unit to check
 template <auto U>
-concept LuminosityUnit = UnitConvertibleTo<U, candelaUnit>;
+concept luminosity_unit = unit_convertible_to<U, candela_unit>;
 
 /// \brief Specifies a unit has dimensions of mass
 ///
@@ -729,7 +734,7 @@ concept LuminosityUnit = UnitConvertibleTo<U, candelaUnit>;
 ///
 /// \tparam U The unit to check
 template <auto U>
-concept MassUnit = UnitConvertibleTo<U, gramUnit>;
+concept mass_unit = unit_convertible_to<U, gram_unit>;
 
 /// \brief Specifies a unit has dimensions of temperature
 ///
@@ -737,7 +742,7 @@ concept MassUnit = UnitConvertibleTo<U, gramUnit>;
 ///
 /// \tparam U The unit to check
 template <auto U>
-concept TemperatureUnit = UnitConvertibleTo<U, kelvinUnit>;
+concept temperature_unit = unit_convertible_to<U, kelvin_unit>;
 
 /// \brief Specifies a unit has dimensions of time
 ///
@@ -745,7 +750,7 @@ concept TemperatureUnit = UnitConvertibleTo<U, kelvinUnit>;
 ///
 /// \tparam U The unit to check
 template <auto U>
-concept TimeUnit = UnitConvertibleTo<U, secondUnit>;
+concept time_unit = unit_convertible_to<U, second_unit>;
 // --- Unit comparisons ---
 
 /// \brief Compare two units for equality
@@ -756,9 +761,9 @@ concept TimeUnit = UnitConvertibleTo<U, secondUnit>;
 ///
 /// \param lhs the first unit to compare for equality
 /// \param rhs th second unit to compare for equality
-constexpr bool operator==(Unit auto lhs, Unit auto rhs) noexcept
+constexpr bool operator==(unit auto lhs, unit auto rhs) noexcept
 {
-    return Internal::Similar<decltype(lhs), decltype(rhs)>;
+    return internal::similar<decltype(lhs), decltype(rhs)>;
 }
 
 // --- Unit conversions ---
@@ -812,7 +817,7 @@ constexpr double conversionFactorPrefix(std::intmax_t from, std::intmax_t to) no
     }
 }
 
-template <Internal::_detail::RatioLike From, Internal::_detail::RatioLike To>
+template <internal::_detail::ratio_like From, internal::_detail::ratio_like To>
 constexpr double conversionFactorOffset() noexcept
 {
     using ResRatio = std::ratio_divide<To, From>;
@@ -834,15 +839,15 @@ constexpr double conversionFactorOffset() noexcept
 /// \param to The target unit
 /// \return The factor the magnitude of a quantity with units \c from needs to be multiplied
 /// to be converted to a quantity with units \c to
-constexpr double tagConversionFactor(Unit auto lhs, Unit auto rhs) noexcept
+constexpr double tag_conversion_factor(unit auto lhs, unit auto rhs) noexcept
 {
-    if constexpr (std::same_as<typename decltype(lhs)::Tag, typename decltype(rhs)::Tag>)
+    if constexpr (std::same_as<typename decltype(lhs)::tag, typename decltype(rhs)::tag>)
     {
         return 1.0;
     }
     else
     {
-        static_assert(_detail::dependentFalse<typename decltype(lhs)::Tag>,
+        static_assert(_detail::dependentFalse<typename decltype(lhs)::tag>,
                       "Attempting to convert between units with inconvertible tags!");
     }
 }
@@ -858,39 +863,46 @@ constexpr double tagConversionFactor(Unit auto lhs, Unit auto rhs) noexcept
 /// \param to The target unit
 /// \return The factor the magnitude of a quantity with units \c from needs to be multiplied
 /// to be converted to a quantity with units \c to
-constexpr double conversionFactor(Unit auto from, Unit auto to) noexcept
-    requires UnitConvertibleTo<from, to>
+constexpr double conversion_factor(unit auto from, unit auto to) noexcept
+    requires unit_convertible_to<from, to>
 {
     using From = decltype(from);
     using To   = decltype(to);
 
     double conversionFactor{1.0};
     // Convert prefixes
-    conversionFactor *= _detail::conversionFactorPrefix(from.amount().multiplier(), to.amount().multiplier());
-    conversionFactor *= _detail::conversionFactorPrefix(from.current().multiplier(), to.current().multiplier());
-    conversionFactor *= _detail::conversionFactorPrefix(from.length().multiplier(), to.length().multiplier());
-    conversionFactor *= _detail::conversionFactorPrefix(from.luminosity().multiplier(), to.luminosity().multiplier());
-    conversionFactor *= _detail::conversionFactorPrefix(from.mass().multiplier(), to.mass().multiplier());
-    conversionFactor *= _detail::conversionFactorPrefix(from.temperature().multiplier(), to.temperature().multiplier());
-    conversionFactor *= _detail::conversionFactorPrefix(from.time().multiplier(), to.time().multiplier());
-    conversionFactor *= _detail::conversionFactorPrefix(from.multiplier(), to.multiplier());
-    conversionFactor *= tagConversionFactor(from, to);
+    conversionFactor *=
+        _detail::conversionFactorPrefix(from.get_amount().get_multiplier(), to.get_amount().get_multiplier());
+    conversionFactor *=
+        _detail::conversionFactorPrefix(from.get_current().get_multiplier(), to.get_current().get_multiplier());
+    conversionFactor *=
+        _detail::conversionFactorPrefix(from.get_length().get_multiplier(), to.get_length().get_multiplier());
+    conversionFactor *=
+        _detail::conversionFactorPrefix(from.get_luminosity().get_multiplier(), to.get_luminosity().get_multiplier());
+    conversionFactor *=
+        _detail::conversionFactorPrefix(from.get_mass().get_multiplier(), to.get_mass().get_multiplier());
+    conversionFactor *=
+        _detail::conversionFactorPrefix(from.get_temperature().get_multiplier(), to.get_temperature().get_multiplier());
+    conversionFactor *=
+        _detail::conversionFactorPrefix(from.get_time().get_multiplier(), to.get_time().get_multiplier());
+    conversionFactor *= _detail::conversionFactorPrefix(from.get_multiplier(), to.get_multiplier());
+    conversionFactor *= tag_conversion_factor(from, to);
 
     // Convert ratios
     conversionFactor *=
-        _detail::conversionFactorOffset<typename decltype(From::Amount)::Scale, typename decltype(To::Amount)::Scale>();
-    conversionFactor *= _detail::conversionFactorOffset<typename decltype(From::Current)::Scale,
-                                                        typename decltype(To::Current)::Scale>();
+        _detail::conversionFactorOffset<typename decltype(From::amount)::scale, typename decltype(To::amount)::scale>();
+    conversionFactor *= _detail::conversionFactorOffset<typename decltype(From::current)::scale,
+                                                        typename decltype(To::current)::scale>();
     conversionFactor *=
-        _detail::conversionFactorOffset<typename decltype(From::Length)::Scale, typename decltype(To::Length)::Scale>();
-    conversionFactor *= _detail::conversionFactorOffset<typename decltype(From::Luminosity)::Scale,
-                                                        typename decltype(To::Luminosity)::Scale>();
+        _detail::conversionFactorOffset<typename decltype(From::length)::scale, typename decltype(To::length)::scale>();
+    conversionFactor *= _detail::conversionFactorOffset<typename decltype(From::luminosity)::scale,
+                                                        typename decltype(To::luminosity)::scale>();
     conversionFactor *=
-        _detail::conversionFactorOffset<typename decltype(From::Mass)::Scale, typename decltype(To::Mass)::Scale>();
-    conversionFactor *= _detail::conversionFactorOffset<typename decltype(From::Temperature)::Scale,
-                                                        typename decltype(To::Temperature)::Scale>();
+        _detail::conversionFactorOffset<typename decltype(From::mass)::scale, typename decltype(To::mass)::scale>();
+    conversionFactor *= _detail::conversionFactorOffset<typename decltype(From::temperature)::scale,
+                                                        typename decltype(To::temperature)::scale>();
     conversionFactor *=
-        _detail::conversionFactorOffset<typename decltype(From::Time)::Scale, typename decltype(To::Time)::Scale>();
+        _detail::conversionFactorOffset<typename decltype(From::time)::scale, typename decltype(To::time)::scale>();
     return conversionFactor;
 }
 
@@ -903,11 +915,12 @@ constexpr double conversionFactor(Unit auto from, Unit auto to) noexcept
 /// \param lhs The left hand side of the multiplication
 /// \param rhs The right hand side of the multiplication
 /// \return The product of two units
-consteval Unit auto operator*(Unit auto lhs, Unit auto rhs) noexcept
+consteval unit auto operator*(unit auto lhs, unit auto rhs) noexcept
 {
-    return UnitType<lhs.amount() * rhs.amount(), lhs.current() * rhs.current(), lhs.length() * rhs.length(),
-                    lhs.luminosity() * rhs.luminosity(), lhs.mass() * rhs.mass(), lhs.temperature() * rhs.temperature(),
-                    lhs.time() * rhs.time(), typename decltype(lhs)::Tag, lhs.multiplier()>{};
+    return unit_type<lhs.get_amount() * rhs.get_amount(), lhs.get_current() * rhs.get_current(),
+                     lhs.get_length() * rhs.get_length(), lhs.get_luminosity() * rhs.get_luminosity(),
+                     lhs.get_mass() * rhs.get_mass(), lhs.get_temperature() * rhs.get_temperature(),
+                     lhs.get_time() * rhs.get_time(), typename decltype(lhs)::tag, lhs.get_multiplier()>{};
 }
 
 /// \brief Divides two units
@@ -919,11 +932,12 @@ consteval Unit auto operator*(Unit auto lhs, Unit auto rhs) noexcept
 /// \param lhs The dividend
 /// \param rhs The divisor
 /// \return The quotient of two units
-consteval Unit auto operator/(Unit auto lhs, Unit auto rhs) noexcept
+consteval unit auto operator/(unit auto lhs, unit auto rhs) noexcept
 {
-    return UnitType<lhs.amount() / rhs.amount(), lhs.current() / rhs.current(), lhs.length() / rhs.length(),
-                    lhs.luminosity() / rhs.luminosity(), lhs.mass() / rhs.mass(), lhs.temperature() / rhs.temperature(),
-                    lhs.time() / rhs.time(), typename decltype(lhs)::Tag>{};
+    return unit_type<lhs.get_amount() / rhs.get_amount(), lhs.get_current() / rhs.get_current(),
+                     lhs.get_length() / rhs.get_length(), lhs.get_luminosity() / rhs.get_luminosity(),
+                     lhs.get_mass() / rhs.get_mass(), lhs.get_temperature() / rhs.get_temperature(),
+                     lhs.get_time() / rhs.get_time(), typename decltype(lhs)::tag>{};
 }
 
 // --- Metric Prefixes ---
@@ -981,7 +995,7 @@ constexpr std::intmax_t quecto = -30;
 /// \cond
 namespace _detail
 {
-std::string defaultUnitName(Unit auto)
+std::string defaultUnitName(unit auto)
 {
     return "";
 }
@@ -996,8 +1010,8 @@ std::string defaultUnitName(Unit auto)
 /// representation for the unit, specialize this string for that unit.
 ///
 /// \tparam U The unit to provide a description for
-template <Unit auto U>
-inline const std::string unitString = _detail::defaultUnitName(U);
-} // namespace Maxwell
+template <unit auto U>
+inline const std::string unit_string = _detail::defaultUnitName(U);
+} // namespace maxwell
 
 #endif

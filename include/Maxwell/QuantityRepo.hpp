@@ -1,4 +1,4 @@
-/// \file QuantityRepo.hpp
+/// \file quantityRepo.hpp
 /// \author Alex Schiffer
 /// \brief Aliases for common quantities and quantity literals
 /// \version 0.1
@@ -12,62 +12,62 @@
 #include "Unit.hpp"
 #include "UnitRepo.hpp"
 
-namespace Maxwell
+namespace maxwell
 {
-using Mole  = Quantity<moleUnit>;
-using IMole = IQuantity<moleUnit>;
+using mole  = quantity<mole_unit>;
+using imole = iquantity<mole_unit>;
 
-using Ampere  = Quantity<ampereUnit>;
-using IAmpere = IQuantity<ampereUnit>;
+using ampere  = quantity<ampere_unit>;
+using iampere = iquantity<ampere_unit>;
 
-using Meter  = Quantity<meterUnit>;
-using IMeter = IQuantity<meterUnit>;
+using meter  = quantity<meter_unit>;
+using imeter = iquantity<meter_unit>;
 
-using Candela  = Quantity<candelaUnit>;
-using ICandela = IQuantity<candelaUnit>;
+using candela  = quantity<candela_unit>;
+using icandela = iquantity<candela_unit>;
 
-using Gram  = Quantity<gramUnit>;
-using IGram = IQuantity<gramUnit>;
+using gram  = quantity<gram_unit>;
+using igram = iquantity<gram_unit>;
 
-using Kelvin  = Quantity<kelvinUnit>;
-using IKelvin = IQuantity<kelvinUnit>;
+using kelvin  = quantity<kelvin_unit>;
+using ikelvin = iquantity<kelvin_unit>;
 
-using Second  = Quantity<secondUnit>;
-using ISecond = IQuantity<secondUnit>;
+using second  = quantity<second_unit>;
+using isecond = iquantity<second_unit>;
 
 #define QUANTITY_LITERAL(name, symbol)                                                                                 \
     consteval name operator""_##symbol(long double x) noexcept                                                         \
     {                                                                                                                  \
         return name{x};                                                                                                \
     }                                                                                                                  \
-    consteval I##name operator""_##symbol(unsigned long long x) noexcept                                               \
+    consteval i##name operator""_##symbol(unsigned long long x) noexcept                                               \
     {                                                                                                                  \
-        return I##name{x};                                                                                             \
+        return i##name{x};                                                                                             \
     }
 
-namespace MetricLiterals
+namespace metric_literals
 {
-QUANTITY_LITERAL(Mole, mol)
-QUANTITY_LITERAL(Ampere, A)
-QUANTITY_LITERAL(Gram, g)
-QUANTITY_LITERAL(Meter, m)
-QUANTITY_LITERAL(Kelvin, K)
-QUANTITY_LITERAL(Second, s)
-} // namespace MetricLiterals
+QUANTITY_LITERAL(mole, mol)
+QUANTITY_LITERAL(ampere, A)
+QUANTITY_LITERAL(gram, g)
+QUANTITY_LITERAL(meter, m)
+QUANTITY_LITERAL(kelvin, K)
+QUANTITY_LITERAL(second, s)
+} // namespace metric_literals
 
 #ifndef NO_PREDEFINED_DERIVED_UNITS
-using Radian  = Quantity<radianUnit>;
-using IRadian = IQuantity<radianUnit>;
+using radian  = quantity<radian_unit>;
+using iradian = iquantity<radian_unit>;
 
-using Degree  = Quantity<degreeUnit>;
-using IDegree = IQuantity<degreeUnit>;
+using degree  = quantity<degree_unit>;
+using idegree = iquantity<degree_unit>;
 
 /// \brief Specifies a quantity has dimensions of angle
 ///
-/// \tparam QuantityType The quantity to check
+/// \tparam quantityType The quantity to check
 template <typename QuantityType>
-concept Angle = AngleUnit<QuantityType::Units>;
+concept angle = angle_unit<QuantityType::units>;
 #endif
-} // namespace Maxwell
+} // namespace maxwell
 
 #endif

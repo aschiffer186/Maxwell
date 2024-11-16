@@ -7,533 +7,535 @@
 #include <type_traits>
 #include <utility>
 
-using namespace Maxwell;
+using namespace maxwell;
 
 TEST(TestUnit, TestGetterConstantExpression)
 {
-    constexpr Internal::Measure auto amount      = meterUnit.amount();
-    constexpr Internal::Measure auto current     = meterUnit.current();
-    constexpr Internal::Measure auto length      = meterUnit.length();
-    constexpr Internal::Measure auto luminosity  = meterUnit.luminosity();
-    constexpr Internal::Measure auto mass        = meterUnit.mass();
-    constexpr Internal::Measure auto temperature = meterUnit.temperature();
-    constexpr Internal::Measure auto time        = meterUnit.time();
+    constexpr internal::measure auto amount      = meter_unit.get_amount();
+    constexpr internal::measure auto current     = meter_unit.get_current();
+    constexpr internal::measure auto length      = meter_unit.get_length();
+    constexpr internal::measure auto luminosity  = meter_unit.get_luminosity();
+    constexpr internal::measure auto mass        = meter_unit.get_mass();
+    constexpr internal::measure auto temperature = meter_unit.get_temperature();
+    constexpr internal::measure auto time        = meter_unit.get_time();
 
-    EXPECT_EQ(amount, Internal::nullMeasure);
-    EXPECT_EQ(current, Internal::nullMeasure);
-    EXPECT_EQ(length, Internal::baseMeasure);
-    EXPECT_EQ(luminosity, Internal::nullMeasure);
-    EXPECT_EQ(mass, Internal::nullMeasure);
-    EXPECT_EQ(temperature, Internal::nullMeasure);
-    EXPECT_EQ(time, Internal::nullMeasure);
+    EXPECT_EQ(amount, internal::null_measure);
+    EXPECT_EQ(current, internal::null_measure);
+    EXPECT_EQ(length, internal::base_measure);
+    EXPECT_EQ(luminosity, internal::null_measure);
+    EXPECT_EQ(mass, internal::null_measure);
+    EXPECT_EQ(temperature, internal::null_measure);
+    EXPECT_EQ(time, internal::null_measure);
 }
 
 TEST(TestUnit, TestAddTag)
 {
-    constexpr Unit auto u = meterUnit.addTag<int>();
+    constexpr unit auto u = meter_unit.add_tag<int>();
 
-    constexpr Internal::Measure auto amount      = u.amount();
-    constexpr Internal::Measure auto current     = u.current();
-    constexpr Internal::Measure auto length      = u.length();
-    constexpr Internal::Measure auto luminosity  = u.luminosity();
-    constexpr Internal::Measure auto mass        = u.mass();
-    constexpr Internal::Measure auto temperature = u.temperature();
-    constexpr Internal::Measure auto time        = u.time();
+    constexpr internal::measure auto amount      = u.get_amount();
+    constexpr internal::measure auto current     = u.get_current();
+    constexpr internal::measure auto length      = u.get_length();
+    constexpr internal::measure auto luminosity  = u.get_luminosity();
+    constexpr internal::measure auto mass        = u.get_mass();
+    constexpr internal::measure auto temperature = u.get_temperature();
+    constexpr internal::measure auto time        = u.get_time();
 
-    EXPECT_EQ(amount, Internal::nullMeasure);
-    EXPECT_EQ(current, Internal::nullMeasure);
-    EXPECT_EQ(length, Internal::baseMeasure);
-    EXPECT_EQ(luminosity, Internal::nullMeasure);
-    EXPECT_EQ(mass, Internal::nullMeasure);
-    EXPECT_EQ(temperature, Internal::nullMeasure);
-    EXPECT_EQ(time, Internal::nullMeasure);
-    EXPECT_TRUE((std::same_as<decltype(u)::Tag, int>));
+    EXPECT_EQ(amount, internal::null_measure);
+    EXPECT_EQ(current, internal::null_measure);
+    EXPECT_EQ(length, internal::base_measure);
+    EXPECT_EQ(luminosity, internal::null_measure);
+    EXPECT_EQ(mass, internal::null_measure);
+    EXPECT_EQ(temperature, internal::null_measure);
+    EXPECT_EQ(time, internal::null_measure);
+    EXPECT_TRUE((std::same_as<decltype(u)::tag, int>));
 }
 
 TEST(TestUnit, TestAdjustAmount)
 {
-    constexpr Unit auto u = moleUnit.adjustMultiplierAmount<3>();
+    constexpr unit auto u = mole_unit.adjust_multiplier_amount<3>();
 
-    constexpr Internal::Measure auto amount      = u.amount();
-    constexpr Internal::Measure auto current     = u.current();
-    constexpr Internal::Measure auto length      = u.length();
-    constexpr Internal::Measure auto luminosity  = u.luminosity();
-    constexpr Internal::Measure auto mass        = u.mass();
-    constexpr Internal::Measure auto temperature = u.temperature();
-    constexpr Internal::Measure auto time        = u.time();
+    constexpr internal::measure auto amount      = u.get_amount();
+    constexpr internal::measure auto current     = u.get_current();
+    constexpr internal::measure auto length      = u.get_length();
+    constexpr internal::measure auto luminosity  = u.get_luminosity();
+    constexpr internal::measure auto mass        = u.get_mass();
+    constexpr internal::measure auto temperature = u.get_temperature();
+    constexpr internal::measure auto time        = u.get_time();
 
-    EXPECT_EQ(amount.power(), 1);
-    EXPECT_EQ(amount.multiplier(), 3);
-    EXPECT_EQ(current, Internal::nullMeasure);
-    EXPECT_EQ(length, Internal::nullMeasure);
-    EXPECT_EQ(luminosity, Internal::nullMeasure);
-    EXPECT_EQ(mass, Internal::nullMeasure);
-    EXPECT_EQ(temperature, Internal::nullMeasure);
-    EXPECT_EQ(time, Internal::nullMeasure);
+    EXPECT_EQ(amount.get_power(), 1);
+    EXPECT_EQ(amount.get_multiplier(), 3);
+    EXPECT_EQ(current, internal::null_measure);
+    EXPECT_EQ(length, internal::null_measure);
+    EXPECT_EQ(luminosity, internal::null_measure);
+    EXPECT_EQ(mass, internal::null_measure);
+    EXPECT_EQ(temperature, internal::null_measure);
+    EXPECT_EQ(time, internal::null_measure);
 }
 
 TEST(TestUnit, TestAdjustCurrent)
 {
-    constexpr Unit auto u = ampereUnit.adjustMultiplierCurrent<3>();
+    constexpr unit auto u = ampere_unit.adjust_multiplier_current<3>();
 
-    constexpr Internal::Measure auto amount      = u.amount();
-    constexpr Internal::Measure auto current     = u.current();
-    constexpr Internal::Measure auto length      = u.length();
-    constexpr Internal::Measure auto luminosity  = u.luminosity();
-    constexpr Internal::Measure auto mass        = u.mass();
-    constexpr Internal::Measure auto temperature = u.temperature();
-    constexpr Internal::Measure auto time        = u.time();
+    constexpr internal::measure auto amount      = u.get_amount();
+    constexpr internal::measure auto current     = u.get_current();
+    constexpr internal::measure auto length      = u.get_length();
+    constexpr internal::measure auto luminosity  = u.get_luminosity();
+    constexpr internal::measure auto mass        = u.get_mass();
+    constexpr internal::measure auto temperature = u.get_temperature();
+    constexpr internal::measure auto time        = u.get_time();
 
-    EXPECT_EQ(amount, Internal::nullMeasure);
-    EXPECT_EQ(current.power(), 1);
-    EXPECT_EQ(current.multiplier(), 3);
-    EXPECT_EQ(length, Internal::nullMeasure);
-    EXPECT_EQ(luminosity, Internal::nullMeasure);
-    EXPECT_EQ(mass, Internal::nullMeasure);
-    EXPECT_EQ(temperature, Internal::nullMeasure);
-    EXPECT_EQ(time, Internal::nullMeasure);
+    EXPECT_EQ(amount, internal::null_measure);
+    EXPECT_EQ(current.get_power(), 1);
+    EXPECT_EQ(current.get_multiplier(), 3);
+    EXPECT_EQ(length, internal::null_measure);
+    EXPECT_EQ(luminosity, internal::null_measure);
+    EXPECT_EQ(mass, internal::null_measure);
+    EXPECT_EQ(temperature, internal::null_measure);
+    EXPECT_EQ(time, internal::null_measure);
 }
 
 TEST(TestUnit, TestAdjustLength)
 {
-    constexpr Unit auto u = meterUnit.adjustMultiplierLength<3>();
+    constexpr unit auto u = meter_unit.adjust_multiplier_length<3>();
 
-    constexpr Internal::Measure auto amount      = u.amount();
-    constexpr Internal::Measure auto current     = u.current();
-    constexpr Internal::Measure auto length      = u.length();
-    constexpr Internal::Measure auto luminosity  = u.luminosity();
-    constexpr Internal::Measure auto mass        = u.mass();
-    constexpr Internal::Measure auto temperature = u.temperature();
-    constexpr Internal::Measure auto time        = u.time();
+    constexpr internal::measure auto amount      = u.get_amount();
+    constexpr internal::measure auto current     = u.get_current();
+    constexpr internal::measure auto length      = u.get_length();
+    constexpr internal::measure auto luminosity  = u.get_luminosity();
+    constexpr internal::measure auto mass        = u.get_mass();
+    constexpr internal::measure auto temperature = u.get_temperature();
+    constexpr internal::measure auto time        = u.get_time();
 
-    EXPECT_EQ(amount, Internal::nullMeasure);
-    EXPECT_EQ(current, Internal::nullMeasure);
-    EXPECT_EQ(length.power(), 1);
-    EXPECT_EQ(length.multiplier(), 3);
-    EXPECT_EQ(luminosity, Internal::nullMeasure);
-    EXPECT_EQ(mass, Internal::nullMeasure);
-    EXPECT_EQ(temperature, Internal::nullMeasure);
-    EXPECT_EQ(time, Internal::nullMeasure);
+    EXPECT_EQ(amount, internal::null_measure);
+    EXPECT_EQ(current, internal::null_measure);
+    EXPECT_EQ(length.get_power(), 1);
+    EXPECT_EQ(length.get_multiplier(), 3);
+    EXPECT_EQ(luminosity, internal::null_measure);
+    EXPECT_EQ(mass, internal::null_measure);
+    EXPECT_EQ(temperature, internal::null_measure);
+    EXPECT_EQ(time, internal::null_measure);
 }
 
 TEST(TestUnit, TestAdjustLuminosity)
 {
-    constexpr Unit auto u = candelaUnit.adjustMultiplierLuminosity<3>();
+    constexpr unit auto u = candela_unit.adjust_multiplier_luminosity<3>();
 
-    constexpr Internal::Measure auto amount      = u.amount();
-    constexpr Internal::Measure auto current     = u.current();
-    constexpr Internal::Measure auto length      = u.length();
-    constexpr Internal::Measure auto luminosity  = u.luminosity();
-    constexpr Internal::Measure auto mass        = u.mass();
-    constexpr Internal::Measure auto temperature = u.temperature();
-    constexpr Internal::Measure auto time        = u.time();
+    constexpr internal::measure auto amount      = u.get_amount();
+    constexpr internal::measure auto current     = u.get_current();
+    constexpr internal::measure auto length      = u.get_length();
+    constexpr internal::measure auto luminosity  = u.get_luminosity();
+    constexpr internal::measure auto mass        = u.get_mass();
+    constexpr internal::measure auto temperature = u.get_temperature();
+    constexpr internal::measure auto time        = u.get_time();
 
-    EXPECT_EQ(amount, Internal::nullMeasure);
-    EXPECT_EQ(current, Internal::nullMeasure);
-    EXPECT_EQ(length, Internal::nullMeasure);
+    EXPECT_EQ(amount, internal::null_measure);
+    EXPECT_EQ(current, internal::null_measure);
+    EXPECT_EQ(length, internal::null_measure);
 
-    EXPECT_EQ(luminosity.power(), 1);
-    EXPECT_EQ(luminosity.multiplier(), 3);
-    EXPECT_EQ(mass, Internal::nullMeasure);
-    EXPECT_EQ(temperature, Internal::nullMeasure);
-    EXPECT_EQ(time, Internal::nullMeasure);
+    EXPECT_EQ(luminosity.get_power(), 1);
+    EXPECT_EQ(luminosity.get_multiplier(), 3);
+    EXPECT_EQ(mass, internal::null_measure);
+    EXPECT_EQ(temperature, internal::null_measure);
+    EXPECT_EQ(time, internal::null_measure);
 }
 
 TEST(TestUnit, TestAdjustMass)
 {
-    constexpr Unit auto u = gramUnit.adjustMultiplierMass<3>();
+    constexpr unit auto u = gram_unit.adjust_multiplier_mass<3>();
 
-    constexpr Internal::Measure auto amount      = u.amount();
-    constexpr Internal::Measure auto current     = u.current();
-    constexpr Internal::Measure auto length      = u.length();
-    constexpr Internal::Measure auto luminosity  = u.luminosity();
-    constexpr Internal::Measure auto mass        = u.mass();
-    constexpr Internal::Measure auto temperature = u.temperature();
-    constexpr Internal::Measure auto time        = u.time();
+    constexpr internal::measure auto amount      = u.get_amount();
+    constexpr internal::measure auto current     = u.get_current();
+    constexpr internal::measure auto length      = u.get_length();
+    constexpr internal::measure auto luminosity  = u.get_luminosity();
+    constexpr internal::measure auto mass        = u.get_mass();
+    constexpr internal::measure auto temperature = u.get_temperature();
+    constexpr internal::measure auto time        = u.get_time();
 
-    EXPECT_EQ(amount, Internal::nullMeasure);
-    EXPECT_EQ(current, Internal::nullMeasure);
-    EXPECT_EQ(length, Internal::nullMeasure);
-    EXPECT_EQ(luminosity, Internal::nullMeasure);
-    EXPECT_EQ(mass.power(), 1);
-    EXPECT_EQ(mass.multiplier(), 3);
-    EXPECT_EQ(temperature, Internal::nullMeasure);
-    EXPECT_EQ(time, Internal::nullMeasure);
+    EXPECT_EQ(amount, internal::null_measure);
+    EXPECT_EQ(current, internal::null_measure);
+    EXPECT_EQ(length, internal::null_measure);
+    EXPECT_EQ(luminosity, internal::null_measure);
+    EXPECT_EQ(mass.get_power(), 1);
+    EXPECT_EQ(mass.get_multiplier(), 3);
+    EXPECT_EQ(temperature, internal::null_measure);
+    EXPECT_EQ(time, internal::null_measure);
 }
 
 TEST(TestUnit, TestAdjustTemperature)
 {
-    constexpr Unit auto u = kelvinUnit.adjustMultiplierTemperature<3>();
+    constexpr unit auto u = kelvin_unit.adjust_multiplier_temperature<3>();
 
-    constexpr Internal::Measure auto amount      = u.amount();
-    constexpr Internal::Measure auto current     = u.current();
-    constexpr Internal::Measure auto length      = u.length();
-    constexpr Internal::Measure auto luminosity  = u.luminosity();
-    constexpr Internal::Measure auto mass        = u.mass();
-    constexpr Internal::Measure auto temperature = u.temperature();
-    constexpr Internal::Measure auto time        = u.time();
+    constexpr internal::measure auto amount      = u.get_amount();
+    constexpr internal::measure auto current     = u.get_current();
+    constexpr internal::measure auto length      = u.get_length();
+    constexpr internal::measure auto luminosity  = u.get_luminosity();
+    constexpr internal::measure auto mass        = u.get_mass();
+    constexpr internal::measure auto temperature = u.get_temperature();
+    constexpr internal::measure auto time        = u.get_time();
 
-    EXPECT_EQ(amount, Internal::nullMeasure);
-    EXPECT_EQ(current, Internal::nullMeasure);
-    EXPECT_EQ(length, Internal::nullMeasure);
-    EXPECT_EQ(luminosity, Internal::nullMeasure);
-    EXPECT_EQ(mass, Internal::nullMeasure);
-    EXPECT_EQ(temperature.power(), 1);
-    EXPECT_EQ(temperature.multiplier(), 3);
-    EXPECT_EQ(time, Internal::nullMeasure);
+    EXPECT_EQ(amount, internal::null_measure);
+    EXPECT_EQ(current, internal::null_measure);
+    EXPECT_EQ(length, internal::null_measure);
+    EXPECT_EQ(luminosity, internal::null_measure);
+    EXPECT_EQ(mass, internal::null_measure);
+    EXPECT_EQ(temperature.get_power(), 1);
+    EXPECT_EQ(temperature.get_multiplier(), 3);
+    EXPECT_EQ(time, internal::null_measure);
 }
 
 TEST(TestUnit, TestAdjustTime)
 {
-    constexpr Unit auto u = secondUnit.adjustMultiplierTime<3>();
+    constexpr unit auto u = second_unit.adjust_multiplier_time<3>();
 
-    constexpr Internal::Measure auto amount      = u.amount();
-    constexpr Internal::Measure auto current     = u.current();
-    constexpr Internal::Measure auto length      = u.length();
-    constexpr Internal::Measure auto luminosity  = u.luminosity();
-    constexpr Internal::Measure auto mass        = u.mass();
-    constexpr Internal::Measure auto temperature = u.temperature();
-    constexpr Internal::Measure auto time        = u.time();
+    constexpr internal::measure auto amount      = u.get_amount();
+    constexpr internal::measure auto current     = u.get_current();
+    constexpr internal::measure auto length      = u.get_length();
+    constexpr internal::measure auto luminosity  = u.get_luminosity();
+    constexpr internal::measure auto mass        = u.get_mass();
+    constexpr internal::measure auto temperature = u.get_temperature();
+    constexpr internal::measure auto time        = u.get_time();
 
-    EXPECT_EQ(amount, Internal::nullMeasure);
-    EXPECT_EQ(current, Internal::nullMeasure);
-    EXPECT_EQ(length, Internal::nullMeasure);
-    EXPECT_EQ(luminosity, Internal::nullMeasure);
-    EXPECT_EQ(mass, Internal::nullMeasure);
-    EXPECT_EQ(temperature, Internal::nullMeasure);
-    EXPECT_EQ(time.power(), 1);
-    EXPECT_EQ(time.multiplier(), 3);
+    EXPECT_EQ(amount, internal::null_measure);
+    EXPECT_EQ(current, internal::null_measure);
+    EXPECT_EQ(length, internal::null_measure);
+    EXPECT_EQ(luminosity, internal::null_measure);
+    EXPECT_EQ(mass, internal::null_measure);
+    EXPECT_EQ(temperature, internal::null_measure);
+    EXPECT_EQ(time.get_power(), 1);
+    EXPECT_EQ(time.get_multiplier(), 3);
 }
 
 TEST(TestUnit, TestAmountScale)
 {
-    constexpr Unit auto u = moleUnit.adjustScaleAmount<std::ratio<12, 1>>().adjustScaleAmount<std::ratio<12, 1>>();
+    constexpr unit auto u = mole_unit.adjust_scale_amount<std::ratio<12, 1>>().adjust_scale_amount<std::ratio<12, 1>>();
 
-    constexpr Internal::Measure auto amount      = u.amount();
-    constexpr Internal::Measure auto current     = u.current();
-    constexpr Internal::Measure auto length      = u.length();
-    constexpr Internal::Measure auto luminosity  = u.luminosity();
-    constexpr Internal::Measure auto mass        = u.mass();
-    constexpr Internal::Measure auto temperature = u.temperature();
-    constexpr Internal::Measure auto time        = u.time();
+    constexpr internal::measure auto amount      = u.get_amount();
+    constexpr internal::measure auto current     = u.get_current();
+    constexpr internal::measure auto length      = u.get_length();
+    constexpr internal::measure auto luminosity  = u.get_luminosity();
+    constexpr internal::measure auto mass        = u.get_mass();
+    constexpr internal::measure auto temperature = u.get_temperature();
+    constexpr internal::measure auto time        = u.get_time();
 
-    EXPECT_TRUE((std::ratio_equal_v<decltype(amount)::Scale, std::ratio<144, 1>>));
-    EXPECT_TRUE((std::ratio_equal_v<decltype(current)::Scale, Internal::_detail::one>));
-    EXPECT_TRUE((std::ratio_equal_v<decltype(length)::Scale, Internal::_detail::one>));
-    EXPECT_TRUE((std::ratio_equal_v<decltype(luminosity)::Scale, Internal::_detail::one>));
-    EXPECT_TRUE((std::ratio_equal_v<decltype(mass)::Scale, Internal::_detail::one>));
-    EXPECT_TRUE((std::ratio_equal_v<decltype(temperature)::Scale, Internal::_detail::one>));
-    EXPECT_TRUE((std::ratio_equal_v<decltype(time)::Scale, Internal::_detail::one>));
+    EXPECT_TRUE((std::ratio_equal_v<decltype(amount)::scale, std::ratio<144, 1>>));
+    EXPECT_TRUE((std::ratio_equal_v<decltype(current)::scale, internal::_detail::one>));
+    EXPECT_TRUE((std::ratio_equal_v<decltype(length)::scale, internal::_detail::one>));
+    EXPECT_TRUE((std::ratio_equal_v<decltype(luminosity)::scale, internal::_detail::one>));
+    EXPECT_TRUE((std::ratio_equal_v<decltype(mass)::scale, internal::_detail::one>));
+    EXPECT_TRUE((std::ratio_equal_v<decltype(temperature)::scale, internal::_detail::one>));
+    EXPECT_TRUE((std::ratio_equal_v<decltype(time)::scale, internal::_detail::one>));
 }
 
 TEST(TestUnit, TestCurrentScale)
 {
-    constexpr Unit auto u = ampereUnit.adjustScaleCurrent<std::ratio<12, 1>>().adjustScaleCurrent<std::ratio<12, 1>>();
+    constexpr unit auto u =
+        ampere_unit.adjust_scale_current<std::ratio<12, 1>>().adjust_scale_current<std::ratio<12, 1>>();
 
-    constexpr Internal::Measure auto amount      = u.amount();
-    constexpr Internal::Measure auto current     = u.current();
-    constexpr Internal::Measure auto length      = u.length();
-    constexpr Internal::Measure auto luminosity  = u.luminosity();
-    constexpr Internal::Measure auto mass        = u.mass();
-    constexpr Internal::Measure auto temperature = u.temperature();
-    constexpr Internal::Measure auto time        = u.time();
+    constexpr internal::measure auto amount      = u.get_amount();
+    constexpr internal::measure auto current     = u.get_current();
+    constexpr internal::measure auto length      = u.get_length();
+    constexpr internal::measure auto luminosity  = u.get_luminosity();
+    constexpr internal::measure auto mass        = u.get_mass();
+    constexpr internal::measure auto temperature = u.get_temperature();
+    constexpr internal::measure auto time        = u.get_time();
 
-    EXPECT_TRUE((std::ratio_equal_v<decltype(amount)::Scale, Internal::_detail::one>));
-    EXPECT_TRUE((std::ratio_equal_v<decltype(current)::Scale, std::ratio<144, 1>>));
-    EXPECT_TRUE((std::ratio_equal_v<decltype(length)::Scale, Internal::_detail::one>));
-    EXPECT_TRUE((std::ratio_equal_v<decltype(luminosity)::Scale, Internal::_detail::one>));
-    EXPECT_TRUE((std::ratio_equal_v<decltype(mass)::Scale, Internal::_detail::one>));
-    EXPECT_TRUE((std::ratio_equal_v<decltype(temperature)::Scale, Internal::_detail::one>));
-    EXPECT_TRUE((std::ratio_equal_v<decltype(time)::Scale, Internal::_detail::one>));
+    EXPECT_TRUE((std::ratio_equal_v<decltype(amount)::scale, internal::_detail::one>));
+    EXPECT_TRUE((std::ratio_equal_v<decltype(current)::scale, std::ratio<144, 1>>));
+    EXPECT_TRUE((std::ratio_equal_v<decltype(length)::scale, internal::_detail::one>));
+    EXPECT_TRUE((std::ratio_equal_v<decltype(luminosity)::scale, internal::_detail::one>));
+    EXPECT_TRUE((std::ratio_equal_v<decltype(mass)::scale, internal::_detail::one>));
+    EXPECT_TRUE((std::ratio_equal_v<decltype(temperature)::scale, internal::_detail::one>));
+    EXPECT_TRUE((std::ratio_equal_v<decltype(time)::scale, internal::_detail::one>));
 }
 
 TEST(TestUnit, TestLengthScale)
 {
-    constexpr Unit auto u = meterUnit.adjustScaleLength<std::ratio<12, 1>>().adjustScaleLength<std::ratio<12, 1>>();
+    constexpr unit auto u =
+        meter_unit.adjust_scale_length<std::ratio<12, 1>>().adjust_scale_length<std::ratio<12, 1>>();
 
-    constexpr Internal::Measure auto amount      = u.amount();
-    constexpr Internal::Measure auto current     = u.current();
-    constexpr Internal::Measure auto length      = u.length();
-    constexpr Internal::Measure auto luminosity  = u.luminosity();
-    constexpr Internal::Measure auto mass        = u.mass();
-    constexpr Internal::Measure auto temperature = u.temperature();
-    constexpr Internal::Measure auto time        = u.time();
+    constexpr internal::measure auto amount      = u.get_amount();
+    constexpr internal::measure auto current     = u.get_current();
+    constexpr internal::measure auto length      = u.get_length();
+    constexpr internal::measure auto luminosity  = u.get_luminosity();
+    constexpr internal::measure auto mass        = u.get_mass();
+    constexpr internal::measure auto temperature = u.get_temperature();
+    constexpr internal::measure auto time        = u.get_time();
 
-    EXPECT_TRUE((std::ratio_equal_v<decltype(amount)::Scale, Internal::_detail::one>));
-    EXPECT_TRUE((std::ratio_equal_v<decltype(current)::Scale, Internal::_detail::one>));
-    EXPECT_TRUE((std::ratio_equal_v<decltype(length)::Scale, std::ratio<144, 1>>));
-    EXPECT_TRUE((std::ratio_equal_v<decltype(luminosity)::Scale, Internal::_detail::one>));
-    EXPECT_TRUE((std::ratio_equal_v<decltype(mass)::Scale, Internal::_detail::one>));
-    EXPECT_TRUE((std::ratio_equal_v<decltype(temperature)::Scale, Internal::_detail::one>));
-    EXPECT_TRUE((std::ratio_equal_v<decltype(time)::Scale, Internal::_detail::one>));
+    EXPECT_TRUE((std::ratio_equal_v<decltype(amount)::scale, internal::_detail::one>));
+    EXPECT_TRUE((std::ratio_equal_v<decltype(current)::scale, internal::_detail::one>));
+    EXPECT_TRUE((std::ratio_equal_v<decltype(length)::scale, std::ratio<144, 1>>));
+    EXPECT_TRUE((std::ratio_equal_v<decltype(luminosity)::scale, internal::_detail::one>));
+    EXPECT_TRUE((std::ratio_equal_v<decltype(mass)::scale, internal::_detail::one>));
+    EXPECT_TRUE((std::ratio_equal_v<decltype(temperature)::scale, internal::_detail::one>));
+    EXPECT_TRUE((std::ratio_equal_v<decltype(time)::scale, internal::_detail::one>));
 }
 
 TEST(TestUnit, TestLuminosityScale)
 {
-    constexpr Unit auto u =
-        candelaUnit.adjustScaleLuminosity<std::ratio<12, 1>>().adjustScaleLuminosity<std::ratio<12, 1>>();
+    constexpr unit auto u =
+        candela_unit.adjust_scale_luminosity<std::ratio<12, 1>>().adjust_scale_luminosity<std::ratio<12, 1>>();
 
-    constexpr Internal::Measure auto amount      = u.amount();
-    constexpr Internal::Measure auto current     = u.current();
-    constexpr Internal::Measure auto length      = u.length();
-    constexpr Internal::Measure auto luminosity  = u.luminosity();
-    constexpr Internal::Measure auto mass        = u.mass();
-    constexpr Internal::Measure auto temperature = u.temperature();
-    constexpr Internal::Measure auto time        = u.time();
+    constexpr internal::measure auto amount      = u.get_amount();
+    constexpr internal::measure auto current     = u.get_current();
+    constexpr internal::measure auto length      = u.get_length();
+    constexpr internal::measure auto luminosity  = u.get_luminosity();
+    constexpr internal::measure auto mass        = u.get_mass();
+    constexpr internal::measure auto temperature = u.get_temperature();
+    constexpr internal::measure auto time        = u.get_time();
 
-    EXPECT_TRUE((std::ratio_equal_v<decltype(amount)::Scale, Internal::_detail::one>));
-    EXPECT_TRUE((std::ratio_equal_v<decltype(current)::Scale, Internal::_detail::one>));
-    EXPECT_TRUE((std::ratio_equal_v<decltype(length)::Scale, Internal::_detail::one>));
-    EXPECT_TRUE((std::ratio_equal_v<decltype(luminosity)::Scale, std::ratio<144, 1>>));
-    EXPECT_TRUE((std::ratio_equal_v<decltype(mass)::Scale, Internal::_detail::one>));
-    EXPECT_TRUE((std::ratio_equal_v<decltype(temperature)::Scale, Internal::_detail::one>));
-    EXPECT_TRUE((std::ratio_equal_v<decltype(time)::Scale, Internal::_detail::one>));
+    EXPECT_TRUE((std::ratio_equal_v<decltype(amount)::scale, internal::_detail::one>));
+    EXPECT_TRUE((std::ratio_equal_v<decltype(current)::scale, internal::_detail::one>));
+    EXPECT_TRUE((std::ratio_equal_v<decltype(length)::scale, internal::_detail::one>));
+    EXPECT_TRUE((std::ratio_equal_v<decltype(luminosity)::scale, std::ratio<144, 1>>));
+    EXPECT_TRUE((std::ratio_equal_v<decltype(mass)::scale, internal::_detail::one>));
+    EXPECT_TRUE((std::ratio_equal_v<decltype(temperature)::scale, internal::_detail::one>));
+    EXPECT_TRUE((std::ratio_equal_v<decltype(time)::scale, internal::_detail::one>));
 }
 
 TEST(TestUnit, TestMassScale)
 {
-    constexpr Unit auto u = gramUnit.adjustScaleMass<std::ratio<12, 1>>().adjustScaleMass<std::ratio<12, 1>>();
+    constexpr unit auto u = gram_unit.adjust_scale_mass<std::ratio<12, 1>>().adjust_scale_mass<std::ratio<12, 1>>();
 
-    constexpr Internal::Measure auto amount      = u.amount();
-    constexpr Internal::Measure auto current     = u.current();
-    constexpr Internal::Measure auto length      = u.length();
-    constexpr Internal::Measure auto luminosity  = u.luminosity();
-    constexpr Internal::Measure auto mass        = u.mass();
-    constexpr Internal::Measure auto temperature = u.temperature();
-    constexpr Internal::Measure auto time        = u.time();
+    constexpr internal::measure auto amount      = u.get_amount();
+    constexpr internal::measure auto current     = u.get_current();
+    constexpr internal::measure auto length      = u.get_length();
+    constexpr internal::measure auto luminosity  = u.get_luminosity();
+    constexpr internal::measure auto mass        = u.get_mass();
+    constexpr internal::measure auto temperature = u.get_temperature();
+    constexpr internal::measure auto time        = u.get_time();
 
-    EXPECT_TRUE((std::ratio_equal_v<decltype(amount)::Scale, Internal::_detail::one>));
-    EXPECT_TRUE((std::ratio_equal_v<decltype(current)::Scale, Internal::_detail::one>));
-    EXPECT_TRUE((std::ratio_equal_v<decltype(length)::Scale, Internal::_detail::one>));
-    EXPECT_TRUE((std::ratio_equal_v<decltype(luminosity)::Scale, Internal::_detail::one>));
-    EXPECT_TRUE((std::ratio_equal_v<decltype(mass)::Scale, std::ratio<144, 1>>));
-    EXPECT_TRUE((std::ratio_equal_v<decltype(temperature)::Scale, Internal::_detail::one>));
-    EXPECT_TRUE((std::ratio_equal_v<decltype(time)::Scale, Internal::_detail::one>));
+    EXPECT_TRUE((std::ratio_equal_v<decltype(amount)::scale, internal::_detail::one>));
+    EXPECT_TRUE((std::ratio_equal_v<decltype(current)::scale, internal::_detail::one>));
+    EXPECT_TRUE((std::ratio_equal_v<decltype(length)::scale, internal::_detail::one>));
+    EXPECT_TRUE((std::ratio_equal_v<decltype(luminosity)::scale, internal::_detail::one>));
+    EXPECT_TRUE((std::ratio_equal_v<decltype(mass)::scale, std::ratio<144, 1>>));
+    EXPECT_TRUE((std::ratio_equal_v<decltype(temperature)::scale, internal::_detail::one>));
+    EXPECT_TRUE((std::ratio_equal_v<decltype(time)::scale, internal::_detail::one>));
 }
 
 TEST(TestUnit, TestTemperatureScale)
 {
-    constexpr Unit auto u =
-        kelvinUnit.adjustScaleTemperature<std::ratio<12, 1>>().adjustScaleTemperature<std::ratio<12, 1>>();
+    constexpr unit auto u =
+        kelvin_unit.adjust_scale_temperature<std::ratio<12, 1>>().adjust_scale_temperature<std::ratio<12, 1>>();
 
-    constexpr Internal::Measure auto amount      = u.amount();
-    constexpr Internal::Measure auto current     = u.current();
-    constexpr Internal::Measure auto length      = u.length();
-    constexpr Internal::Measure auto luminosity  = u.luminosity();
-    constexpr Internal::Measure auto mass        = u.mass();
-    constexpr Internal::Measure auto temperature = u.temperature();
-    constexpr Internal::Measure auto time        = u.time();
+    constexpr internal::measure auto amount      = u.get_amount();
+    constexpr internal::measure auto current     = u.get_current();
+    constexpr internal::measure auto length      = u.get_length();
+    constexpr internal::measure auto luminosity  = u.get_luminosity();
+    constexpr internal::measure auto mass        = u.get_mass();
+    constexpr internal::measure auto temperature = u.get_temperature();
+    constexpr internal::measure auto time        = u.get_time();
 
-    EXPECT_TRUE((std::ratio_equal_v<decltype(amount)::Scale, Internal::_detail::one>));
-    EXPECT_TRUE((std::ratio_equal_v<decltype(current)::Scale, Internal::_detail::one>));
-    EXPECT_TRUE((std::ratio_equal_v<decltype(length)::Scale, Internal::_detail::one>));
-    EXPECT_TRUE((std::ratio_equal_v<decltype(luminosity)::Scale, Internal::_detail::one>));
-    EXPECT_TRUE((std::ratio_equal_v<decltype(mass)::Scale, Internal::_detail::one>));
-    EXPECT_TRUE((std::ratio_equal_v<decltype(temperature)::Scale, std::ratio<144, 1>>));
-    EXPECT_TRUE((std::ratio_equal_v<decltype(time)::Scale, Internal::_detail::one>));
+    EXPECT_TRUE((std::ratio_equal_v<decltype(amount)::scale, internal::_detail::one>));
+    EXPECT_TRUE((std::ratio_equal_v<decltype(current)::scale, internal::_detail::one>));
+    EXPECT_TRUE((std::ratio_equal_v<decltype(length)::scale, internal::_detail::one>));
+    EXPECT_TRUE((std::ratio_equal_v<decltype(luminosity)::scale, internal::_detail::one>));
+    EXPECT_TRUE((std::ratio_equal_v<decltype(mass)::scale, internal::_detail::one>));
+    EXPECT_TRUE((std::ratio_equal_v<decltype(temperature)::scale, std::ratio<144, 1>>));
+    EXPECT_TRUE((std::ratio_equal_v<decltype(time)::scale, internal::_detail::one>));
 }
 
 TEST(TestUnit, TestTimeScale)
 {
-    constexpr Unit auto u = secondUnit.adjustScaleTime<std::ratio<12, 1>>().adjustScaleTime<std::ratio<12, 1>>();
+    constexpr unit auto u = second_unit.adjust_scale_time<std::ratio<12, 1>>().adjust_scale_time<std::ratio<12, 1>>();
 
-    constexpr Internal::Measure auto amount      = u.amount();
-    constexpr Internal::Measure auto current     = u.current();
-    constexpr Internal::Measure auto length      = u.length();
-    constexpr Internal::Measure auto luminosity  = u.luminosity();
-    constexpr Internal::Measure auto mass        = u.mass();
-    constexpr Internal::Measure auto temperature = u.temperature();
-    constexpr Internal::Measure auto time        = u.time();
+    constexpr internal::measure auto amount      = u.get_amount();
+    constexpr internal::measure auto current     = u.get_current();
+    constexpr internal::measure auto length      = u.get_length();
+    constexpr internal::measure auto luminosity  = u.get_luminosity();
+    constexpr internal::measure auto mass        = u.get_mass();
+    constexpr internal::measure auto temperature = u.get_temperature();
+    constexpr internal::measure auto time        = u.get_time();
 
-    EXPECT_TRUE((std::ratio_equal_v<decltype(amount)::Scale, Internal::_detail::one>));
-    EXPECT_TRUE((std::ratio_equal_v<decltype(current)::Scale, Internal::_detail::one>));
-    EXPECT_TRUE((std::ratio_equal_v<decltype(length)::Scale, Internal::_detail::one>));
-    EXPECT_TRUE((std::ratio_equal_v<decltype(luminosity)::Scale, Internal::_detail::one>));
-    EXPECT_TRUE((std::ratio_equal_v<decltype(mass)::Scale, Internal::_detail::one>));
-    EXPECT_TRUE((std::ratio_equal_v<decltype(temperature)::Scale, Internal::_detail::one>));
-    EXPECT_TRUE((std::ratio_equal_v<decltype(time)::Scale, std::ratio<144, 1>>));
+    EXPECT_TRUE((std::ratio_equal_v<decltype(amount)::scale, internal::_detail::one>));
+    EXPECT_TRUE((std::ratio_equal_v<decltype(current)::scale, internal::_detail::one>));
+    EXPECT_TRUE((std::ratio_equal_v<decltype(length)::scale, internal::_detail::one>));
+    EXPECT_TRUE((std::ratio_equal_v<decltype(luminosity)::scale, internal::_detail::one>));
+    EXPECT_TRUE((std::ratio_equal_v<decltype(mass)::scale, internal::_detail::one>));
+    EXPECT_TRUE((std::ratio_equal_v<decltype(temperature)::scale, internal::_detail::one>));
+    EXPECT_TRUE((std::ratio_equal_v<decltype(time)::scale, std::ratio<144, 1>>));
 }
 
 TEST(TestUnit, TestToSIBaseUnits)
 {
-    constexpr Internal::MeasureType<2, 3, std::ratio<2, 1>, std::ratio<3, 2>> m;
+    constexpr internal::measure_type<2, 3, std::ratio<2, 1>, std::ratio<3, 2>> m;
 
-    const UnitType<m, m, m, m, m, m, m, int> startUnit;
-    constexpr Unit auto                      u = startUnit.toSIBaseUnits();
+    const unit_type<m, m, m, m, m, m, m, int> start_unit;
+    constexpr unit auto                       u = start_unit.to_SI_base_units();
 
-    constexpr Internal::Measure auto amount      = u.amount();
-    constexpr Internal::Measure auto current     = u.current();
-    constexpr Internal::Measure auto length      = u.length();
-    constexpr Internal::Measure auto luminosity  = u.luminosity();
-    constexpr Internal::Measure auto mass        = u.mass();
-    constexpr Internal::Measure auto temperature = u.temperature();
-    constexpr Internal::Measure auto time        = u.time();
+    constexpr internal::measure auto amount      = u.get_amount();
+    constexpr internal::measure auto current     = u.get_current();
+    constexpr internal::measure auto length      = u.get_length();
+    constexpr internal::measure auto luminosity  = u.get_luminosity();
+    constexpr internal::measure auto mass        = u.get_mass();
+    constexpr internal::measure auto temperature = u.get_temperature();
+    constexpr internal::measure auto time        = u.get_time();
 
-    EXPECT_EQ(amount.power(), 2);
-    EXPECT_EQ(amount.multiplier(), 0);
-    EXPECT_TRUE((std::ratio_equal_v<decltype(amount)::Scale, Internal::_detail::one>));
-    EXPECT_TRUE((std::ratio_equal_v<decltype(amount)::Offset, Internal::_detail::zero>));
+    EXPECT_EQ(amount.get_power(), 2);
+    EXPECT_EQ(amount.get_multiplier(), 0);
+    EXPECT_TRUE((std::ratio_equal_v<decltype(amount)::scale, internal::_detail::one>));
+    EXPECT_TRUE((std::ratio_equal_v<decltype(amount)::offset, internal::_detail::zero>));
 
-    EXPECT_EQ(current.power(), 2);
-    EXPECT_EQ(current.multiplier(), 0);
-    EXPECT_TRUE((std::ratio_equal_v<decltype(current)::Scale, Internal::_detail::one>));
-    EXPECT_TRUE((std::ratio_equal_v<decltype(current)::Offset, Internal::_detail::zero>));
+    EXPECT_EQ(current.get_power(), 2);
+    EXPECT_EQ(current.get_multiplier(), 0);
+    EXPECT_TRUE((std::ratio_equal_v<decltype(current)::scale, internal::_detail::one>));
+    EXPECT_TRUE((std::ratio_equal_v<decltype(current)::offset, internal::_detail::zero>));
 
-    EXPECT_EQ(length.power(), 2);
-    EXPECT_EQ(length.multiplier(), 0);
-    EXPECT_TRUE((std::ratio_equal_v<decltype(length)::Scale, Internal::_detail::one>));
-    EXPECT_TRUE((std::ratio_equal_v<decltype(length)::Offset, Internal::_detail::zero>));
+    EXPECT_EQ(length.get_power(), 2);
+    EXPECT_EQ(length.get_multiplier(), 0);
+    EXPECT_TRUE((std::ratio_equal_v<decltype(length)::scale, internal::_detail::one>));
+    EXPECT_TRUE((std::ratio_equal_v<decltype(length)::offset, internal::_detail::zero>));
 
-    EXPECT_EQ(luminosity.power(), 2);
-    EXPECT_EQ(luminosity.multiplier(), 0);
-    EXPECT_TRUE((std::ratio_equal_v<decltype(luminosity)::Scale, Internal::_detail::one>));
-    EXPECT_TRUE((std::ratio_equal_v<decltype(luminosity)::Offset, Internal::_detail::zero>));
+    EXPECT_EQ(luminosity.get_power(), 2);
+    EXPECT_EQ(luminosity.get_multiplier(), 0);
+    EXPECT_TRUE((std::ratio_equal_v<decltype(luminosity)::scale, internal::_detail::one>));
+    EXPECT_TRUE((std::ratio_equal_v<decltype(luminosity)::offset, internal::_detail::zero>));
 
-    EXPECT_EQ(mass.power(), 2);
-    EXPECT_EQ(mass.multiplier(), 3);
-    EXPECT_TRUE((std::ratio_equal_v<decltype(mass)::Scale, Internal::_detail::one>));
-    EXPECT_TRUE((std::ratio_equal_v<decltype(mass)::Offset, Internal::_detail::zero>));
+    EXPECT_EQ(mass.get_power(), 2);
+    EXPECT_EQ(mass.get_multiplier(), 3);
+    EXPECT_TRUE((std::ratio_equal_v<decltype(mass)::scale, internal::_detail::one>));
+    EXPECT_TRUE((std::ratio_equal_v<decltype(mass)::offset, internal::_detail::zero>));
 
-    EXPECT_EQ(temperature.power(), 2);
-    EXPECT_EQ(temperature.multiplier(), 0);
-    EXPECT_TRUE((std::ratio_equal_v<decltype(temperature)::Scale, Internal::_detail::one>));
-    EXPECT_TRUE((std::ratio_equal_v<decltype(temperature)::Offset, Internal::_detail::zero>));
+    EXPECT_EQ(temperature.get_power(), 2);
+    EXPECT_EQ(temperature.get_multiplier(), 0);
+    EXPECT_TRUE((std::ratio_equal_v<decltype(temperature)::scale, internal::_detail::one>));
+    EXPECT_TRUE((std::ratio_equal_v<decltype(temperature)::offset, internal::_detail::zero>));
 
-    EXPECT_EQ(time.power(), 2);
-    EXPECT_EQ(time.multiplier(), 0);
-    EXPECT_TRUE((std::ratio_equal_v<decltype(time)::Scale, Internal::_detail::one>));
-    EXPECT_TRUE((std::ratio_equal_v<decltype(time)::Offset, Internal::_detail::zero>));
+    EXPECT_EQ(time.get_power(), 2);
+    EXPECT_EQ(time.get_multiplier(), 0);
+    EXPECT_TRUE((std::ratio_equal_v<decltype(time)::scale, internal::_detail::one>));
+    EXPECT_TRUE((std::ratio_equal_v<decltype(time)::offset, internal::_detail::zero>));
 
-    EXPECT_TRUE((std::same_as<decltype(u)::Tag, void>));
+    EXPECT_TRUE((std::same_as<decltype(u)::tag, void>));
 }
 
 TEST(TestUnit, TestUnitConcept)
 {
-    using BaseType  = std::remove_cvref_t<meterUnitType>;
+    using BaseType  = std::remove_cvref_t<meter_unit_type>;
     using ConstType = std::add_const_t<BaseType>;
     using LRefType  = std::add_lvalue_reference_t<BaseType>;
     using RRefType  = std::add_rvalue_reference_t<BaseType>;
     using CLRefType = std::add_const_t<LRefType>;
     using CRRefType = std::add_const_t<RRefType>;
 
-    EXPECT_TRUE(Unit<BaseType>);
-    EXPECT_TRUE(Unit<ConstType>);
-    EXPECT_TRUE(Unit<LRefType>);
-    EXPECT_TRUE(Unit<RRefType>);
-    EXPECT_TRUE(Unit<CLRefType>);
-    EXPECT_TRUE(Unit<CRRefType>);
+    EXPECT_TRUE(unit<BaseType>);
+    EXPECT_TRUE(unit<ConstType>);
+    EXPECT_TRUE(unit<LRefType>);
+    EXPECT_TRUE(unit<RRefType>);
+    EXPECT_TRUE(unit<CLRefType>);
+    EXPECT_TRUE(unit<CRRefType>);
 }
 
 TEST(TestUnit, TestUnitless)
 {
-    EXPECT_FALSE(UnitlessUnit<moleUnit>);
-    EXPECT_FALSE(UnitlessUnit<ampereUnit>);
-    EXPECT_FALSE(UnitlessUnit<meterUnit>);
-    EXPECT_FALSE(UnitlessUnit<candelaUnit>);
-    EXPECT_FALSE(UnitlessUnit<gramUnit>);
-    EXPECT_FALSE(UnitlessUnit<kelvinUnit>);
-    EXPECT_FALSE(UnitlessUnit<secondUnit>);
-    EXPECT_FALSE(UnitlessUnit<radianUnit>);
-    EXPECT_TRUE(UnitlessUnit<unitlessUnit>);
+    EXPECT_FALSE(unitless_unit<mole_unit>);
+    EXPECT_FALSE(unitless_unit<ampere_unit>);
+    EXPECT_FALSE(unitless_unit<meter_unit>);
+    EXPECT_FALSE(unitless_unit<candela_unit>);
+    EXPECT_FALSE(unitless_unit<gram_unit>);
+    EXPECT_FALSE(unitless_unit<kelvin_unit>);
+    EXPECT_FALSE(unitless_unit<second_unit>);
+    EXPECT_FALSE(unitless_unit<radian_unit>);
+    EXPECT_TRUE(unitless_unit<unitless_unit_type{}>);
 }
 
 TEST(TestUnit, TestUnitTraits)
 {
-    EXPECT_TRUE(AmountUnit<moleUnit>);
-    EXPECT_TRUE(AmountUnit<kilomoleUnit>);
-    EXPECT_FALSE(AmountUnit<ampereUnit>);
-    EXPECT_FALSE(AmountUnit<meterUnit>);
-    EXPECT_FALSE(AmountUnit<candelaUnit>);
-    EXPECT_FALSE(AmountUnit<gramUnit>);
-    EXPECT_FALSE(AmountUnit<kelvinUnit>);
-    EXPECT_FALSE(AmountUnit<secondUnit>);
-    EXPECT_FALSE(AmountUnit<radianUnit>);
-    EXPECT_FALSE(AmountUnit<unitlessUnit>);
+    EXPECT_TRUE(amount_unit<mole_unit>);
+    EXPECT_TRUE(amount_unit<kilomole_unit>);
+    EXPECT_FALSE(amount_unit<ampere_unit>);
+    EXPECT_FALSE(amount_unit<meter_unit>);
+    EXPECT_FALSE(amount_unit<candela_unit>);
+    EXPECT_FALSE(amount_unit<gram_unit>);
+    EXPECT_FALSE(amount_unit<kelvin_unit>);
+    EXPECT_FALSE(amount_unit<second_unit>);
+    EXPECT_FALSE(amount_unit<radian_unit>);
+    EXPECT_FALSE(amount_unit<unitless_unit_type{}>);
 
-    EXPECT_FALSE(CurrentUnit<moleUnit>);
-    EXPECT_TRUE(CurrentUnit<ampereUnit>);
-    EXPECT_TRUE(CurrentUnit<kiloampereUnit>);
-    EXPECT_FALSE(CurrentUnit<meterUnit>);
-    EXPECT_FALSE(CurrentUnit<candelaUnit>);
-    EXPECT_FALSE(CurrentUnit<gramUnit>);
-    EXPECT_FALSE(CurrentUnit<kelvinUnit>);
-    EXPECT_FALSE(CurrentUnit<secondUnit>);
-    EXPECT_FALSE(CurrentUnit<radianUnit>);
-    EXPECT_FALSE(CurrentUnit<unitlessUnit>);
+    EXPECT_FALSE(current_unit<mole_unit>);
+    EXPECT_TRUE(current_unit<ampere_unit>);
+    EXPECT_TRUE(current_unit<kiloampere_unit>);
+    EXPECT_FALSE(current_unit<meter_unit>);
+    EXPECT_FALSE(current_unit<candela_unit>);
+    EXPECT_FALSE(current_unit<gram_unit>);
+    EXPECT_FALSE(current_unit<kelvin_unit>);
+    EXPECT_FALSE(current_unit<second_unit>);
+    EXPECT_FALSE(current_unit<radian_unit>);
+    EXPECT_FALSE(current_unit<unitless_unit_type{}>);
 
-    EXPECT_FALSE(LengthUnit<moleUnit>);
-    EXPECT_FALSE(LengthUnit<ampereUnit>);
-    EXPECT_TRUE(LengthUnit<meterUnit>);
-    EXPECT_TRUE(LengthUnit<kilometerUnit>);
-    EXPECT_FALSE(LengthUnit<candelaUnit>);
-    EXPECT_FALSE(LengthUnit<gramUnit>);
-    EXPECT_FALSE(LengthUnit<kelvinUnit>);
-    EXPECT_FALSE(LengthUnit<secondUnit>);
-    EXPECT_FALSE(LengthUnit<radianUnit>);
-    EXPECT_FALSE(LengthUnit<unitlessUnit>);
+    EXPECT_FALSE(length_unit<mole_unit>);
+    EXPECT_FALSE(length_unit<ampere_unit>);
+    EXPECT_TRUE(length_unit<meter_unit>);
+    EXPECT_TRUE(length_unit<kilometer_unit>);
+    EXPECT_FALSE(length_unit<candela_unit>);
+    EXPECT_FALSE(length_unit<gram_unit>);
+    EXPECT_FALSE(length_unit<kelvin_unit>);
+    EXPECT_FALSE(length_unit<second_unit>);
+    EXPECT_FALSE(length_unit<radian_unit>);
+    EXPECT_FALSE(length_unit<unitless_unit_type{}>);
 
-    EXPECT_FALSE(LuminosityUnit<moleUnit>);
-    EXPECT_FALSE(LuminosityUnit<ampereUnit>);
-    EXPECT_FALSE(LuminosityUnit<meterUnit>);
-    EXPECT_TRUE(LuminosityUnit<candelaUnit>);
-    EXPECT_TRUE(LuminosityUnit<kilocandelaUnit>);
-    EXPECT_FALSE(LuminosityUnit<gramUnit>);
-    EXPECT_FALSE(LuminosityUnit<kelvinUnit>);
-    EXPECT_FALSE(LuminosityUnit<secondUnit>);
-    EXPECT_FALSE(LuminosityUnit<radianUnit>);
-    EXPECT_FALSE(LuminosityUnit<unitlessUnit>);
+    EXPECT_FALSE(luminosity_unit<mole_unit>);
+    EXPECT_FALSE(luminosity_unit<ampere_unit>);
+    EXPECT_FALSE(luminosity_unit<meter_unit>);
+    EXPECT_TRUE(luminosity_unit<candela_unit>);
+    EXPECT_TRUE(luminosity_unit<kilocandela_unit>);
+    EXPECT_FALSE(luminosity_unit<gram_unit>);
+    EXPECT_FALSE(luminosity_unit<kelvin_unit>);
+    EXPECT_FALSE(luminosity_unit<second_unit>);
+    EXPECT_FALSE(luminosity_unit<radian_unit>);
+    EXPECT_FALSE(luminosity_unit<unitless_unit_type{}>);
 
-    EXPECT_FALSE(MassUnit<moleUnit>);
-    EXPECT_FALSE(MassUnit<ampereUnit>);
-    EXPECT_FALSE(MassUnit<meterUnit>);
-    EXPECT_FALSE(MassUnit<candelaUnit>);
-    EXPECT_TRUE(MassUnit<gramUnit>);
-    EXPECT_TRUE(MassUnit<kilogramUnit>);
-    EXPECT_FALSE(MassUnit<kelvinUnit>);
-    EXPECT_FALSE(MassUnit<secondUnit>);
-    EXPECT_FALSE(MassUnit<radianUnit>);
-    EXPECT_FALSE(MassUnit<unitlessUnit>);
+    EXPECT_FALSE(mass_unit<mole_unit>);
+    EXPECT_FALSE(mass_unit<ampere_unit>);
+    EXPECT_FALSE(mass_unit<meter_unit>);
+    EXPECT_FALSE(mass_unit<candela_unit>);
+    EXPECT_TRUE(mass_unit<gram_unit>);
+    EXPECT_TRUE(mass_unit<kilogram_unit>);
+    EXPECT_FALSE(mass_unit<kelvin_unit>);
+    EXPECT_FALSE(mass_unit<second_unit>);
+    EXPECT_FALSE(mass_unit<radian_unit>);
+    EXPECT_FALSE(mass_unit<unitless_unit_type{}>);
 
-    EXPECT_FALSE(TemperatureUnit<moleUnit>);
-    EXPECT_FALSE(TemperatureUnit<ampereUnit>);
-    EXPECT_FALSE(TemperatureUnit<meterUnit>);
-    EXPECT_FALSE(TemperatureUnit<candelaUnit>);
-    EXPECT_FALSE(TemperatureUnit<gramUnit>);
-    EXPECT_TRUE(TemperatureUnit<kelvinUnit>);
-    EXPECT_TRUE(TemperatureUnit<kilokelvinUnit>);
-    EXPECT_FALSE(TemperatureUnit<secondUnit>);
-    EXPECT_FALSE(TemperatureUnit<radianUnit>);
-    EXPECT_FALSE(TemperatureUnit<unitlessUnit>);
+    EXPECT_FALSE(temperature_unit<mole_unit>);
+    EXPECT_FALSE(temperature_unit<ampere_unit>);
+    EXPECT_FALSE(temperature_unit<meter_unit>);
+    EXPECT_FALSE(temperature_unit<candela_unit>);
+    EXPECT_FALSE(temperature_unit<gram_unit>);
+    EXPECT_TRUE(temperature_unit<kelvin_unit>);
+    EXPECT_TRUE(temperature_unit<kilokelvin_unit>);
+    EXPECT_FALSE(temperature_unit<second_unit>);
+    EXPECT_FALSE(temperature_unit<radian_unit>);
+    EXPECT_FALSE(temperature_unit<unitless_unit_type{}>);
 
-    EXPECT_FALSE(TimeUnit<moleUnit>);
-    EXPECT_FALSE(TimeUnit<ampereUnit>);
-    EXPECT_FALSE(TimeUnit<meterUnit>);
-    EXPECT_FALSE(TimeUnit<candelaUnit>);
-    EXPECT_FALSE(TimeUnit<gramUnit>);
-    EXPECT_FALSE(TimeUnit<kelvinUnit>);
-    EXPECT_TRUE(TimeUnit<secondUnit>);
-    EXPECT_TRUE(TimeUnit<kilosecondUnit>);
-    EXPECT_FALSE(TimeUnit<radianUnit>);
-    EXPECT_FALSE(TimeUnit<unitlessUnit>);
+    EXPECT_FALSE(time_unit<mole_unit>);
+    EXPECT_FALSE(time_unit<ampere_unit>);
+    EXPECT_FALSE(time_unit<meter_unit>);
+    EXPECT_FALSE(time_unit<candela_unit>);
+    EXPECT_FALSE(time_unit<gram_unit>);
+    EXPECT_FALSE(time_unit<kelvin_unit>);
+    EXPECT_TRUE(time_unit<second_unit>);
+    EXPECT_TRUE(time_unit<kilosecond_unit>);
+    EXPECT_FALSE(time_unit<radian_unit>);
+    EXPECT_FALSE(time_unit<unitless_unit_type{}>);
 
-    EXPECT_FALSE(AngleUnit<moleUnit>);
-    EXPECT_FALSE(AngleUnit<ampereUnit>);
-    EXPECT_FALSE(AngleUnit<meterUnit>);
-    EXPECT_FALSE(AngleUnit<candelaUnit>);
-    EXPECT_FALSE(AngleUnit<gramUnit>);
-    EXPECT_FALSE(AngleUnit<kelvinUnit>);
-    EXPECT_FALSE(AngleUnit<secondUnit>);
-    EXPECT_TRUE(AngleUnit<radianUnit>);
-    static_assert(AngleUnit<kiloradianUnit>);
-    EXPECT_TRUE(AngleUnit<degreeUnit>);
-    EXPECT_FALSE(AngleUnit<unitlessUnit>);
+    EXPECT_FALSE(angle_unit<mole_unit>);
+    EXPECT_FALSE(angle_unit<ampere_unit>);
+    EXPECT_FALSE(angle_unit<meter_unit>);
+    EXPECT_FALSE(angle_unit<candela_unit>);
+    EXPECT_FALSE(angle_unit<gram_unit>);
+    EXPECT_FALSE(angle_unit<kelvin_unit>);
+    EXPECT_FALSE(angle_unit<second_unit>);
+    EXPECT_TRUE(angle_unit<radian_unit>);
+    static_assert(angle_unit<kiloradian_unit>);
+    EXPECT_TRUE(angle_unit<degree_unit>);
+    EXPECT_FALSE(angle_unit<unitless_unit_type{}>);
 }
 
 TEST(TestUnit, TestUnitEquality)
 {
-    Unit auto        u  = meterUnit;
-    const Unit auto  u2 = meterUnit;
-    const Unit auto& u3 = meterUnit;
+    unit auto        u  = meter_unit;
+    const unit auto  u2 = meter_unit;
+    const unit auto& u3 = meter_unit;
 
     EXPECT_EQ(u, u);
     EXPECT_EQ(u, u2);
@@ -543,7 +545,7 @@ TEST(TestUnit, TestUnitEquality)
     EXPECT_EQ(u2, u3);
     EXPECT_EQ(u3, u2);
 
-    EXPECT_NE(meterUnit, kilometerUnit);
+    EXPECT_NE(meter_unit, kilometer_unit);
     EXPECT_FALSE(u != u);
     EXPECT_FALSE(u != u2);
     EXPECT_FALSE(u2 != u);
@@ -556,32 +558,32 @@ TEST(TestUnit, TestUnitEquality)
 TEST(TestUnit, TestUnitConversionOffset)
 {
     // Amount
-    const double conversion1 = conversionFactor(footUnit, mileUnit);
-    const double conversion2 = conversionFactor(mileUnit, footUnit);
-    const double conversion3 = conversionFactor(footUnit, meterUnit);
-    const double conversion4 = conversionFactor(meterUnit, footUnit);
+    const double conversion1 = conversion_factor(foot_unit, mile_unit);
+    const double conversion2 = conversion_factor(mile_unit, foot_unit);
+    const double conversion3 = conversion_factor(foot_unit, meter_unit);
+    const double conversion4 = conversion_factor(meter_unit, foot_unit);
 
     EXPECT_FLOAT_EQ(conversion1, 1.0 / 5'280.0);
     EXPECT_FLOAT_EQ(conversion2, 5'280.0);
     EXPECT_FLOAT_EQ(conversion3, 0.3048);
     EXPECT_FLOAT_EQ(conversion4, 1.0 / 0.3048);
 
-    const double conversion5 = conversionFactor(kilogramUnit, poundUnit);
-    const double conversion6 = conversionFactor(poundUnit, kilogramUnit);
+    const double conversion5 = conversion_factor(kilogram_unit, pound_unit);
+    const double conversion6 = conversion_factor(pound_unit, kilogram_unit);
 
     EXPECT_FLOAT_EQ(conversion5, 2.2046226);
     EXPECT_FLOAT_EQ(conversion6, 1.0 / 2.2046226);
 
-    const double conversion7 = conversionFactor(yearUnit, dayUnit);
-    const double conversion8 = conversionFactor(dayUnit, yearUnit);
+    const double conversion7 = conversion_factor(year_unit, day_unit);
+    const double conversion8 = conversion_factor(day_unit, year_unit);
 
     EXPECT_FLOAT_EQ(conversion7, 365.0);
     EXPECT_FLOAT_EQ(conversion8, 1.0 / 365.0);
 
-    const Unit auto from = meterUnit / secondUnit;
-    const Unit auto to   = mileUnit / hourUnit;
+    const unit auto from = meter_unit / second_unit;
+    const unit auto to   = mile_unit / hour_unit;
 
-    const double conversion9 = conversionFactor(from, to);
+    const double conversion9 = conversion_factor(from, to);
 
     EXPECT_FLOAT_EQ(conversion9, 2.23694);
 }
@@ -597,10 +599,10 @@ class UnitIncompatabilityTest : public testing::Test
 };
 
 using IncompatibleUnits =
-    ::testing::Types<std::pair<moleUnitType, ampereUnitType>, std::pair<ampereUnitType, candelaUnitType>,
-                     std::pair<candelaUnitType, gramUnitType>, std::pair<gramUnitType, kelvinUnitType>,
-                     std::pair<kelvinUnitType, secondUnitType>, std::pair<secondUnitType, radianUnitType>,
-                     std::pair<radianUnitType, unitlessUnitType>>;
+    ::testing::Types<std::pair<mole_unit_type, ampere_unit_type>, std::pair<ampere_unit_type, candela_unit_type>,
+                     std::pair<candela_unit_type, gram_unit_type>, std::pair<gram_unit_type, kelvin_unit_type>,
+                     std::pair<kelvin_unit_type, second_unit_type>, std::pair<second_unit_type, radian_unit_type>,
+                     std::pair<radian_unit_type, unitless_unit_type>>;
 TYPED_TEST_SUITE(UnitIncompatabilityTest, IncompatibleUnits);
 
 TYPED_TEST(UnitIncompatabilityTest, TestUnitIncompatability)
@@ -608,8 +610,8 @@ TYPED_TEST(UnitIncompatabilityTest, TestUnitIncompatability)
     constexpr auto first  = TestFixture::first;
     constexpr auto second = TestFixture::second;
 
-    EXPECT_FALSE((UnitConvertibleTo<first, second>));
-    EXPECT_FALSE((UnitConvertibleTo<second, first>));
+    EXPECT_FALSE((unit_convertible_to<first, second>));
+    EXPECT_FALSE((unit_convertible_to<second, first>));
 }
 
 template <typename T>
@@ -622,11 +624,12 @@ class UnitCompatabilityTest : public testing::Test
 };
 
 using CompatibleUnits =
-    ::testing::Types<std::pair<moleUnitType, kilomoleUnitType>, std::pair<ampereUnitType, kiloampereUnitType>,
-                     std::pair<meterUnitType, kilometerUnitType>, std::pair<candelaUnitType, kilocandelaUnitType>,
-                     std::pair<gramUnitType, kilogramUnitType>, std::pair<kelvinUnitType, kilokelvinUnitType>,
-                     std::pair<secondUnitType, kilosecondUnitType>, std::pair<radianUnitType, kiloradianUnitType>,
-                     std::pair<radianUnitType, degreeUnitType>>;
+    ::testing::Types<std::pair<mole_unit_type, kilomole_unit_type>, std::pair<ampere_unit_type, kiloampere_unit_type>,
+                     std::pair<meter_unit_type, kilometer_unit_type>,
+                     std::pair<candela_unit_type, kilocandela_unit_type>, std::pair<gram_unit_type, kilogram_unit_type>,
+                     std::pair<kelvin_unit_type, kilokelvin_unit_type>,
+                     std::pair<second_unit_type, kilosecond_unit_type>,
+                     std::pair<radian_unit_type, kiloradian_unit_type>, std::pair<radian_unit_type, degree_unit_type>>;
 TYPED_TEST_SUITE(UnitCompatabilityTest, CompatibleUnits);
 
 TYPED_TEST(UnitCompatabilityTest, TestCompatibleUnits)
@@ -634,8 +637,8 @@ TYPED_TEST(UnitCompatabilityTest, TestCompatibleUnits)
     constexpr auto first  = TestFixture::first;
     constexpr auto second = TestFixture::second;
 
-    EXPECT_TRUE((UnitConvertibleTo<first, second>));
-    EXPECT_TRUE((UnitConvertibleTo<second, first>));
+    EXPECT_TRUE((unit_convertible_to<first, second>));
+    EXPECT_TRUE((unit_convertible_to<second, first>));
 }
 
 TYPED_TEST(UnitCompatabilityTest, TestUnitPrefixConversion)
@@ -643,10 +646,10 @@ TYPED_TEST(UnitCompatabilityTest, TestUnitPrefixConversion)
     constexpr auto first  = TestFixture::first;
     constexpr auto second = TestFixture::second;
 
-    double conversion1 = conversionFactor(first, second);
-    double conversion2 = conversionFactor(second, first);
+    double conversion1 = conversion_factor(first, second);
+    double conversion2 = conversion_factor(second, first);
 
-    if constexpr (!Internal::Similar<decltype(second), degreeUnitType>)
+    if constexpr (!internal::similar<decltype(second), degree_unit_type>)
     {
         EXPECT_FLOAT_EQ(conversion1, 1e-3);
         EXPECT_FLOAT_EQ(conversion2, 1e3);

@@ -13,119 +13,119 @@
 
 #include <chrono>
 #include <type_traits>
-namespace Maxwell::Internal
+namespace maxwell::internal
 {
 /// \brief Specifies two types can be added together
 /// \tparam Tp The left hand side type of the addition
 /// \tparam Up The right hand side type of the addition
 template <typename Tp, typename Up>
-concept AddEnabledWith = requires(Tp a, Up b) { a + b; };
+concept add_enabled_with = requires(Tp a, Up b) { a + b; };
 
 /// \brief Specifies a type supports addition with itself
 /// \tparam Tp The type to check
 template <typename Tp>
-concept AddEnabled = AddEnabledWith<Tp, Tp>;
+concept add_enabled = add_enabled_with<Tp, Tp>;
 
 /// \brief Specifies two types can be added together and the addition is \c noexcept
 /// \tparam Tp The left hand side type of the addition
 /// \tparam Up The right hand side type of the addition
 template <typename Tp, typename Up>
-concept NothrowAddEnabledWith = AddEnabledWith<Tp, Up> && requires(Tp a, Up b) { noexcept(a + b); };
+concept nothrow_add_enabled_with = add_enabled_with<Tp, Up> && requires(Tp a, Up b) { noexcept(a + b); };
 
 /// \brief Specifies a type supports addition with itself and the addition is \c noexcept
 /// \tparam Tp The type to check
 template <typename Tp>
-concept NothrowAddEnabled = NothrowAddEnabledWith<Tp, Tp>;
+concept nothrow_add_enabled = nothrow_add_enabled_with<Tp, Tp>;
 
 /// \brief Specifies two types can be subtracted
 /// \tparam Tp The left hand side type of the subtraction
 /// \tparam Up The right hand side type of the subtraction
 template <typename Tp, typename Up>
-concept SubtractEnabledWith = requires(Tp a, Up b) { a + b; };
+concept subtract_enabled_with = requires(Tp a, Up b) { a + b; };
 
 /// \brief Specifies a type supports subtraction from itself
 /// \tparam Tp The type to check
 template <typename Tp>
-concept SubtractEnabled = SubtractEnabledWith<Tp, Tp>;
+concept subtract_enabled = subtract_enabled_with<Tp, Tp>;
 
 /// \brief Specifies two types can be subtracted and the subtraction is \c noexcept
 /// \tparam Tp The left hand side type of the subtraction
 /// \tparam Up The right hand side type of the subtraction
 template <typename Tp, typename Up>
-concept NothrowSubtractEnabledWith = SubtractEnabledWith<Tp, Up> && requires(Tp a, Up b) { noexcept(a - b); };
+concept nothrow_subtract_enabled_with = subtract_enabled_with<Tp, Up> && requires(Tp a, Up b) { noexcept(a - b); };
 
 /// \brief Specifies a type supports subtraction from itself and the subtraction is \c noexcept
 /// \tparam Tp The type to check
 template <typename Tp>
-concept NothrowSubtractEnabled = NothrowSubtractEnabledWith<Tp, Tp>;
+concept nothrow_subtract_enabled = nothrow_subtract_enabled_with<Tp, Tp>;
 
 // clang-format off
 /// \brief Specifies two types can be multiplied
 /// \tparam Tp The left hand side type of the multiplication
 /// \tparam Up The right hand side type of the multiplication
 template <typename Tp, typename Up>
-concept MultiplyEnabledWith = requires(Tp a, Up b) { a * b; };
+concept multiply_enabled_with = requires(Tp a, Up b) { a * b; };
 
 /// \brief Specifies a type supports multiplied by itself
 /// \tparam Tp The type to check
 template <typename Tp>
-concept MultiplyEnabled = MultiplyEnabledWith<Tp, Tp>;
+concept multiply_enabled = multiply_enabled_with<Tp, Tp>;
 
 /// \brief Specifies two types can be multiplied and the multiplication is \c noexcept
 /// \tparam Tp The left hand side type of the multiplication
 /// \tparam Up The right hand side type of the multiplication
 template <typename Tp, typename Up>
-concept NothrowMultiplyEnabledWith = MultiplyEnabledWith<Tp, Up> && requires(Tp a, Up b) { noexcept(a * b); };
+concept nothrow_multiply_enabled_with = multiply_enabled_with<Tp, Up> && requires(Tp a, Up b) { noexcept(a * b); };
 
 /// \brief Specifies a type supports multiplication by itself and the multiplication is \c noexcept
 /// \tparam Tp The type to check
 template <typename Tp>
-concept NothrowMultiplyEnabled = NothrowMultiplyEnabledWith<Tp, Tp>;
+concept nothrow_multiply_enabled = nothrow_multiply_enabled_with<Tp, Tp>;
 // clang-format on
 
 /// \brief Specifies two types can be divided
 /// \tparam Tp The left hand side type of the division
 /// \tparam Up The right hand side type of the division
 template <typename Tp, typename Up>
-concept DivideEnabledWith = requires(Tp a, Up b) { a / b; };
+concept divide_enabled_with = requires(Tp a, Up b) { a / b; };
 
 /// \brief Specifies a type supports division by itself
 /// \tparam Tp The type to check
 template <typename Tp>
-concept DivideEnabled = DivideEnabledWith<Tp, Tp>;
+concept divide_enabled = divide_enabled_with<Tp, Tp>;
 
 /// \brief Specifies two types can be divided and the division is \c noexcept
 /// \tparam Tp The left hand side type of the division
 /// \tparam Up The right hand side type of the division
 template <typename Tp, typename Up>
-concept NothrowDivideEnabledWith = DivideEnabledWith<Tp, Up> && requires(Tp a, Up b) { noexcept(a / b); };
+concept nothrow_divide_enabled_with = divide_enabled_with<Tp, Up> && requires(Tp a, Up b) { noexcept(a / b); };
 
 /// \brief Specifies a type supports divided by itself and the division is \c noexcept
 /// \tparam Tp The type to check
 template <typename Tp>
-concept NothrowDivideEnabled = NothrowDivideEnabledWith<Tp, Tp>;
+concept nothrow_divide_enabled = nothrow_divide_enabled_with<Tp, Tp>;
 
 /// \brief Specifies modulus can be computed between two types
 /// \tparam Tp The left hand side type of the modulo
 /// \tparam Up The right hand side type of the modulo
 template <typename Tp, typename Up>
-concept ModuloEnabledWith = requires(Tp a, Tp b) { a % b; };
+concept modulo_enabled_with = requires(Tp a, Tp b) { a % b; };
 
 /// \brief Specifies modulus can be computed for a type
 /// \tparam Tp The type to check
 template <typename Tp>
-concept ModuleEnabled = ModuloEnabledWith<Tp, Tp>;
+concept module_enabled = modulo_enabled_with<Tp, Tp>;
 
 /// \brief Specifies modulus can be computed between two types and the calculation does not throw exceptions.
 /// \tparam Tp The left hand side type of the modulo
 /// \tparam Up The right hand side type of the modulo
 template <typename Tp, typename Up>
-concept NothrowModuloEnabledWith = ModuloEnabledWith<Tp, Up> && requires(Tp a, Tp b) { noexcept(a % b); };
+concept nothrow_modulo_enabled_with = modulo_enabled_with<Tp, Up> && requires(Tp a, Tp b) { noexcept(a % b); };
 
 /// \brief Specifies modulus can be computed for a type and the calculation does not throw exceptions.
 /// \tparam Tp The type to check
 template <typename Tp>
-concept NothrowModuloEnabled = NothrowMultiplyEnabledWith<Tp, Tp>;
+concept nothrow_modulo_enabled = nothrow_modulo_enabled_with<Tp, Tp>;
 
 /// \cond
 namespace _detail
@@ -141,7 +141,7 @@ struct is_chrono_dur<std::chrono::duration<Rep, Period>> : std::true_type
 };
 
 template <typename T>
-concept ChronoDuration = is_chrono_dur<std::remove_cvref_t<T>>::value;
+concept chrono_duration = is_chrono_dur<std::remove_cvref_t<T>>::value;
 } // namespace _detail
 /// \endcond
 
@@ -150,8 +150,8 @@ concept ChronoDuration = is_chrono_dur<std::remove_cvref_t<T>>::value;
 /// \tparam The first type to check
 /// \tparam The second type to check
 template <typename T, typename U>
-concept Similar = std::same_as<std::remove_cvref_t<T>, std::remove_cvref_t<U>>;
+concept similar = std::same_as<std::remove_cvref_t<T>, std::remove_cvref_t<U>>;
 /// \endcond
-} // namespace Maxwell::Internal
+} // namespace maxwell::internal
 
 #endif

@@ -18,7 +18,7 @@
 
 /// \namespace Maxwell::Internal
 /// \brief Declarations internal to Maxwell
-namespace Maxwell::Internal
+namespace maxwell::internal
 {
 // --- Measure Type Defintion ---
 
@@ -39,122 +39,122 @@ struct is_ratio<std::ratio<Num, Den>> : std::true_type
 };
 
 template <typename Tp>
-concept RatioLike = is_ratio<Tp>::value;
+concept ratio_like = is_ratio<Tp>::value;
 } // namespace _detail
 /// \endcond
 
-/// \class MeasureType
+/// \class measure_type
 /// \brief Represents one fundamental quantity in the SI system
 ///
-/// <tt>class MeasureType</tt> represents one dimension used
+/// <tt>class measure_type</tt> represents one dimension used
 /// in the SI system. It consists of a base unit and the transformations
 /// applied to the base unit to convert it to a derived unit repersenting
 /// that dimension. The unit represented by this class is given by
 ///
-/// \f$Unit = (10^{Multiplier} * Scale::num/Scale::den * Measure^{Power}) + Offset::num/Offset::den\f$
+/// \f$Unit = (10^{multiplier} * scale::num/scale::den * Measure^{power}) + offset::num/offset::den\f$
 ///
 /// The transformations applied to the measure are part of the
 /// measure's type; different measres are different types.
 ///
-/// \tparam Power_ the power the unit is raised to
-/// \tparam Multiplier_ the metric prefix applied to the unit
-/// \tparam Scale_ the scale factor of the unit
-/// \tparam Offset_ the offset of the unit
-template <std::intmax_t Power_, std::intmax_t Multiplier_, _detail::RatioLike Scale_ = _detail::one,
-          _detail::RatioLike Offset_ = _detail::zero>
-struct MeasureType
+/// \tparam power_ the power the unit is raised to
+/// \tparam multiplier_ the metric prefix applied to the unit
+/// \tparam scale_ the scale factor of the unit
+/// \tparam offset_ the offset of the unit
+template <std::intmax_t power_, std::intmax_t multiplier_, _detail::ratio_like scale_ = _detail::one,
+          _detail::ratio_like offset_ = _detail::zero>
+struct measure_type
 {
     /// The power the unit is raised to
-    static constexpr std::intmax_t Power      = Power_;
+    static constexpr std::intmax_t power      = power_;
     /// The metric prefix of the unit
-    static constexpr std::intmax_t Multiplier = Multiplier_;
+    static constexpr std::intmax_t multiplier = multiplier_;
     /// The scale factor of the unit
-    using Scale                               = Scale_;
+    using scale                               = scale_;
     /// The offset of the unit
-    using Offset                              = Offset_;
+    using offset                              = offset_;
 
-    /// \fn power
+    /// \fn get_power
     /// \brief Returns the power the measure is raised to
     ///
     /// \return The power the measure is raised to
-    consteval std::intmax_t power() const noexcept
+    consteval std::intmax_t get_power() const noexcept
     {
-        return Power;
+        return power;
     }
 
-    /// \fn multiplier
+    /// \fn get_multiplier
     /// \brief Returns the metric prefix of the measure
     /// \return The metric prefix of the measure
-    std::intmax_t consteval multiplier() const noexcept
+    std::intmax_t consteval get_multiplier() const noexcept
     {
-        return Multiplier;
+        return multiplier;
     }
 
-    /// \fn adjustMultiplier
+    /// \fn adjustmultiplier
     /// \brief Adjusts the multiplier by the specified amount
     ///
     /// Creates a new measure whose multiplier is equivalent to
-    /// \code Multiplier + Adjustment \endcode
+    /// \code multiplier + adjustment \endcode
     ///
-    /// \post The returned measure has a power of \c Power and a
-    ///       multiplier equal to <tt>Multiplier + Adjustment</tt>
+    /// \post The returned measure has a power of \c power and a
+    ///       multiplier equal to <tt>multiplier + adjustment</tt>
     ///
-    /// \tparam Adjustment the amount to adjust the measure by
+    /// \tparam adjustment the amount to adjust the measure by
     /// \return A new masure with the adjusted prefix
-    template <std::intmax_t Adjustment>
-    consteval auto adjustMultiplier() const noexcept
+    template <std::intmax_t adjustment>
+    consteval auto adjust_multiplier() const noexcept
     {
-        return MeasureType<Power, Multiplier + Adjustment, Scale, Offset>{};
+        return measure_type<power, multiplier + adjustment, scale, offset>{};
     }
 
-    /// \fn isBaseMeasure
+    /// \fn is_base_measure
     /// \brief Returns true if the measure is a base measure
     ///
     /// Returns true if the measure is a base measure, i.e. if the
     /// following condition is true
     /// \code
-    /// Power == 1 && Multiplier == 0
+    /// power == 1 && multiplier == 0
     /// \endcode
     /// In general, this corresponds with an SI base unit except
     /// for mass, where this measure returns true for gram, not kilogram.
     /// \return true if the measure is a base measure
-    consteval bool isBaseMeasure() const noexcept
+    consteval bool is_base_measure() const noexcept
     {
-        return Power_ == 1 && Multiplier_ == 0 && std::ratio_equal_v<Scale, _detail::one> &&
-               std::ratio_equal_v<Offset, _detail::zero>;
+        return power_ == 1 && multiplier_ == 0 && std::ratio_equal_v<scale, _detail::one> &&
+               std::ratio_equal_v<offset, _detail::zero>;
     }
 
-    /// \fn isCoherentMeasure
+    /// \fn is_coherent_measure
     /// \brief Returns true if the measure is a coherent measure
     ///
     /// Returns true if the measure is a coherent measure, i.e.
     /// if it has no multiplier.
     ///
     /// \return true if the measuer is a coherent measure
-    consteval bool isCoherentMeasure() const noexcept
+    consteval bool is_coherent_measure() const noexcept
     {
-        return Multiplier_ == 0 && std::ratio_equal_v<Scale, _detail::one> && std::ratio_equal_v<Offset, _detail::zero>;
+        return multiplier_ == 0 && std::ratio_equal_v<scale, _detail::one> && std::ratio_equal_v<offset, _detail::zero>;
     }
 
-    /// \fn toCoherentMeasure
+    /// \fn to_coherent_measure
     /// \brief Returns a coherent version of the measure
     ///
-    /// Returns a new \c MeasureType with the same power that is a
+    /// Returns a new \c measure_type with the same power that is a
     /// coherent version of \c *this
     ///
-    /// \post The returned \c MeasureType has a multiplier of 0
+    /// \post The returned \c measure_type has a multiplier of 0
     /// \return a coherent version of \c *this
-    consteval auto toCoherentMeasure() const noexcept
+    consteval auto to_coherent_measure() const noexcept
     {
-        return MeasureType<Power, 0, _detail::one, _detail::zero>{};
+        return measure_type<power, 0, _detail::one, _detail::zero>{};
     }
 };
 
 /// Compile-time constant represeting base measure
-constexpr MeasureType<1, 0, _detail::one, _detail::zero> baseMeasure;
+constexpr measure_type<1, 0, _detail::one, _detail::zero> base_measure;
 /// Compile-time constant representing a null measure
 /// (measure that doesn't contribute to the unit's definition)
-constexpr MeasureType<0, 0, _detail::one, _detail::zero> nullMeasure;
+constexpr measure_type<0, 0, _detail::one, _detail::zero> null_measure;
 
 // -- Measure Type Concepts --
 
@@ -166,21 +166,21 @@ struct _is_measure : std::false_type
 {
 };
 
-template <std::intmax_t Power_, std::intmax_t Multiplier, _detail::RatioLike Scale_, _detail::RatioLike Offset_>
-struct _is_measure<MeasureType<Power_, Multiplier, Scale_, Offset_>> : std::true_type
+template <std::intmax_t power_, std::intmax_t multiplier, _detail::ratio_like scale_, _detail::ratio_like offset_>
+struct _is_measure<measure_type<power_, multiplier, scale_, offset_>> : std::true_type
 {
 };
 } // namespace _detail
 /// \endcond
 
-/// \brief Specifies a type is an instantiation of the \c MeasureType class template
+/// \brief Specifies a type is an instantiation of the \c measure_type class template
 ///
-/// Specifies a type is an instantiation of the \c MeasureType class template, ignoring cv-qualfiers
+/// Specifies a type is an instantiation of the \c measure_type class template, ignoring cv-qualfiers
 /// and references.
 ///
 /// \tparam M the type to check
 template <typename M>
-concept Measure = _detail::_is_measure<std::remove_cvref_t<M>>::value;
+concept measure = _detail::_is_measure<std::remove_cvref_t<M>>::value;
 
 // --- Measure Conversion ---
 
@@ -196,24 +196,24 @@ concept Measure = _detail::_is_measure<std::remove_cvref_t<M>>::value;
 ///
 /// \param from the starting measure
 /// \param to the target measure
-consteval bool isMeasureConvertible(Measure auto from, Measure auto to) noexcept
+consteval bool is_measure_convertible(measure auto from, measure auto to) noexcept
 {
-    return from.power() == to.power();
+    return from.get_power() == to.get_power();
 }
 
 // --- Measure Type Comparison ---
 
-/// \brief Compares two \c MeasureTypes for equality
+/// \brief Compares two \c measure_types for equality
 ///
-/// Compares two \c MeasureTypes for equality.
-/// Two \c MeasureTypes are equal if and only if they have the
+/// Compares two \c measure_types for equality.
+/// Two \c measure_types are equal if and only if they have the
 /// same power, multiplier, scale factor, and offset. This implies they are the same type.
 ///
 /// \param lhs one measure to compare for equality
 /// \param rhs the other measure to compare for equality
 ///
 /// \return true if the measures are equal
-constexpr bool operator==(Measure auto lhs, Measure auto rhs) noexcept
+constexpr bool operator==(measure auto lhs, measure auto rhs) noexcept
 {
     return std::same_as<std::remove_cvref_t<decltype(lhs)>, std::remove_cvref_t<decltype(rhs)>>;
 }
@@ -227,25 +227,25 @@ constexpr bool operator==(Measure auto lhs, Measure auto rhs) noexcept
 /// \param lhs one measure to multiply
 /// \param rhs the other measure to multiply
 /// \return the product of \c lhs and \c rhs
-constexpr Measure auto operator*(Measure auto lhs, Measure auto rhs) noexcept
+constexpr measure auto operator*(measure auto lhs, measure auto rhs) noexcept
 {
     using LHSType = decltype(lhs);
     using RHSType = decltype(rhs);
 
-    constexpr auto multiplier = (lhs.multiplier() == rhs.multiplier()) ? lhs.multiplier() : 0;
+    constexpr auto multiplier = (lhs.get_multiplier() == rhs.get_multiplier()) ? lhs.get_multiplier() : 0;
 
     // if constexpr (lhs.multiplier() == rhs.multiplier() &&
-    //               std::ratio_equal_v<typename LHSType::Offset, typename RHSType::Offset>)
+    //               std::ratio_equal_v<typename LHSType::offset, typename RHSType::offset>)
     // {
-    //     return MeasureType<lhs.power() + rhs.power(), lhs.multiplier(), typename LHSType::Scale,
-    //                        typename RHSType::Offset>{};
+    //     return measure_type<lhs.power() + rhs.power(), lhs.multiplier(), typename LHSType::scale,
+    //                        typename RHSType::offset>{};
     // }
     // else
     // {
-    //     return MeasureType<lhs.power() + rhs.power(), 0, _detail::one, _detail::zero>{};
+    //     return measure_type<lhs.power() + rhs.power(), 0, _detail::one, _detail::zero>{};
     // }
-    return MeasureType<lhs.power() + rhs.power(), multiplier,
-                       std::ratio_multiply<typename LHSType::Scale, typename RHSType::Scale>, _detail::zero>{};
+    return measure_type<lhs.get_power() + rhs.get_power(), multiplier,
+                        std::ratio_multiply<typename LHSType::scale, typename RHSType::scale>, _detail::zero>{};
 }
 
 /// \brief Divides two measures
@@ -257,25 +257,25 @@ constexpr Measure auto operator*(Measure auto lhs, Measure auto rhs) noexcept
 /// \param lhs the divident
 /// \param rhs the divisor
 /// \return the quotient of \c lhs and \c rhs
-constexpr Measure auto operator/(Measure auto lhs, Measure auto rhs) noexcept
+constexpr measure auto operator/(measure auto lhs, measure auto rhs) noexcept
 {
     using LHSType             = decltype(lhs);
     using RHSType             = decltype(rhs);
-    constexpr auto multiplier = (lhs.multiplier() == rhs.multiplier()) ? lhs.multiplier() : 0;
+    constexpr auto multiplier = (lhs.get_multiplier() == rhs.get_multiplier()) ? lhs.get_multiplier() : 0;
 
     // if constexpr (lhs.multiplier() == rhs.multiplier() &&
-    //               std::ratio_equal_v<typename LHSType::Offset, typename RHSType::Offset>)
+    //               std::ratio_equal_v<typename LHSType::offset, typename RHSType::offset>)
     // {
-    //     return MeasureType<lhs.power() + rhs.power(), lhs.multiplier(), typename LHSType::Scale,
-    //                        typename RHSType::Offset>{};
+    //     return measure_type<lhs.power() + rhs.power(), lhs.multiplier(), typename LHSType::scale,
+    //                        typename RHSType::offset>{};
     // }
     // else
     // {
-    //     return MeasureType<lhs.power() + rhs.power(), 0, _detail::one, _detail::zero>{};
+    //     return measure_type<lhs.power() + rhs.power(), 0, _detail::one, _detail::zero>{};
     // }
-    return MeasureType<lhs.power() - rhs.power(), multiplier,
-                       std::ratio_divide<typename LHSType::Scale, typename RHSType::Scale>, _detail::zero>{};
+    return measure_type<lhs.get_power() - rhs.get_power(), multiplier,
+                        std::ratio_divide<typename LHSType::scale, typename RHSType::scale>, _detail::zero>{};
 }
-} // namespace Maxwell::Internal
+} // namespace maxwell::internal
 
 #endif
