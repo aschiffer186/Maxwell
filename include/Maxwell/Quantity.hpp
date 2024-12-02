@@ -39,12 +39,14 @@ namespace internal::_detail
 template <typename Period, ratio_like Scale>
 constexpr bool implicit_unit_conversion() noexcept
 {
+    // TODO: Implement
     return true;
 }
 
 template <typename Period, ratio_like Scale>
 constexpr bool implicit_chrono_conversion() noexcept
 {
+    // TODO: Implement
     return true;
 }
 
@@ -66,6 +68,7 @@ template <typename D, unit auto U>
     requires time_unit<U>
 constexpr double from_chrono_conversion_factor()
 {
+    // TODO: Finish
     // using Period = D::period;
     if (std::ratio_equal_v<typename decltype(U.get_time())::scale, internal::_detail::one>)
     {
@@ -83,6 +86,7 @@ template <typename D, unit auto U>
     requires time_unit<U>
 constexpr double to_chrono_conversion_factor()
 {
+    // TODO: Finish
     // using Period = D::period;
     if (std::ratio_equal_v<typename decltype(U.get_time())::scale, internal::_detail::one>)
     {
