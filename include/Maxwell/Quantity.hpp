@@ -10,12 +10,14 @@
 
 #include <cctype>
 #include <chrono>
+#include <compare>
 #include <concepts>
 #include <format>
 #include <functional>
 #include <initializer_list>
 #include <iterator>
 #include <limits>
+#include <memory>
 #include <ostream>
 #include <string_view>
 #include <type_traits>
@@ -103,6 +105,21 @@ template <typename M, unit auto U>
 struct is_basic_quantity<basic_quantity<M, U>> : std::true_type
 {
 };
+
+template <typename M, unit auto U>
+struct is_basic_quantity<const basic_quantity<M, U>> : std::true_type
+{
+};
+
+template <typename M, unit auto U>
+struct is_basic_quantity<volatile basic_quantity<M, U>> : std::true_type
+{
+};
+
+template <typename M, unit auto U>
+struct is_basic_quantity<const volatile basic_quantity<M, U>> : std::true_type
+{
+};
 } // namespace internal::_detail
 /// \endcond
 
@@ -117,6 +134,9 @@ struct is_basic_quantity<basic_quantity<M, U>> : std::true_type
 ///
 /// \sa unitType
 ///
+/// Mandates: \c T is not cv-qualified, not \c std::in_place_t, not a spcalization of \c std::chrono::duration, and
+/// not a specialization of \c basic_quantity
+///
 /// \tparam T the type of the quantity's magnitude
 /// \tparam U the quantity's units
 template <typename T, unit auto U>
@@ -124,6 +144,7 @@ class basic_quantity
 {
     static_assert(!std::is_const_v<T>, "Magnitude cannot be const");
     static_assert(!std::is_volatile_v<T>, "Magnitude cannot be volatile");
+    static_assert(!std::is_void_v<T>, "Magnitude cannot be void");
     static_assert(!internal::similar<T, std::in_place_t>, "Magnitude cannot be std::in_place_t");
     static_assert(!internal::_detail::chrono_duration<T>, "Magnitude cannot be a std::chrono::duration");
     static_assert(!internal::_detail::is_basic_quantity<T>::value, "Magnitude cannot be a basic quantity!");
@@ -133,10 +154,9 @@ class basic_quantity
 
   public:
     /// The type of the quantity's magnitude
-    using magnitude_type = T;
+    using magnitude_type        = T;
     /// The type of the quantity's units
-    using units_type     = decltype(U);
-
+    using units_type            = decltype(U);
     /// The quantity's units
     static constexpr auto units = U;
 
@@ -163,7 +183,7 @@ class basic_quantity
     /// \post <tt>this->magnitude()</tt> is equal to \c magnitude
     ///
     /// \throws Any exceptions thrown by the move constructor of \c magnitude_type
-    constexpr explicit(unitless_unit<units>)
+    constexpr explicit(!unitless_unit<units>)
         basic_quantity(magnitude_type magnitude) noexcept(std::is_nothrow_move_constructible_v<magnitude_type>)
         requires std::move_constructible<magnitude_type>
         : magnitude_(std::move(magnitude))
@@ -181,7 +201,7 @@ class basic_quantity
     template <typename Up>
         requires(!internal::_detail::chrono_duration<Up>) && std::constructible_from<magnitude_type, Up> &&
                 (!internal::_detail::is_basic_quantity<std::remove_cvref_t<Up>>::value)
-    constexpr explicit(unitless_unit<units>)
+    constexpr explicit(!unitless_unit<units>)
         basic_quantity(Up&& magnitude) noexcept(std::is_nothrow_constructible_v<magnitude_type, Up>)
         : magnitude_(std::forward<Up>(magnitude))
     {
@@ -225,7 +245,7 @@ class basic_quantity
     /// \brief Constructor
     ///
     /// Constructs a \c basic_quantity from a \c std::chrono::duration type, allowing for integration with the
-    /// standard library. This constructor is implicit if there would be a loss of information converting from the
+    /// standard library. This constructor is implicit if there would be no loss of information converting from the
     /// specified \c std::chrono::duration type.
     ///
     /// \pre \c magnitude_type is constructible from \c Rep
@@ -291,8 +311,12 @@ class basic_quantity
         swap(other.magnitude_, magnitude_);
     }
 
-    friend auto operator==(const basic_quantity& a, const basic_quantity& b) -> bool  = default;
-    friend auto operator<=>(const basic_quantity& a, const basic_quantity& b) -> auto = default;
+    friend bool operator==(const basic_quantity& a, const basic_quantity& b)
+        requires std::equality_comparable<magnitude_type>
+    = default;
+    friend auto operator<=>(const basic_quantity& a, const basic_quantity& b)
+        requires std::three_way_comparable<magnitude_type>
+    = default;
 
     // --- Accessor Functions ---
 
@@ -327,7 +351,7 @@ class basic_quantity
 
     // --- Conversion Functions ---
 
-    constexpr explicit(unitless_unit<units>) operator magnitude_type() const noexcept
+    constexpr explicit(!unitless_unit<units>) operator magnitude_type() const noexcept
     {
         return magnitude_;
     }
@@ -436,7 +460,6 @@ class basic_quantity
   private:
     magnitude_type magnitude_{};
 };
-
 // --- CTAD for construction from std::chrono::duration
 template <typename Rep, typename Period>
 basic_quantity(std::chrono::duration<Rep, Period>) -> basic_quantity<Rep, second_unit>;
@@ -569,6 +592,24 @@ constexpr auto operator/(const M2& lhs, const basic_quantity<M1, U1>& rhs) noexc
     internal::nothrow_multiply_enabled_with<M1, M2>) -> basic_quantity<decltype(lhs / rhs.magnitude()), U1>
 {
     return basic_quantity<decltype(lhs.magnitude() / rhs), U1>(lhs.magnitude() * rhs);
+}
+
+// --- Comparison ---
+template <typename M, unit auto U1, unit auto U2>
+    requires std::equality_comparable<M>
+constexpr bool operator==(const basic_quantity<M, U1>& lhs,
+                          const basic_quantity<M, U2>& rhs) noexcept(noexcept(lhs.magnitude() == rhs.magnitude()))
+{
+    return lhs.to_SI_base_units().magnitude() == rhs.to_SI_base_units().magnitude();
+}
+
+template <typename M, unit auto U1, unit auto U2>
+    requires std::three_way_comparable<M>
+constexpr std::compare_three_way_result_t<M> operator<=>(
+    const basic_quantity<M, U1>& lhs,
+    const basic_quantity<M, U2>& rhs) noexcept(noexcept(lhs.magnitude() <=> rhs.magnitude()))
+{
+    return lhs.to_SI_base_units().magnitude() <=> rhs.to_SI_base_units().magnitude();
 }
 
 // --- Formatting ---

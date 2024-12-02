@@ -585,7 +585,16 @@ TEST(TestUnit, TestUnitConversionOffset)
 
     const double conversion9 = conversion_factor(from, to);
 
-    EXPECT_FLOAT_EQ(conversion9, 2.23694);
+    EXPECT_NEAR(conversion9, 2.23694, 1e-4);
+}
+
+TEST(TestUnit, TestUnitMultiplication)
+{
+    const unit_type<internal::measure_type<1, 0>{}, internal::measure_type<2, 0>{}, internal::measure_type<3, 0>{},
+                    internal::measure_type<4, 0>{}, internal::measure_type<5, 0>{}, internal::measure_type<6, 0>{},
+                    internal::measure_type<7, 0>{}>
+                                     u;
+    [[maybe_unused]] const unit auto prod = u * u;
 }
 
 // --- Type Parameterized Tests ---

@@ -12,6 +12,7 @@
 #define CONCEPTS_HPP
 
 #include <chrono>
+#include <memory>
 #include <type_traits>
 namespace maxwell::internal
 {
@@ -151,7 +152,22 @@ concept chrono_duration = is_chrono_dur<std::remove_cvref_t<T>>::value;
 /// \tparam The second type to check
 template <typename T, typename U>
 concept similar = std::same_as<std::remove_cvref_t<T>, std::remove_cvref_t<U>>;
-/// \endcond
+
+namespace _detail
+{
+template <typename>
+struct specializes_pointer_traits : std::false_type
+{
+};
+
+template <typename Ptr>
+struct specializes_pointer_traits<std::pointer_traits<Ptr>> : std::true_type
+{
+};
+
+template <typename T>
+concept pointer_like = specializes_pointer_traits<T>::value;
+} // namespace _detail
 } // namespace maxwell::internal
 
 #endif

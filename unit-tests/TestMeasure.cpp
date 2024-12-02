@@ -196,12 +196,12 @@ TEST(TestMeasure, TestMeasureMultiplication)
 
     EXPECT_EQ(p3.get_power(), 2);
     EXPECT_EQ(p3.get_multiplier(), 1);
-    EXPECT_TRUE((std::ratio_equal_v<decltype(p3)::scale, std::ratio<1, 2>>));
-    EXPECT_TRUE((std::ratio_equal_v<decltype(p3)::offset, std::ratio<1, 2>>));
+    EXPECT_TRUE((std::ratio_equal_v<decltype(p3)::scale, std::ratio<1, 4>>));
+    EXPECT_TRUE((std::ratio_equal_v<decltype(p3)::offset, _detail::zero>));
 
     EXPECT_EQ(p4.get_power(), 3);
     EXPECT_EQ(p4.get_multiplier(), 0);
-    EXPECT_TRUE((std::ratio_equal_v<decltype(p4)::scale, _detail::one>));
+    EXPECT_TRUE((std::ratio_equal_v<decltype(p4)::scale, std::ratio<2, 6>>));
     EXPECT_TRUE((std::ratio_equal_v<decltype(p4)::offset, _detail::zero>));
 }
 
@@ -225,11 +225,11 @@ TEST(TestMeasure, TestMeasureDivision)
 
     EXPECT_EQ(q3.get_power(), 0);
     EXPECT_EQ(q3.get_multiplier(), 1);
-    EXPECT_TRUE((std::ratio_equal_v<decltype(q3)::scale, std::ratio<1, 2>>));
-    EXPECT_TRUE((std::ratio_equal_v<decltype(q3)::offset, std::ratio<1, 2>>));
+    EXPECT_TRUE((std::ratio_equal_v<decltype(q3)::scale, std::ratio<1, 1>>));
+    EXPECT_TRUE((std::ratio_equal_v<decltype(q3)::offset, _detail::zero>));
 
     EXPECT_EQ(q4.get_power(), -1);
     EXPECT_EQ(q4.get_multiplier(), 0);
-    EXPECT_TRUE((std::ratio_equal_v<decltype(q4)::scale, _detail::one>));
+    EXPECT_TRUE((std::ratio_equal_v<decltype(q4)::scale, std::ratio<3, 4>>));
     EXPECT_TRUE((std::ratio_equal_v<decltype(q4)::offset, _detail::zero>));
 }

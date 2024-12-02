@@ -6,6 +6,8 @@
 #include <gtest/gtest.h>
 #include <type_traits>
 
+#include "TestTypes.hpp"
+
 using namespace maxwell;
 
 TEST(TestQuantity, TestQuantityCXXProperties)
@@ -29,9 +31,14 @@ TEST(TestQuantity, TestDefaultConstructor)
     const meter m{};
     EXPECT_FLOAT_EQ(m.magnitude(), double{});
 
-    constexpr meter m2{};
+    const meter m2{};
 
     EXPECT_FLOAT_EQ(m2.magnitude(), double{});
+}
+
+template <mass M>
+void foo(M)
+{
 }
 
 TEST(TestQuantity, TestMagnitudeTypeConstructor)
@@ -44,4 +51,23 @@ TEST(TestQuantity, TestMagnitudeTypeConstructor)
 
     constexpr meter m2{1.0};
     EXPECT_FLOAT_EQ(m2.magnitude(), double(1.0));
+
+    Noisy<true>                             n{};
+    Noisy<false>                            n2{};
+    basic_quantity<Noisy<true>, meter_unit> q{n};
+
+    bool is_nothrow = noexcept(basic_quantity<Noisy<true>, meter_unit>{n});
+
+    EXPECT_TRUE(is_nothrow);
+    EXPECT_EQ(Noisy<true>::numCopyCtorCalls, 1);
+    EXPECT_EQ(Noisy<true>::numMoveCtorCalls, 1);
+
+    constexpr bool is_nothrow2 = noexcept(basic_quantity<Noisy<false>, meter_unit>{n2});
+    EXPECT_FALSE(is_nothrow2);
+}
+
+TEST(TestQuantity, TestForwardingConstructor)
+{
+    using type1 = basic_quantity<Noisy<true>, meter_unit>;
+    using type2 = basic_quantity<Noisy<false>, meter_unit>;
 }

@@ -13,6 +13,7 @@
 #include <ratio>
 #include <string>
 #include <type_traits>
+#include <unordered_map>
 
 #include "internal/Concepts.hpp"
 #include "internal/Measure.hpp"
@@ -995,9 +996,31 @@ constexpr std::intmax_t quecto = -30;
 /// \cond
 namespace _detail
 {
-std::string defaultUnitName(unit auto)
+std::string default_unit_name(unit auto u)
 {
-    return "";
+    std::string                  name;
+    const internal::measure auto amount      = u.get_amount();
+    const internal::measure auto current     = u.get_current();
+    const internal::measure auto length      = u.get_length();
+    const internal::measure auto luminosity  = u.get_luminosity();
+    const internal::measure auto mass        = u.get_mass();
+    const internal::measure auto temperature = u.get_temperature();
+    const internal::measure auto time        = u.get_time();
+
+    static const std::unordered_map<std::intmax_t, std::string> prefixes{
+        {-30, "q"}, {-27, "r"}, {-24, "y"}, {-21, "z"}, {-18, "a"}, {-15, "f"}, {-12, "p"}, {-9, "n"},
+        {-6, "u"},  {-3, "m"},  {-2, "c"},  {-1, "d"},  {1, "da"},  {2, "h"},   {3, "k"},   {6, "M"},
+        {9, "G"},   {12, "T"},  {15, "P"},  {18, "E"},  {21, "Z"},  {24, "Y"},  {27, "R"},  {30, "Q"}};
+    if (luminosity.get_power() != 0)
+    {
+        name.append(prefixes[luminosity.get_prefix()]);
+        name.append("cd^");
+        name.append(std::to_string(luminosity.get_power()));
+    }
+    if (amount.get_power() != 0)
+    {
+    }
+    return name;
 }
 } // namespace _detail
 /// \endcond
@@ -1011,7 +1034,7 @@ std::string defaultUnitName(unit auto)
 ///
 /// \tparam U The unit to provide a description for
 template <unit auto U>
-inline const std::string unit_string = _detail::defaultUnitName(U);
+inline const std::string unit_string = _detail::default_unit_name(U);
 } // namespace maxwell
 
 #endif
