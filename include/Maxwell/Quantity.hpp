@@ -69,17 +69,11 @@ template <typename D, unit auto U>
 constexpr double from_chrono_conversion_factor()
 {
     // TODO: Finish
-    // using Period = D::period;
-    if (std::ratio_equal_v<typename decltype(U.get_time())::scale, internal::_detail::one>)
-    {
-        // Detailing with second, potentially scaled by a metric prefix
-        [[maybe_unused]] constexpr std::intmax_t multiplier = U.get_time().get_multiplier();
-        return 1.0;
-    }
-    else
-    {
-        return 1.0;
-    }
+    using Period = D::period;
+    const unit_type<null_measure, null_measure, null_measure, null_measure, null_measure, null_measure,
+                    measure_type<1, 0, Period>{}>
+        as_maxwell_unit;
+    return conversion_factor(as_maxwell_unit, U);
 }
 
 template <typename D, unit auto U>
@@ -88,16 +82,11 @@ constexpr double to_chrono_conversion_factor()
 {
     // TODO: Finish
     // using Period = D::period;
-    if (std::ratio_equal_v<typename decltype(U.get_time())::scale, internal::_detail::one>)
-    {
-        // Detailing with second, potentially scaled by a metric prefix
-        [[maybe_unused]] constexpr std::intmax_t multiplier = U.get_time().get_multiplier();
-        return 1.0;
-    }
-    else
-    {
-        return 1.0;
-    }
+    using Period = D::period;
+    const unit_type<null_measure, null_measure, null_measure, null_measure, null_measure, null_measure,
+                    measure_type<1, 0, Period>{}>
+        as_maxwell_unit;
+    return conversion_factor(U, as_maxwell_unit);
 }
 
 template <typename>
