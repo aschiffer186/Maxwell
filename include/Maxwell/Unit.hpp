@@ -822,7 +822,7 @@ template <internal::_detail::ratio_like From, internal::_detail::ratio_like To>
 constexpr double conversionFactorOffset() noexcept
 {
     using ResRatio = std::ratio_divide<To, From>;
-    return static_cast<double>(ResRatio::num) / static_cast<double>(ResRatio::den);
+    return static_cast<double>(ResRatio::den) / static_cast<double>(ResRatio::num);
 }
 } // namespace _detail
 /// \endcond
@@ -840,18 +840,14 @@ constexpr double conversionFactorOffset() noexcept
 /// \param to The target unit
 /// \return The factor the magnitude of a quantity with units \c from needs to be multiplied
 /// to be converted to a quantity with units \c to
-constexpr double tag_conversion_factor(unit auto lhs, unit auto rhs) noexcept
+template <typename, typename>
+struct tag_conversion_factor;
+
+template <typename Tag>
+struct tag_conversion_factor<Tag, Tag>
 {
-    if constexpr (std::same_as<typename decltype(lhs)::tag, typename decltype(rhs)::tag>)
-    {
-        return 1.0;
-    }
-    else
-    {
-        static_assert(_detail::dependentFalse<typename decltype(lhs)::tag>,
-                      "Attempting to convert between units with inconvertible tags!");
-    }
-}
+    static constexpr double factor = 1.0;
+};
 
 /// \brief Calculate the conversion factor to go from \c from to \c to
 ///
@@ -887,7 +883,7 @@ constexpr double conversion_factor(unit auto from, unit auto to) noexcept
     conversionFactor *=
         _detail::conversionFactorPrefix(from.get_time().get_multiplier(), to.get_time().get_multiplier());
     conversionFactor *= _detail::conversionFactorPrefix(from.get_multiplier(), to.get_multiplier());
-    conversionFactor *= tag_conversion_factor(from, to);
+    conversionFactor *= tag_conversion_factor<typename From::tag, typename To::tag>::factor;
 
     // Convert ratios
     conversionFactor *=

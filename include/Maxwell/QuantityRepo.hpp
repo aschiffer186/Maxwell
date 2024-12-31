@@ -55,6 +55,9 @@ QUANTITY_LITERAL(kelvin, K)
 QUANTITY_LITERAL(second, s)
 } // namespace metric_literals
 
+using unitless_quantity  = quantity<unitless_unit_type{}>;
+using iunitless_quantity = iquantity<unitless_unit_type{}>;
+
 #ifndef NO_PREDEFINED_DERIVED_UNITS
 using radian  = quantity<radian_unit>;
 using iradian = iquantity<radian_unit>;
@@ -67,6 +70,12 @@ using idegree = iquantity<degree_unit>;
 /// \tparam quantityType The quantity to check
 template <typename QuantityType>
 concept angle = angle_unit<QuantityType::units>;
+
+template <typename QuantityType>
+concept pressure = pressure_unit<QuantityType::units>;
+
+using pascal  = quantity<pascal_unit>;
+using ipascal = quantity<pascal_unit>;
 #endif
 } // namespace maxwell
 

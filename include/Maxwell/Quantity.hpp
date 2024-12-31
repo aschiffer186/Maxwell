@@ -47,7 +47,7 @@ template <typename Period, ratio_like Scale>
 constexpr bool implicit_chrono_conversion() noexcept
 {
     // TODO: Implement
-    return true;
+    return std::ratio_divide<Period, Scale>::den == 1;
 }
 
 template <typename D, typename M, auto U>
@@ -61,7 +61,7 @@ template <typename D, typename M, auto U>
 concept enable_implicit_to_chrono =
     unit<decltype(U)> && chrono_duration<D> &&
     (std::chrono::treat_as_floating_point_v<typename D::rep> ||
-     implicit_chrono_conversion<typename D::period, decltype(decltype(U)::time)::scale>()) &&
+     implicit_chrono_conversion<decltype(decltype(U)::time)::scale, typename D::period>()) &&
     std::constructible_from<typename D::rep, M>;
 
 template <typename D, unit auto U>
@@ -80,8 +80,6 @@ template <typename D, unit auto U>
     requires time_unit<U>
 constexpr double to_chrono_conversion_factor()
 {
-    // TODO: Finish
-    // using Period = D::period;
     using Period = D::period;
     const unit_type<null_measure, null_measure, null_measure, null_measure, null_measure, null_measure,
                     measure_type<1, 0, Period>{}>
@@ -245,6 +243,8 @@ class basic_quantity
     /// \pre \c units has dimensions of time
     /// \post \c this->magnitude() is equal to \c dur.count()
     ///
+    /// \param dur the \c std::chrono::duration value to construct from
+    ///
     /// \throw any exceptions thrown by \c dur or by the constructor of \c magnitude_type
     template <typename Rep, typename Period>
         requires time_unit<units> && std::constructible_from<magnitude_type, Rep>
@@ -255,6 +255,21 @@ class basic_quantity
     {
     }
 
+    /// \brief Converting constructor
+    ///
+    /// Constructs a \c basic_quantity from the specified \c basic_quantity with different units, automatically
+    /// converting the units of the specified quantity to \c Units. The magnitude of \c *this is move constructed
+    /// from \c q.magnitude() then multiplied by the appropriate conversion factor between \c Other and \c Units.
+    ///
+    /// \pre \c magnitude_type is constructible from \c Up
+    /// \pre \c Other is convertible to \c Units.
+    /// \post <tt>this->magnitude() == conversion_factor(Other, Units)*q.magnitude()</tt>
+    ///
+    /// \tparam Up the type of the magnitude of the \c basic_quantity to construct from
+    /// \tparam Other the units ofthe \c basic_quantity to construct from
+    /// \param q the \c basic_quantity to construct from
+    ///
+    /// \throw any exceptions thrown by the move constructor of \c magnitude_type
     template <typename Up, unit auto Other>
         requires(std::constructible_from<magnitude_type, std::add_rvalue_reference_t<Up>>) &&
                 (!(std::same_as<Up, magnitude_type> && Other == U)) && unit_convertible_to<Other, units>
@@ -264,16 +279,46 @@ class basic_quantity
     {
     }
 
-    template <typename Up, unit auto Other>
-        requires(std::constructible_from<magnitude_type, std::add_rvalue_reference_t<Up>>) &&
-                unit_convertible_to<Other, units>
-    constexpr basic_quantity& operator=(basic_quantity<Up, Other> q) noexcept(
-        std::is_nothrow_constructible_v<magnitude_type, std::add_rvalue_reference_t<Up>>)
+    /// \brief Converting assignment operator
+    ///
+    /// Converts the magitude of \c q from \c Other to \c Units then assigns the value to the magnitude
+    /// of \c *this.
+    ///
+    /// \pre \c Up is swappable with \c magnitude_type
+    /// \pre \c Other is convertible to \c units
+    /// \post <tt>this->magnitude() == conversion_factor(Other, Units)*q.magnitude()</tt>
+    ///
+    /// \tparam Up the type of the magnitude of the \c basic_quantity being assigned from
+    /// \tparam Other the units of the \c basic_quantity being assigned from
+    /// \param q the \c basic_quantity to assign to \c *this
+    ///
+    /// \return a reference to \c *this
+    ///
+    /// \throws any exceptions through by swapping \c Up and \c magnitude_type
+    template <std::swappable_with<magnitude_type> Up, unit auto Other>
+        requires unit_convertible_to<Other, units>
+    constexpr basic_quantity& operator=(basic_quantity<Up, Other> q)
     {
         (*this).swap(q);
         return *this;
     }
 
+    /// \brief Converting assignment operator
+    ///
+    /// Converts the magitude of \c dur from the period specified by the \c std::chrono::duration to
+    /// \c Units
+    ///
+    /// \pre \c magnitude_type is constructible from \c Rep
+    /// \pre \c time_unit<units>
+    /// \post <tt>this->magnitude() == conversion_factor(Other, Units)*dur.coun</tt>
+    ///
+    /// \tparam Rep the representation type of the \c std::chrono::duration
+    /// \tparam Period the period of the \c std::chrono::duration
+    /// \param dur the \c std::chrono::duration to assign to \c *this
+    ///
+    /// \return a refeence to \c *this
+    ///
+    /// \throws any exceptions thrown by the copy constructor of \c dur
     template <typename Rep, typename Period>
         requires time_unit<units> && std::constructible_from<magnitude_type, Rep>
     basic_quantity& operator=(std::chrono::duration<Rep, Period> dur)
@@ -282,15 +327,28 @@ class basic_quantity
         return *this;
     }
 
+    /// \brief Assignment operator
+    ///
+    /// Assigns the specified value to the magnitude of \c *this. This operator only applies to
+    /// unitless quantities.
+    ///
+    /// \pre \c magnitude_type is assignable from \c Up
+    /// \pre \c *this is unitless
+    ///
+    /// \tparam Up the the type of the value to assign to \c *this
+    /// \param up the value to assign to \c *this
+    ///
+    /// \return a reference to \c *this
     template <typename Up>
-        requires std::constructible_from<magnitude_type, Up> && unitless_unit<units>
-    constexpr basic_quantity& operator=(Up up) noexcept(std::is_nothrow_constructible_v<magnitude_type, Up>)
+        requires std::assignable_from<std::add_rvalue_reference_t<Up>, magnitude_type> && unitless_unit<units>
+    constexpr basic_quantity& operator=(Up up) noexcept(
+        std::is_nothrow_assignable_v<std::add_rvalue_reference_t<Up>, magnitude_type>)
     {
-        (*this).swap(basic_quantity(std::move(up)));
+        magnitude_ = std::move(up);
         return *this;
     }
-    // --- Core Language Functions ---
 
+    // --- Core Language Functions ---
     /// \brief Swaps two quantities
     ///
     /// Swaps the magnitude of two quantities.
@@ -556,7 +614,7 @@ constexpr auto operator/(const basic_quantity<M1, U1>& lhs,
 }
 
 template <typename M1, unit auto U1, typename M2>
-    requires internal::multiply_enabled_with<M1, M2>
+    requires internal::multiply_enabled_with<M1, M2> && (!unitless_unit<U1>)
 constexpr auto operator*(const basic_quantity<M1, U1>& lhs, const M2& rhs) noexcept(
     internal::nothrow_multiply_enabled_with<M1, M2>) -> basic_quantity<decltype(lhs.magnitude() * rhs), U1>
 {
@@ -564,7 +622,7 @@ constexpr auto operator*(const basic_quantity<M1, U1>& lhs, const M2& rhs) noexc
 }
 
 template <typename M1, unit auto U1, typename M2>
-    requires internal::multiply_enabled_with<M1, M2>
+    requires internal::multiply_enabled_with<M1, M2> && (!unitless_unit<U1>)
 constexpr auto operator*(const M2& lhs, const basic_quantity<M1, U1>& rhs) noexcept(
     internal::nothrow_multiply_enabled_with<M1, M2>) -> basic_quantity<decltype(lhs * rhs.magnitude()), U1>
 {
@@ -648,7 +706,7 @@ concept mass = mass_unit<QuantityType::units>;
 ///
 /// \tparam QuantityType The quantity to check
 template <typename QuantityType>
-concept Temperature = temperature_unit<QuantityType::units>;
+concept temperature = temperature_unit<QuantityType::units>;
 
 /// \brief Specifies a quantity has dimensions of time
 ///

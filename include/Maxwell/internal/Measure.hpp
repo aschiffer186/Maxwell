@@ -232,7 +232,11 @@ constexpr measure auto operator*(measure auto lhs, measure auto rhs) noexcept
     using LHSType = decltype(lhs);
     using RHSType = decltype(rhs);
 
-    constexpr auto multiplier = (lhs.get_multiplier() == rhs.get_multiplier()) ? lhs.get_multiplier() : 0;
+    constexpr auto multiplier = (lhs.get_multiplier() == rhs.get_multiplier())
+                                    ? lhs.get_multiplier()
+                                    : ((rhs.get_multiplier() == 0)   ? lhs.get_multiplier()
+                                       : (lhs.get_multiplier() == 0) ? rhs.get_multiplier()
+                                                                     : 0);
 
     // if constexpr (lhs.multiplier() == rhs.multiplier() &&
     //               std::ratio_equal_v<typename LHSType::offset, typename RHSType::offset>)
@@ -259,9 +263,14 @@ constexpr measure auto operator*(measure auto lhs, measure auto rhs) noexcept
 /// \return the quotient of \c lhs and \c rhs
 constexpr measure auto operator/(measure auto lhs, measure auto rhs) noexcept
 {
-    using LHSType             = decltype(lhs);
-    using RHSType             = decltype(rhs);
-    constexpr auto multiplier = (lhs.get_multiplier() == rhs.get_multiplier()) ? lhs.get_multiplier() : 0;
+    using LHSType = decltype(lhs);
+    using RHSType = decltype(rhs);
+
+    constexpr auto multiplier = (lhs.get_multiplier() == rhs.get_multiplier())
+                                    ? lhs.get_multiplier()
+                                    : ((rhs.get_multiplier() == 0)   ? lhs.get_multiplier()
+                                       : (lhs.get_multiplier() == 0) ? rhs.get_multiplier()
+                                                                     : 0);
 
     // if constexpr (lhs.multiplier() == rhs.multiplier() &&
     //               std::ratio_equal_v<typename LHSType::offset, typename RHSType::offset>)

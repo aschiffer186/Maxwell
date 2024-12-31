@@ -182,10 +182,11 @@ struct is_tag_convertible<_detail::degree_tag, _detail::radian_tag> : std::true_
 /// to get a value in degrees
 ///
 /// \return conversion factor from radians to degrees
-consteval double tag_conversion_factor(radian_unit_type, degree_unit_type) noexcept
+template <>
+struct tag_conversion_factor<radian_unit_type::tag, degree_unit_type::tag>
 {
-    return 180.0 / std::numbers::pi;
-}
+    static constexpr double factor = 180.0 / std::numbers::pi;
+};
 
 /// \brief Calculate conversion factor
 ///
@@ -194,10 +195,11 @@ consteval double tag_conversion_factor(radian_unit_type, degree_unit_type) noexc
 /// to get a value in radians
 ///
 /// \return conversion factor from degrees to radians
-consteval double tag_conversion_factor(degree_unit_type, radian_unit_type) noexcept
+template <>
+struct tag_conversion_factor<degree_unit_type::tag, radian_unit_type::tag>
 {
-    return std::numbers::pi / 180.0;
-}
+    static constexpr double factor = std::numbers::pi / 180.0;
+};
 
 /// \cond
 namespace _detail
@@ -219,6 +221,10 @@ MAKE_METRIC_PREFIXES(steradian_unit, extra)
 MAKE_UNIT_WITH_PREFIXES_DESC(hertz, unitless_unit_type{} / second_unit, time, "Hz")
 MAKE_UNIT_WITH_PREFIXES_DESC(newton, kilogram_unit * meter_unit / (second_unit * second_unit), mass, "N")
 MAKE_UNIT_WITH_PREFIXES_DESC(pascal, newton_unit / (meter_unit * meter_unit), mass, "Pa")
+
+template<auto U> 
+concept pressure_unit = unit_convertible_to<U, pascal_unit>;
+
 MAKE_UNIT_WITH_PREFIXES_DESC(joule, newton_unit * meter_unit, mass, "J")
 MAKE_UNIT_WITH_PREFIXES_DESC(watt, joule_unit / second_unit, mass, "J/s")
 MAKE_UNIT_WITH_PREFIXES_DESC(coulomb, second_unit * ampere_unit, current, "C")
@@ -269,21 +275,21 @@ MAKE_UNIT(meter_per_second_per_second, meter_per_second_unit / second_unit)
 MAKE_UNIT(square_meter, meter_unit * meter_unit)
 MAKE_UNIT(cubic_meter, square_meter_unit * meter_unit)
 
-MAKE_SCALED_UNIT_WITH_DESC(liter, meter_unit, (std::ratio<1'000, 1>), length, "L")
+MAKE_SCALED_UNIT_WITH_DESC(liter, cubic_meter_unit, (std::ratio<1'000, 1>), length, "L")
 
 // Imperial units 
-MAKE_SCALED_UNIT_WITH_DESC(foot, meter_unit, (std::ratio<3'280'839'895, 1'000'000'000>), length, "ft")
-MAKE_SCALED_UNIT_WITH_DESC(inch, foot_unit, (std::ratio<12, 1>), length, "in")
-MAKE_SCALED_UNIT_WITH_DESC(yard, foot_unit, (std::ratio<1, 3>), length, "yd")
-MAKE_SCALED_UNIT_WITH_DESC(mile, foot_unit, (std::ratio<1, 5'280>), length, "mi")
+MAKE_SCALED_UNIT_WITH_DESC(foot, meter_unit, (std::ratio<3'048, 10'000>), length, "ft")
+MAKE_SCALED_UNIT_WITH_DESC(inch, foot_unit, (std::ratio<1, 12>), length, "in")
+MAKE_SCALED_UNIT_WITH_DESC(yard, foot_unit, (std::ratio<3, 1>), length, "yd")
+MAKE_SCALED_UNIT_WITH_DESC(mile, foot_unit, (std::ratio<5'280, 1>), length, "mi")
 
-MAKE_SCALED_UNIT_WITH_DESC(pound, kilogram_unit, (std::ratio<22'046'226'218, 10'000'000'000>), mass, "lb")
+MAKE_SCALED_UNIT_WITH_DESC(pound, kilogram_unit, (std::ratio<45'359'237, 100'000'000>), mass, "lb")
 
-MAKE_SCALED_UNIT_WITH_DESC(minute, second_unit, (std::ratio<1, 60>), time, "min")
-MAKE_SCALED_UNIT_WITH_DESC(hour, minute_unit, (std::ratio<1, 60>), time, "hr")
-MAKE_SCALED_UNIT_WITH_DESC(day, hour_unit, (std::ratio<1, 24>), time, "day")
-MAKE_SCALED_UNIT_WITH_DESC(week, day_unit, (std::ratio<1, 7>), time, "week")
-MAKE_SCALED_UNIT_WITH_DESC(year, day_unit, (std::ratio<1, 365>), time, "yr")
+MAKE_SCALED_UNIT_WITH_DESC(minute, second_unit, (std::ratio<60, 1>), time, "min")
+MAKE_SCALED_UNIT_WITH_DESC(hour, minute_unit, (std::ratio<60, 1>), time, "hr")
+MAKE_SCALED_UNIT_WITH_DESC(day, hour_unit, (std::ratio<24, 1>), time, "day")
+MAKE_SCALED_UNIT_WITH_DESC(week, day_unit, (std::ratio<7, 1>), time, "week")
+MAKE_SCALED_UNIT_WITH_DESC(year, day_unit, (std::ratio<365, 1>), time, "yr")
 
 // clang-format on
 #undef ESC
