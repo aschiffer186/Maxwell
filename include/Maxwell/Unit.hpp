@@ -456,6 +456,160 @@ struct unit_type
         return unit_type<amount, current, length, luminosity, mass, temperature, newMeasure, tag, ExtraMultiplier_>{};
     }
 
+    /// \brief Adjusts the offset of the amount dimension of the unit
+    ///
+    /// Returns a new \c unit_type with the same dimension, but whose amount offset has been
+    /// has been adjustd by the specified value.
+    ///
+    /// \post The offset of the amount dimension of the return unit is equal to the offset
+    ///       of \c *this + \c Adjustment
+    ///
+    /// \tparam Adjustment The amount to adjust the offset of the amount dimension by
+    /// \return A \c unit_type whose amount dimension has been offset
+    template <internal::_detail::ratio_like Adjustment>
+    consteval auto adjust_offset_amount() const noexcept
+    {
+        constexpr internal::measure auto oldMeasure = amount;
+        using OldOffset                             = decltype(oldMeasure)::offset;
+        using NewOffset                             = std::ratio_add<OldOffset, Adjustment>;
+        constexpr internal::measure_type<oldMeasure.get_powewr(), oldMeasure.get_multiplier(),
+                                         typename decltype(oldMeasure)::scale, NewOffset>
+            newMeasure{};
+        return unit_type<newMeasure, current, length, luminosity, mass, temperature, time, tag, ExtraMultiplier_>{};
+    }
+
+    /// \brief Adjusts the offset of the current dimension of the unit
+    ///
+    /// Returns a new \c unit_type with t current dimension, but whose amount offset has been
+    /// has been adjustd by the specified value.
+    ///
+    /// \post The offset of the current dimension of the return unit is equal to the offset
+    ///       of \c *this + \c Adjustment
+    ///
+    /// \tparam Adjustment The current to adjust the offset of the amount dimension by
+    /// \return A \c unit_type whose current dimension has been offset
+    template <internal::_detail::ratio_like Adjustment>
+    consteval auto adjust_offset_current() const noexcept
+    {
+        constexpr internal::measure auto oldMeasure = current;
+        using OldOffset                             = decltype(oldMeasure)::offset;
+        using NewOffset                             = std::ratio_add<OldOffset, Adjustment>;
+        constexpr internal::measure_type<oldMeasure.get_powewr(), oldMeasure.get_multiplier(),
+                                         typename decltype(oldMeasure)::scale, NewOffset>
+            newMeasure{};
+        return unit_type<amount, newMeasure, length, luminosity, mass, temperature, time, tag, ExtraMultiplier_>{};
+    }
+
+    /// \brief Adjusts the offset of the length dimension of the unit
+    ///
+    /// Returns a new \c unit_type with the same length dimension, but whose length offset has been
+    /// has been adjustd by the specified value.
+    ///
+    /// \post The offset of the length dimension of the return unit is equal to the offset
+    ///       of \c *this + \c Adjustment
+    ///
+    /// \tparam Adjustment The amount to adjust the offset of the length dimension by
+    /// \return A \c unit_type whose length dimension has been offset
+    template <internal::_detail::ratio_like Adjustment>
+    consteval auto adjust_offset_length() const noexcept
+    {
+        constexpr internal::measure auto oldMeasure = length;
+        using OldOffset                             = decltype(oldMeasure)::offset;
+        using NewOffset                             = std::ratio_add<OldOffset, Adjustment>;
+        constexpr internal::measure_type<oldMeasure.get_powewr(), oldMeasure.get_multiplier(),
+                                         typename decltype(oldMeasure)::scale, NewOffset>
+            newMeasure{};
+        return unit_type<amount, current, newMeasure, luminosity, mass, temperature, time, tag, ExtraMultiplier_>{};
+    }
+
+    /// \brief Adjusts the offset of the luminosity dimension of the unit
+    ///
+    /// Returns a new \c unit_type with the same luminosity dimension, but whose luminosity offset has been
+    /// has been adjustd by the specified value.
+    ///
+    /// \post The offset of the luminosity dimension of the return unit is equal to the offset
+    ///       of \c *this + \c Adjustment
+    ///
+    /// \tparam Adjustment The amount to adjust the offset of the luminosity dimension by
+    /// \return A \c unit_type whose luminosity dimension has been offset
+    template <internal::_detail::ratio_like Adjustment>
+    consteval auto adjust_offset_luminosity() const noexcept
+    {
+        constexpr internal::measure auto oldMeasure = luminosity;
+        using OldOffset                             = decltype(oldMeasure)::offset;
+        using NewOffset                             = std::ratio_add<OldOffset, Adjustment>;
+        constexpr internal::measure_type<oldMeasure.get_powewr(), oldMeasure.get_multiplier(),
+                                         typename decltype(oldMeasure)::scale, NewOffset>
+            newMeasure{};
+        return unit_type<amount, current, length, newMeasure, mass, temperature, time, tag, ExtraMultiplier_>{};
+    }
+
+    /// \brief Adjusts the offset of the mass dimension of the unit
+    ///
+    /// Returns a new \c unit_type with the same mass dimension, but whose mass offset has been
+    /// has been adjustd by the specified value.
+    ///
+    /// \post The offset of the mass dimension of the return unit is equal to the offset
+    ///       of \c *this + \c Adjustment
+    ///
+    /// \tparam Adjustment The amount to adjust the offset of the mass dimension by
+    /// \return A \c unit_type whose mass dimension has been offset
+    template <internal::_detail::ratio_like Adjustment>
+    consteval auto adjust_offset_mass() const noexcept
+    {
+        constexpr internal::measure auto oldMeasure = mass;
+        using OldOffset                             = decltype(oldMeasure)::offset;
+        using NewOffset                             = std::ratio_add<OldOffset, Adjustment>;
+        constexpr internal::measure_type<oldMeasure.get_powewr(), oldMeasure.get_multiplier(),
+                                         typename decltype(oldMeasure)::scale, NewOffset>
+            newMeasure{};
+        return unit_type<amount, current, length, luminosity, newMeasure, temperature, time, tag, ExtraMultiplier_>{};
+    }
+
+    /// \brief Adjusts the offset of the temperature dimension of the unit
+    ///
+    /// Returns a new \c unit_type with the same temperature dimension, but whose temperature offset has been
+    /// has been adjustd by the specified value.
+    ///
+    /// \post The offset of the temperature dimension of the return unit is equal to the offset
+    ///       of \c *this + \c Adjustment
+    ///
+    /// \tparam Adjustment The amount to adjust the offset of the temperature dimension by
+    /// \return A \c unit_type whose temperature dimension has been offset
+    template <internal::_detail::ratio_like Adjustment>
+    consteval auto adjust_offset_temperature() const noexcept
+    {
+        constexpr internal::measure auto oldMeasure = temperature;
+        using OldOffset                             = decltype(oldMeasure)::offset;
+        using NewOffset                             = std::ratio_add<OldOffset, Adjustment>;
+        constexpr internal::measure_type<oldMeasure.get_powewr(), oldMeasure.get_multiplier(),
+                                         typename decltype(oldMeasure)::scale, NewOffset>
+            newMeasure{};
+        return unit_type<amount, current, length, luminosity, mass, newMeasure, time, tag, ExtraMultiplier_>{};
+    }
+
+    /// \brief Adjusts the offset of the time dimension of the unit
+    ///
+    /// Returns a new \c unit_type with the same time dimension, but whose time offset has been
+    /// has been adjustd by the specified value.
+    ///
+    /// \post The offset of the time dimension of the return unit is equal to the offset
+    ///       of \c *this + \c Adjustment
+    ///
+    /// \tparam Adjustment The amount to adjust the offset of the time dimension by
+    /// \return A \c unit_type whose time dimension has been offset
+    template <internal::_detail::ratio_like Adjustment>
+    consteval auto adjust_offset_time() const noexcept
+    {
+        constexpr internal::measure auto oldMeasure = time;
+        using OldOffset                             = decltype(oldMeasure)::offset;
+        using NewOffset                             = std::ratio_add<OldOffset, Adjustment>;
+        constexpr internal::measure_type<oldMeasure.get_powewr(), oldMeasure.get_multiplier(),
+                                         typename decltype(oldMeasure)::scale, NewOffset>
+            newMeasure{};
+        return unit_type<amount, current, length, luminosity, mass, temperature, newMeasure, tag, ExtraMultiplier_>{};
+    }
+
     /// \brief Converts a unit to SI base units
     ///
     /// Returns a new \c unit_type with the same dimesions as \c *this, but expressed
@@ -994,27 +1148,84 @@ namespace _detail
 {
 std::string default_unit_name(unit auto u)
 {
-    std::string                  name;
-    const internal::measure auto amount      = u.get_amount();
-    const internal::measure auto current     = u.get_current();
-    const internal::measure auto length      = u.get_length();
-    const internal::measure auto luminosity  = u.get_luminosity();
-    const internal::measure auto mass        = u.get_mass();
-    const internal::measure auto temperature = u.get_temperature();
-    const internal::measure auto time        = u.get_time();
+    [[maybe_unused]] std::string                  name;
+    [[maybe_unused]] const internal::measure auto amount      = u.get_amount();
+    [[maybe_unused]] const internal::measure auto current     = u.get_current();
+    [[maybe_unused]] const internal::measure auto length      = u.get_length();
+    [[maybe_unused]] const internal::measure auto luminosity  = u.get_luminosity();
+    [[maybe_unused]] const internal::measure auto mass        = u.get_mass();
+    [[maybe_unused]] const internal::measure auto temperature = u.get_temperature();
+    [[maybe_unused]] const internal::measure auto time        = u.get_time();
 
     static const std::unordered_map<std::intmax_t, std::string> prefixes{
-        {-30, "q"}, {-27, "r"}, {-24, "y"}, {-21, "z"}, {-18, "a"}, {-15, "f"}, {-12, "p"}, {-9, "n"},
-        {-6, "u"},  {-3, "m"},  {-2, "c"},  {-1, "d"},  {1, "da"},  {2, "h"},   {3, "k"},   {6, "M"},
-        {9, "G"},   {12, "T"},  {15, "P"},  {18, "E"},  {21, "Z"},  {24, "Y"},  {27, "R"},  {30, "Q"}};
+        {-30, "q"}, {-27, "r"}, {-24, "y"}, {-21, "z"}, {-18, "a"}, {-15, "f"}, {-12, "p"}, {-9, "n"}, {-6, "u"},
+        {-3, "m"},  {-2, "c"},  {-1, "d"},  {0, ""},    {1, "da"},  {2, "h"},   {3, "k"},   {6, "M"},  {9, "G"},
+        {12, "T"},  {15, "P"},  {18, "E"},  {21, "Z"},  {24, "Y"},  {27, "R"},  {30, "Q"}};
     if (luminosity.get_power() != 0)
     {
-        name.append(prefixes[luminosity.get_prefix()]);
+        name.append(prefixes.find(luminosity.get_multiplier())->second);
         name.append("cd^");
         name.append(std::to_string(luminosity.get_power()));
     }
     if (amount.get_power() != 0)
     {
+        name.append(prefixes.find(amount.get_multiplier())->second);
+        if (!name.empty())
+        {
+            name.append("*");
+        }
+        name.append("mol^");
+        name.append(std::to_string(amount.get_power()));
+    }
+    if (mass.get_power() != 0)
+    {
+        name.append(prefixes.find(mass.get_multiplier())->second);
+        if (!name.empty())
+        {
+            name.append("*");
+        }
+        name.append("g^");
+        name.append(std::to_string(mass.get_power()));
+    }
+    if (length.get_power() != 0)
+    {
+        name.append(prefixes.find(length.get_multiplier())->second);
+        if (!name.empty())
+        {
+            name.append("*");
+        }
+        name.append("m^");
+        name.append(std::to_string(length.get_power()));
+    }
+    if (temperature.get_power() != 0)
+    {
+        name.append(prefixes.find(temperature.get_multiplier())->second);
+        if (!name.empty())
+        {
+            name.append("*");
+        }
+        name.append("K^");
+        name.append(std::to_string(temperature.get_power()));
+    }
+    if (time.get_power() != 0)
+    {
+        name.append(prefixes.find(time.get_multiplier())->second);
+        if (!name.empty())
+        {
+            name.append("*");
+        }
+        name.append("s^");
+        name.append(std::to_string(time.get_power()));
+    }
+    if (current.get_power() != 0)
+    {
+        name.append(prefixes.find(current.get_multiplier())->second);
+        if (!name.empty())
+        {
+            name.append("*");
+        }
+        name.append("A^");
+        name.append(std::to_string(current.get_power()));
     }
     return name;
 }

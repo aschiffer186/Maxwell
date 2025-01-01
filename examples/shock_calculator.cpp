@@ -1,8 +1,15 @@
 #include "Maxwell.hpp"
-#include "QuantityRepo.hpp"
+#include "Unit.hpp"
+
+#include <iostream>
 #include <tuple>
 
 using Mach = maxwell::unitless_quantity;
+
+void func(maxwell::unit auto u)
+{
+    [[maybe_unused]] auto a = u.template adjust_scale_time<std::ratio<1, 1>>();
+}
 
 std::tuple<Mach, maxwell::pascal, maxwell::kelvin> normal_shock_wave(Mach M0, maxwell::pressure auto p0,
                                                                      maxwell::temperature auto T0)
@@ -23,4 +30,13 @@ std::tuple<Mach, maxwell::pascal, maxwell::kelvin> normal_shock_wave(Mach M0, ma
 
 int main()
 {
+    using namespace maxwell::metric_literals;
+
+    func(maxwell::meter_unit);
+
+    auto [M1, p1, T1] = normal_shock_wave(1.7, 101325_Pa, 275_K);
+    std::cout << "Upstream Mach: " << M1;
+    std::cout << "\nUpstream pressure: " << p1;
+    std::cout << "\nUpstream temperature: " << T1 << '\n';
+    return 0;
 }

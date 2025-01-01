@@ -76,6 +76,11 @@ concept pressure = pressure_unit<QuantityType::units>;
 
 using pascal  = quantity<pascal_unit>;
 using ipascal = quantity<pascal_unit>;
+
+namespace metric_literals
+{
+QUANTITY_LITERAL(pascal, Pa)
+}
 #endif
 } // namespace maxwell
 

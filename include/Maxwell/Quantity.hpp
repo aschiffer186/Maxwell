@@ -732,36 +732,16 @@ struct std::formatter<maxwell::basic_quantity<M, U>>
 {
     constexpr auto parse(std::format_parse_context& ctx)
     {
-        auto pos = ctx.begin();
-        while (pos != ctx.end() && *pos != '}')
-        {
-            if (std::tolower(*pos) == 'b')
-            {
-                inSIBaseunits_ = true;
-            }
-            else if (std::tolower(*pos) == 'u')
-            {
-                unitsOnly_ = true;
-            }
-            else if (std::tolower(*pos) == 'd')
-            {
-                dimensionOnly_ = true;
-            }
-            ++pos;
-        }
-        if (dimensionOnly_ && unitsOnly_)
-        {
-            throw std::format_error{"Cannot specify both dimension only and units only!"};
-        }
+        return ctx.begin();
     }
 
     auto format(const maxwell::basic_quantity<M, U>& q, std::format_context& ctx) const
     {
         std::string              temp;
-        const maxwell::unit auto actual = (inSIBaseunits_) ? q.to_SI_base_units() : q;
+        const maxwell::unit auto actual = q.get_units();
         if (unitsOnly_)
         {
-            std::format_to(std::back_inserter(temp), "{}", maxwell::unit_string<decltype(actual)::units>);
+            std::format_to(std::back_inserter(temp), "{}", maxwell::unit_string<actual>);
         }
         else if (dimensionOnly_)
         {
@@ -776,8 +756,8 @@ struct std::formatter<maxwell::basic_quantity<M, U>>
         }
         else
         {
-            std::format_to(std::back_inserter(temp), "{} {}", actual.magnitude(),
-                           maxwell::unit_string<decltype(actual)::units>);
+            std::format_to(std::back_inserter(temp), "{} {}", q.magnitude(),
+                           maxwell::unit_string<std::remove_cvref_t<decltype(q)>::units>);
         }
         return std::formatter<std::string_view>{}.format(temp, ctx);
     }
