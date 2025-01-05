@@ -7,7 +7,8 @@
             "cacheVariables": {
                 "CMAKE_CXX_STANDARD": "20",
                 "CMAKE_CXX_EXTENSIONS": "Off",
-                "CMAKE_EXPORT_COMPILE_COMMANDS": "true"
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "true",
+                "BUILD_TESTS": "On"
             },
             "binaryDir": "build/${presetName}"
         },
