@@ -472,7 +472,7 @@ struct unit_type
         constexpr internal::measure auto oldMeasure = amount;
         using OldOffset                             = decltype(oldMeasure)::offset;
         using NewOffset                             = std::ratio_add<OldOffset, Adjustment>;
-        constexpr internal::measure_type<oldMeasure.get_powewr(), oldMeasure.get_multiplier(),
+        constexpr internal::measure_type<oldMeasure.get_power(), oldMeasure.get_multiplier(),
                                          typename decltype(oldMeasure)::scale, NewOffset>
             newMeasure{};
         return unit_type<newMeasure, current, length, luminosity, mass, temperature, time, tag, ExtraMultiplier_>{};
@@ -494,7 +494,7 @@ struct unit_type
         constexpr internal::measure auto oldMeasure = current;
         using OldOffset                             = decltype(oldMeasure)::offset;
         using NewOffset                             = std::ratio_add<OldOffset, Adjustment>;
-        constexpr internal::measure_type<oldMeasure.get_powewr(), oldMeasure.get_multiplier(),
+        constexpr internal::measure_type<oldMeasure.get_power(), oldMeasure.get_multiplier(),
                                          typename decltype(oldMeasure)::scale, NewOffset>
             newMeasure{};
         return unit_type<amount, newMeasure, length, luminosity, mass, temperature, time, tag, ExtraMultiplier_>{};
@@ -516,7 +516,7 @@ struct unit_type
         constexpr internal::measure auto oldMeasure = length;
         using OldOffset                             = decltype(oldMeasure)::offset;
         using NewOffset                             = std::ratio_add<OldOffset, Adjustment>;
-        constexpr internal::measure_type<oldMeasure.get_powewr(), oldMeasure.get_multiplier(),
+        constexpr internal::measure_type<oldMeasure.get_power(), oldMeasure.get_multiplier(),
                                          typename decltype(oldMeasure)::scale, NewOffset>
             newMeasure{};
         return unit_type<amount, current, newMeasure, luminosity, mass, temperature, time, tag, ExtraMultiplier_>{};
@@ -538,7 +538,7 @@ struct unit_type
         constexpr internal::measure auto oldMeasure = luminosity;
         using OldOffset                             = decltype(oldMeasure)::offset;
         using NewOffset                             = std::ratio_add<OldOffset, Adjustment>;
-        constexpr internal::measure_type<oldMeasure.get_powewr(), oldMeasure.get_multiplier(),
+        constexpr internal::measure_type<oldMeasure.get_power(), oldMeasure.get_multiplier(),
                                          typename decltype(oldMeasure)::scale, NewOffset>
             newMeasure{};
         return unit_type<amount, current, length, newMeasure, mass, temperature, time, tag, ExtraMultiplier_>{};
@@ -560,7 +560,7 @@ struct unit_type
         constexpr internal::measure auto oldMeasure = mass;
         using OldOffset                             = decltype(oldMeasure)::offset;
         using NewOffset                             = std::ratio_add<OldOffset, Adjustment>;
-        constexpr internal::measure_type<oldMeasure.get_powewr(), oldMeasure.get_multiplier(),
+        constexpr internal::measure_type<oldMeasure.get_power(), oldMeasure.get_multiplier(),
                                          typename decltype(oldMeasure)::scale, NewOffset>
             newMeasure{};
         return unit_type<amount, current, length, luminosity, newMeasure, temperature, time, tag, ExtraMultiplier_>{};
@@ -582,7 +582,7 @@ struct unit_type
         constexpr internal::measure auto oldMeasure = temperature;
         using OldOffset                             = decltype(oldMeasure)::offset;
         using NewOffset                             = std::ratio_add<OldOffset, Adjustment>;
-        constexpr internal::measure_type<oldMeasure.get_powewr(), oldMeasure.get_multiplier(),
+        constexpr internal::measure_type<oldMeasure.get_power(), oldMeasure.get_multiplier(),
                                          typename decltype(oldMeasure)::scale, NewOffset>
             newMeasure{};
         return unit_type<amount, current, length, luminosity, mass, newMeasure, time, tag, ExtraMultiplier_>{};
@@ -604,7 +604,7 @@ struct unit_type
         constexpr internal::measure auto oldMeasure = time;
         using OldOffset                             = decltype(oldMeasure)::offset;
         using NewOffset                             = std::ratio_add<OldOffset, Adjustment>;
-        constexpr internal::measure_type<oldMeasure.get_powewr(), oldMeasure.get_multiplier(),
+        constexpr internal::measure_type<oldMeasure.get_power(), oldMeasure.get_multiplier(),
                                          typename decltype(oldMeasure)::scale, NewOffset>
             newMeasure{};
         return unit_type<amount, current, length, luminosity, mass, temperature, newMeasure, tag, ExtraMultiplier_>{};

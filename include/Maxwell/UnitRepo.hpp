@@ -155,7 +155,7 @@ MAKE_METRIC_PREFIXES(radian_unit, extra)
 constexpr auto degree_unit = unitless_unit_type{}.add_tag<_detail::degree_tag>();
 template <>
 inline const std::string unit_string<degree_unit> = "deg";
-using degree_unit_type                            = decltype(degree_unit);
+using degree_unit_type                              = decltype(degree_unit);
 
 /// \brief Specifies a unit has dimensions of angle
 ///
@@ -222,6 +222,9 @@ MAKE_UNIT_WITH_PREFIXES_DESC(hertz, unitless_unit_type{} / second_unit, time, "H
 MAKE_UNIT_WITH_PREFIXES_DESC(newton, kilogram_unit * meter_unit / (second_unit * second_unit), mass, "N")
 MAKE_UNIT_WITH_PREFIXES_DESC(pascal, newton_unit / (meter_unit * meter_unit), mass, "Pa")
 
+constexpr unit auto atm_unit = pascal_unit.template adjust_scale_mass<std::ratio<101'325>>();
+using atm_unit_type = std::remove_const_t<decltype(atm_unit)>;
+
 template<auto U> 
 concept pressure_unit = unit_convertible_to<U, pascal_unit>;
 
@@ -235,7 +238,11 @@ MAKE_UNIT_WITH_PREFIXES_DESC(siemens, unitless_unit_type{} / ohm_unit, time, "S"
 MAKE_UNIT_WITH_PREFIXES_DESC(weber, volt_unit * second_unit, mass, "Wb")
 MAKE_UNIT_WITH_PREFIXES_DESC(tesla, weber_unit / (meter_unit * meter_unit), mass, "T")
 MAKE_UNIT_WITH_PREFIXES_DESC(henry, weber_unit / ampere_unit, mass, "L")
-// Celsius
+constexpr unit auto celsius_unit = kelvin_unit.template adjust_offset_temperature<std::ratio<-273>>();
+using celsius_unit_type = std::remove_const_t<decltype(celsius_unit)>;
+template<>
+inline const std::string unit_string<celsius_unit> = "°C";
+
 MAKE_UNIT_WITH_PREFIXES_DESC(lumen, candela_unit * steradian_unit, luminosity, "lm")
 MAKE_UNIT_WITH_PREFIXES_DESC(lux, candela_unit / (meter_unit * meter_unit), luminosity, "lx")
 
@@ -290,6 +297,14 @@ MAKE_SCALED_UNIT_WITH_DESC(hour, minute_unit, (std::ratio<60, 1>), time, "hr")
 MAKE_SCALED_UNIT_WITH_DESC(day, hour_unit, (std::ratio<24, 1>), time, "day")
 MAKE_SCALED_UNIT_WITH_DESC(week, day_unit, (std::ratio<7, 1>), time, "week")
 MAKE_SCALED_UNIT_WITH_DESC(year, day_unit, (std::ratio<365, 1>), time, "yr")
+
+// clang-format on
+constexpr unit auto farenheit_unit = celsius_unit.template adjust_scale_temperature<std::ratio<9, 5>>()
+                                         .template adjust_offset_temperature<std::ratio<32>>();
+// clang-format off
+using farenheit_unit_type = std::remove_const_t<decltype(farenheit_unit)>;
+template<>
+inline const std::string unit_string<farenheit_unit> = "°F";
 
 // clang-format on
 #undef ESC

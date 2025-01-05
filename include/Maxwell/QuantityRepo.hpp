@@ -74,12 +74,25 @@ concept angle = angle_unit<QuantityType::units>;
 template <typename QuantityType>
 concept pressure = pressure_unit<QuantityType::units>;
 
+using atm  = quantity<atm_unit>;
+using iatm = iquantity<atm_unit>;
+
 using pascal  = quantity<pascal_unit>;
-using ipascal = quantity<pascal_unit>;
+using ipascal = iquantity<pascal_unit>;
+
+using celsius  = quantity<celsius_unit>;
+using icelsius = iquantity<celsius_unit>;
 
 namespace metric_literals
 {
 QUANTITY_LITERAL(pascal, Pa)
+QUANTITY_LITERAL(celsius, degC)
+QUANTITY_LITERAL(atm, atm)
+} // namespace metric_literals
+
+namespace imperial_literals
+{
+
 }
 #endif
 } // namespace maxwell
