@@ -155,7 +155,7 @@ MAKE_METRIC_PREFIXES(radian_unit, extra)
 constexpr auto degree_unit = unitless_unit_type{}.add_tag<_detail::degree_tag>();
 template <>
 inline const std::string unit_string<degree_unit> = "deg";
-using degree_unit_type                              = decltype(degree_unit);
+using degree_unit_type                            = decltype(degree_unit);
 
 /// \brief Specifies a unit has dimensions of angle
 ///
@@ -220,6 +220,10 @@ MAKE_METRIC_PREFIXES(steradian_unit, extra)
 // clang-format off
 MAKE_UNIT_WITH_PREFIXES_DESC(hertz, unitless_unit_type{} / second_unit, time, "Hz")
 MAKE_UNIT_WITH_PREFIXES_DESC(newton, kilogram_unit * meter_unit / (second_unit * second_unit), mass, "N")
+
+template<auto U> 
+concept force_unit = unit_convertible_to<U, newton_unit>;
+
 MAKE_UNIT_WITH_PREFIXES_DESC(pascal, newton_unit / (meter_unit * meter_unit), mass, "Pa")
 
 constexpr unit auto atm_unit = pascal_unit.template adjust_scale_mass<std::ratio<101'325>>();
@@ -229,7 +233,13 @@ template<auto U>
 concept pressure_unit = unit_convertible_to<U, pascal_unit>;
 
 MAKE_UNIT_WITH_PREFIXES_DESC(joule, newton_unit * meter_unit, mass, "J")
+template<auto U> 
+concept energy_unit = unit_convertible_to<U, joule_unit>;
+
 MAKE_UNIT_WITH_PREFIXES_DESC(watt, joule_unit / second_unit, mass, "J/s")
+template<auto U> 
+concept power_unit = unit_convertible_to<U, watt_unit>;
+
 MAKE_UNIT_WITH_PREFIXES_DESC(coulomb, second_unit * ampere_unit, current, "C")
 MAKE_UNIT_WITH_PREFIXES_DESC(volt, watt_unit / ampere_unit, mass, "V")
 MAKE_UNIT_WITH_PREFIXES_DESC(farad, coulomb_unit / volt_unit, mass, "F")

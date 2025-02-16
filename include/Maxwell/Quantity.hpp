@@ -17,7 +17,6 @@
 #include <initializer_list>
 #include <iterator>
 #include <limits>
-#include <memory>
 #include <ostream>
 #include <string_view>
 #include <type_traits>
@@ -36,32 +35,31 @@ class basic_quantity;
 /// \cond
 namespace internal::_detail
 {
-template <typename Period, ratio_like Scale>
-constexpr bool implicit_unit_conversion() noexcept
+template <ratio_like FromPeriod, ratio_like ToPeriod>
+consteval bool implicit_from_chrono_conversion() noexcept
 {
     // TODO: Implement
-    return true;
+    return std::ratio_divide<FromPeriod, ToPeriod>::den == 1;
 }
 
-template <typename Period, ratio_like Scale>
-constexpr bool implicit_chrono_conversion() noexcept
+template <ratio_like FromPeriod, ratio_like ToPeriod>
+consteval bool implicit_to_chrono_conversion() noexcept
 {
-    // TODO: Implement
-    return std::ratio_divide<Period, Scale>::den == 1;
+    return std::ratio_divide<FromPeriod, ToPeriod>::den == 1;
 }
 
 template <typename D, typename M, auto U>
 concept enable_implicit_from_chrono =
     unit<decltype(U)> && chrono_duration<D> &&
     (std::chrono::treat_as_floating_point_v<M> ||
-     implicit_unit_conversion<typename D::period, decltype(decltype(U)::time)::scale>()) &&
+     implicit_from_chrono_conversion<typename D::period, typename decltype(decltype(U)::time)::scale>()) &&
     std::constructible_from<M, typename D::rep>;
 
 template <typename D, typename M, auto U>
 concept enable_implicit_to_chrono =
     unit<decltype(U)> && chrono_duration<D> &&
     (std::chrono::treat_as_floating_point_v<typename D::rep> ||
-     implicit_chrono_conversion<decltype(decltype(U)::time)::scale, typename D::period>()) &&
+     implicit_to_chrono_conversion<typename decltype(decltype(U)::time)::scale, typename D::period>()) &&
     std::constructible_from<typename D::rep, M>;
 
 template <typename D, unit auto U>
@@ -258,6 +256,30 @@ class basic_quantity
     /// \brief Converting constructor
     ///
     /// Constructs a \c basic_quantity from the specified \c basic_quantity with different units, automatically
+    /// converting the units of the specified quantity to \c Units. The magnitude of \c *this is copy constructed
+    /// from \c q.magnitude() then multiplied by the appropriate conversion factor between \c Other and \c Units.
+    ///
+    /// \pre \c magnitude_type is constructible from \c Up
+    /// \pre \c Other is convertible to \c Units.
+    /// \post <tt>this->magnitude() == conversion_factor(Other, Units)*q.magnitude()</tt>
+    ///
+    /// \tparam Up the type of the magnitude of the \c basic_quantity to construct from
+    /// \tparam Other the units ofthe \c basic_quantity to construct from
+    /// \param q the \c basic_quantity to construct from
+    ///
+    /// \throw any exceptions thrown by the move constructor of \c magnitude_type
+    template <typename Up, unit auto Other>
+        requires(std::constructible_from<magnitude_type, std::add_rvalue_reference_t<Up>>) &&
+                (!(std::same_as<Up, magnitude_type> && Other == U)) && unit_convertible_to<Other, units>
+    constexpr basic_quantity(const basic_quantity<Up, Other>& q) noexcept(
+        std::is_nothrow_constructible_v<magnitude_type, std::add_rvalue_reference_t<Up>>)
+        : magnitude_(q.magnitude() * conversion_factor(Other, units))
+    {
+    }
+
+    /// \brief Converting constructor
+    ///
+    /// Constructs a \c basic_quantity from the specified \c basic_quantity with different units, automatically
     /// converting the units of the specified quantity to \c Units. The magnitude of \c *this is move constructed
     /// from \c q.magnitude() then multiplied by the appropriate conversion factor between \c Other and \c Units.
     ///
@@ -273,9 +295,9 @@ class basic_quantity
     template <typename Up, unit auto Other>
         requires(std::constructible_from<magnitude_type, std::add_rvalue_reference_t<Up>>) &&
                 (!(std::same_as<Up, magnitude_type> && Other == U)) && unit_convertible_to<Other, units>
-    constexpr basic_quantity(basic_quantity<Up, Other> q) noexcept(
+    constexpr basic_quantity(basic_quantity<Up, Other>&& q) noexcept(
         std::is_nothrow_constructible_v<magnitude_type, std::add_rvalue_reference_t<Up>>)
-        : magnitude_(q.magnitude() * conversion_factor(Other, units))
+        : magnitude_(std::move(q).magnitude() * conversion_factor(Other, units))
     {
     }
 
@@ -296,10 +318,38 @@ class basic_quantity
     ///
     /// \throws any exceptions through by swapping \c Up and \c magnitude_type
     template <std::swappable_with<magnitude_type> Up, unit auto Other>
-        requires unit_convertible_to<Other, units>
-    constexpr basic_quantity& operator=(basic_quantity<Up, Other> q)
+        requires unit_convertible_to<Other, units> && std::constructible_from<magnitude_type, const Up&>
+    constexpr basic_quantity& operator=(const basic_quantity<Up, Other>& q) noexcept(
+        std::is_nothrow_swappable_v<magnitude_type> && std::is_nothrow_constructible_v<magnitude_type, const Up&>)
     {
-        (*this).swap(q);
+        (*this).swap(basic_quantity{q});
+        return *this;
+    }
+
+    /// \brief Converting assignment operator
+    ///
+    /// Converts the magitude of \c q from \c Other to \c Units then assigns the value to the magnitude
+    /// of \c *this.
+    ///
+    /// \pre \c Up is swappable with \c magnitude_type
+    /// \pre \c Other is convertible to \c units
+    /// \post <tt>this->magnitude() == conversion_factor(Other, Units)*q.magnitude()</tt>
+    ///
+    /// \tparam Up the type of the magnitude of the \c basic_quantity being assigned from
+    /// \tparam Other the units of the \c basic_quantity being assigned from
+    /// \param q the \c basic_quantity to assign to \c *this
+    ///
+    /// \return a reference to \c *this
+    ///
+    /// \throws any exceptions through by swapping \c Up and \c magnitude_type
+    template <std::swappable_with<magnitude_type> Up, unit auto Other>
+        requires unit_convertible_to<Other, units> &&
+                 std::constructible_from<magnitude_type, std::add_rvalue_reference_t<Up>>
+    constexpr basic_quantity& operator=(basic_quantity<Up, Other>&& q) noexcept(
+        std::is_nothrow_swappable_v<magnitude_type> &&
+        std::is_nothrow_constructible_v<magnitude_type, std::add_rvalue_reference_t<Up>>)
+    {
+        (*this).swap(basic_quantity{std::move(q)});
         return *this;
     }
 
@@ -341,10 +391,10 @@ class basic_quantity
     /// \return a reference to \c *this
     template <typename Up>
         requires std::assignable_from<std::add_rvalue_reference_t<Up>, magnitude_type> && unitless_unit<units>
-    constexpr basic_quantity& operator=(Up up) noexcept(
+    constexpr basic_quantity& operator=(Up&& up) noexcept(
         std::is_nothrow_assignable_v<std::add_rvalue_reference_t<Up>, magnitude_type>)
     {
-        magnitude_ = std::move(up);
+        magnitude_ = std::forward(up);
         return *this;
     }
 
@@ -401,8 +451,14 @@ class basic_quantity
     }
 
     // --- Conversion Functions ---
-
-    constexpr explicit(!unitless_unit<units>) operator magnitude_type() const noexcept
+    /// \brief Conversion operator to underlying magnitude type
+    ///
+    /// Converts the quantity to the underlying type. This operation is implicit
+    /// if the quantity is unitless. It is highly recommended to only call this operator
+    /// if the quantity is unitless.
+    ///
+    /// \return the underlying magnitude of the \c basic_quantity
+    constexpr explicit(!unitless_unit<units>) operator magnitude_type() const
     {
         return magnitude_;
     }
@@ -414,8 +470,8 @@ class basic_quantity
                                                       units>) operator std::chrono::duration<Rep, Period>() const
         requires time_unit<units>
     {
-        return std::chrono::duration<Rep, Period>{
-            magnitude_ * internal::_detail::to_chrono_conversion_factor<std::chrono::duration<Rep, Period>, units>()};
+        return std::chrono::duration<Rep, Period>{static_cast<Rep>(
+            magnitude_ * internal::_detail::to_chrono_conversion_factor<std::chrono::duration<Rep, Period>, units>())};
     }
 
     // --- Arithmetic Functions ---
@@ -482,13 +538,26 @@ class basic_quantity
         return *this;
     }
 
-    constexpr basic_quantity& operator++() noexcept
+    /// \brief Pre-increment operator
+    ///
+    /// Increments the underlying magnitude by 1 and
+    /// returns a reference to the modified \c basic_quantity
+    ///
+    /// \return a reference to \c *this after the modification
+    constexpr basic_quantity& operator++()
     {
         ++magnitude_;
         return *this;
     }
 
-    constexpr basic_quantity operator++(int) noexcept
+    /// \brief Post-increment operator
+    ///
+    /// Increments the underlying magnitude by 1 and
+    /// returns a copy of the \c basic_quantity before the
+    /// modification
+    ///
+    /// \return a copy of \c *this prior to the modification
+    constexpr basic_quantity operator++(int)
     {
         basic_quantity temp(*this);
         ++(*this);
@@ -782,20 +851,11 @@ struct std::hash<maxwell::basic_quantity<M, U>>
     }
 };
 
-/// \cond
-namespace internal::_detail
-{
-template <typename M>
-constexpr bool supports_limits = std::numeric_limits<M>::is_specialized;
-}
-/// \endcond
-
 /// \brief Specialization of \c std::numeric_limits for \c basic_quantity
 ///
 /// Specialization of \c std::numeric_limits for \c basic_quantity. Provides
 /// values equivalent to \c std::numeric_limits<M>.
 template <typename M, maxwell::unit auto U>
-    requires internal::_detail::supports_limits<M>
 struct std::numeric_limits<maxwell::basic_quantity<M, U>>
 {
   private:
@@ -896,8 +956,18 @@ struct std::numeric_limits<maxwell::basic_quantity<M, U>>
 };
 
 template <typename M, maxwell::unit auto U>
-    requires internal::_detail::supports_limits<M>
 struct std::numeric_limits<const maxwell::basic_quantity<M, U>> : std::numeric_limits<maxwell::basic_quantity<M, U>>
+{
+};
+
+template <typename M, maxwell::unit auto U>
+struct std::numeric_limits<volatile maxwell::basic_quantity<M, U>> : std::numeric_limits<maxwell::basic_quantity<M, U>>
+{
+};
+
+template <typename M, maxwell::unit auto U>
+struct std::numeric_limits<const volatile maxwell::basic_quantity<M, U>>
+    : std::numeric_limits<maxwell::basic_quantity<M, U>>
 {
 };
 #endif

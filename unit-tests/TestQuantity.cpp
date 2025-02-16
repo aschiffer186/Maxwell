@@ -128,3 +128,13 @@ TEST(TestQuantity, TestConvertingConstructor)
 
     EXPECT_FLOAT_EQ(d.magnitude(), 180.0 / 3'600.0);
 }
+
+TEST(TestQuantity, TestChronoConversion)
+{
+    inanosecond                           s{10.0};
+    [[maybe_unused]] std::chrono::seconds s2(s);
+
+    static_assert(internal::_detail::enable_implicit_to_chrono<std::chrono::seconds, int, maxwell::nanosecond_unit>);
+
+    std::cout << s << "\n";
+}

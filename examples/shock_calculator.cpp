@@ -38,9 +38,9 @@ int main()
     std::cout << "\nUpstream pressure: " << p1;
     std::cout << "\nUpstream temperature: " << T1 << '\n';
 
-    const auto p0_atm = 0.2609059956_atm;
+    // const auto p0_atm = 0.2609059956_atm;
 
-    std::tie(M1, p1, T1) = normal_shock_wave(M0, p0_atm, 1.0_m);
+    // std::tie(M1, p1, T1) = normal_shock_wave(M0, p0_atm, 1.0_m);
     std::cout << "Upstream Mach: " << M1;
     std::cout << "\nUpstream pressure: " << p1;
     std::cout << "\nUpstream temperature: " << T1 << '\n';
