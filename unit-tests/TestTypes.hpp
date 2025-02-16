@@ -1,7 +1,9 @@
 #ifndef TEST_TYPES_HPP
 #define TEST_TYPES_HPP
 
+#include <initializer_list>
 #include <iostream>
+#include <numeric>
 
 template <bool Noexcept>
 struct Noisy
@@ -60,4 +62,16 @@ Noisy<Noexcept>& Noisy<Noexcept>::operator=(Noisy&&) noexcept(Noexcept)
     ++numMoveAssignCalls;
 }
 
+struct in_place
+{
+    double value;
+
+    in_place(double d1, double d2) : value(d1 + d2)
+    {
+    }
+
+    in_place(std::initializer_list<double> il, double d) : value(std::accumulate(il.begin(), il.end(), 0.0) + d)
+    {
+    }
+};
 #endif

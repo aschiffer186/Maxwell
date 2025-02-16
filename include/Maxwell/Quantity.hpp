@@ -24,6 +24,7 @@
 
 #include "Unit.hpp"
 #include "internal/Concepts.hpp"
+#include "internal/Config.hpp"
 #include "internal/Measure.hpp"
 
 /// \namespace maxwell
@@ -131,12 +132,11 @@ struct is_basic_quantity<const volatile basic_quantity<M, U>> : std::true_type
 template <typename T, unit auto U>
 class basic_quantity
 {
-    static_assert(!std::is_const_v<T>, "Magnitude cannot be const");
-    static_assert(!std::is_volatile_v<T>, "Magnitude cannot be volatile");
     static_assert(!std::is_void_v<T>, "Magnitude cannot be void");
     static_assert(!internal::similar<T, std::in_place_t>, "Magnitude cannot be std::in_place_t");
     static_assert(!internal::_detail::chrono_duration<T>, "Magnitude cannot be a std::chrono::duration");
     static_assert(!internal::_detail::is_basic_quantity<T>::value, "Magnitude cannot be a basic quantity!");
+    static_assert(!unit<T>, "Magnitude cannot be a unit");
 
     template <typename D>
     static constexpr bool implicit_from_chrono = internal::_detail::enable_implicit_from_chrono<D, T, U>;
@@ -224,7 +224,7 @@ class basic_quantity
     ///
     /// \throws Any exceptions thrown by the constructor of \c magnitude_type
     template <typename Up, typename... Args>
-        requires std::constructible_from<std::initializer_list<Up>, Args...>
+        requires std::constructible_from<magnitude_type, std::initializer_list<Up>, Args...>
     constexpr explicit basic_quantity(std::in_place_t, std::initializer_list<Up> il, Args&&... args) noexcept(
         std::is_nothrow_constructible_v<magnitude_type, std::initializer_list<Up>, Args...>)
         : magnitude_(il, std::forward<Args>(args)...)
@@ -246,7 +246,7 @@ class basic_quantity
     /// \throw any exceptions thrown by \c dur or by the constructor of \c magnitude_type
     template <typename Rep, typename Period>
         requires time_unit<units> && std::constructible_from<magnitude_type, Rep>
-    constexpr explicit(!implicit_from_chrono<std::chrono::duration<Rep, Period>>)
+    MAXWELL_CONSTEXPR23 explicit(!implicit_from_chrono<std::chrono::duration<Rep, Period>>)
         basic_quantity(std::chrono::duration<Rep, Period> dur)
         : magnitude_(dur.count() *
                      internal::_detail::from_chrono_conversion_factor<std::chrono::duration<Rep, Period>, units>())
@@ -318,38 +318,12 @@ class basic_quantity
     ///
     /// \throws any exceptions through by swapping \c Up and \c magnitude_type
     template <std::swappable_with<magnitude_type> Up, unit auto Other>
-        requires unit_convertible_to<Other, units> && std::constructible_from<magnitude_type, const Up&>
-    constexpr basic_quantity& operator=(const basic_quantity<Up, Other>& q) noexcept(
-        std::is_nothrow_swappable_v<magnitude_type> && std::is_nothrow_constructible_v<magnitude_type, const Up&>)
-    {
-        (*this).swap(basic_quantity{q});
-        return *this;
-    }
-
-    /// \brief Converting assignment operator
-    ///
-    /// Converts the magitude of \c q from \c Other to \c Units then assigns the value to the magnitude
-    /// of \c *this.
-    ///
-    /// \pre \c Up is swappable with \c magnitude_type
-    /// \pre \c Other is convertible to \c units
-    /// \post <tt>this->magnitude() == conversion_factor(Other, Units)*q.magnitude()</tt>
-    ///
-    /// \tparam Up the type of the magnitude of the \c basic_quantity being assigned from
-    /// \tparam Other the units of the \c basic_quantity being assigned from
-    /// \param q the \c basic_quantity to assign to \c *this
-    ///
-    /// \return a reference to \c *this
-    ///
-    /// \throws any exceptions through by swapping \c Up and \c magnitude_type
-    template <std::swappable_with<magnitude_type> Up, unit auto Other>
         requires unit_convertible_to<Other, units> &&
                  std::constructible_from<magnitude_type, std::add_rvalue_reference_t<Up>>
-    constexpr basic_quantity& operator=(basic_quantity<Up, Other>&& q) noexcept(
-        std::is_nothrow_swappable_v<magnitude_type> &&
-        std::is_nothrow_constructible_v<magnitude_type, std::add_rvalue_reference_t<Up>>)
+    constexpr basic_quantity& operator=(basic_quantity<Up, Other> q)
     {
-        (*this).swap(basic_quantity{std::move(q)});
+        basic_quantity temp(std::move(q));
+        (*this).swap(temp);
         return *this;
     }
 
@@ -371,9 +345,10 @@ class basic_quantity
     /// \throws any exceptions thrown by the copy constructor of \c dur
     template <typename Rep, typename Period>
         requires time_unit<units> && std::constructible_from<magnitude_type, Rep>
-    basic_quantity& operator=(std::chrono::duration<Rep, Period> dur)
+    MAXWELL_CONSTEXPR23 basic_quantity& operator=(std::chrono::duration<Rep, Period> dur)
     {
-        (*this).swap(basic_quantity{dur});
+        basic_quantity temp{dur};
+        (*this).swap(temp);
         return *this;
     }
 
@@ -406,15 +381,37 @@ class basic_quantity
     /// \post \c other has the old magnitude of \c *this and \c *this has the old magnitude of \c other
     ///
     /// \throws Any exceptions thrown by swapping the magnitudes of the quantities
-    void swap(basic_quantity& other) noexcept(std::is_nothrow_swappable_v<magnitude_type>)
+    constexpr void swap(basic_quantity& other) noexcept(std::is_nothrow_swappable_v<magnitude_type>)
     {
         using std::swap;
         swap(other.magnitude_, magnitude_);
     }
 
+    /// \brief Compares two quantities for equality
+    ///
+    /// Checks if two \c basic_quantities are equal. Two quantities are equal if and only if their
+    /// magnitudes are equal. Note, if the magnitude type is a floating-point type,
+    /// this operator will use floating-point equality, which is most likely undesired
+    /// and can lead to false negatives.
+    ///
+    /// \pre the magitude types of the quantities are equality comparable
+    ///
+    /// \param a one quantity to check for equality
+    /// \param b the other quantity to check for equality
+    /// \return \c true if the magnitudes of the quantities are the same
     friend bool operator==(const basic_quantity& a, const basic_quantity& b)
         requires std::equality_comparable<magnitude_type>
     = default;
+
+    /// \brief Quantity three way comparison operator
+    ///
+    /// Three way comparison operator for \c basic_quantities.
+    ///
+    /// \pre The magnitude type is three_way_comparable
+    ///
+    /// \param a one quantity to use in the three way comparison
+    /// \param b the other quantity to use in the three way comparison
+    /// \return <tt>a.magnitude() <=> b.magnitude()</tt>
     friend auto operator<=>(const basic_quantity& a, const basic_quantity& b)
         requires std::three_way_comparable<magnitude_type>
     = default;
@@ -424,9 +421,25 @@ class basic_quantity
     /// \brief Returns the magnitude of the \c *this
     ///
     /// \return A \c const reference to the magnitude of \c *this
-    constexpr const magnitude_type& magnitude() const noexcept
+    constexpr const magnitude_type& magnitude() const& noexcept
     {
         return magnitude_;
+    }
+
+    /// \brief Returns the magnitude of the \c *this
+    ///
+    /// \return An rvalue reference to the magnitude of \c *this
+    constexpr magnitude_type&& magnitude() && noexcept
+    {
+        return std::move(magnitude_);
+    }
+
+    /// \brief Returns the magnitude of the \c *this
+    ///
+    /// \return A \c const rvalue reference to the magnitude of \c *this
+    constexpr const magnitude_type&& magnitude() const&& noexcept
+    {
+        return std::move(magnitude_);
     }
 
     /// \brief Returns the units of \c *this
@@ -465,7 +478,7 @@ class basic_quantity
 
     template <typename Rep, typename Period>
         requires internal::multiply_enabled_with<magnitude_type, Rep>
-    constexpr explicit(
+    MAXWELL_CONSTEXPR23 explicit(
         !internal::_detail::enable_implicit_to_chrono<std::chrono::duration<Rep, Period>, magnitude_type,
                                                       units>) operator std::chrono::duration<Rep, Period>() const
         requires time_unit<units>
@@ -715,6 +728,18 @@ constexpr auto operator/(const M2& lhs, const basic_quantity<M1, U1>& rhs) noexc
 }
 
 // --- Comparison ---
+/// \brief Compares two quantities for equality
+///
+/// Checks if two \c basic_quantities are equal. Two quantities are equal if and only if their
+/// magnitudes, when converted to SI base units, are equal. Note, if the magnitude type is a floating-point type,
+/// this operator will use floating-point equality, which is most likely undesired
+/// and can lead to false negatives.
+///
+/// \pre the magitude types of the quantities are equality comparable
+///
+/// \param lhs one quantity to check for equality
+/// \param rhs the other quantity to check for equality
+/// \return \c true if the magnitudes of the quantities are the same
 template <typename M, unit auto U1, unit auto U2>
     requires std::equality_comparable<M>
 constexpr bool operator==(const basic_quantity<M, U1>& lhs,
@@ -723,6 +748,16 @@ constexpr bool operator==(const basic_quantity<M, U1>& lhs,
     return lhs.to_SI_base_units().magnitude() == rhs.to_SI_base_units().magnitude();
 }
 
+/// \brief Quantity three way comparison operator
+///
+/// Three way comparison operator for \c basic_quantities. Behaves as if
+/// the quantities were converted to SI base units prior to the comparison.
+///
+/// \pre The magnitude type is three_way_comparable
+///
+/// \param rhs one quantity to use in the three way comparison
+/// \param lhs the other quantity to use in the three way comparison
+/// \return <tt>lhs.to_SI_base_units().magnitude() <=> rhs.to_SI_base_units().magnitude()</tt>
 template <typename M, unit auto U1, unit auto U2>
     requires std::three_way_comparable<M>
 constexpr std::compare_three_way_result_t<M> operator<=>(
@@ -736,7 +771,11 @@ constexpr std::compare_three_way_result_t<M> operator<=>(
 template <typename M, unit auto U>
 std::ostream& operator<<(std::ostream& os, const basic_quantity<M, U>& q)
 {
+#ifdef MAXWELL_USE_PRINT
+    std::print(os, q);
+#else
     os << std::format("{}", q);
+#endif
     return os;
 }
 

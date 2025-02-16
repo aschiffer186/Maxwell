@@ -17,7 +17,7 @@
             "inherits": "C++-setup",
             "hidden": true,
             "cacheVariables": {
-                "CMAKE_CXX_FLAGS": "-Wall -Wextra -Werror -pedantic -O0 -g",
+                "CMAKE_CXX_FLAGS": "-Wall -Wextra -Werror -pedantic -O0 -g -fdiagnostics-color=always",
                 "CMAKE_BUILD_TYPE": "Debug"
             }
         },
@@ -26,7 +26,7 @@
             "inherits": "C++-setup",
             "hidden": true,
             "cacheVariables": {
-                "CMAKE_CXX_FLAGS": "-Wall -Wextra -Werror -pedantic -O2 -DNDEBUG",
+                "CMAKE_CXX_FLAGS": "-Wall -Wextra -Werror -pedantic -O2 -DNDEBUG -fdiagnostics-color=always",
                 "CMAKE_BUILD_TYPE": "Release"
             }
         },
