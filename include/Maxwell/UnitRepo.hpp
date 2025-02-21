@@ -1,4 +1,4 @@
-/// \file _unitRepo.hpp
+/// \file UnitRepo.hpp
 /// \author Alex Schiffer
 /// \brief File containing definition of common units and macros to create new units
 /// \version 0.1

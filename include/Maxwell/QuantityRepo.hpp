@@ -1,4 +1,4 @@
-/// \file quantityRepo.hpp
+/// \file QuantityRepo.hpp
 /// \author Alex Schiffer
 /// \brief Aliases for common quantities and quantity literals
 /// \version 0.1
@@ -149,7 +149,7 @@ QUANTITY_PREFIXES(joule)
 using watt     = quantity<watt_unit>;
 using int_watt = int_quantity<watt_unit>;
 QUANTITY_PREFIXES(watt)
-using coulomb      = quantity<coulomb_unit>;
+using coulomb     = quantity<coulomb_unit>;
 using int_coulomb = int_quantity<coulomb_unit>;
 QUANTITY_PREFIXES(coulomb)
 using volt     = quantity<volt_unit>;

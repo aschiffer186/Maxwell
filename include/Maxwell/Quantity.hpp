@@ -67,7 +67,6 @@ template <typename D, unit auto U>
     requires time_unit<U>
 constexpr double from_chrono_conversion_factor()
 {
-    // TODO: Finish
     using Period = std::ratio_divide<std::ratio<1>, typename D::period>;
     const unit_type<null_measure, null_measure, null_measure, null_measure, null_measure, null_measure,
                     measure_type<1, 0, Period>{}>
@@ -498,6 +497,16 @@ class basic_quantity
         return magnitude_;
     }
 
+    /// \brief Conversion operator to \c std::chrono::duration
+    ///
+    /// Converts the quantity to a \c std::chrono::duration. This conversion is implicit if
+    /// the conversion would not result in a loss of information.
+    /// \pre \c units has dimensions of time
+    /// \pre \c Rep is constructible from \c magnitude_type
+    ///
+    /// \tparam Rep the representation type of the \c std::chrono::duration
+    /// \tparam Period the period of the \c std::chrono::duration
+    /// \return a \c std::chrono::duration that is the same value \c *this
     template <typename Rep, typename Period>
         requires internal::multiply_enabled_with<magnitude_type, Rep>
     MAXWELL_CONSTEXPR23 explicit(
