@@ -1148,14 +1148,14 @@ namespace _detail
 {
 std::string default_unit_name(unit auto u)
 {
-    [[maybe_unused]] std::string                  name;
-    [[maybe_unused]] const internal::measure auto amount      = u.get_amount();
-    [[maybe_unused]] const internal::measure auto current     = u.get_current();
-    [[maybe_unused]] const internal::measure auto length      = u.get_length();
-    [[maybe_unused]] const internal::measure auto luminosity  = u.get_luminosity();
-    [[maybe_unused]] const internal::measure auto mass        = u.get_mass();
-    [[maybe_unused]] const internal::measure auto temperature = u.get_temperature();
-    [[maybe_unused]] const internal::measure auto time        = u.get_time();
+    std::string                  name;
+    const internal::measure auto amount      = u.get_amount();
+    const internal::measure auto current     = u.get_current();
+    const internal::measure auto length      = u.get_length();
+    const internal::measure auto luminosity  = u.get_luminosity();
+    const internal::measure auto mass        = u.get_mass();
+    const internal::measure auto temperature = u.get_temperature();
+    const internal::measure auto time        = u.get_time();
 
     static const std::unordered_map<std::intmax_t, std::string> prefixes{
         {-30, "q"}, {-27, "r"}, {-24, "y"}, {-21, "z"}, {-18, "a"}, {-15, "f"}, {-12, "p"}, {-9, "n"}, {-6, "u"},

@@ -227,6 +227,8 @@ concept force_unit = unit_convertible_to<U, newton_unit>;
 MAKE_UNIT_WITH_PREFIXES_DESC(pascal, newton_unit / (meter_unit * meter_unit), mass, "Pa")
 
 constexpr unit auto atm_unit = pascal_unit.template adjust_scale_mass<std::ratio<101'325>>();
+template<>
+inline const std::string unit_string<atm_unit> = "atm";
 using atm_unit_type = std::remove_const_t<decltype(atm_unit)>;
 
 template<auto U> 

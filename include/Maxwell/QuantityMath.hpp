@@ -86,22 +86,46 @@ constexpr auto lerp(basic_quantity<M, U> a, basic_quantity<M2, U2> b, basic_quan
     return {std::lerp(a.magnitude(), b.magnitude(), t.magnitude())};
 }
 
-template <typename M, unit auto U>
-MAXWELL_MATH_CONSTEXPR26 basic_quantity<M, U> exp(basic_quantity<M, U> x)
+template <typename M>
+MAXWELL_MATH_CONSTEXPR26 basic_quantity<M, unitless_unit_type{}> exp(basic_quantity<M, unitless_unit_type{}> x)
 {
-    return {std::exp(x.magnitude())};
+    return std::exp(x);
 }
 
-template <typename M, unit auto U>
-MAXWELL_MATH_CONSTEXPR26 basic_quantity<M, U> exp2(basic_quantity<M, U> x)
+template <typename M>
+MAXWELL_MATH_CONSTEXPR26 basic_quantity<M, unitless_unit_type{}> exp2(basic_quantity<M, unitless_unit_type{}> x)
 {
-    return basic_quantity<M, U>(std::exp2(x.magnitude()));
+    return std::exp2(x);
 }
 
-template <typename M, unit auto U>
-MAXWELL_MATH_CONSTEXPR26 basic_quantity<M, U> expm1(basic_quantity<M, U> x)
+template <typename M>
+MAXWELL_MATH_CONSTEXPR26 basic_quantity<M, unitless_unit_type{}> expm1(basic_quantity<M, unitless_unit_type{}> x)
 {
-    return basic_quantity<M, U>(std::expm1(x.magnitude()));
+    return std::expm1(x);
+}
+
+template <typename M>
+MAXWELL_MATH_CONSTEXPR26 basic_quantity<M, unitless_unit_type{}> log(basic_quantity<M, unitless_unit_type{}> x)
+{
+    return std::log(x);
+}
+
+template <typename M>
+MAXWELL_MATH_CONSTEXPR26 basic_quantity<M, unitless_unit_type{}> log10(basic_quantity<M, unitless_unit_type{}> x)
+{
+    return std::log10(x);
+}
+
+template <typename M>
+MAXWELL_MATH_CONSTEXPR26 basic_quantity<M, unitless_unit_type{}> log2(basic_quantity<M, unitless_unit_type{}> x)
+{
+    return std::log2(x);
+}
+
+template <typename M>
+MAXWELL_MATH_CONSTEXPR26 basic_quantity<M, unitless_unit_type{}> log1p(basic_quantity<M, unitless_unit_type{}> x)
+{
+    return std::log1p(x);
 }
 
 MAXWELL_MATH_CONSTEXPR26 double cos(angle auto q)

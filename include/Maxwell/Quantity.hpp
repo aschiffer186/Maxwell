@@ -110,6 +110,27 @@ template <typename M, unit auto U>
 struct is_basic_quantity<const volatile basic_quantity<M, U>> : std::true_type
 {
 };
+
+template <typename M, unit auto U>
+struct is_basic_quantity<basic_quantity<M, U>&> : std::true_type
+{
+};
+
+template <typename M, unit auto U>
+struct is_basic_quantity<const basic_quantity<M, U>&> : std::true_type
+{
+};
+
+template <typename M, unit auto U>
+struct is_basic_quantity<basic_quantity<M, U>&&> : std::true_type
+{
+};
+
+template <typename M, unit auto U>
+struct is_basic_quantity<const basic_quantity<M, U>&&> : std::true_type
+{
+};
+
 } // namespace internal::_detail
 /// \endcond
 
@@ -124,8 +145,8 @@ struct is_basic_quantity<const volatile basic_quantity<M, U>> : std::true_type
 ///
 /// \sa unitType
 ///
-/// Mandates: \c T is not cv-qualified, not \c std::in_place_t, not a spcalization of \c std::chrono::duration, and
-/// not a specialization of \c basic_quantity
+/// Mandates: \c T is not cv-qualified, not \c std::in_place_t, not a specialization of \c std::chrono::duration,
+/// not a specialization of \c basic_quantity, and is not a specialization of \c unit_type or \c measure_type
 ///
 /// \tparam T the type of the quantity's magnitude
 /// \tparam U the quantity's units
@@ -137,6 +158,7 @@ class basic_quantity
     static_assert(!internal::_detail::chrono_duration<T>, "Magnitude cannot be a std::chrono::duration");
     static_assert(!internal::_detail::is_basic_quantity<T>::value, "Magnitude cannot be a basic quantity!");
     static_assert(!unit<T>, "Magnitude cannot be a unit");
+    static_assert(!internal::measure<T>, "Magnitude cannot be a measure");
 
     template <typename D>
     static constexpr bool implicit_from_chrono = internal::_detail::enable_implicit_from_chrono<D, T, U>;
@@ -269,10 +291,10 @@ class basic_quantity
     ///
     /// \throw any exceptions thrown by the move constructor of \c magnitude_type
     template <typename Up, unit auto Other>
-        requires(std::constructible_from<magnitude_type, std::add_rvalue_reference_t<Up>>) &&
-                (!(std::same_as<Up, magnitude_type> && Other == U)) && unit_convertible_to<Other, units>
+        requires std::constructible_from<magnitude_type, Up> &&
+                 (!(std::same_as<Up, magnitude_type> && Other == U)) && unit_convertible_to<Other, units>
     constexpr basic_quantity(const basic_quantity<Up, Other>& q) noexcept(
-        std::is_nothrow_constructible_v<magnitude_type, std::add_rvalue_reference_t<Up>>)
+        std::is_nothrow_constructible_v<magnitude_type, Up>)
         : magnitude_(q.magnitude() * conversion_factor(Other, units))
     {
     }
@@ -293,8 +315,8 @@ class basic_quantity
     ///
     /// \throw any exceptions thrown by the move constructor of \c magnitude_type
     template <typename Up, unit auto Other>
-        requires(std::constructible_from<magnitude_type, std::add_rvalue_reference_t<Up>>) &&
-                (!(std::same_as<Up, magnitude_type> && Other == U)) && unit_convertible_to<Other, units>
+        requires std::constructible_from<magnitude_type, std::add_rvalue_reference_t<Up>> &&
+                 (!(std::same_as<Up, magnitude_type> && Other == U)) && unit_convertible_to<Other, units>
     constexpr basic_quantity(basic_quantity<Up, Other>&& q) noexcept(
         std::is_nothrow_constructible_v<magnitude_type, std::add_rvalue_reference_t<Up>>)
         : magnitude_(std::move(q).magnitude() * conversion_factor(Other, units))
@@ -777,6 +799,25 @@ std::ostream& operator<<(std::ostream& os, const basic_quantity<M, U>& q)
     os << std::format("{}", q);
 #endif
     return os;
+}
+
+/// \brief Converts a quantity to another quantity
+///
+/// Converts a quantity to a quantity in different units as
+/// long as \c From can be converted a quantity with the
+/// units of \c Target.
+///
+/// \pre \c From is convertible to \c To
+///
+/// \tparam Target the type of the quantity to convert to
+/// \tparam From the type of the quantity to convert from
+/// \param from the quantity to convert from
+/// \return the converted quantity
+template <typename Target, typename From>
+    requires internal::_detail::is_basic_quantity<Target>::value && internal::_detail::is_basic_quantity<From>::value
+constexpr Target quantity_cast(const From& from)
+{
+    return Target(from);
 }
 
 // --- Quantity Type Traits ---

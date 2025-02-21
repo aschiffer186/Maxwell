@@ -28,6 +28,7 @@ std::tuple<Mach, maxwell::pascal, maxwell::kelvin> normal_shock_wave(Mach M0, ma
 int main()
 {
     using namespace maxwell::metric_literals;
+    using namespace maxwell;
 
     const auto p0_pa = 26436.3_Pa;
     const auto T0    = 223.150_K;
@@ -38,11 +39,11 @@ int main()
     std::cout << "\nUpstream pressure: " << p1;
     std::cout << "\nUpstream temperature: " << T1 << '\n';
 
-    // const auto p0_atm = 0.2609059956_atm;
+    const auto p0_atm = 0.2609059956_atm;
 
-    // std::tie(M1, p1, T1) = normal_shock_wave(M0, p0_atm, 1.0_m);
+    std::tie(M1, p1, T1) = normal_shock_wave(M0, p0_atm, T0);
     std::cout << "Upstream Mach: " << M1;
-    std::cout << "\nUpstream pressure: " << p1;
+    std::cout << "\nUpstream pressure: " << quantity_cast<atm>(p1);
     std::cout << "\nUpstream temperature: " << T1 << '\n';
 
     return 0;
