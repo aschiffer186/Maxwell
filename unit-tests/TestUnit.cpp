@@ -555,7 +555,7 @@ TEST(TestUnit, TestUnitEquality)
     EXPECT_FALSE(u3 != u2);
 }
 
-TEST(TestUnit, TestUnitConversionOffset)
+TEST(TestUnit, TestUnitConversionFactor)
 {
     // Amount
     const double conversion1 = conversion_factor(foot_unit, mile_unit);
@@ -586,6 +586,28 @@ TEST(TestUnit, TestUnitConversionOffset)
     const double conversion9 = conversion_factor(from, to);
 
     EXPECT_NEAR(conversion9, 2.23694, 1e-4);
+}
+
+TEST(TestUnit, TestConversionOffset)
+{
+    // Temperature
+    const double conversion1 = conversion_offset(kelvin_unit, kelvin_unit);
+    const double conversion2 = conversion_offset(kelvin_unit, kelvin_unit);
+
+    EXPECT_FLOAT_EQ(conversion1, 0.0);
+    EXPECT_FLOAT_EQ(conversion2, 0.0);
+
+    const double conversion3 = conversion_offset(celsius_unit, kelvin_unit);
+    const double conversion4 = conversion_offset(kelvin_unit, celsius_unit);
+
+    EXPECT_FLOAT_EQ(conversion3, 273.15);
+    EXPECT_FLOAT_EQ(conversion4, -273.15);
+
+    const double conversion5 = conversion_offset(fahrenheit_unit, kelvin_unit);
+    const double conversion6 = conversion_offset(kelvin_unit, fahrenheit_unit);
+
+    EXPECT_FLOAT_EQ(conversion5, 459.67);
+    EXPECT_FLOAT_EQ(conversion6, -459.67);
 }
 
 TEST(TestUnit, TestUnitMultiplication)

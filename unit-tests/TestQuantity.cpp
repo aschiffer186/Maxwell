@@ -138,6 +138,17 @@ TEST(TestQuantity, TestUnitConvertingConstructor)
     const ToType3   d{r};
 
     EXPECT_FLOAT_EQ(d.magnitude(), 180.0 / 3'600.0);
+
+    using FromType4 = basic_quantity<double, kelvin_unit>;
+    using ToType4   = basic_quantity<double, celsius_unit>;
+    using ToType6   = basic_quantity<double, fahrenheit_unit>;
+
+    const FromType4 k{1.0};
+    const ToType4   c{k};
+
+    EXPECT_FLOAT_EQ(c.magnitude(), -272.15);
+    const ToType6 far{k};
+    EXPECT_FLOAT_EQ(far.magnitude(), -457.87);
 }
 
 TEST(TestQuantity, TestConvertingAssignmentOperator)

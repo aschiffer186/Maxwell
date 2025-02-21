@@ -68,7 +68,7 @@ template <typename D, unit auto U>
 constexpr double from_chrono_conversion_factor()
 {
     // TODO: Finish
-    using Period = D::period;
+    using Period = std::ratio_divide<std::ratio<1>, typename D::period>;
     const unit_type<null_measure, null_measure, null_measure, null_measure, null_measure, null_measure,
                     measure_type<1, 0, Period>{}>
         as_maxwell_unit;
@@ -79,7 +79,7 @@ template <typename D, unit auto U>
     requires time_unit<U>
 constexpr double to_chrono_conversion_factor()
 {
-    using Period = D::period;
+    using Period = std::ratio_divide<std::ratio<1>, typename D::period>;
     const unit_type<null_measure, null_measure, null_measure, null_measure, null_measure, null_measure,
                     measure_type<1, 0, Period>{}>
         as_maxwell_unit;
@@ -295,7 +295,7 @@ class basic_quantity
                  (!(std::same_as<Up, magnitude_type> && Other == U)) && unit_convertible_to<Other, units>
     constexpr basic_quantity(const basic_quantity<Up, Other>& q) noexcept(
         std::is_nothrow_constructible_v<magnitude_type, Up>)
-        : magnitude_(q.magnitude() * conversion_factor(Other, units))
+        : magnitude_(q.magnitude() * conversion_factor(Other, units) + conversion_offset(Other, units))
     {
     }
 
@@ -319,7 +319,7 @@ class basic_quantity
                  (!(std::same_as<Up, magnitude_type> && Other == U)) && unit_convertible_to<Other, units>
     constexpr basic_quantity(basic_quantity<Up, Other>&& q) noexcept(
         std::is_nothrow_constructible_v<magnitude_type, std::add_rvalue_reference_t<Up>>)
-        : magnitude_(std::move(q).magnitude() * conversion_factor(Other, units))
+        : magnitude_(std::move(q).magnitude() * conversion_factor(Other, units) + conversion_offset(Other, units))
     {
     }
 

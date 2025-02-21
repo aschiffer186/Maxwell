@@ -250,7 +250,7 @@ MAKE_UNIT_WITH_PREFIXES_DESC(siemens, unitless_unit_type{} / ohm_unit, time, "S"
 MAKE_UNIT_WITH_PREFIXES_DESC(weber, volt_unit * second_unit, mass, "Wb")
 MAKE_UNIT_WITH_PREFIXES_DESC(tesla, weber_unit / (meter_unit * meter_unit), mass, "T")
 MAKE_UNIT_WITH_PREFIXES_DESC(henry, weber_unit / ampere_unit, mass, "L")
-constexpr unit auto celsius_unit = kelvin_unit.template adjust_offset_temperature<std::ratio<-273>>();
+constexpr unit auto celsius_unit = kelvin_unit.template adjust_offset_temperature<std::ratio<-27315, 100>>();
 using celsius_unit_type = std::remove_const_t<decltype(celsius_unit)>;
 template<>
 inline const std::string unit_string<celsius_unit> = "°C";
@@ -294,29 +294,29 @@ MAKE_UNIT(meter_per_second_per_second, meter_per_second_unit / second_unit)
 MAKE_UNIT(square_meter, meter_unit * meter_unit)
 MAKE_UNIT(cubic_meter, square_meter_unit * meter_unit)
 
-MAKE_SCALED_UNIT_WITH_DESC(liter, cubic_meter_unit, (std::ratio<1'000, 1>), length, "L")
+MAKE_SCALED_UNIT_WITH_DESC(liter, cubic_meter_unit, (std::ratio<1, 1'000>), length, "L")
 
 // Imperial units 
-MAKE_SCALED_UNIT_WITH_DESC(foot, meter_unit, (std::ratio<3'048, 10'000>), length, "ft")
-MAKE_SCALED_UNIT_WITH_DESC(inch, foot_unit, (std::ratio<1, 12>), length, "in")
-MAKE_SCALED_UNIT_WITH_DESC(yard, foot_unit, (std::ratio<3, 1>), length, "yd")
-MAKE_SCALED_UNIT_WITH_DESC(mile, foot_unit, (std::ratio<5'280, 1>), length, "mi")
+MAKE_SCALED_UNIT_WITH_DESC(foot, meter_unit, (std::ratio<10'000, 3'048>), length, "ft")
+MAKE_SCALED_UNIT_WITH_DESC(inch, foot_unit, (std::ratio<12, 1>), length, "in")
+MAKE_SCALED_UNIT_WITH_DESC(yard, foot_unit, (std::ratio<1, 3>), length, "yd")
+MAKE_SCALED_UNIT_WITH_DESC(mile, foot_unit, (std::ratio<1, 5'280>), length, "mi")
 
-MAKE_SCALED_UNIT_WITH_DESC(pound, kilogram_unit, (std::ratio<45'359'237, 100'000'000>), mass, "lb")
+MAKE_SCALED_UNIT_WITH_DESC(pound, kilogram_unit, (std::ratio<100'000'000, 45'359'237>), mass, "lb")
 
-MAKE_SCALED_UNIT_WITH_DESC(minute, second_unit, (std::ratio<60, 1>), time, "min")
-MAKE_SCALED_UNIT_WITH_DESC(hour, minute_unit, (std::ratio<60, 1>), time, "hr")
-MAKE_SCALED_UNIT_WITH_DESC(day, hour_unit, (std::ratio<24, 1>), time, "day")
-MAKE_SCALED_UNIT_WITH_DESC(week, day_unit, (std::ratio<7, 1>), time, "week")
-MAKE_SCALED_UNIT_WITH_DESC(year, day_unit, (std::ratio<365, 1>), time, "yr")
+MAKE_SCALED_UNIT_WITH_DESC(minute, second_unit, (std::ratio<1, 60>), time, "min")
+MAKE_SCALED_UNIT_WITH_DESC(hour, minute_unit, (std::ratio<1, 60>), time, "hr")
+MAKE_SCALED_UNIT_WITH_DESC(day, hour_unit, (std::ratio<1, 24>), time, "day")
+MAKE_SCALED_UNIT_WITH_DESC(week, day_unit, (std::ratio<1, 7>), time, "week")
+MAKE_SCALED_UNIT_WITH_DESC(year, day_unit, (std::ratio<1, 365>), time, "yr")
 
 // clang-format on
-constexpr unit auto farenheit_unit = celsius_unit.template adjust_scale_temperature<std::ratio<9, 5>>()
-                                         .template adjust_offset_temperature<std::ratio<32>>();
+constexpr unit auto fahrenheit_unit = celsius_unit.template adjust_scale_temperature<std::ratio<9, 5>>()
+                                          .template adjust_offset_temperature<std::ratio<32>>();
 // clang-format off
-using farenheit_unit_type = std::remove_const_t<decltype(farenheit_unit)>;
+using fahrenheit_unit_type = std::remove_const_t<decltype(fahrenheit_unit)>;
 template<>
-inline const std::string unit_string<farenheit_unit> = "°F";
+inline const std::string unit_string<fahrenheit_unit> = "°F";
 
 // clang-format on
 #undef ESC

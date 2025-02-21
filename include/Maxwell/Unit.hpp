@@ -580,8 +580,9 @@ struct unit_type
     consteval auto adjust_offset_temperature() const noexcept
     {
         constexpr internal::measure auto oldMeasure = temperature;
-        using OldOffset                             = decltype(oldMeasure)::offset;
-        using NewOffset                             = std::ratio_add<OldOffset, Adjustment>;
+        using OldOffset =
+            std::ratio_multiply<typename decltype(oldMeasure)::offset, typename decltype(oldMeasure)::scale>;
+        using NewOffset = std::ratio_add<OldOffset, Adjustment>;
         constexpr internal::measure_type<oldMeasure.get_power(), oldMeasure.get_multiplier(),
                                          typename decltype(oldMeasure)::scale, NewOffset>
             newMeasure{};
@@ -976,7 +977,7 @@ template <internal::_detail::ratio_like From, internal::_detail::ratio_like To>
 constexpr double conversionFactorOffset() noexcept
 {
     using ResRatio = std::ratio_divide<To, From>;
-    return static_cast<double>(ResRatio::den) / static_cast<double>(ResRatio::num);
+    return static_cast<double>(ResRatio::num) / static_cast<double>(ResRatio::den);
 }
 } // namespace _detail
 /// \endcond
@@ -1055,6 +1056,56 @@ constexpr double conversion_factor(unit auto from, unit auto to) noexcept
     conversionFactor *=
         _detail::conversionFactorOffset<typename decltype(From::time)::scale, typename decltype(To::time)::scale>();
     return conversionFactor;
+}
+
+/// \brief Calculates the conversion between two units
+///
+/// Calculates the conversion offset that must be applied to convert from
+/// the specified unit to the target unit.
+///
+/// \pre \c from is convertible to \c to
+/// \param from the unit to convert from
+/// \param to the target unit
+/// \return the conversion offset that must be applied
+constexpr double conversion_offset(unit auto from, unit auto to) noexcept
+    requires unit_convertible_to<from, to>
+{
+    using rhs_type = decltype(from);
+    using lhs_type = decltype(to);
+
+    using amount_difference_type =
+        std::ratio_subtract<typename decltype(lhs_type::amount)::offset, typename decltype(rhs_type::amount)::offset>;
+    const double amount_diffence = amount_difference_type::num / static_cast<double>(amount_difference_type::den);
+
+    using curret_difference_type =
+        std::ratio_subtract<typename decltype(lhs_type::current)::offset, typename decltype(rhs_type::current)::offset>;
+    const double current_difference = curret_difference_type::num / static_cast<double>(curret_difference_type::den);
+
+    using length_difference_type =
+        std::ratio_subtract<typename decltype(lhs_type::length)::offset, typename decltype(rhs_type::length)::offset>;
+    const double length_difference = length_difference_type::num / static_cast<double>(length_difference_type::den);
+
+    using luminosity_difference_type = std::ratio_subtract<typename decltype(lhs_type::luminosity)::offset,
+                                                           typename decltype(rhs_type::luminosity)::offset>;
+    const double luminosity_difference =
+        luminosity_difference_type::num / static_cast<double>(luminosity_difference_type::den);
+
+    using mass_difference_type =
+        std::ratio_subtract<typename decltype(lhs_type::mass)::offset, typename decltype(rhs_type::mass)::offset>;
+    const double mass_difference = mass_difference_type::num / static_cast<double>(mass_difference_type::den);
+
+    using temperature_difference_type = std::ratio_subtract<typename decltype(lhs_type::temperature)::offset,
+                                                            typename decltype(rhs_type::temperature)::offset>;
+    const double temperature_difference =
+        temperature_difference_type::num / static_cast<double>(temperature_difference_type::den);
+
+    using time_difference_type =
+        std::ratio_subtract<typename decltype(lhs_type::time)::offset, typename decltype(rhs_type::time)::offset>;
+    const double time_difference = time_difference_type::num / static_cast<double>(time_difference_type::den);
+
+    return /*conversion_factor(from, to) **/
+        (amount_diffence + current_difference + length_difference + luminosity_difference + mass_difference +
+         temperature_difference + time_difference);
 }
 
 /// \brief Multiplies two units
