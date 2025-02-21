@@ -625,7 +625,7 @@ using quantity = basic_quantity<double, U>;
 
 /// \brief Convenience type alias for \c basic_quantity with \c magnitude_type of \c int
 template <unit auto U>
-using iquantity = basic_quantity<int, U>;
+using int_quantity = basic_quantity<int, U>;
 
 template <typename M, unit auto U>
 constexpr void swap(basic_quantity<M, U>& lhs, basic_quantity<M, U>& rhs) noexcept(noexcept(lhs.swap(rhs)))

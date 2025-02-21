@@ -223,10 +223,10 @@ TEST(TestQuantity, TestUnitlessAssignmentOperator)
 
 TEST(TestQuantity, TestQuantityEquality)
 {
-    const imeter     m1{1};
-    const imeter     m2{1};
-    const imeter     m3{1'000};
-    const ikilometer m4{1};
+    const int_meter     m1{1};
+    const int_meter     m2{1};
+    const int_meter     m3{1'000};
+    const int_kilometer m4{1};
 
     EXPECT_TRUE(m1 == m2);
     EXPECT_FALSE(m1 != m2);
@@ -256,7 +256,7 @@ TEST(TestQuantity, TestQuantityThreeWayComparison)
 
 TEST(TestQuantity, TestChronoConversion)
 {
-    inanosecond                           s{10.0};
+    int_nanosecond                        s{10.0};
     [[maybe_unused]] std::chrono::seconds s2(s);
 
     static_assert(internal::_detail::enable_implicit_to_chrono<std::chrono::seconds, int, maxwell::nanosecond_unit>);
