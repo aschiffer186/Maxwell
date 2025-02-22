@@ -9,7 +9,6 @@
 #define UNIT_HPP
 
 #include <array>
-#include <concepts>
 #include <ratio>
 #include <string>
 #include <type_traits>
@@ -1021,41 +1020,50 @@ constexpr double conversion_factor(unit auto from, unit auto to) noexcept
     using From = decltype(from);
     using To   = decltype(to);
 
-    double conversionFactor{1.0};
-    // Convert prefixes
-    conversionFactor *=
-        _detail::conversionFactorPrefix(from.get_amount().get_multiplier(), to.get_amount().get_multiplier());
-    conversionFactor *=
-        _detail::conversionFactorPrefix(from.get_current().get_multiplier(), to.get_current().get_multiplier());
-    conversionFactor *=
-        _detail::conversionFactorPrefix(from.get_length().get_multiplier(), to.get_length().get_multiplier());
-    conversionFactor *=
-        _detail::conversionFactorPrefix(from.get_luminosity().get_multiplier(), to.get_luminosity().get_multiplier());
-    conversionFactor *=
-        _detail::conversionFactorPrefix(from.get_mass().get_multiplier(), to.get_mass().get_multiplier());
-    conversionFactor *=
-        _detail::conversionFactorPrefix(from.get_temperature().get_multiplier(), to.get_temperature().get_multiplier());
-    conversionFactor *=
-        _detail::conversionFactorPrefix(from.get_time().get_multiplier(), to.get_time().get_multiplier());
-    conversionFactor *= _detail::conversionFactorPrefix(from.get_multiplier(), to.get_multiplier());
-    conversionFactor *= tag_conversion_factor<typename From::tag, typename To::tag>::factor;
+    // Short circuit for identical types
+    if constexpr (internal::similar<From, To>)
+    {
+        return 1.0;
+    }
+    else
+    {
 
-    // Convert ratios
-    conversionFactor *=
-        _detail::conversionFactorOffset<typename decltype(From::amount)::scale, typename decltype(To::amount)::scale>();
-    conversionFactor *= _detail::conversionFactorOffset<typename decltype(From::current)::scale,
-                                                        typename decltype(To::current)::scale>();
-    conversionFactor *=
-        _detail::conversionFactorOffset<typename decltype(From::length)::scale, typename decltype(To::length)::scale>();
-    conversionFactor *= _detail::conversionFactorOffset<typename decltype(From::luminosity)::scale,
-                                                        typename decltype(To::luminosity)::scale>();
-    conversionFactor *=
-        _detail::conversionFactorOffset<typename decltype(From::mass)::scale, typename decltype(To::mass)::scale>();
-    conversionFactor *= _detail::conversionFactorOffset<typename decltype(From::temperature)::scale,
-                                                        typename decltype(To::temperature)::scale>();
-    conversionFactor *=
-        _detail::conversionFactorOffset<typename decltype(From::time)::scale, typename decltype(To::time)::scale>();
-    return conversionFactor;
+        double conversionFactor{1.0};
+        // Convert prefixes
+        conversionFactor *=
+            _detail::conversionFactorPrefix(from.get_amount().get_multiplier(), to.get_amount().get_multiplier());
+        conversionFactor *=
+            _detail::conversionFactorPrefix(from.get_current().get_multiplier(), to.get_current().get_multiplier());
+        conversionFactor *=
+            _detail::conversionFactorPrefix(from.get_length().get_multiplier(), to.get_length().get_multiplier());
+        conversionFactor *= _detail::conversionFactorPrefix(from.get_luminosity().get_multiplier(),
+                                                            to.get_luminosity().get_multiplier());
+        conversionFactor *=
+            _detail::conversionFactorPrefix(from.get_mass().get_multiplier(), to.get_mass().get_multiplier());
+        conversionFactor *= _detail::conversionFactorPrefix(from.get_temperature().get_multiplier(),
+                                                            to.get_temperature().get_multiplier());
+        conversionFactor *=
+            _detail::conversionFactorPrefix(from.get_time().get_multiplier(), to.get_time().get_multiplier());
+        conversionFactor *= _detail::conversionFactorPrefix(from.get_multiplier(), to.get_multiplier());
+        conversionFactor *= tag_conversion_factor<typename From::tag, typename To::tag>::factor;
+
+        // Convert ratios
+        conversionFactor *= _detail::conversionFactorOffset<typename decltype(From::amount)::scale,
+                                                            typename decltype(To::amount)::scale>();
+        conversionFactor *= _detail::conversionFactorOffset<typename decltype(From::current)::scale,
+                                                            typename decltype(To::current)::scale>();
+        conversionFactor *= _detail::conversionFactorOffset<typename decltype(From::length)::scale,
+                                                            typename decltype(To::length)::scale>();
+        conversionFactor *= _detail::conversionFactorOffset<typename decltype(From::luminosity)::scale,
+                                                            typename decltype(To::luminosity)::scale>();
+        conversionFactor *=
+            _detail::conversionFactorOffset<typename decltype(From::mass)::scale, typename decltype(To::mass)::scale>();
+        conversionFactor *= _detail::conversionFactorOffset<typename decltype(From::temperature)::scale,
+                                                            typename decltype(To::temperature)::scale>();
+        conversionFactor *=
+            _detail::conversionFactorOffset<typename decltype(From::time)::scale, typename decltype(To::time)::scale>();
+        return conversionFactor;
+    }
 }
 
 /// \brief Calculates the conversion between two units
@@ -1073,39 +1081,47 @@ constexpr double conversion_offset(unit auto from, unit auto to) noexcept
     using rhs_type = decltype(from);
     using lhs_type = decltype(to);
 
-    using amount_difference_type =
-        std::ratio_subtract<typename decltype(lhs_type::amount)::offset, typename decltype(rhs_type::amount)::offset>;
-    const double amount_diffence = amount_difference_type::num / static_cast<double>(amount_difference_type::den);
+    if constexpr (internal::similar<lhs_type, rhs_type>)
+    {
+        return 0.0;
+    }
+    else
+    {
+        using amount_difference_type = std::ratio_subtract<typename decltype(lhs_type::amount)::offset,
+                                                           typename decltype(rhs_type::amount)::offset>;
+        const double amount_diffence = amount_difference_type::num / static_cast<double>(amount_difference_type::den);
 
-    using curret_difference_type =
-        std::ratio_subtract<typename decltype(lhs_type::current)::offset, typename decltype(rhs_type::current)::offset>;
-    const double current_difference = curret_difference_type::num / static_cast<double>(curret_difference_type::den);
+        using curret_difference_type = std::ratio_subtract<typename decltype(lhs_type::current)::offset,
+                                                           typename decltype(rhs_type::current)::offset>;
+        const double current_difference =
+            curret_difference_type::num / static_cast<double>(curret_difference_type::den);
 
-    using length_difference_type =
-        std::ratio_subtract<typename decltype(lhs_type::length)::offset, typename decltype(rhs_type::length)::offset>;
-    const double length_difference = length_difference_type::num / static_cast<double>(length_difference_type::den);
+        using length_difference_type   = std::ratio_subtract<typename decltype(lhs_type::length)::offset,
+                                                             typename decltype(rhs_type::length)::offset>;
+        const double length_difference = length_difference_type::num / static_cast<double>(length_difference_type::den);
 
-    using luminosity_difference_type = std::ratio_subtract<typename decltype(lhs_type::luminosity)::offset,
-                                                           typename decltype(rhs_type::luminosity)::offset>;
-    const double luminosity_difference =
-        luminosity_difference_type::num / static_cast<double>(luminosity_difference_type::den);
+        using luminosity_difference_type = std::ratio_subtract<typename decltype(lhs_type::luminosity)::offset,
+                                                               typename decltype(rhs_type::luminosity)::offset>;
+        const double luminosity_difference =
+            luminosity_difference_type::num / static_cast<double>(luminosity_difference_type::den);
 
-    using mass_difference_type =
-        std::ratio_subtract<typename decltype(lhs_type::mass)::offset, typename decltype(rhs_type::mass)::offset>;
-    const double mass_difference = mass_difference_type::num / static_cast<double>(mass_difference_type::den);
+        using mass_difference_type =
+            std::ratio_subtract<typename decltype(lhs_type::mass)::offset, typename decltype(rhs_type::mass)::offset>;
+        const double mass_difference = mass_difference_type::num / static_cast<double>(mass_difference_type::den);
 
-    using temperature_difference_type = std::ratio_subtract<typename decltype(lhs_type::temperature)::offset,
-                                                            typename decltype(rhs_type::temperature)::offset>;
-    const double temperature_difference =
-        temperature_difference_type::num / static_cast<double>(temperature_difference_type::den);
+        using temperature_difference_type = std::ratio_subtract<typename decltype(lhs_type::temperature)::offset,
+                                                                typename decltype(rhs_type::temperature)::offset>;
+        const double temperature_difference =
+            temperature_difference_type::num / static_cast<double>(temperature_difference_type::den);
 
-    using time_difference_type =
-        std::ratio_subtract<typename decltype(lhs_type::time)::offset, typename decltype(rhs_type::time)::offset>;
-    const double time_difference = time_difference_type::num / static_cast<double>(time_difference_type::den);
+        using time_difference_type =
+            std::ratio_subtract<typename decltype(lhs_type::time)::offset, typename decltype(rhs_type::time)::offset>;
+        const double time_difference = time_difference_type::num / static_cast<double>(time_difference_type::den);
 
-    return /*conversion_factor(from, to) **/
-        (amount_diffence + current_difference + length_difference + luminosity_difference + mass_difference +
-         temperature_difference + time_difference);
+        return /*conversion_factor(from, to) **/
+            (amount_diffence + current_difference + length_difference + luminosity_difference + mass_difference +
+             temperature_difference + time_difference);
+    }
 }
 
 /// \brief Multiplies two units
