@@ -35,6 +35,9 @@ using int_kelvin = int_quantity<kelvin_unit>;
 using second     = quantity<second_unit>;
 using int_second = int_quantity<second_unit>;
 
+using unitless_quantity     = quantity<unitless_unit_type{}>;
+using int_unitless_quantity = int_quantity<unitless_unit_type{}>;
+
 #define QUANTITY_LITERAL(name, symbol)                                                                                 \
     consteval name operator""_##symbol(long double x) noexcept                                                         \
     {                                                                                                                  \

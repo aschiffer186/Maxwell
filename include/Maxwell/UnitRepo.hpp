@@ -291,7 +291,11 @@ MAKE_UNIT_WITH_PREFIXES_DESC(katal, mole_unit / second_unit, amount, "kat")
 
 MAKE_UNIT(meter_per_second, meter_unit / second_unit)
 MAKE_UNIT(meter_per_second_per_second, meter_per_second_unit / second_unit)
+
 MAKE_UNIT(square_meter, meter_unit * meter_unit)
+MAKE_UNIT(square_centimeter, centimeter_unit * centimeter_unit)
+MAKE_UNIT(square_kilometer, kilometer_unit * kilometer_unit)
+
 MAKE_UNIT(cubic_meter, square_meter_unit * meter_unit)
 
 MAKE_SCALED_UNIT_WITH_DESC(liter, cubic_meter_unit, (std::ratio<1, 1'000>), length, "L")
@@ -301,6 +305,16 @@ MAKE_SCALED_UNIT_WITH_DESC(foot, meter_unit, (std::ratio<10'000, 3'048>), length
 MAKE_SCALED_UNIT_WITH_DESC(inch, foot_unit, (std::ratio<12, 1>), length, "in")
 MAKE_SCALED_UNIT_WITH_DESC(yard, foot_unit, (std::ratio<1, 3>), length, "yd")
 MAKE_SCALED_UNIT_WITH_DESC(mile, foot_unit, (std::ratio<1, 5'280>), length, "mi")
+
+MAKE_UNIT_WITH_DESC(square_foot, foot_unit * foot_unit, "ft^2")
+MAKE_UNIT_WITH_DESC(square_inch, inch_unit * inch_unit, "in^2")
+MAKE_UNIT_WITH_DESC(square_yard, yard_unit * yard_unit, "yd^2")
+MAKE_UNIT_WITH_DESC(square_mile, mile_unit * mile_unit, "mi^2") 
+
+MAKE_UNIT_WITH_DESC(cubic_foot, foot_unit * foot_unit * foot_unit, "ft^3")
+MAKE_UNIT_WITH_DESC(cubic_inch, inch_unit * inch_unit * inch_unit, "in^3")
+MAKE_UNIT_WITH_DESC(cubic_yard, yard_unit * yard_unit * yard_unit, "yd^3")
+MAKE_UNIT_WITH_DESC(cubic_mile, mile_unit * mile_unit * mile_unit, "mi^3")
 
 MAKE_SCALED_UNIT_WITH_DESC(pound, kilogram_unit, (std::ratio<100'000'000, 45'359'237>), mass, "lb")
 

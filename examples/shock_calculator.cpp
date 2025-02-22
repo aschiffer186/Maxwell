@@ -1,17 +1,14 @@
 #include "Maxwell.hpp"
 
 #include <iostream>
-#include <map>
-#include <string>
 #include <tuple>
-#include <unordered_map>
 
 using Mach = maxwell::unitless_quantity;
 
 std::tuple<Mach, maxwell::pascal, maxwell::kelvin> normal_shock_wave(Mach M0, maxwell::pressure auto p0,
                                                                      maxwell::temperature auto T0)
 {
-    constexpr double gamma{1.4};
+    constexpr maxwell::unitless_quantity gamma{1.4};
 
     const Mach M1 = std::sqrt(((gamma - 1) * M0 * M0 + 2) / (2 * gamma * M0 * M0 - (gamma - 1)));
 
