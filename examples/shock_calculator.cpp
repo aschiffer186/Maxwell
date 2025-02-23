@@ -1,4 +1,6 @@
 #include "Maxwell.hpp"
+#include "Quantity.hpp"
+#include "QuantityRepo.hpp"
 
 #include <iostream>
 #include <tuple>
