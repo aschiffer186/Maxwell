@@ -685,15 +685,14 @@ template <typename M1, unit auto U1, typename M2, unit auto U2>
     requires internal::multiply_enabled_with<M1, M2>
 constexpr auto operator*(const basic_quantity<M1, U1>  lhs,
                          const basic_quantity<M2, U2>& rhs) noexcept(internal::nothrow_multiply_enabled_with<M1, M2>)
-    -> basic_quantity<decltype(lhs.get_magnitude() * rhs.get_magnitude()),
-                      U1.to_SI_base_units() * U2.to_SI_base_units()>
+    -> basic_quantity<decltype(lhs.magnitude() * rhs.magnitude()), U1.to_SI_base_units() * U2.to_SI_base_units()>
 {
     const auto lhsSIBase = lhs.to_SI_base_units();
     const auto rhsSIBase = rhs.to_SI_base_units();
 
-    constexpr unit auto outputunits = lhsSIBase.units() * rhsSIBase.units();
-    return basic_quantity<decltype(lhs.magnitude() * rhs.magnitude()), outputunits>(lhsSIBase.magnitude() *
-                                                                                    rhsSIBase.magnitude());
+    constexpr unit auto output_units = lhsSIBase.get_units() * rhsSIBase.get_units();
+    return basic_quantity<decltype(lhs.magnitude() * rhs.magnitude()), output_units>(lhsSIBase.magnitude() *
+                                                                                     rhsSIBase.magnitude());
 }
 
 /// \brief Calculates the quotient between two \c BasicQuantities
@@ -721,13 +720,14 @@ constexpr auto operator/(const basic_quantity<M1, U1>& lhs,
     const auto lhsSIBase = lhs.to_SI_base_units();
     const auto rhsSIBase = rhs.to_SI_base_units();
 
-    constexpr unit auto outputunits = lhsSIBase.units() / rhsSIBase.units();
+    constexpr unit auto outputunits = lhsSIBase.get_units() / rhsSIBase.get_units();
     return basic_quantity<decltype(lhs.magnitude() / rhs.magnitude()), outputunits>(lhsSIBase.magnitude() *
                                                                                     rhsSIBase.magnitude());
 }
 
 template <typename M1, unit auto U1, typename M2>
-    requires internal::multiply_enabled_with<M1, M2> && (!unitless_unit<U1>)
+    requires internal::multiply_enabled_with<M1, M2> && (!unitless_unit<U1>) &&
+                 (!internal::_detail::is_basic_quantity<M2>::value)
 constexpr auto operator*(const basic_quantity<M1, U1>& lhs, const M2& rhs) noexcept(
     internal::nothrow_multiply_enabled_with<M1, M2>) -> basic_quantity<decltype(lhs.magnitude() * rhs), U1>
 {
@@ -735,7 +735,8 @@ constexpr auto operator*(const basic_quantity<M1, U1>& lhs, const M2& rhs) noexc
 }
 
 template <typename M1, unit auto U1, typename M2>
-    requires internal::multiply_enabled_with<M1, M2> && (!unitless_unit<U1>)
+    requires internal::multiply_enabled_with<M1, M2> && (!unitless_unit<U1>) &&
+                 (!internal::_detail::is_basic_quantity<M1>::value)
 constexpr auto operator*(const M2& lhs, const basic_quantity<M1, U1>& rhs) noexcept(
     internal::nothrow_multiply_enabled_with<M1, M2>) -> basic_quantity<decltype(lhs * rhs.magnitude()), U1>
 {

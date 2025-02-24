@@ -68,11 +68,29 @@
             "configuration": "Debug"
         },
         {
+            "name": "ninja-debug-clean",
+            "configurePreset": "ninja-debug",
+            "displayName": "Ninja (Debug) Clean",
+            "configuration": "Debug",
+            "targets": [
+                "clean"
+            ]
+        },
+        {
             "name": "ninja-release",
             "configurePreset": "ninja-release",
             "displayName": "Ninja (Relase)",
             "description": "Build with Ninja in release mode",
             "configuration": "Release"
+        },
+        {
+            "name": "ninja-release-clean",
+            "configurePreset": "ninja-release",
+            "displayName": "Ninja (Release) Clean",
+            "configuration": "Release",
+            "targets": [
+                "clean"
+            ]
         },
         {
             "name": "make-debug",
@@ -82,11 +100,29 @@
             "configuration": "Debug"
         },
         {
+            "name": "make-debug-clean",
+            "configurePreset": "make-debug",
+            "displayName": "Make (Release) Clean",
+            "configuration": "Debug",
+            "targets": [
+                "clean"
+            ]
+        },
+        {
             "name": "make-release",
             "configurePreset": "make-release",
             "displayName": "Makefiles (Relase)",
             "description": "Build with Makefiles in release mode",
             "configuration": "Release"
+        },
+        {
+            "name": "make-release-clean",
+            "configurePreset": "make-release",
+            "displayName": "Make (Release) Clean",
+            "configuration": "Release",
+            "targets": [
+                "clean"
+            ]
         }
     ],
     "testPresets": [

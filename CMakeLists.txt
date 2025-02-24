@@ -5,6 +5,7 @@ option(DISABLE_PREDEFINED_UNITS "Disables all library-defined units except for S
 option(EXPLICITLY_INSTANTIATE_UNITS "Create explicit instantiations for derived units" OFF)
 option(BUILD_TESTS "Build unit tests" OFF)
 option(BUILD_EXAMPLES "Build examples" OFF)
+option(BUILD_EIGEN_INTERFACE "Build Eigen Interface" OFF)
 
 if (DISABLE_PREDEFINED_UNITS)
     add_compile_definitions(-DNO_PREDEFINED_DERIVED_UNITS)
