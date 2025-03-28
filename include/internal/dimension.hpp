@@ -57,15 +57,13 @@ struct dimension {
     return dimension{power, prefix, scale, offset * scale + addend};
   }
 
-  /**
-   * @brief Returns the equivalent SI base dimension
-   *
-   * Returns the equivalent SI base dimension of \c *this, i.e, the
-   * dimension with the same power as \c *this, but with no scaling or offset.
-   *
-   * @return the equivalent SI base dimension
-   * @throws nothing
-   */
+  /// @brief Returns the equivalent SI base dimension
+  ///
+  /// Returns the equivalent SI base dimension of \c *this, i.e, the
+  /// dimension with the same power as \c *this, but with no scaling or offset.
+  ///
+  /// @return the equivalent SI base dimension
+  /// @throws nothing
   constexpr dimension to_SI_base_dimension() const noexcept {
     return {power, 0, one, zero};
   }

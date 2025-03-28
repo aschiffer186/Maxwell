@@ -1,6 +1,9 @@
 #include "Maxwell.hpp"
 #include "internal/quantity.hpp"
 #include "internal/unit.hpp"
+#include "internal/unit_repo.hpp"
+#include <iostream>
+#include <limits>
 #include <vector>
 
 struct res_unit : decltype(maxwell::mole_unit * maxwell::ampere_unit) {
@@ -19,4 +22,11 @@ int main() {
   //   [[maybe_unused]] const maxwell::mole m2(maxwell::mole{} /
   //   maxwell::ampere{} *
   //                                           maxell::newton{});
+  const auto V_unit =
+      maxwell::newton_unit / (maxwell::meter_unit * maxwell::meter_unit);
+
+  maxwell::basic_quantity<double, V_unit> V1{3.0};
+  maxwell::basic_quantity<double, maxwell::pascal_unit> V2{3.0};
+  maxwell::basic_quantity<double, maxwell::meter_unit> meter{V2};
+  V1 = V2;
 }

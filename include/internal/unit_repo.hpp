@@ -264,10 +264,16 @@ namespace maxwell {
   };                                                                           \
   constexpr unit_name##_unit_type unit_name##_unit;
 
-MAKE_UNIT_WITH_DESC(radian, unitless_unit_type{}, "rad";)
-MAKE_UNIT_PREFIXES(radian_unit, mass);
+#define MAKE_UNIT_PREFXIES_WITH_DESC(unit_name, definition, desc, dimension)   \
+  MAKE_UNIT_WITH_DESC(unit_name, definition, desc)                             \
+  MAKE_UNIT_PREFIXES(unit_name##_unit, dimension)
 
+MAKE_UNIT_WITH_DESC(radian, unitless_unit_type{}, "rad");
+MAKE_UNIT_WITH_DESC(steradian, unitless_unit_type{}, "sr");
 MAKE_UNIT_WITH_DESC(degree, unitless_unit_type{}, "deg");
+
+MAKE_UNIT_PREFXIES_WITH_DESC(hertz, unitless_unit_type{} / second_unit, "Hz",
+                             time);
 
 template <>
 struct is_tag_convertible<degree_unit_type, radian_unit_type> : std::true_type {
@@ -285,8 +291,14 @@ template <> struct tag_conversion_factor<degree_unit_type, radian_unit_type> {
   static constexpr double factor = std::numbers::pi / 180.0;
 };
 
-MAKE_UNIT_WITH_DESC(newton, kilogram_unit* meter_unit / second_unit, "N");
-MAKE_UNIT_PREFIXES(newton_unit, mass)
+MAKE_UNIT_PREFXIES_WITH_DESC(newton, kilogram_unit* meter_unit / second_unit,
+                             "N", mass)
+MAKE_UNIT_PREFXIES_WITH_DESC(pascal, newton_unit / meter_unit / meter_unit,
+                             "Pa", mass)
+MAKE_UNIT_PREFXIES_WITH_DESC(joule, newton_unit* meter_unit, "J", mass)
+MAKE_UNIT_PREFXIES_WITH_DESC(watt, joule_unit / second_unit, "W", mass)
+MAKE_UNIT_PREFXIES_WITH_DESC(coulomb, ampere_unit* second_unit, "C", current)
+MAKE_UNIT_PREFXIES_WITH_DESC(volt, watt_unit / ampere_unit, "V", mass)
 } // namespace maxwell
 
 #endif

@@ -118,8 +118,18 @@ struct rational {
     }
   }
 
-  friend constexpr bool operator==(const rational&,
-                                   const rational&) noexcept = default;
+  [[nodiscard]] constexpr rational reduced() const noexcept {
+    rational temp{*this};
+    temp.reduce();
+    return temp;
+  }
+
+  friend constexpr bool operator==(const rational& lhs, const rational& rhs) {
+    const auto lhs_reduced = lhs.reduced();
+    const auto rhs_reduced = rhs.reduced();
+    return lhs_reduced.numerator == rhs_reduced.numerator &&
+           lhs_reduced.denominator == rhs_reduced.denominator;
+  }
 
   constexpr explicit operator double() const noexcept {
     return static_cast<double>(numerator) / static_cast<double>(denominator);

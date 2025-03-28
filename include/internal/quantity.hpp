@@ -3,8 +3,14 @@
 
 #include <chrono>
 #include <concepts>
+#include <format>
+#include <functional>
 #include <initializer_list>
+#include <iterator>
+#include <limits>
+#include <ostream>
 #include <ratio>
+#include <string_view>
 #include <type_traits>
 #include <utility>
 
@@ -109,13 +115,13 @@ public:
   MAXWELL_CONSTEXPR23 basic_quantity(std::chrono::duration<Rep, Period> time) {}
 
   template <typename Up, unit auto V>
-    requires std::constructible_from<scalar_type, Up> &&
-             unit_convertible_to<V, units>
+    requires unit_convertible_to<V, units> &&
+             std::constructible_from<scalar_type, Up>
   constexpr basic_quantity(const basic_quantity<Up, V>&) {}
 
   template <typename Up, unit auto V>
-    requires std::constructible_from<scalar_type, Up> &&
-             unit_convertible_to<V, units>
+    requires unit_convertible_to<V, units> &&
+             std::constructible_from<scalar_type, Up>
   constexpr basic_quantity(basic_quantity<Up, V>&&) noexcept(
       std::is_nothrow_constructible_v<scalar_type,
                                       std::add_rvalue_reference_t<Up>>) {}
@@ -134,7 +140,7 @@ public:
   }
 
   template <typename Up = scalar_type>
-    requires std::assignable_from<scalar_type&, Up>
+    requires unitless_unit<units> && std::assignable_from<scalar_type&, Up>
   constexpr basic_quantity& operator=(Up&& other) noexcept(
       std::is_nothrow_assignable_v<scalar_type&, Up>) {
     magnitude_ = std::forward<Up>(other);
@@ -160,6 +166,7 @@ public:
     return magnitude_;
   }
 
+  constexpr auto to_SI_base_units() const { return *this; }
   // --- Quantity comparison ---
 
   friend auto constexpr operator<=>(const basic_quantity&,
@@ -189,7 +196,9 @@ public:
     requires addable_with<T, Up> && unit_convertible_to<V, units>
   constexpr basic_quantity&
   operator+=(const basic_quantity<Up, V>& other) noexcept(
-      nothrow_subtractable_with<T, Up>) {}
+      nothrow_subtractable_with<T, Up>) {
+    return *this;
+  }
 
   constexpr basic_quantity&
   operator*=(const scalar_type& scalar) noexcept(nothrow_multiply<scalar_type>)
@@ -207,20 +216,60 @@ public:
     return *this;
   }
 
+  constexpr basic_quantity& operator++() {
+    ++magnitude_;
+    return *this;
+  }
+
+  constexpr basic_quantity& operator--() {
+    --magnitude_;
+    return *this;
+  }
+
+  constexpr basic_quantity& operator++(int) {
+    basic_quantity temp{*this};
+    ++magnitude_;
+    return temp;
+  }
+
+  constexpr basic_quantity& operator--(int) {
+    basic_quantity temp{*this};
+    --magnitude_;
+    return temp;
+  }
+
 private:
   scalar_type magnitude_{};
 };
 
 template <typename S1, unit auto U1, typename S2, unit auto U2>
 constexpr auto operator*(const basic_quantity<S1, U1>& lhs,
-                         const basic_quantity<S2, U2>&) {
-  return basic_quantity<S1, U1 * U2>{lhs.get_magnitude()};
+                         const basic_quantity<S2, U2>& rhs)
+    -> basic_quantity<decltype(lhs.get_magnitude() * rhs.get_magnitude()),
+                      U1 * U2> {
+  const auto lhs_base_units = lhs.to_SI_base_units();
+  const auto rhs_base_units = rhs.to_SI_base_units();
+
+  using return_scalar_type =
+      decltype(lhs_base_units.get_magnitude() * rhs_base_units.get_magnitude());
+  return basic_quantity<return_scalar_type, lhs_base_units.get_units() *
+                                                rhs_base_units.get_units()>{
+      lhs_base_units.get_magnitude() * rhs_base_units.get_magnitude()};
 }
 
 template <typename S1, unit auto U1, typename S2, unit auto U2>
 constexpr auto operator/(const basic_quantity<S1, U1>& lhs,
-                         const basic_quantity<S2, U2>&) {
-  return basic_quantity<S1, U1 / U2>{lhs.get_magnitude()};
+                         const basic_quantity<S2, U2>& rhs)
+    -> basic_quantity<decltype(lhs.get_magnitude() / rhs.get_magnitude()),
+                      U1 / U2> {
+  const auto lhs_base_units = lhs.to_SI_base_units();
+  const auto rhs_base_units = rhs.to_SI_base_units();
+
+  using return_scalar_type =
+      decltype(lhs_base_units.get_magnitude() / rhs_base_units.get_magnitude());
+  return basic_quantity<return_scalar_type, lhs_base_units.get_units() *
+                                                rhs_base_units.get_units()>{
+      lhs_base_units.get_magnitude() / rhs_base_units.get_magnitude()};
 }
 
 using mole = basic_quantity<double, mole_unit>;
@@ -246,6 +295,41 @@ concept temperature = temperature_unit<typename T::units_type{}>;
 
 template <typename T>
 concept time = time_unit<typename T::units_type{}>;
+
+// Quantity printing
+
+template <typename T, unit auto U>
+std::ostream& operator<<(std::ostream& os, const basic_quantity<T, U>& q) {
+  os << std::format("{}", q);
+}
 } // namespace maxwell
+
+template <typename T, maxwell::unit auto U>
+struct std::formatter<maxwell::basic_quantity<T, U>>
+    : std::formatter<std::string_view> {
+  constexpr auto parse(std::format_parse_context& ctx) { return ctx.begin(); }
+
+  auto format(const maxwell::basic_quantity<T, U>& q,
+              std::format_context& ctx) const {
+    std::string temp;
+    std::format_to(std::back_inserter(temp), "{}", q.get_magnitude());
+    return std::formatter<std::string_view>::format(temp, ctx);
+  }
+};
+
+template <typename T, maxwell::unit auto U>
+struct std::hash<maxwell::basic_quantity<T, U>> {
+  std::size_t
+  operator()(const maxwell::basic_quantity<T, U>& q) const noexcept {
+    const auto as_SI_base_units = q.to_SI_base_units();
+    return std::hash<T>{}(as_SI_base_units) ^
+           (std::hash<std::string>{}(as_SI_base_units.get_units().unit_string())
+            << 1);
+  }
+};
+
+template <typename T, maxwell::unit auto U>
+struct std::numeric_limits<maxwell::basic_quantity<T, U>>
+    : std::numeric_limits<T> {};
 
 #endif
