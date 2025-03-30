@@ -652,7 +652,7 @@ struct second_unit_type
 };
 constexpr second_unit_type second_unit;
 
-struct unitless_unit_type
+struct scalar_unit_type
     : unit_type<null_dimension, null_dimension, null_dimension, null_dimension,
                 null_dimension, null_dimension, null_dimension> {
   using base_type =
@@ -661,6 +661,7 @@ struct unitless_unit_type
 
   constexpr static std::string unit_string() { return "[]"; }
 };
+constexpr scalar_unit_type scalar_unit;
 
 template <auto U>
 concept amount_unit = unit_convertible_to<U, mole_unit>;
@@ -684,7 +685,7 @@ template <auto U>
 concept time_unit = unit_convertible_to<U, second_unit>;
 
 template <auto U>
-concept unitless_unit = unit_convertible_to<U, unitless_unit_type{}>;
+concept unitless_unit = unit_convertible_to<U, scalar_unit>;
 } // namespace maxwell
 
 #endif

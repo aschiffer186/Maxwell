@@ -268,12 +268,11 @@ namespace maxwell {
   MAKE_UNIT_WITH_DESC(unit_name, definition, desc)                             \
   MAKE_UNIT_PREFIXES(unit_name##_unit, dimension)
 
-MAKE_UNIT_WITH_DESC(radian, unitless_unit_type{}, "rad");
-MAKE_UNIT_WITH_DESC(steradian, unitless_unit_type{}, "sr");
-MAKE_UNIT_WITH_DESC(degree, unitless_unit_type{}, "deg");
+MAKE_UNIT_WITH_DESC(radian, scalar_unit, "rad");
+MAKE_UNIT_WITH_DESC(steradian, scalar_unit, "sr");
+MAKE_UNIT_WITH_DESC(degree, scalar_unit, "deg");
 
-MAKE_UNIT_PREFXIES_WITH_DESC(hertz, unitless_unit_type{} / second_unit, "Hz",
-                             time);
+MAKE_UNIT_PREFXIES_WITH_DESC(hertz, scalar_unit / second_unit, "Hz", time);
 
 template <>
 struct is_tag_convertible<degree_unit_type, radian_unit_type> : std::true_type {
