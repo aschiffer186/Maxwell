@@ -64,12 +64,9 @@ struct dimension {
   ///
   /// @return the equivalent SI base dimension
   /// @throws nothing
-  constexpr dimension to_SI_base_dimension() const noexcept {
-    return {power, 0, one, zero};
-  }
+  constexpr dimension to_SI_base_dimension() const noexcept { return {power, 0, one, zero}; }
 
-  friend constexpr bool operator==(const dimension&,
-                                   const dimension&) = default;
+  friend constexpr bool operator==(const dimension&, const dimension&) = default;
 };
 
 constexpr std::int8_t quetta = 30;
@@ -110,17 +107,14 @@ constexpr dimension base_dimension{one, 0};
 /// \param lhs one dimension to multiply
 /// \param rhs the other dimensin to multiply
 /// \return the product of \c lhs and \c rhs
-constexpr dimension operator*(const dimension& lhs,
-                              const dimension& rhs) noexcept {
+constexpr dimension operator*(const dimension& lhs, const dimension& rhs) noexcept {
 
-  const std::int8_t prefix = (lhs.prefix == rhs.prefix)
-                                 ? lhs.prefix
-                                 : ((rhs.prefix == 0)   ? lhs.prefix
-                                    : (lhs.prefix == 0) ? rhs.prefix
-                                                        : 0);
+  const std::int8_t prefix = (lhs.prefix == rhs.prefix) ? lhs.prefix
+                                                        : ((rhs.prefix == 0)   ? lhs.prefix
+                                                           : (lhs.prefix == 0) ? rhs.prefix
+                                                                               : 0);
 
-  return dimension{lhs.power + rhs.power, prefix, lhs.scale * rhs.scale,
-                   rhs.scale};
+  return dimension{lhs.power + rhs.power, prefix, lhs.scale * rhs.scale, rhs.scale};
 }
 
 /// \brief Divides two dimensions
@@ -133,15 +127,16 @@ constexpr dimension operator*(const dimension& lhs,
 /// \param lhs the dividend
 /// \param rhs the divisor
 /// \return the quotient of \c lhs and \c rhs
-constexpr dimension operator/(const dimension& lhs,
-                              const dimension& rhs) noexcept {
-  const std::int8_t prefix = (lhs.prefix == rhs.prefix)
-                                 ? lhs.prefix
-                                 : ((rhs.prefix == 0)   ? lhs.prefix
-                                    : (lhs.prefix == 0) ? rhs.prefix
-                                                        : 0);
-  return dimension{lhs.power - rhs.power, prefix, lhs.scale / rhs.scale,
-                   lhs.scale};
+constexpr dimension operator/(const dimension& lhs, const dimension& rhs) noexcept {
+  const std::int8_t prefix = (lhs.prefix == rhs.prefix) ? lhs.prefix
+                                                        : ((rhs.prefix == 0)   ? lhs.prefix
+                                                           : (lhs.prefix == 0) ? rhs.prefix
+                                                                               : 0);
+  return dimension{lhs.power - rhs.power, prefix, lhs.scale / rhs.scale, lhs.scale};
+}
+
+constexpr dimension sqrt(const dimension& d) noexcept {
+  return dimension{d.power / 2, static_cast<std::int8_t>(d.prefix / 2), d.scale, d.offset};
 }
 } // namespace maxwell
 

@@ -472,6 +472,20 @@ constexpr auto operator/(const quantity<U1, S1>& lhs, const quantity<U2, S2>& rh
       lhs_base_units.get_magnitude() / rhs_base_units.get_magnitude()};
 }
 
+template <unit auto U1, typename M1, typename M2>
+  requires multiply_with<M1, M2> && (!unitless_unit<U1>) && (!_detail::is_basic_quantity_v<std::remove_cvref_t<M2>>)
+constexpr auto operator*(const quantity<U1, M1>& lhs, const M2& rhs) noexcept(nothrow_multiply_with<M1, M2>)
+    -> quantity<U1, decltype(lhs.get_magnitude() * rhs)> {
+  return quantity<U1, decltype(lhs.get_magnitude() * rhs)>(lhs.get_magnitude() * rhs);
+}
+
+template <unit auto U1, typename M1, typename M2>
+  requires multiply_with<M1, M2> && (!unitless_unit<U1>) && (!_detail::is_basic_quantity_v<std::remove_cvref_t<M2>>)
+constexpr auto operator*(const M2& lhs, const quantity<U1, M1>& rhs) noexcept(nothrow_multiply_with<M1, M2>)
+    -> quantity<U1, decltype(lhs * rhs.get_magnitude())> {
+  return rhs * lhs;
+}
+
 template <typename M1, unit auto U1, typename M2, unit auto U2>
   requires unit_convertible_to<U1, U2> && addable_with<M1, M2>
 constexpr auto operator+(quantity<U1, M1> lhs, const quantity<U2, M2>& rhs) noexcept(nothrow_addable_with<M1, M2>) {

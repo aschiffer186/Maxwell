@@ -21,4 +21,6 @@
 #define MAXWELL_CONSTEXPR23 constexpr
 #endif
 
+#define MATH_NOEXCEPT(func) noexcept(noexcept(std::func(std::declval<T>())))
+
 #endif

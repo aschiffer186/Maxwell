@@ -426,6 +426,13 @@ template <unit auto LHS, unit auto RHS> struct unit_quotient_impl {
 };
 
 template <unit auto LHS, unit auto RHS> using unit_quotient_impl_t = unit_quotient_impl<LHS, RHS>::type;
+
+template <unit auto U> struct unit_sqrt_impl {
+  using type = unit_type<sqrt(U.get_amount()), sqrt(U.get_current()), sqrt(U.get_length()), sqrt(U.get_luminosity()),
+                         sqrt(U.get_mass()), sqrt(U.get_temperature()), sqrt(U.get_time()), typename decltype(U)::tag>;
+};
+
+template <unit auto U> using unit_sqrt_impl_t = unit_sqrt_impl<U>::type;
 } // namespace _detail
 /// \endcond
 
@@ -446,6 +453,11 @@ template <unit LHS, unit RHS> struct unit_quotient_type : _detail::unit_quotient
   constexpr static std::string unit_string() { return LHS::unit_string() + "/" + RHS::unit_string(); }
 };
 
+template <unit U> struct unit_sqrt_type : _detail::unit_sqrt_impl_t<U{}> {
+  using base_type = _detail::unit_sqrt_impl<U{}>;
+
+  constexpr static std::string unit_string() { return base_type::unit_string(); }
+};
 /// \brief Multiplies two units
 ///
 /// Multiplies two units; the dimensions of the resulting unit is the product of
