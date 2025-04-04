@@ -433,8 +433,7 @@ constexpr auto operator<=>(const quantity<U1, S1>& lhs, const quantity<U2, S2>& 
 }
 
 template <typename S1, unit auto U1, typename S2, unit auto U2>
-constexpr auto operator*(const quantity<U1, S1>& lhs, const quantity<U2, S2>& rhs)
-    -> quantity<U1 * U2, decltype(lhs.get_magnitude() * rhs.get_magnitude())> {
+constexpr auto operator*(const quantity<U1, S1>& lhs, const quantity<U2, S2>& rhs) {
   const auto lhs_base_units = lhs.to_SI_base_units();
   const auto rhs_base_units = rhs.to_SI_base_units();
 
@@ -445,21 +444,21 @@ constexpr auto operator*(const quantity<U1, S1>& lhs, const quantity<U2, S2>& rh
 }
 
 template <typename S1, unit auto U1, typename S2, unit auto U2>
-constexpr auto operator/(const quantity<U1, S1>& lhs, const quantity<U2, S2>& rhs)
-    -> quantity<U1 / U2, decltype(lhs.get_magnitude() / rhs.get_magnitude())> {
+constexpr auto operator/(const quantity<U1, S1>& lhs, const quantity<U2, S2>& rhs) {
   const auto lhs_base_units = lhs.to_SI_base_units();
   const auto rhs_base_units = rhs.to_SI_base_units();
 
-  using return_scalar_type = decltype(lhs_base_units.get_magnitude() / rhs_base_units.get_magnitude());
+  using return_scalar_type =
+      std::remove_cvref_t<decltype(lhs_base_units.get_magnitude() / rhs_base_units.get_magnitude())>;
   return quantity<lhs_base_units.get_units() / rhs_base_units.get_units(), return_scalar_type>{
       lhs_base_units.get_magnitude() / rhs_base_units.get_magnitude()};
 }
 
 template <unit auto U1, typename M1, typename M2>
   requires multiply_with<M1, M2> && (!unitless_unit<U1>) && (!_detail::is_basic_quantity_v<std::remove_cvref_t<M2>>)
-constexpr auto operator*(const quantity<U1, M1>& lhs, const M2& rhs) noexcept(nothrow_multiply_with<M1, M2>)
-    -> quantity<U1, decltype(lhs.get_magnitude() * rhs)> {
-  return quantity<U1, decltype(lhs.get_magnitude() * rhs)>(lhs.get_magnitude() * rhs);
+constexpr auto operator*(const quantity<U1, M1>& lhs, const M2& rhs) noexcept(nothrow_multiply_with<M1, M2>) {
+  using return_scalar_type = std::remove_cvref_t<decltype(lhs.get_magnitude() + rhs)>;
+  return quantity<U1, return_scalar_type>(lhs.get_magnitude() * rhs);
 }
 
 template <unit auto U1, typename M1, typename M2>
@@ -467,6 +466,13 @@ template <unit auto U1, typename M1, typename M2>
 constexpr auto operator*(const M2& lhs, const quantity<U1, M1>& rhs) noexcept(nothrow_multiply_with<M1, M2>)
     -> quantity<U1, decltype(lhs * rhs.get_magnitude())> {
   return rhs * lhs;
+}
+
+template <unit auto U1, typename M1, typename M2>
+  requires divide_with<M1, M2> && (!unitless_unit<U1>) && (!_detail::is_basic_quantity_v<std::remove_cvref_t<M2>>)
+constexpr auto operator/(const quantity<U1, M1>& lhs, const M2& rhs) noexcept(nothrow_multiply_with<M1, M2>) {
+  using return_scalar_type = std::remove_cvref_t<decltype(lhs.get_magnitude() / rhs)>;
+  return quantity<U1, return_scalar_type>(lhs.get_magnitude() / rhs);
 }
 
 template <typename M1, unit auto U1, typename M2, unit auto U2>
@@ -481,7 +487,10 @@ constexpr auto operator+(quantity<U1, M1> lhs, const quantity<U2, M2>& rhs) noex
 template <typename M1, unit auto U1, typename M2, unit auto U2>
   requires unit_convertible_to<U1, U2> && subtractable_with<M1, M2>
 constexpr auto operator-(quantity<U1, M1> lhs, const quantity<U2, M2>& rhs) noexcept(subtractable_with<M1, M2>) {
-  return lhs -= rhs;
+  using return_scalar_type = std::remove_cvref_t<decltype(lhs.get_magnitude() - rhs.get_magnitude())>;
+
+  return quantity<U1.to_SI_base_units(), return_scalar_type>(lhs.to_SI_base_units().get_magnitude() -
+                                                             rhs.to_SI_base_units().get_magnitude());
 }
 
 template <typename M, unit auto U> constexpr quantity<U, M> operator-(const quantity<U, M>& x) {

@@ -88,9 +88,10 @@ struct unit_type : _detail::unit_base {
   consteval dimension get_time() const noexcept { return time; }
 
   consteval unit auto to_SI_base_units() const noexcept {
-    return unit_type<Amount.to_SI_base_dimension(), Current.to_SI_base_dimension(), Length.to_SI_base_dimension(),
-                     Luminosity.to_SI_base_dimension(), Mass.to_SI_base_dimension(), Temperature.to_SI_base_dimension(),
-                     Time.to_SI_base_dimension(), tag>{};
+    return unit_type<Amount.to_coherent_dimension(), Current.to_coherent_dimension(), Length.to_coherent_dimension(),
+                     Luminosity.to_coherent_dimension(), Mass.to_coherent_dimension(),
+                     Temperature.to_coherent_dimension(), Time.to_coherent_dimension(), tag>{}
+        .template adjust_prefix_mass<3>();
   }
 
   template <std::int8_t NewPrefix> constexpr unit auto adjust_prefix_amount() const noexcept {
@@ -201,8 +202,6 @@ struct unit_type : _detail::unit_base {
   template <typename T> constexpr unit auto add_tag() const noexcept {
     return unit_type<amount, current, length, luminosity, mass, temperature, time, T>{};
   }
-
-  constexpr unit auto to_SI_base_unis() const noexcept { return *this; }
 
   constexpr static std::string unit_string() { return ""; }
 };

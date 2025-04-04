@@ -64,7 +64,7 @@ struct dimension {
   ///
   /// @return the equivalent SI base dimension
   /// @throws nothing
-  constexpr dimension to_SI_base_dimension() const noexcept { return {power, 0, one, zero}; }
+  constexpr dimension to_coherent_dimension() const noexcept { return {power, 0, one, zero}; }
 
   friend constexpr bool operator==(const dimension&, const dimension&) = default;
 };
