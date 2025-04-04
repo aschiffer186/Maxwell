@@ -27,6 +27,15 @@ struct rational {
   /// The denominator of the rational number
   std::intmax_t denominator{1};
 
+  /**
+   * @brief Constructor
+   *
+   * Creates a rational number with the specified numerator and denominator.
+   *
+   * @pre the denominator is not zero
+   * @param numerator_in the numerator of the rational number
+   * @param denominator_in the denominator of the rational number
+   */
   constexpr rational(std::intmax_t numerator_in, std::intmax_t denominator_in = 1) noexcept
       : numerator(numerator_in), denominator(denominator_in) {
     assert(denominator_in != 0 && "Attempting to create rational number with zero in denominoatir");
