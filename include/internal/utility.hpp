@@ -1,8 +1,17 @@
+/**
+ * @file utility.hpp
+ * @author Alex Schiffer
+ * @brief Definition of common utilities for Maxwell
+ * @version 1.0
+ * @date 2025-04-04
+ *
+ * @copyright Copyright (c) 2025
+ *
+ */
 #ifndef UTILITY_HPP
 #define UTILITY_HPP
 
 #include <cassert>
-#include <concepts>
 #include <cstdint>
 #include <numeric>
 #include <ratio>
@@ -163,6 +172,12 @@ template <typename> struct is_ratio_like : std::false_type {};
 template <std::intmax_t N, std::intmax_t D> struct is_ratio_like<std::ratio<N, D>> : std::true_type {};
 } // namespace _detail
 
+/**
+ * @brief Creates a rational number from a \c std::ratio
+ *
+ * @tparam T the \c std::ratio to create a rational number from
+ * @return a rational number equivalent to the \c std::ratio
+ */
 template <typename T>
   requires _detail::is_ratio_like<std::remove_cvref_t<T>>::value
 constexpr rational from_ratio() noexcept {
