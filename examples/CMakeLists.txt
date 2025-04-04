@@ -1,2 +1,0 @@
-add_executable(shock_calculator shock_calculator.cpp)
-target_link_libraries(shock_calculator PRIVATE Maxwell)
