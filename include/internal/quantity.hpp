@@ -337,34 +337,6 @@ public:
   /// base units.
   constexpr auto to_SI_base_units() const { return quantity<units.to_SI_base_units(), magnitude_type>(*this); }
   // --- Quantity comparison ---
-  /// \brief Quantity three way comparison operator
-  ///
-  /// Three way comparison operator for \c basic_quantities.
-  ///
-  /// \pre The magnitude type is three_way_comparable
-  ///
-  /// \param a one quantity to use in the three way comparison
-  /// \param b the other quantity to use in the three way comparison
-  /// \return <tt>a.magnitude() <=> b.magnitude()</tt>
-  friend auto constexpr operator<=>(const quantity&, const quantity&)
-    requires std::equality_comparable<magnitude_type>
-  = default;
-
-  /// \brief Compares two quantities for equality
-  ///
-  /// Checks if two \c basic_quantities are equal. Two quantities are equal if
-  /// and only if their magnitudes are equal. Note, if the magnitude type is a
-  /// floating-point type, this operator will use floating-point equality, which
-  /// is most likely undesired and can lead to false negatives.
-  ///
-  /// \pre the magitude types of the quantities are equality comparable
-  ///
-  /// \param a one quantity to check for equality
-  /// \param b the other quantity to check for equality
-  /// \return \c true if the magnitudes of the quantities are the same
-  friend constexpr bool operator==(const quantity&, const quantity&)
-    requires std::three_way_comparable<magnitude_type>
-  = default;
 
   // --- Quantity manipulation ---
 
@@ -372,7 +344,7 @@ public:
     requires addable<magnitude_type>
   {
     if constexpr (requires(magnitude_type value) { value += value; }) {
-      magnitude_ += other.magnitude();
+      magnitude_ += other.get_magnitude();
     } else {
       magnitude_ = magnitude_ + other.magnitude_;
     }
@@ -383,7 +355,7 @@ public:
     requires subtractable<magnitude_type>
   {
     if constexpr (requires(magnitude_type value) { value -= value; }) {
-      magnitude_ -= other.magnitude();
+      magnitude_ -= other.get_magnitude();
     } else {
       magnitude_ = magnitude_ - other.magnitude_;
     }
@@ -450,13 +422,24 @@ private:
   magnitude_type magnitude_{};
 };
 
+template <unit auto U1, typename S1, unit auto U2, typename S2>
+constexpr bool operator==(const quantity<U1, S1>& lhs, const quantity<U2, S2>& rhs) {
+  return lhs.to_SI_base_units().get_magnitude() == rhs.to_SI_base_units().get_magnitude();
+}
+
+template <unit auto U1, typename S1, unit auto U2, typename S2>
+constexpr auto operator<=>(const quantity<U1, S1>& lhs, const quantity<U2, S2>& rhs) {
+  return lhs.to_SI_base_units().get_magnitude() <=> rhs.to_SI_base_units().get_magnitude();
+}
+
 template <typename S1, unit auto U1, typename S2, unit auto U2>
 constexpr auto operator*(const quantity<U1, S1>& lhs, const quantity<U2, S2>& rhs)
     -> quantity<U1 * U2, decltype(lhs.get_magnitude() * rhs.get_magnitude())> {
   const auto lhs_base_units = lhs.to_SI_base_units();
   const auto rhs_base_units = rhs.to_SI_base_units();
 
-  using return_scalar_type = decltype(lhs_base_units.get_magnitude() * rhs_base_units.get_magnitude());
+  using return_scalar_type =
+      std::remove_cvref_t<decltype(lhs_base_units.get_magnitude() * rhs_base_units.get_magnitude())>;
   return quantity<lhs_base_units.get_units() * rhs_base_units.get_units(), return_scalar_type>{
       lhs_base_units.get_magnitude() * rhs_base_units.get_magnitude()};
 }
@@ -489,7 +472,10 @@ constexpr auto operator*(const M2& lhs, const quantity<U1, M1>& rhs) noexcept(no
 template <typename M1, unit auto U1, typename M2, unit auto U2>
   requires unit_convertible_to<U1, U2> && addable_with<M1, M2>
 constexpr auto operator+(quantity<U1, M1> lhs, const quantity<U2, M2>& rhs) noexcept(nothrow_addable_with<M1, M2>) {
-  return lhs += rhs;
+  using return_scalar_type = std::remove_cvref_t<decltype(lhs.get_magnitude() + rhs.get_magnitude())>;
+
+  return quantity<U1.to_SI_base_units(), return_scalar_type>(lhs.to_SI_base_units().get_magnitude() +
+                                                             rhs.to_SI_base_units().get_magnitude());
 }
 
 template <typename M1, unit auto U1, typename M2, unit auto U2>

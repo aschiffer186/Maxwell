@@ -202,6 +202,8 @@ struct unit_type : _detail::unit_base {
     return unit_type<amount, current, length, luminosity, mass, temperature, time, T>{};
   }
 
+  constexpr unit auto to_SI_base_unis() const noexcept { return *this; }
+
   constexpr static std::string unit_string() { return ""; }
 };
 

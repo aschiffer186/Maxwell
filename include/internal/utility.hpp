@@ -18,11 +18,9 @@ struct rational {
   /// The denominator of the rational number
   std::intmax_t denominator{1};
 
-  constexpr rational(std::intmax_t numerator_in,
-                     std::intmax_t denominator_in = 1) noexcept
+  constexpr rational(std::intmax_t numerator_in, std::intmax_t denominator_in = 1) noexcept
       : numerator(numerator_in), denominator(denominator_in) {
-    assert(denominator_in != 0 &&
-           "Attempting to create rational number with zero in denominoatir");
+    assert(denominator_in != 0 && "Attempting to create rational number with zero in denominoatir");
   }
 
   /**
@@ -90,7 +88,7 @@ struct rational {
     assert(denominator != 0);
     assert(other.denominator != 0);
     numerator *= other.denominator;
-    denominator *= other.denominator;
+    denominator *= other.numerator;
     reduce();
     return *this;
   }
@@ -127,8 +125,7 @@ struct rational {
   friend constexpr bool operator==(const rational& lhs, const rational& rhs) {
     const auto lhs_reduced = lhs.reduced();
     const auto rhs_reduced = rhs.reduced();
-    return lhs_reduced.numerator == rhs_reduced.numerator &&
-           lhs_reduced.denominator == rhs_reduced.denominator;
+    return lhs_reduced.numerator == rhs_reduced.numerator && lhs_reduced.denominator == rhs_reduced.denominator;
   }
 
   constexpr explicit operator double() const noexcept {
@@ -139,8 +136,7 @@ struct rational {
 namespace _detail {
 template <typename> struct is_ratio_like : std::false_type {};
 
-template <std::intmax_t N, std::intmax_t D>
-struct is_ratio_like<std::ratio<N, D>> : std::true_type {};
+template <std::intmax_t N, std::intmax_t D> struct is_ratio_like<std::ratio<N, D>> : std::true_type {};
 } // namespace _detail
 
 template <typename T>
@@ -154,21 +150,13 @@ constexpr rational one{1};
 /// Rational number representing zero
 constexpr rational zero{0};
 
-constexpr rational operator+(rational lhs, const rational& rhs) noexcept {
-  return lhs += rhs;
-}
+constexpr rational operator+(rational lhs, const rational& rhs) noexcept { return lhs += rhs; }
 
-constexpr rational operator-(rational lhs, const rational& rhs) noexcept {
-  return lhs -= rhs;
-}
+constexpr rational operator-(rational lhs, const rational& rhs) noexcept { return lhs -= rhs; }
 
-constexpr rational operator*(rational lhs, const rational& rhs) noexcept {
-  return lhs *= rhs;
-}
+constexpr rational operator*(rational lhs, const rational& rhs) noexcept { return lhs *= rhs; }
 
-constexpr rational operator/(rational lhs, const rational& rhs) noexcept {
-  return lhs /= rhs;
-}
+constexpr rational operator/(rational lhs, const rational& rhs) noexcept { return lhs /= rhs; }
 
 template <typename T, typename U>
 concept addable_with = requires(T a, U b) { a + b; };
