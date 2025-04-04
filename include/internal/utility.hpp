@@ -35,7 +35,8 @@ struct rational {
   constexpr rational& operator+=(const rational& other) noexcept {
     assert(denominator != 0);
     assert(other.denominator != 0);
-    numerator += other.numerator;
+    numerator = (other.numerator * denominator) + (numerator * other.denominator);
+    denominator = denominator * other.denominator;
     reduce();
     return *this;
   }
@@ -52,7 +53,8 @@ struct rational {
   constexpr rational& operator-=(const rational& other) noexcept {
     assert(denominator != 0);
     assert(other.denominator != 0);
-    numerator -= other.numerator;
+    numerator = (numerator * other.denominator) - (other.numerator * denominator);
+    denominator = denominator * other.denominator;
     reduce();
     return *this;
   }
@@ -116,18 +118,40 @@ struct rational {
     }
   }
 
+  /**
+   * @brief Returns a the reduced form of the rational number
+   *
+   * Returns a copy of \c *this that is reduced to simplest terms
+   *
+   * @return a copy of \c *this that is reduced to simplest terms
+   */
   [[nodiscard]] constexpr rational reduced() const noexcept {
     rational temp{*this};
     temp.reduce();
     return temp;
   }
 
+  /**
+   * @brief Compares two rational numbers for equality
+   *
+   * Compares two rational numbers for equality. The rational numbers are equal if their
+   * reduced forms are equal.
+   *
+   * @param lhs the left hand side of the comparison
+   * @param rhs the right hand side of the comparison
+   * @return \c true if the rational numbers are equal.
+   */
   friend constexpr bool operator==(const rational& lhs, const rational& rhs) {
     const auto lhs_reduced = lhs.reduced();
     const auto rhs_reduced = rhs.reduced();
     return lhs_reduced.numerator == rhs_reduced.numerator && lhs_reduced.denominator == rhs_reduced.denominator;
   }
 
+  /**
+   * @brief Converts a rational number to its floating-point approximation
+   *
+   * @return the floating-point approximation of the rational number
+   */
   constexpr explicit operator double() const noexcept {
     return static_cast<double>(numerator) / static_cast<double>(denominator);
   }
@@ -150,12 +174,40 @@ constexpr rational one{1};
 /// Rational number representing zero
 constexpr rational zero{0};
 
+/**
+ * @brief Adds two rational numbers
+ *
+ * @param lhs the left-hand side of the addition
+ * @param rhs the right-hand side of the addition
+ * @return the sum of the two rational numbers
+ */
 constexpr rational operator+(rational lhs, const rational& rhs) noexcept { return lhs += rhs; }
 
+/**
+ * @brief Subtracts two rational numbers
+ *
+ * @param lhs the left-hand side of the subtraction
+ * @param rhs the right-hand side of the subtraction
+ * @return the difference of the two rational numbers
+ */
 constexpr rational operator-(rational lhs, const rational& rhs) noexcept { return lhs -= rhs; }
 
+/**
+ * @brief Multiplies two rational numbers
+ *
+ * @param lhs the left-hand side of the multiplication
+ * @param rhs the right-hand side of the multiplication
+ * @return the product of the two rational numbers
+ */
 constexpr rational operator*(rational lhs, const rational& rhs) noexcept { return lhs *= rhs; }
 
+/**
+ * @brief Divides two rational numbers
+ *
+ * @param lhs the left-hand side of the division
+ * @param rhs the right-hand side of the division
+ * @return the quotient of the two rational numbers
+ */
 constexpr rational operator/(rational lhs, const rational& rhs) noexcept { return lhs /= rhs; }
 
 template <typename T, typename U>

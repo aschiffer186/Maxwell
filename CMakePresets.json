@@ -1,11 +1,11 @@
 {
-    "version": 6, 
+    "version": 6,
     "configurePresets": [
         {
             "name": "setup",
             "binaryDir": "build/${presetName}",
             "cacheVariables": {
-                "CMAKE_EXPORT_COMPILE_COMMANDS" : true,
+                "CMAKE_EXPORT_COMPILE_COMMANDS": true,
                 "CMAKE_CXX_STANDARD": "20",
                 "CMAKE_CXX_EXTENSIONS": "off"
             },
@@ -23,9 +23,9 @@
             "name": "ninja-debug",
             "generator": "Ninja",
             "displayName": "Ninja (Debug)",
-            "inherits" : "gcc-like-setup",
+            "inherits": "gcc-like-setup",
             "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug", 
+                "CMAKE_BUILD_TYPE": "Debug",
                 "CMAKE_CXX_FLAGS_DEBUG": "-g -O0"
             }
         },
@@ -46,6 +46,22 @@
             "configurePreset": "ninja-debug",
             "configuration": "Debug",
             "displayName": "Ninja (Debug)"
+        },
+        {
+            "name": "ninja-release",
+            "configurePreset": "ninja-release",
+            "configuration": "Release",
+            "displayName": "Ninja (Release)"
+        }
+    ],
+    "testPresets": [
+        {
+            "name": "ninja-debug-tests",
+            "configurePreset": "ninja-debug",
+            "displayName": "Debug tests (Ninja)",
+            "output": {
+                "outputOnFailure": true
+            }
         }
     ]
 }
