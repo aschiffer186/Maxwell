@@ -1,9 +1,9 @@
 #ifndef UNIT_HPP
 #define UNIT_HPP
 
+#include <array>
 #include <concepts>
 #include <cstdint>
-#include <functional>
 #include <string>
 #include <type_traits>
 

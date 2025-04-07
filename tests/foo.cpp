@@ -13,6 +13,7 @@ struct res_unit : decltype(maxwell::mole_unit * maxwell::ampere_unit) {
 void foo(maxwell::amount auto) {}
 
 int main() {
+  using namespace maxwell::metric_literals;
   // [[maybe_unused]] const maxwell::mole m;
 
   //   using res = maxwell::basic_quantity<double, res_unit{}>;
@@ -25,4 +26,5 @@ int main() {
   maxwell::quantity<maxwell::pascal_unit> V2{3.0};
   // maxwell::basic_quantity<double, maxwell::meter_unit> meter{V2};
   // V1 = V2;
+  maxwell::meter m = 10_m * 10_m;
 }

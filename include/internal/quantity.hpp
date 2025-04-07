@@ -437,10 +437,11 @@ constexpr auto operator*(const quantity<U1, S1>& lhs, const quantity<U2, S2>& rh
   const auto lhs_base_units = lhs.to_SI_base_units();
   const auto rhs_base_units = rhs.to_SI_base_units();
 
+  const unit auto return_units = lhs_base_units.get_units() * rhs_base_units.get_units();
+
   using return_scalar_type =
       std::remove_cvref_t<decltype(lhs_base_units.get_magnitude() * rhs_base_units.get_magnitude())>;
-  return quantity<lhs_base_units.get_units() * rhs_base_units.get_units(), return_scalar_type>{
-      lhs_base_units.get_magnitude() * rhs_base_units.get_magnitude()};
+  return quantity<return_units, return_scalar_type>{lhs_base_units.get_magnitude() * rhs_base_units.get_magnitude()};
 }
 
 template <typename S1, unit auto U1, typename S2, unit auto U2>
@@ -517,6 +518,9 @@ concept temperature = temperature_unit<typename T::units_type{}>;
 
 template <typename T>
 concept time = time_unit<typename T::units_type{}>;
+
+template <typename T>
+concept scalar = unitless_unit<typename T::units_type{}>;
 
 template <unit auto U> using int_quantity = quantity<U, int>;
 // Quantity printing
