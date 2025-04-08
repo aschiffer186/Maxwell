@@ -89,7 +89,7 @@ public:
   ///
   /// \throws any exceptions thrown by the default constructor of \c
   /// magnitude_type
-  constexpr quantity() noexcept
+  constexpr quantity()
     requires std::is_default_constructible_v<magnitude_type>
   = default;
 

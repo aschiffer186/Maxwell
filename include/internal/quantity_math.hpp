@@ -76,7 +76,7 @@ template <int Power, unit auto U, typename T> MAXWELL_MATH_CONSTEXPR26 auto pow(
   } else if constexpr (Power < 0) {
     return quantity<scalar_unit, T>(1) / pow<-Power>(x);
   } else {
-    return x * pow<Power - 1>(x);
+    return x * pow<Power - 1>(x); 
   }
 }
 

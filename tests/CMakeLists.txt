@@ -13,3 +13,8 @@ add_executable(test_dimension test_dimension.cpp)
 target_link_libraries(test_dimension PRIVATE Maxwell GTest::gtest_main)
 gtest_discover_tests(test_dimension)
 add_test(NAME TestDimension COMMAND test_dimension)
+
+add_executable(test_quantity test_quantity.cpp)
+target_link_libraries(test_quantity PRIVATE Maxwell GTest::gtest_main) 
+gtest_discover_tests(test_quantity)
+add_test(NAME TestQuantity COMMAND test_quantity)
