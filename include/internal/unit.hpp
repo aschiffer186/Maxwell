@@ -523,14 +523,14 @@ struct candela_unit_type : unit_type<null_dimension, null_dimension, null_dimens
 };
 constexpr candela_unit_type candela_unit;
 
-struct kilogram_unit_type : unit_type<null_dimension, null_dimension, null_dimension, null_dimension,
-                                      dimension{.power = one, .prefix = 3}, null_dimension, null_dimension> {
-  using base_type = unit_type<null_dimension, null_dimension, null_dimension, null_dimension,
-                              dimension{.power = one, .prefix = 3}, null_dimension, null_dimension>;
+struct gram_unit_type : unit_type<null_dimension, null_dimension, null_dimension, null_dimension, base_dimension,
+                                  null_dimension, null_dimension> {
+  using base_type = unit_type<null_dimension, null_dimension, null_dimension, null_dimension, base_dimension,
+                              null_dimension, null_dimension>;
 
-  constexpr static std::string unit_string() { return "kg"; }
+  constexpr static std::string unit_string() { return "g"; }
 };
-constexpr kilogram_unit_type kilogram_unit;
+constexpr gram_unit_type gram_unit;
 
 struct kelvin_unit_type : unit_type<null_dimension, null_dimension, null_dimension, null_dimension, null_dimension,
                                     base_dimension, null_dimension> {
@@ -572,7 +572,7 @@ template <auto U>
 concept luminosity_unit = unit_convertible_to<U, candela_unit>;
 
 template <auto U>
-concept mass_unit = unit_convertible_to<U, kilogram_unit>;
+concept mass_unit = unit_convertible_to<U, gram_unit>;
 
 template <auto U>
 concept temperature_unit = unit_convertible_to<U, kelvin_unit>;
