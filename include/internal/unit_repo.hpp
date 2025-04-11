@@ -208,7 +208,16 @@ MAKE_UNIT_PREFXIES_WITH_DESC(sievert, gray_unit.add_tag<sievert_unit_tag>(), "Sv
 
 MAKE_UNIT_PREFXIES_WITH_DESC(katal, mole_unit / second_unit, "kat", amount)
 
+MAKE_UNIT_WITH_DESC(square_quettameter, quettameter_unit* quettameter_unit, "Qm^2")
+MAKE_UNIT_WITH_DESC(square_ronnameter, ronnameter_unit* ronnameter_unit, "Rm^2")
+MAKE_UNIT_WITH_DESC(square_yottameter, yottameter_unit* yottameter_unit, "Ym^2")
+MAKE_UNIT_WITH_DESC(square_zettameter, zettameter_unit* zettameter_unit, "Zm^2")
+MAKE_UNIT_WITH_DESC(square_exameter, exameter_unit* exameter_unit, "Em^2")
+MAKE_UNIT_WITH_DESC(square_petameter, petameter_unit* petameter_unit, "Pm^2")
 MAKE_UNIT_WITH_DESC(square_meter, meter_unit* meter_unit, "m^2")
+MAKE_UNIT_WITH_DESC(square_decimeter, decimeter_unit* decimeter_unit, "dm^2")
+MAKE_UNIT_WITH_DESC(square_centimeter, centimeter_unit* centimeter_unit, "cm^2")
+
 MAKE_UNIT_WITH_DESC(cubic_meter, square_meter_unit* meter_unit, "m^3")
 
 MAKE_UNIT_WITH_DESC(meter_per_second, meter_unit / second_unit, "m/s")

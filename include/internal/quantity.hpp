@@ -166,6 +166,44 @@ public:
   /// \brief Converting constructor
   ///
   /// Constructs a \c basic_quantity from the specified \c basic_quantity with
+  /// different \c magnitude_type.
+  ///
+  /// \pre \c magnitude_type is constructible from \c Up
+  /// \post <tt>this->magnitude() == other.magnitude()
+  ///
+  /// \tparam Up the type of the magnitude of the \c basic_quantity to construct
+  ///
+  /// \param q the \c basic_quantity to construct from
+  ///
+  /// \throw any exceptions thrown by the copy constructor of \c magnitude_type
+  template <typename Up>
+    requires std::constructible_from<magnitude_type, Up>
+  constexpr explicit(!std::convertible_to<Up, magnitude_type>)
+      quantity(const quantity<units, Up>& q) noexcept(std::is_nothrow_constructible_v<magnitude_type, const Up&>)
+      : magnitude_(q.get_magnitude()) {}
+
+  /// \brief Converting constructor
+  ///
+  /// Constructs a \c basic_quantity from the specified \c basic_quantity with
+  /// different \c magnitude_type.
+  ///
+  /// \pre \c magnitude_type is constructible from \c Up
+  /// \post <tt>this->magnitude() == other.magnitude()
+  ///
+  /// \tparam Up the type of the magnitude of the \c basic_quantity to construct
+  ///
+  /// \param q the \c basic_quantity to construct from
+  ///
+  /// \throw any exceptions thrown by the move constructor of \c magnitude_type
+  template <typename Up>
+    requires std::constructible_from<magnitude_type, Up>
+  constexpr explicit(!std::convertible_to<Up, magnitude_type>) quantity(quantity<units, Up>&& q) noexcept(
+      std::is_nothrow_constructible_v<magnitude_type, std::add_rvalue_reference_t<Up>>)
+      : magnitude_(std::move(q).get_magnitude()) {}
+
+  /// \brief Converting constructor
+  ///
+  /// Constructs a \c basic_quantity from the specified \c basic_quantity with
   /// different units, automatically converting the units of the specified
   /// quantity to \c Units. The magnitude of \c *this is copy constructed from
   /// \c q.magnitude() then multiplied by the appropriate conversion factor
@@ -180,27 +218,17 @@ public:
   /// from \tparam Other the units ofthe \c basic_quantity to construct from
   /// \param q the \c basic_quantity to construct from
   ///
-  /// \throw any exceptions thrown by the move constructor of \c magnitude_type
+  /// \throw any exceptions thrown by the copy constructor of \c magnitude_type
   template <typename Up, unit auto V>
     requires unit_convertible_to<V, units> && std::constructible_from<magnitude_type, Up>
-  constexpr quantity(const quantity<V, Up>& q)
+  constexpr quantity(const quantity<V, Up>& q) noexcept(std::is_nothrow_constructible_v<magnitude_type, const Up&>)
       : magnitude_(q.get_magnitude() * conversion_factor(q.get_units(), units) + conversion_offset(V, units)) {}
-
-  template <typename Up>
-    requires std::constructible_from<magnitude_type, Up>
-  constexpr explicit(!std::convertible_to<Up, magnitude_type>) quantity(const quantity<units, Up>& q)
-      : magnitude_(q.get_magnitude()) {}
-
-  template <typename Up>
-    requires std::constructible_from<magnitude_type, Up>
-  constexpr explicit(!std::convertible_to<Up, magnitude_type>) quantity(quantity<units, Up>&& q)
-      : magnitude_(std::move(q).get_magnitude()) {}
 
   /// \brief Converting constructor
   ///
   /// Constructs a \c basic_quantity from the specified \c basic_quantity with
   /// different units, automatically converting the units of the specified
-  /// quantity to \c Units. The magnitude of \c *this is move constructed from
+  /// quantity to \c Units. The magnitude of \c *this is copy constructed from
   /// \c q.magnitude() then multiplied by the appropriate conversion factor
   /// between \c Other and \c Units.
   ///
@@ -348,6 +376,13 @@ public:
   constexpr auto to_SI_base_units() const { return quantity<units.to_SI_base_units(), magnitude_type>(*this); }
 
   // --- Quantity manipulation ---
+  /// \brief Addition operator
+  ///
+  /// Adds the magnitude of the specified quantity to the magnitude of
+  /// \c *this
+  ///
+  /// \param other The quantity to add to \c *this
+  /// \return A reference to the modified value \c *this
   constexpr quantity& operator+=(const quantity& other)
     requires addable<magnitude_type>
   {
@@ -359,6 +394,13 @@ public:
     return *this;
   }
 
+  /// \brief Subtrction operator
+  ///
+  /// Subtraction the magnitude of the specified quantity from the magnitude of
+  /// \c *this
+  ///
+  /// \param other The quantity to subtract from this \c *this
+  /// \return A reference to the modified value \c *this
   constexpr quantity& operator-=(const quantity& other) noexcept(nothrow_subtractable<magnitude_type>)
     requires subtractable<magnitude_type>
   {
@@ -370,12 +412,26 @@ public:
     return *this;
   }
 
+  /// \brief Converting addition operator
+  ///
+  /// Converts the specified quantity to the units of \c *this then adds the converted
+  /// magnitude to \c *this
+  ///
+  /// \param other The quantity to add to \c *this
+  /// \return A reference to the modified value of \c *this
   template <typename Up, unit auto V>
     requires addable_with<T, Up> && unit_convertible_to<V, units>
   constexpr quantity& operator+=(const quantity<V, Up>& other) noexcept(nothrow_addable_with<T, Up>) {
     return *this += quantity(other);
   }
 
+  /// \brief Converting subtraction operator
+  ///
+  /// Converts the specified quantity to the units of \c *this then subtracts the converted
+  /// magnitude to \c *this
+  ///
+  /// \param other The quantity to subtract \c *this
+  /// \return A reference to the modified value of \c *this
   template <typename Up, unit auto V>
     requires unit_convertible_to<V, units> && subtractable_with<T, Up>
   constexpr quantity& operator-=(const quantity<V, Up>& other) noexcept(nothrow_subtractable_with<T, Up>) {

@@ -6,6 +6,7 @@
 #include <cstdint>
 
 namespace maxwell {
+
 /// @brief Class template representing one dimension of a unit
 ///
 /// Class template \c dimension represents one dimension in terms of the

@@ -123,6 +123,30 @@ TEST(TestQuantity, TestUnitConvertingConstructorCurrent) {
   EXPECT_FLOAT_EQ(a3.get_magnitude(), 1.0);
 }
 
+TEST(TestQuantity, TestUnitConvertingConstructorLength) {
+  meter m{1.0};
+  nanometer nm{m};
+  EXPECT_FLOAT_EQ(nm.get_magnitude(), 1.0e9);
+  kilometer km{m};
+  EXPECT_FLOAT_EQ(km.get_magnitude(), 1e-3);
+
+  meter m2{nm};
+  EXPECT_FLOAT_EQ(m2.get_magnitude(), 1.0);
+
+  meter m3{km};
+  EXPECT_FLOAT_EQ(m3.get_magnitude(), 1.0);
+}
+
+TEST(TestQuantity, TestUnitConvertingConstructorArea) {
+  square_meter sm{1.0};
+  square_centimeter cm{sm};
+
+  EXPECT_FLOAT_EQ(cm.get_magnitude(), 1e4);
+
+  square_meter m2{cm};
+  EXPECT_FLOAT_EQ(m2.get_magnitude(), 1.0);
+}
+
 TEST(TestQuantity, TestGetMagnitude) {
   quantity<meter_unit, double> q1{3.0};
 

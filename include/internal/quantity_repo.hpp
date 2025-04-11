@@ -100,6 +100,12 @@ using int_joule = int_quantity<joule_unit>;
 using coulumb = quantity<coulomb_unit>;
 using int_coulumb = int_quantity<coulomb_unit>;
 
+using square_meter = quantity<square_meter_unit>;
+using int_square_meter = int_quantity<square_meter_unit>;
+using square_decimeter = quantity<square_decimeter_unit>;
+using square_centimeter = quantity<square_centimeter_unit>;
+using int_square_centimeter = int_quantity<square_centimeter_unit>;
+
 using meter_per_second = quantity<meter_per_second_unit>;
 using int_meter_per_second = int_quantity<meter_per_second_unit>;
 
