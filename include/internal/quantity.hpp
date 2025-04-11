@@ -2,6 +2,7 @@
 #define QUANTITY_HPP
 
 #include <chrono>
+#include <compare>
 #include <concepts>
 #include <format>
 #include <functional>
@@ -20,6 +21,7 @@
 #include "utility.hpp"
 
 namespace maxwell {
+/// \cond
 template <unit auto U, typename T = double> class quantity;
 
 namespace _detail {
@@ -50,6 +52,7 @@ constexpr double to_chrono_conversion_factor() {
   return conversion_factor(U, as_maxwell_unit);
 }
 } // namespace _detail
+/// \endcond
 
 /// \class basic_quantity
 /// \brief A dimensioned quantity
@@ -438,6 +441,12 @@ public:
     return *this -= quantity(other);
   }
 
+  /// \brief Multiplication operator
+  ///
+  /// Multiplies the quantity by the specified scalar value
+  ///
+  /// \param scalar the scalar value to multiply \c *this by
+  /// \return A reference to the modified value of \c *this
   constexpr quantity& operator*=(const magnitude_type& scalar) noexcept(nothrow_multiply<magnitude_type>)
     requires multiply<magnitude_type>
   {
@@ -449,6 +458,12 @@ public:
     return *this;
   }
 
+  /// \brief Division operator
+  ///
+  /// Divides the quantity by the specified scalar value
+  ///
+  /// \param scalar the scalar value to divide \c *this by
+  /// \return A reference to the modified value of \c *this
   constexpr quantity& operator/=(const magnitude_type& scalar) noexcept(nothrow_divide<magnitude_type>)
     requires divide<magnitude_type>
   {
@@ -460,11 +475,21 @@ public:
     return *this;
   }
 
+  /// \brief Pre-increment operator
+  ///
+  /// Incerements the magnitude of \c *this by one
+  ///
+  /// \return A reference to the modified value \c *this
   constexpr quantity& operator++() {
     ++magnitude_;
     return *this;
   }
 
+  /// \brief Pre-decrement operator
+  ///
+  /// Decrements the magnitude of \c *this by one
+  ///
+  /// \return A reference to the modified value \c *this
   constexpr quantity& operator--() {
     --magnitude_;
     return *this;
@@ -486,13 +511,51 @@ private:
   magnitude_type magnitude_{};
 };
 
+/// \brief Equality operator
+///
+/// Compares the magnitudes of two quantities for equality. Two
+/// quanities are if their magnitudes, after conversion to the quantity's SI base units,
+/// are equal.
+///
+/// Warning: floating-point equality will be performed if the underlying magnitude's are
+///          floating-point types.
+///
+/// \pre <tt>std::equality_comparable_with<S1, S2><\tt>
+///
+/// \tparam U1 The units of the left hand side quantity
+/// \tparam S1 The magnitude type of the left hand side quantity
+/// \tparam U2 The units of the right hand side quantity
+/// \tparam S2 The magnitude type of the right hand side quantity
+///
+/// \param lhs The left hand side of the comparison
+/// \param rhs The right hand side of the comparison
+/// \return \c true if the two quantities are equal
 template <unit auto U1, typename S1, unit auto U2, typename S2>
+  requires std::equality_comparable_with<S1, S2>
 constexpr bool operator==(const quantity<U1, S1>& lhs, const quantity<U2, S2>& rhs) {
   return lhs.to_SI_base_units().get_magnitude() == rhs.to_SI_base_units().get_magnitude();
 }
 
+/// \brief Three-way comparison operator
+///
+/// Performs three-way comparison on two quantities. Prior to the conversion, both
+/// quantities are converted to SI base units to ensure equivalent quantities with
+/// different magnitudes are compared correctly
+///
+/// \pre <tt>std::three_way_comparable_with<S1, S2><\tt>
+///
+/// \tparam U1 The units of the left hand side quantity
+/// \tparam S1 The magnitude type of the left hand side quantity
+/// \tparam U2 The units of the right hand side quantity
+/// \tparam S2 The magnitude type of the right hand side quantity
+///
+/// \param lhs The left hand side of the comparison
+/// \param rhs The right hand side of the comparison
+/// \return the three way comparison of the quantities
 template <unit auto U1, typename S1, unit auto U2, typename S2>
-constexpr auto operator<=>(const quantity<U1, S1>& lhs, const quantity<U2, S2>& rhs) {
+  requires std::three_way_comparable_with<S1, S2>
+constexpr std::compare_three_way_result_t<S1, S2> operator<=>(const quantity<U1, S1>& lhs,
+                                                              const quantity<U2, S2>& rhs) {
   return lhs.to_SI_base_units().get_magnitude() <=> rhs.to_SI_base_units().get_magnitude();
 }
 
