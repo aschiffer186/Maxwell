@@ -434,6 +434,7 @@ template <unit auto U> struct unit_sqrt_impl {
 };
 
 template <unit auto U> using unit_sqrt_impl_t = unit_sqrt_impl<U>::type;
+
 } // namespace _detail
 /// \endcond
 

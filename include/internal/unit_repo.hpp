@@ -133,7 +133,8 @@ namespace maxwell {
   struct quecto##unit_name##_type : decltype(unit_name##_type{}.template adjust_prefix_##dimension<quecto>()) {        \
     using base_type = decltype(unit_name##_type{}.adjust_prefix_##dimension<quecto>());                                \
     constexpr static std::string unit_string() { return "q" + unit_name##_type::unit_string(); }                       \
-  };
+  };                                                                                                                   \
+  constexpr quecto##unit_name##_type quecto##unit_name;
 
 #define MAKE_UNIT_WITH_DESC(unit_name, definition, desc)                                                               \
   struct unit_name##_unit_type : decltype(definition) {                                                                \
@@ -154,9 +155,13 @@ MAKE_UNIT_PREFIXES(gram_unit, mass)
 MAKE_UNIT_PREFIXES(kelvin_unit, temperature)
 MAKE_UNIT_PREFIXES(second_unit, time)
 
-MAKE_UNIT_WITH_DESC(radian, scalar_unit, "rad");
-MAKE_UNIT_WITH_DESC(steradian, scalar_unit, "sr");
-MAKE_UNIT_WITH_DESC(degree, scalar_unit, "deg");
+struct radian_unit_tag;
+struct degree_unit_tag;
+struct steradian_unit_tag;
+
+MAKE_UNIT_WITH_DESC(radian, scalar_unit.add_tag<radian_unit_tag>(), "rad");
+MAKE_UNIT_WITH_DESC(steradian, scalar_unit.add_tag<degree_unit_tag>(), "sr");
+MAKE_UNIT_WITH_DESC(degree, scalar_unit.add_tag<steradian_unit_tag>(), "deg");
 
 MAKE_UNIT_PREFXIES_WITH_DESC(hertz, scalar_unit / second_unit, "Hz", time);
 
@@ -172,18 +177,57 @@ template <> struct tag_conversion_factor<degree_unit_type, radian_unit_type> {
   static constexpr double factor = std::numbers::pi / 180.0;
 };
 
+struct steradian_tag;
+
 MAKE_UNIT_PREFXIES_WITH_DESC(newton, kilogram_unit* meter_unit / second_unit, "N", mass)
 MAKE_UNIT_PREFXIES_WITH_DESC(pascal, newton_unit / meter_unit / meter_unit, "Pa", mass)
 MAKE_UNIT_PREFXIES_WITH_DESC(joule, newton_unit* meter_unit, "J", mass)
 MAKE_UNIT_PREFXIES_WITH_DESC(watt, joule_unit / second_unit, "W", mass)
 MAKE_UNIT_PREFXIES_WITH_DESC(coulomb, ampere_unit* second_unit, "C", current)
 MAKE_UNIT_PREFXIES_WITH_DESC(volt, watt_unit / ampere_unit, "V", mass)
+MAKE_UNIT_PREFXIES_WITH_DESC(farad, coulomb_unit / volt_unit, "F", mass)
+MAKE_UNIT_PREFXIES_WITH_DESC(ohm, volt_unit / ampere_unit, "Ω", mass)
+MAKE_UNIT_PREFXIES_WITH_DESC(siemens, ampere_unit / volt_unit, "S", current)
+MAKE_UNIT_PREFXIES_WITH_DESC(weber, volt_unit* second_unit, "Wb", mass)
+MAKE_UNIT_PREFXIES_WITH_DESC(tesla, weber_unit / (meter_unit * meter_unit), "T", mass)
+MAKE_UNIT_PREFXIES_WITH_DESC(henry, weber_unit / ampere_unit, "H", mass)
+
+constexpr rational celsisus_offset{27'315, 100};
+MAKE_UNIT_WITH_DESC(Celsisus, kelvin_unit.adjust_offset_temperature<celsisus_offset>(), "°C")
+
+MAKE_UNIT_PREFXIES_WITH_DESC(lumen, candela_unit* steradian_unit, "lm", luminosity)
+MAKE_UNIT_PREFXIES_WITH_DESC(lux, lumen_unit / (meter_unit * meter_unit), "lx", luminosity)
+
+struct becquerel_unit_tag;
+MAKE_UNIT_PREFXIES_WITH_DESC(becquerel, hertz_unit.add_tag<becquerel_unit_tag>(), "Bq", time)
+
+MAKE_UNIT_PREFXIES_WITH_DESC(gray, joule_unit / kilogram_unit, "Gy", length)
+
+struct sievert_unit_tag;
+MAKE_UNIT_PREFXIES_WITH_DESC(sievert, gray_unit.add_tag<sievert_unit_tag>(), "Sv", length)
+
+MAKE_UNIT_PREFXIES_WITH_DESC(katal, mole_unit / second_unit, "kat", amount)
+
+MAKE_UNIT_WITH_DESC(square_meter, meter_unit* meter_unit, "m^2")
+MAKE_UNIT_WITH_DESC(cubic_meter, square_meter_unit* meter_unit, "m^3")
 
 MAKE_UNIT_WITH_DESC(meter_per_second, meter_unit / second_unit, "m/s")
 MAKE_UNIT_WITH_DESC(meter_per_second_per_second, meter_per_second_unit / second_unit, "m/s^2")
 
 template <auto U>
 concept angle_unit = unit_convertible_to<U, radian_unit>;
+
+template <auto U>
+concept freqency_unit = unit_convertible_to<U, hertz_unit>;
+
+template <auto U>
+concept force_unit = unit_convertible_to<U, newton_unit>;
+
+template <auto U>
+concept pressure_unit = unit_convertible_to<U, pascal_unit>;
+
+template <auto U>
+concept energy_unit = unit_convertible_to<U, joule_unit>;
 } // namespace maxwell
 
 #endif

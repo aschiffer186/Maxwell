@@ -12,7 +12,8 @@ template <bool Throwing> struct noisy {
   constexpr noisy() noexcept(Throwing) { ++num_default_ctor_calls; }
   constexpr explicit noisy(double d) noexcept(Throwing) : value(d) {}
   constexpr noisy(double d1, double d2) noexcept(Throwing) : value(d1 + d2) {}
-  constexpr noisy(std::initializer_list<double> il, double d3) : value(std::accumulate(il.begin(), il.end(), d3)) {}
+  constexpr noisy(std::initializer_list<double> il, double d3) noexcept(Throwing)
+      : value(std::accumulate(il.begin(), il.end(), d3)) {}
   constexpr noisy(const noisy& other) noexcept(Throwing) : value(other.value) { ++num_copy_ctor_calls; }
   constexpr noisy(noisy&& other) noexcept(Throwing) : value(other.value) { ++num_move_ctor_calls; }
 

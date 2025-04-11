@@ -14,10 +14,10 @@
 #include <type_traits>
 #include <utility>
 
-#include "internal/config.hpp"
-#include "internal/dimension.hpp"
-#include "internal/utility.hpp"
+#include "config.hpp"
+#include "dimension.hpp"
 #include "unit.hpp"
+#include "utility.hpp"
 
 namespace maxwell {
 template <unit auto U, typename T = double> class quantity;
@@ -105,7 +105,7 @@ public:
   /// \throws Any exceptions thrown by the constructor of \c magnitude_type
   template <typename Up = magnitude_type>
     requires std::constructible_from<magnitude_type, Up> && (!_detail::is_basic_quantity_v<std::remove_cvref_t<Up>>)
-  constexpr explicit(!unitless_unit<units>)
+  constexpr explicit(!unitless_unit<units> || !std::convertible_to<Up, magnitude_type>)
       quantity(Up&& u) noexcept(std::is_nothrow_constructible_v<magnitude_type, Up&&>)
       : magnitude_(std::forward<Up>(u)) {}
 
@@ -467,6 +467,8 @@ template <unit auto U1, typename M1, typename M2>
   requires multiply_with<M1, M2> && (!unitless_unit<U1>) && (!_detail::is_basic_quantity_v<std::remove_cvref_t<M2>>) &&
            (!unit<M2>)
 constexpr auto operator*(const quantity<U1, M1>& lhs, const M2& rhs) noexcept(nothrow_multiply_with<M1, M2>) {
+  // NOTE: Multiplication is NOT guaranteed to be commutative for all possible magnitude_types (e.g. matrices)
+  //       DO NOT re-write this as return lhs * rhs!
   using return_scalar_type = std::remove_cvref_t<decltype(lhs.get_magnitude() * rhs)>;
   return quantity<U1, return_scalar_type>{lhs.get_magnitude() * rhs};
 }
@@ -475,6 +477,8 @@ template <unit auto U1, typename M1, typename M2>
   requires multiply_with<M1, M2> && (!unitless_unit<U1>) && (!_detail::is_basic_quantity_v<std::remove_cvref_t<M2>>) &&
            (!unit<M2>)
 constexpr auto operator*(const M2& lhs, const quantity<U1, M1>& rhs) noexcept(nothrow_multiply_with<M1, M2>) {
+  // NOTE: Multiplication is NOT guaranteed to be commutative for all possible magnitude_types (e.g. matrices)
+  //       DO NOT re-write this as return rhs * lhs!
   using return_scalar_type = std::remove_cvref_t<decltype(lhs * rhs.get_magnitude())>;
   return quantity<U1, return_scalar_type>{lhs * rhs.get_magnitude()};
 }

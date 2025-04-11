@@ -1,7 +1,7 @@
 #ifndef CONSTANTS_HPP
 #define CONSTANTS_HPP
 
-#include "internal/quantity_repo.hpp"
+#include "quantity_repo.hpp"
 
 namespace maxwell::constants {
 namespace _detail {

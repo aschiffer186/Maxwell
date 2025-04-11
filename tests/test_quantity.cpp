@@ -81,6 +81,46 @@ TEST(TestQuantity, TestInPlaceConstructor) {
   EXPECT_EQ(q2.get_magnitude().value, 3.0);
   EXPECT_FALSE(
       (std::is_nothrow_constructible_v<quantity<meter_unit, throwing_noisy>, std::in_place_t, double, double>));
+
+  quantity<meter_unit, nothrow_noisy> q3{std::in_place, {1.0, 2.0, 3.0, 4.0}, 5.0};
+  EXPECT_EQ(q3.get_magnitude().value, 15.0);
+  EXPECT_TRUE((std::is_nothrow_constructible_v<quantity<meter_unit, nothrow_noisy>, std::in_place_t,
+                                               std::initializer_list<double>, double>));
+  EXPECT_TRUE(
+      is_constant_expression([] { quantity<meter_unit, nothrow_noisy>{std::in_place, {1.0, 2.0, 3.0, 4.0}, 5.0}; }));
+
+  quantity<meter_unit, throwing_noisy> q4{std::in_place, {1.0, 2.0, 3.0, 4.0}, 5.0};
+  EXPECT_EQ(q4.get_magnitude().value, 15.0);
+  EXPECT_FALSE((std::is_nothrow_constructible_v<quantity<meter_unit, throwing_noisy>, std::in_place_t,
+                                                std::initializer_list<double>, double>));
+}
+
+TEST(TestQuantity, TestUnitConvertingConstructorAmount) {
+  mole m{1.0};
+  nanomole nm{m};
+  EXPECT_FLOAT_EQ(nm.get_magnitude(), 1.0e9);
+  kilomole km{m};
+  EXPECT_FLOAT_EQ(km.get_magnitude(), 1e-3);
+
+  mole m2{nm};
+  EXPECT_FLOAT_EQ(m2.get_magnitude(), 1.0);
+
+  mole m3{km};
+  EXPECT_FLOAT_EQ(m3.get_magnitude(), 1.0);
+}
+
+TEST(TestQuantity, TestUnitConvertingConstructorCurrent) {
+  ampere a{1.0};
+  nanoampere na{a};
+  EXPECT_FLOAT_EQ(na.get_magnitude(), 1.0e9);
+  kiloampere ka{a};
+  EXPECT_FLOAT_EQ(ka.get_magnitude(), 1e-3);
+
+  ampere a2{na};
+  EXPECT_FLOAT_EQ(a2.get_magnitude(), 1.0);
+
+  ampere a3{ka};
+  EXPECT_FLOAT_EQ(a3.get_magnitude(), 1.0);
 }
 
 TEST(TestQuantity, TestGetMagnitude) {

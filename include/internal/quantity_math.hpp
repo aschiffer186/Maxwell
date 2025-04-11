@@ -5,8 +5,8 @@
 #include <concepts>
 
 #include "config.hpp"
-#include "internal/quantity_repo.hpp"
 #include "quantity.hpp"
+#include "quantity_repo.hpp"
 #include "unit.hpp"
 #include "unit_repo.hpp"
 
