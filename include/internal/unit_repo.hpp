@@ -3,7 +3,7 @@
 
 #include <string>
 
-#include "internal/dimension.hpp"
+#include "dimension.hpp"
 #include "unit.hpp"
 
 namespace maxwell {

@@ -15,6 +15,7 @@
 #include <cstdint>
 #include <numeric>
 #include <ratio>
+#include <type_traits>
 
 namespace maxwell {
 /**

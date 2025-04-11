@@ -442,25 +442,18 @@ constexpr auto operator<=>(const quantity<U1, S1>& lhs, const quantity<U2, S2>& 
 
 template <typename S1, unit auto U1, typename S2, unit auto U2>
 constexpr auto operator*(const quantity<U1, S1>& lhs, const quantity<U2, S2>& rhs) {
-  const auto lhs_base_units = lhs.to_SI_base_units();
-  const auto rhs_base_units = rhs.to_SI_base_units();
+  const unit auto return_units = lhs.get_units() * rhs.get_units();
 
-  const unit auto return_units = lhs_base_units.get_units() * rhs_base_units.get_units();
-
-  using return_scalar_type =
-      std::remove_cvref_t<decltype(lhs_base_units.get_magnitude() * rhs_base_units.get_magnitude())>;
-  return quantity<return_units, return_scalar_type>{lhs_base_units.get_magnitude() * rhs_base_units.get_magnitude()};
+  using return_scalar_type = std::remove_cvref_t<decltype(lhs.get_magnitude() * rhs.get_magnitude())>;
+  return quantity<return_units, return_scalar_type>{lhs.get_magnitude() * rhs.get_magnitude()};
 }
 
 template <typename S1, unit auto U1, typename S2, unit auto U2>
 constexpr auto operator/(const quantity<U1, S1>& lhs, const quantity<U2, S2>& rhs) {
-  const auto lhs_base_units = lhs.to_SI_base_units();
-  const auto rhs_base_units = rhs.to_SI_base_units();
+  const unit auto return_units = lhs.get_units() / rhs.get_units();
 
-  using return_scalar_type =
-      std::remove_cvref_t<decltype(lhs_base_units.get_magnitude() / rhs_base_units.get_magnitude())>;
-  return quantity<lhs_base_units.get_units() / rhs_base_units.get_units(), return_scalar_type>{
-      lhs_base_units.get_magnitude() / rhs_base_units.get_magnitude()};
+  using return_scalar_type = std::remove_cvref_t<decltype(lhs.get_magnitude() / rhs.get_magnitude())>;
+  return quantity<return_units, return_scalar_type>{lhs.get_magnitude() / rhs.get_magnitude()};
 }
 
 template <unit auto U1, typename M1, typename M2>

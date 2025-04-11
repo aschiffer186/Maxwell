@@ -87,12 +87,7 @@ struct unit_type : _detail::unit_base {
 
   consteval dimension get_time() const noexcept { return time; }
 
-  consteval unit auto to_SI_base_units() const noexcept {
-    return unit_type<Amount.to_coherent_dimension(), Current.to_coherent_dimension(), Length.to_coherent_dimension(),
-                     Luminosity.to_coherent_dimension(), Mass.to_coherent_dimension(),
-                     Temperature.to_coherent_dimension(), Time.to_coherent_dimension(), tag>{}
-        .template adjust_prefix_mass<3>();
-  }
+  consteval unit auto to_SI_base_units() const noexcept;
 
   template <std::int8_t NewPrefix> constexpr unit auto adjust_prefix_amount() const noexcept {
     constexpr dimension adjusted = amount.adjust_prefix(NewPrefix);
@@ -212,6 +207,24 @@ constexpr bool operator==(unit auto lhs, unit auto rhs) noexcept {
          lhs.get_mass() == rhs.get_mass() && lhs.get_temperature() == rhs.get_temperature() &&
          lhs.get_time() == rhs.get_time() && std::same_as<typename decltype(lhs)::tag, typename decltype(rhs)::tag>;
 };
+
+template <unit auto U> struct SI_base_unit {
+  using type = decltype(unit_type<U.get_amount().to_coherent_dimension(), U.get_current().to_coherent_dimension(),
+                                  U.get_length().to_coherent_dimension(), U.get_luminosity().to_coherent_dimension(),
+                                  U.get_mass().to_coherent_dimension(), U.get_temperature().to_coherent_dimension(),
+                                  U.get_time().to_coherent_dimension(), typename decltype(U)::tag>{}
+                            .template adjust_prefix_mass<3>());
+};
+
+template <unit auto U> using SI_base_unit_t = SI_base_unit<U>::type;
+
+template <dimension Amount, dimension Current, dimension Length, dimension Luminosity, dimension Mass,
+          dimension Temperature, dimension Time, typename Tag, std::intmax_t ExtraMultiplier>
+consteval unit auto
+unit_type<Amount, Current, Length, Luminosity, Mass, Temperature, Time, Tag, ExtraMultiplier>::to_SI_base_units()
+    const noexcept {
+  return SI_base_unit_t<std::remove_reference_t<decltype(*this)>{}>{};
+}
 
 // --- Unit Traits ---
 
