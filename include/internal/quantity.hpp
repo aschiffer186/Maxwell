@@ -1,3 +1,13 @@
+/**
+ * @file quantity.hpp
+ * @author Alex Schiffer
+ * @brief Definition of \c quantity class template
+ * @version 1.0
+ * @date 2025-04-14
+ *
+ * @copyright Copyright (c) 2025
+ *
+ */
 #ifndef QUANTITY_HPP
 #define QUANTITY_HPP
 
@@ -20,16 +30,17 @@
 #include "unit.hpp"
 #include "utility.hpp"
 
+/// \namespace maxwell Enclosing namespace of all public Maxwell API
 namespace maxwell {
 /// \cond
 template <unit auto U, typename T = double> class quantity;
 
 namespace _detail {
-template <typename> struct is_basic_quantity : std::false_type {};
+template <typename> struct is_quantity : std::false_type {};
 
-template <typename T, unit auto U> struct is_basic_quantity<quantity<U, T>> : std::true_type {};
+template <typename T, unit auto U> struct is_quantity<quantity<U, T>> : std::true_type {};
 
-template <typename T> constexpr bool is_basic_quantity_v = is_basic_quantity<T>::value;
+template <typename T> constexpr bool is_quantity_v = is_quantity<T>::value;
 
 template <typename D, unit auto U>
   requires time_unit<U>
@@ -54,10 +65,10 @@ constexpr double to_chrono_conversion_factor() {
 } // namespace _detail
 /// \endcond
 
-/// \class basic_quantity
+/// \class quantity
 /// \brief A dimensioned quantity
 ///
-/// <tt>class basic_quantity</tt> represents a value that has both a magnitude
+/// <tt>class quantity</tt> represents a value that has both a magnitude
 /// and units. The units are part of the quantity's type, allowing for
 /// verification of unit coherency and conversion of units at compile-time.
 /// A program is ill-formed if an invalid operation is performed between
@@ -67,7 +78,7 @@ constexpr double to_chrono_conversion_factor() {
 ///
 /// Mandates: \c T is not cv-qualified, not \c std::in_place_t, not a
 /// specialization of \c std::chrono::duration, not a specialization of \c
-/// basic_quantity, and is not a specialization of \c unit_type or \c
+/// quantity, and is not a specialization of \c unit_type or \c
 /// measure_type
 ///
 /// \tparam T the type of the quantity's magnitude
@@ -98,7 +109,7 @@ public:
 
   /// \brief Constructor
   ///
-  /// Constructs a \c basic_quantity whose magnitude is constructed using the
+  /// Constructs a \c quantity whose magnitude is constructed using the
   /// value \c std::forward<Up>(magnitude)
   ///
   /// \pre \c magnitude_type is constructible from \c Up&&
@@ -107,14 +118,14 @@ public:
   ///
   /// \throws Any exceptions thrown by the constructor of \c magnitude_type
   template <typename Up = magnitude_type>
-    requires std::constructible_from<magnitude_type, Up> && (!_detail::is_basic_quantity_v<std::remove_cvref_t<Up>>)
+    requires std::constructible_from<magnitude_type, Up> && (!_detail::is_quantity_v<std::remove_cvref_t<Up>>)
   constexpr explicit(!unitless_unit<units> || !std::convertible_to<Up, magnitude_type>)
       quantity(Up&& u) noexcept(std::is_nothrow_constructible_v<magnitude_type, Up&&>)
       : magnitude_(std::forward<Up>(u)) {}
 
   /// \c Constructor
   ///
-  /// Constructs a \c basic_quantity whose magnitude s constructed in place from
+  /// Constructs a \c quantity whose magnitude s constructed in place from
   /// the specified arguments using the expression \c
   /// std::forward<Args>(args)...
   ///
@@ -131,7 +142,7 @@ public:
 
   /// \c Constructor
   ///
-  /// Constructs a \c basic_quantity whose magnitude s constructed in place from
+  /// Constructs a \c quantity whose magnitude s constructed in place from
   /// the specified initializer list and arguments arguments using the
   /// expression <tt>magnitude_type(il, std::forward<Args>(args)...)</tt>
   ///
@@ -148,7 +159,7 @@ public:
 
   /// \brief Constructor
   ///
-  /// Constructs a \c basic_quantity from a \c std::chrono::duration type,
+  /// Constructs a \c quantity from a \c std::chrono::duration type,
   /// allowing for integration with the standard library. This constructor is
   /// implicit if there would be no loss of information converting from the
   /// specified \c std::chrono::duration type.
@@ -168,15 +179,15 @@ public:
 
   /// \brief Converting constructor
   ///
-  /// Constructs a \c basic_quantity from the specified \c basic_quantity with
+  /// Constructs a \c quantity from the specified \c quantity with
   /// different \c magnitude_type.
   ///
   /// \pre \c magnitude_type is constructible from \c Up
   /// \post <tt>this->magnitude() == other.magnitude()
   ///
-  /// \tparam Up the type of the magnitude of the \c basic_quantity to construct
+  /// \tparam Up the type of the magnitude of the \c quantity to construct
   ///
-  /// \param q the \c basic_quantity to construct from
+  /// \param q the \c quantity to construct from
   ///
   /// \throw any exceptions thrown by the copy constructor of \c magnitude_type
   template <typename Up>
@@ -187,15 +198,15 @@ public:
 
   /// \brief Converting constructor
   ///
-  /// Constructs a \c basic_quantity from the specified \c basic_quantity with
+  /// Constructs a \c quantity from the specified \c quantity with
   /// different \c magnitude_type.
   ///
   /// \pre \c magnitude_type is constructible from \c Up
   /// \post <tt>this->magnitude() == other.magnitude()
   ///
-  /// \tparam Up the type of the magnitude of the \c basic_quantity to construct
+  /// \tparam Up the type of the magnitude of the \c quantity to construct
   ///
-  /// \param q the \c basic_quantity to construct from
+  /// \param q the \c quantity to construct from
   ///
   /// \throw any exceptions thrown by the move constructor of \c magnitude_type
   template <typename Up>
@@ -206,7 +217,7 @@ public:
 
   /// \brief Converting constructor
   ///
-  /// Constructs a \c basic_quantity from the specified \c basic_quantity with
+  /// Constructs a \c quantity from the specified \c quantity with
   /// different units, automatically converting the units of the specified
   /// quantity to \c Units. The magnitude of \c *this is copy constructed from
   /// \c q.magnitude() then multiplied by the appropriate conversion factor
@@ -217,9 +228,9 @@ public:
   /// \post <tt>this->magnitude() == conversion_factor(Other,
   /// Units)*q.magnitude()</tt>
   ///
-  /// \tparam Up the type of the magnitude of the \c basic_quantity to construct
-  /// from \tparam Other the units ofthe \c basic_quantity to construct from
-  /// \param q the \c basic_quantity to construct from
+  /// \tparam Up the type of the magnitude of the \c quantity to construct
+  /// from \tparam Other the units ofthe \c quantity to construct from
+  /// \param q the \c quantity to construct from
   ///
   /// \throw any exceptions thrown by the copy constructor of \c magnitude_type
   template <typename Up, unit auto V>
@@ -229,7 +240,7 @@ public:
 
   /// \brief Converting constructor
   ///
-  /// Constructs a \c basic_quantity from the specified \c basic_quantity with
+  /// Constructs a \c quantity from the specified \c quantity with
   /// different units, automatically converting the units of the specified
   /// quantity to \c Units. The magnitude of \c *this is copy constructed from
   /// \c q.magnitude() then multiplied by the appropriate conversion factor
@@ -240,9 +251,9 @@ public:
   /// \post <tt>this->magnitude() == conversion_factor(Other,
   /// Units)*q.magnitude()</tt>
   ///
-  /// \tparam Up the type of the magnitude of the \c basic_quantity to construct
-  /// from \tparam Other the units ofthe \c basic_quantity to construct from
-  /// \param q the \c basic_quantity to construct from
+  /// \tparam Up the type of the magnitude of the \c quantity to construct
+  /// from \tparam Other the units ofthe \c quantity to construct from
+  /// \param q the \c quantity to construct from
   ///
   /// \throw any exceptions thrown by the move constructor of \c magnitude_type
   template <typename Up, unit auto V>
@@ -262,9 +273,9 @@ public:
   /// \post <tt>this->magnitude() == conversion_factor(Other,
   /// Units)*q.magnitude()</tt>
   ///
-  /// \tparam Up the type of the magnitude of the \c basic_quantity being
-  /// assigned from \tparam Other the units of the \c basic_quantity being
-  /// assigned from \param q the \c basic_quantity to assign to \c *this
+  /// \tparam Up the type of the magnitude of the \c quantity being
+  /// assigned from \tparam Other the units of the \c quantity being
+  /// assigned from \param q the \c quantity to assign to \c *this
   ///
   /// \return a reference to \c *this
   ///
@@ -347,7 +358,7 @@ public:
   /// if the quantity is unitless. It is highly recommended to only call this
   /// operator if the quantity is unitless.
   ///
-  /// \return the underlying magnitude of the \c basic_quantity
+  /// \return the underlying magnitude of the \c quantity
   constexpr explicit(!unitless_unit<units>) operator magnitude_type() const noexcept { return magnitude_; }
 
   /// \brief Conversion operator to \c std::chrono::duration
@@ -367,14 +378,14 @@ public:
         magnitude_ * _detail::to_chrono_conversion_factor<std::chrono::duration<Rep, Period>, units>()));
   }
 
-  /// \brief Returns a new \c basic_quantity with the same dimensions of \c
+  /// \brief Returns a new \c quantity with the same dimensions of \c
   /// *this but in SI base units
   ///
-  /// Returns a new \c basic_quantity with the same dimension of \c *this, but
+  /// Returns a new \c quantity with the same dimension of \c *this, but
   /// in SI base units. The magnitude of the returned quantity is equivalent to
   /// \c this->magnitude() converted to SI base units
   ///
-  /// \return A new \c basic_quantity with the same dimension of \c *this in SI
+  /// \return A new \c quantity with the same dimension of \c *this in SI
   /// base units.
   constexpr auto to_SI_base_units() const { return quantity<units.to_SI_base_units(), magnitude_type>(*this); }
 
@@ -495,12 +506,24 @@ public:
     return *this;
   }
 
+  /// \brief Post-increment operator
+  ///
+  /// Increments the magnitude of \c *this by one and
+  /// returns a copy of the \c quantity prior to the increment
+  ///
+  /// \return A copy of the \c quantity prior to the increment
   constexpr quantity& operator++(int) {
     quantity temp{*this};
     ++magnitude_;
     return temp;
   }
 
+  /// \brief Post-decrement operator
+  ///
+  /// Decrements the magnitude of \c *this by one and
+  /// returns a copy of the \c quantity prior to the decremet
+  ///
+  /// \return A copy of the \c quantity prior to the decrement
   constexpr quantity& operator--(int) {
     quantity temp{*this};
     --magnitude_;
@@ -559,52 +582,151 @@ constexpr std::compare_three_way_result_t<S1, S2> operator<=>(const quantity<U1,
   return lhs.to_SI_base_units().get_magnitude() <=> rhs.to_SI_base_units().get_magnitude();
 }
 
+/// \brief Multiplication operator
+///
+/// Multiplies two quantities together. The resulting quantity has units of
+/// S1 * S2. The type of the magnitude of the resulting quantity is determined
+/// from the type of S1 * S2. It is not recommended to use \c auto for the result
+/// of this type as it may produce unexpected results (e.g. if expression templates are
+/// used for lazy evaluation).
+///
+/// In addition, multiplication may not be commutative or associative if the multiplication
+/// of \c S1 and \c S2 is not commutative or associative. For example, if \c S1 and \c S2 are
+/// matrices, the multiplication may not be commutative or associative.
+///
+/// \pre <tt>std::multiply_with<S1, S2><\tt>
+/// \tparam S1 The type of the magnitude of the left hand side of the multiplication
+/// \tparam U1 The units of the left hand side of the multiplication
+/// \tparam S2 The type of the magnitude of the right hand side of the multiplication
+/// \tparam U2 The units of the right hand side of the multiplication
+/// \param lhs The left hand side of the multiplication
+/// \param rhs The right hand side of the multiplication
+/// \return The product of the two quantities
 template <typename S1, unit auto U1, typename S2, unit auto U2>
-constexpr auto operator*(const quantity<U1, S1>& lhs, const quantity<U2, S2>& rhs) {
+constexpr auto operator*(const quantity<U1, S1>& lhs, const quantity<U2, S2>& rhs)
+  requires multiply_with<S1, S2>
+{
   const unit auto return_units = lhs.get_units() * rhs.get_units();
 
   using return_scalar_type = std::remove_cvref_t<decltype(lhs.get_magnitude() * rhs.get_magnitude())>;
   return quantity<return_units, return_scalar_type>{lhs.get_magnitude() * rhs.get_magnitude()};
 }
 
+/// \brief Divides operator
+///
+/// Divides two quantities together. The resulting quantity has units of
+/// S1 * S2. The type of the magnitude of the resulting quantity is determined
+/// from the type of S1 / S2. It is not recommended to use \c auto for the result
+/// of this type as it may produce unexpected results (e.g. if expression templates are
+/// used for lazy evaluation).
+///
+/// \pre <tt>std::divide_with<S1, S2><\tt>
+///
+/// \tparam S1 The type of the magnitude of the left hand side of the division
+/// \tparam U1 The units of the left hand side of the division
+/// \tparam S2 The type of the magnitude of the right hand side of the division
+/// \tparam U2 The units of the right hand side of the division
+/// \param lhs The left hand side of the division
+/// \param rhs The right hand side of the division
+/// \return The quotient of the two quantities
 template <typename S1, unit auto U1, typename S2, unit auto U2>
-constexpr auto operator/(const quantity<U1, S1>& lhs, const quantity<U2, S2>& rhs) {
+constexpr auto operator/(const quantity<U1, S1>& lhs, const quantity<U2, S2>& rhs)
+  requires divide_with<S1, S2>
+{
   const unit auto return_units = lhs.get_units() / rhs.get_units();
 
   using return_scalar_type = std::remove_cvref_t<decltype(lhs.get_magnitude() / rhs.get_magnitude())>;
   return quantity<return_units, return_scalar_type>{lhs.get_magnitude() / rhs.get_magnitude()};
 }
 
+/// \brief Multiplication operator
+///
+/// Multiplies a quantity by a scalar value. The resulting quantity has the
+/// same units as the original quantity. The type of the magnitude of the resulting
+/// quantity is determined from the type of S1 * S2. It is not recommended to use \c auto
+/// for the result of this type as it may produce unexpected results (e.g. if expression templates are
+/// used for lazy evaluation).
+///
+/// In addition, multiplication may not be commutative or associative if the multiplication
+/// of \c M1 and \c M2 is not commutative or associative. For example, if \c M1 and \c m2 are
+/// matrices, the multiplication may not be commutative or associative.
+///
+/// \pre <tt>std::multiply_with<S1, S2><\tt>
+/// \pre \c M2 is not a specialization of \c quantity or \c unit_type
+///
+/// \tparam U1 The units of the left hand side of the multiplication
+/// \tparam M1 The type of the magnitude of the left hand side of the multiplication
+/// \tparam M2 The type of the magnitude of the right hand side of the multiplication
+/// \param lhs The left hand side of the multiplication
+/// \param rhs The right hand side of the multiplication
+/// \return The product of the two quantities
 template <unit auto U1, typename M1, typename M2>
-  requires multiply_with<M1, M2> && (!unitless_unit<U1>) && (!_detail::is_basic_quantity_v<std::remove_cvref_t<M2>>) &&
-           (!unit<M2>)
-constexpr auto operator*(const quantity<U1, M1>& lhs, const M2& rhs) noexcept(nothrow_multiply_with<M1, M2>) {
-  // NOTE: Multiplication is NOT guaranteed to be commutative for all possible magnitude_types (e.g. matrices)
-  //       DO NOT re-write this as return lhs * rhs!
+  requires multiply_with<M1, M2> && (!_detail::is_quantity_v<std::remove_cvref_t<M2>>) && (!unit<M2>)
+constexpr auto operator*(const quantity<U1, M1>& lhs, const M2& rhs) {
+  // NOTE: Multiplication is NOT guaranteed to be commutative for all possible magnitude_types (e.g. matrices).
+  //       DO NOT re-write this in terms of another multiplication operator
   using return_scalar_type = std::remove_cvref_t<decltype(lhs.get_magnitude() * rhs)>;
   return quantity<U1, return_scalar_type>{lhs.get_magnitude() * rhs};
 }
 
+/// \brief Multiplication operator
+///
+/// Multiplies a quantity by a scalar value. The resulting quantity has the
+/// same units as the original quantity. The type of the magnitude of the resulting
+/// quantity is determined from the type of S1 * S2. It is not recommended to use \c auto
+/// for the result of this type as it may produce unexpected results (e.g. if expression templates are
+/// used for lazy evaluation).
+///
+/// In addition, multiplication may not be commutative or associative if the multiplication
+/// of \c M1 and \c M2 is not commutative or associative. For example, if \c M1 and \c m2 are
+/// matrices, the multiplication may not be commutative or associative.
+///
+/// \pre <tt>std::multiply_with<S1, S2><\tt>
+/// \pre \c M2 is not a specialization of \c quantity or \c unit_type
+///
+/// \tparam U1 The units of the right hand side of the multiplication
+/// \tparam M1 The type of the magnitude of the right hand side of the multiplication
+/// \tparam M2 The type of the magnitude of the left hand side of the multiplication
+/// \param lhs The left hand side of the multiplication
+/// \param rhs The right hand side of the multiplication
+/// \return The product of the two quantities
 template <unit auto U1, typename M1, typename M2>
-  requires multiply_with<M1, M2> && (!unitless_unit<U1>) && (!_detail::is_basic_quantity_v<std::remove_cvref_t<M2>>) &&
+  requires multiply_with<M1, M2> && (!unitless_unit<U1>) && (!_detail::is_quantity_v<std::remove_cvref_t<M2>>) &&
            (!unit<M2>)
-constexpr auto operator*(const M2& lhs, const quantity<U1, M1>& rhs) noexcept(nothrow_multiply_with<M1, M2>) {
+constexpr auto operator*(const M2& lhs, const quantity<U1, M1>& rhs) {
   // NOTE: Multiplication is NOT guaranteed to be commutative for all possible magnitude_types (e.g. matrices)
-  //       DO NOT re-write this as return rhs * lhs!
+  //       DO NOT re-write this in terms of another multiplication operator
   using return_scalar_type = std::remove_cvref_t<decltype(lhs * rhs.get_magnitude())>;
   return quantity<U1, return_scalar_type>{lhs * rhs.get_magnitude()};
 }
 
+/// \brief Division operator
+///
+/// divides a quantity by a scalar value. The resulting quantity has the
+/// same units as the original quantity. The type of the magnitude of the resulting
+/// quantity is determined from the type of S1 / S2. It is not recommended to use \c auto
+/// for the result of this type as it may produce unexpected results (e.g. if expression templates are
+/// used for lazy evaluation).
+///
+/// \pre <tt>std::divide_with<S1, S2><\tt>
+/// \pre \c M2 is not a specialization of \c quantity or \c unit_type
+///
+/// \tparam U1 The units of the right hand side of the division
+/// \tparam M1 The type of the magnitude of the right hand side of the division
+/// \tparam M2 The type of the magnitude of the left hand side of the division
+/// \param lhs The left hand side of the division
+/// \param rhs The right hand side of the division
+/// \return The quotient of the two quantities
 template <unit auto U1, typename M1, typename M2>
-  requires divide_with<M1, M2> && (!unitless_unit<U1>) && (!_detail::is_basic_quantity_v<std::remove_cvref_t<M2>>)
-constexpr auto operator/(const quantity<U1, M1>& lhs, const M2& rhs) noexcept(nothrow_multiply_with<M1, M2>) {
+  requires divide_with<M1, M2> && (!unitless_unit<U1>) && (!_detail::is_quantity_v<std::remove_cvref_t<M2>>)
+constexpr auto operator/(const quantity<U1, M1>& lhs, const M2& rhs) {
   using return_scalar_type = std::remove_cvref_t<decltype(lhs.get_magnitude() / rhs)>;
   return quantity<U1, return_scalar_type>(lhs.get_magnitude() / rhs);
 }
 
 template <typename M1, unit auto U1, typename M2, unit auto U2>
   requires unit_convertible_to<U1, U2> && addable_with<M1, M2>
-constexpr auto operator+(quantity<U1, M1> lhs, const quantity<U2, M2>& rhs) noexcept(nothrow_addable_with<M1, M2>) {
+constexpr auto operator+(quantity<U1, M1> lhs, const quantity<U2, M2>& rhs) {
   using return_scalar_type = std::remove_cvref_t<decltype(lhs.get_magnitude() + rhs.get_magnitude())>;
 
   return quantity<U1.to_SI_base_units(), return_scalar_type>(lhs.to_SI_base_units().get_magnitude() +
@@ -613,15 +735,28 @@ constexpr auto operator+(quantity<U1, M1> lhs, const quantity<U2, M2>& rhs) noex
 
 template <typename M1, unit auto U1, typename M2, unit auto U2>
   requires unit_convertible_to<U1, U2> && subtractable_with<M1, M2>
-constexpr auto operator-(quantity<U1, M1> lhs, const quantity<U2, M2>& rhs) noexcept(subtractable_with<M1, M2>) {
+constexpr auto operator-(quantity<U1, M1> lhs, const quantity<U2, M2>& rhs) {
   using return_scalar_type = std::remove_cvref_t<decltype(lhs.get_magnitude() - rhs.get_magnitude())>;
 
   return quantity<U1.to_SI_base_units(), return_scalar_type>(lhs.to_SI_base_units().get_magnitude() -
                                                              rhs.to_SI_base_units().get_magnitude());
 }
 
-template <typename M, unit auto U> constexpr quantity<U, M> operator-(const quantity<U, M>& x) {
-  return quantity<U, M>(-x.get_magnitude());
+/// \brief Negation operator
+///
+/// Negates the magnitude of the specified quantity. The returned quantity has the
+/// same units as the original quantity; however, the magnitude type may be different.
+/// It is not recommended to use \c auto
+/// for the result of this type as it may produce unexpected results (e.g. if expression templates are
+/// used for lazy evaluation).
+///
+/// \tparam M The type of the magnitude of the quantity
+/// \tparam U The units of the quantity
+/// \param x The quantity to negate
+/// \return The negated quantity
+template <typename M, unit auto U> constexpr auto operator-(const quantity<U, M>& x) {
+  using scalar_return_type = std::remove_cvref_t<decltype(-x.get_magnitude())>;
+  return quantity<U, scalar_return_type>(-x.get_magnitude());
 }
 
 template <typename T>
