@@ -283,7 +283,7 @@ constexpr std::array pow10{1e-30, 1e-29, 1e-28, 1e-27, 1e-26, 1e-25, 1e-24, 1e-2
                            1e9,   1e10,  1e11,  1e12,  1e13,  1e14,  1e15,  1e16,  1e17,  1e18,  1e19,  1e20,  1e21,
                            1e22,  1e23,  1e24,  1e25,  1e26,  1e27,  1e28,  1e29,  1e30};
 
-constexpr double pow(double base, std::intmax_t power) noexcept {
+consteval double pow(double base, std::intmax_t power) noexcept {
   if (power < 0) {
     return 1.0 / pow(base, -power);
   }
@@ -303,7 +303,7 @@ constexpr double pow(double base, std::intmax_t power) noexcept {
   return pow(base * base, (power - 1) / 2);
 }
 
-constexpr double conversion_factor_prefix(std::int8_t from, std::int8_t to) noexcept {
+consteval double conversion_factor_prefix(std::int8_t from, std::int8_t to) noexcept {
   if ((from - to) < 30) {
     return pow10[(from - to) + 30];
   } else {
@@ -311,7 +311,7 @@ constexpr double conversion_factor_prefix(std::int8_t from, std::int8_t to) noex
   }
 }
 
-constexpr double conversion_factor_offset(const rational& to, const rational& from) noexcept {
+consteval double conversion_factor_offset(const rational& from, const rational& to) noexcept {
   const rational res_ratio = to / from;
   return static_cast<double>(res_ratio);
 }
@@ -348,7 +348,7 @@ template <typename Tag> struct tag_conversion_factor<Tag, Tag> {
 /// \param to The target unit
 /// \return The factor the magnitude of a quantity with units \c from needs to
 /// be multiplied to be converted to a quantity with units \c to
-constexpr double conversion_factor(unit auto from, unit auto to) noexcept
+consteval double conversion_factor(unit auto from, unit auto to) noexcept
   requires unit_convertible_to<from, to>
 {
   using From = decltype(from);
@@ -392,7 +392,7 @@ constexpr double conversion_factor(unit auto from, unit auto to) noexcept
 /// \param from the unit to convert from
 /// \param to the target unit
 /// \return the conversion offset that must be applied
-constexpr double conversion_offset(unit auto from, unit auto to) noexcept
+consteval double conversion_offset(unit auto from, unit auto to) noexcept
   requires unit_convertible_to<from, to>
 {
   if (from == to) {

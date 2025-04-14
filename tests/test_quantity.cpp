@@ -135,6 +135,74 @@ TEST(TestQuantity, TestUnitConvertingConstructorLength) {
 
   meter m3{km};
   EXPECT_FLOAT_EQ(m3.get_magnitude(), 1.0);
+
+  foot ft{m};
+  EXPECT_FLOAT_EQ(ft.get_magnitude(), 3.28084);
+
+  meter mr4{ft};
+  EXPECT_FLOAT_EQ(mr4.get_magnitude(), 1.0);
+
+  inch in{nm};
+  EXPECT_FLOAT_EQ(in.get_magnitude(), 39.370079);
+}
+
+TEST(TestQuantity, TestUnitConvertingConstructorLuminosity) {
+  candela cd{1.0};
+  nanocandela ncd{cd};
+  EXPECT_FLOAT_EQ(ncd.get_magnitude(), 1.0e9);
+  kilocandela kcd{cd};
+  EXPECT_FLOAT_EQ(kcd.get_magnitude(), 1e-3);
+
+  candela cd2{ncd};
+  EXPECT_FLOAT_EQ(cd2.get_magnitude(), 1.0);
+
+  candela cd3{kcd};
+  EXPECT_FLOAT_EQ(cd3.get_magnitude(), 1.0);
+}
+
+TEST(TestQuantity, TestUnitConvertingConstructorMass) {
+  gram g{1.0};
+  nanogram ng{g};
+  EXPECT_FLOAT_EQ(ng.get_magnitude(), 1.0e9);
+
+  kilogram kg{g};
+  EXPECT_FLOAT_EQ(kg.get_magnitude(), 1e-3);
+
+  gram g2{ng};
+  EXPECT_FLOAT_EQ(g2.get_magnitude(), 1.0);
+
+  gram g3{kg};
+  EXPECT_FLOAT_EQ(g3.get_magnitude(), 1.0);
+
+  ounce oz{kg};
+  EXPECT_FLOAT_EQ(oz.get_magnitude(), 0.03527396);
+}
+
+TEST(TestQuantity, TestUnitConvertingConstructorTemperature) {
+  kelvin k{1.0};
+  nanokelvin nk{k};
+  EXPECT_FLOAT_EQ(nk.get_magnitude(), 1.0e9);
+
+  kilokelvin kk{k};
+  EXPECT_FLOAT_EQ(kk.get_magnitude(), 1e-3);
+
+  kelvin k2{nk};
+  EXPECT_FLOAT_EQ(k2.get_magnitude(), 1.0);
+
+  kelvin k3{kk};
+  EXPECT_FLOAT_EQ(k3.get_magnitude(), 1.0);
+
+  Celsisus c{k};
+  EXPECT_FLOAT_EQ(c.get_magnitude(), -272.15);
+
+  Fahrenheit f{k};
+  EXPECT_FLOAT_EQ(f.get_magnitude(), -457.87);
+
+  kelvin k4{c};
+  EXPECT_FLOAT_EQ(k4.get_magnitude(), 1.0);
+
+  kelvin k5{f};
+  EXPECT_FLOAT_EQ(k5.get_magnitude(), 1.0);
 }
 
 TEST(TestQuantity, TestUnitConvertingConstructorArea) {

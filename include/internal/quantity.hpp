@@ -236,7 +236,7 @@ public:
   template <typename Up, unit auto V>
     requires unit_convertible_to<V, units> && std::constructible_from<magnitude_type, Up>
   constexpr quantity(const quantity<V, Up>& q) noexcept(std::is_nothrow_constructible_v<magnitude_type, const Up&>)
-      : magnitude_(q.get_magnitude() * conversion_factor(q.get_units(), units) + conversion_offset(V, units)) {}
+      : magnitude_(q.get_magnitude() * conversion_factor(V, units) + conversion_offset(V, units)) {}
 
   /// \brief Converting constructor
   ///
@@ -260,8 +260,7 @@ public:
     requires unit_convertible_to<V, units> && std::constructible_from<magnitude_type, Up>
   constexpr quantity(quantity<V, Up>&& q) noexcept(
       std::is_nothrow_constructible_v<magnitude_type, std::add_rvalue_reference_t<Up>>)
-      : magnitude_(std::move(q).get_magnitude() * conversion_factor(q.get_units(), units) +
-                   conversion_offset(V, units)) {}
+      : magnitude_(std::move(q).get_magnitude() * conversion_factor(V, units) + conversion_offset(V, units)) {}
 
   /// \brief Converting assignment operator
   ///

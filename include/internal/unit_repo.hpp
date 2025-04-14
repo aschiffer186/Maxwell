@@ -155,30 +155,30 @@ MAKE_UNIT_PREFIXES(gram_unit, mass)
 MAKE_UNIT_PREFIXES(kelvin_unit, temperature)
 MAKE_UNIT_PREFIXES(second_unit, time)
 
+/// \cond
 struct radian_unit_tag;
 struct degree_unit_tag;
 struct steradian_unit_tag;
+struct becquerel_unit_tag;
+struct sievert_unit_tag;
+/// \endcond
 
 MAKE_UNIT_WITH_DESC(radian, scalar_unit.add_tag<radian_unit_tag>(), "rad");
 MAKE_UNIT_WITH_DESC(steradian, scalar_unit.add_tag<degree_unit_tag>(), "sr");
 MAKE_UNIT_WITH_DESC(degree, scalar_unit.add_tag<steradian_unit_tag>(), "deg");
 
-MAKE_UNIT_PREFXIES_WITH_DESC(hertz, scalar_unit / second_unit, "Hz", time);
-
+/// \cond
 template <> struct is_tag_convertible<degree_unit_type, radian_unit_type> : std::true_type {};
-
 template <> struct is_tag_convertible<radian_unit_type, degree_unit_type> : std::true_type {};
-
 template <> struct tag_conversion_factor<radian_unit_type, degree_unit_type> {
   static constexpr double factor = 180.0 / std::numbers::pi;
 };
-
 template <> struct tag_conversion_factor<degree_unit_type, radian_unit_type> {
   static constexpr double factor = std::numbers::pi / 180.0;
 };
+/// \endcond
 
-struct steradian_tag;
-
+MAKE_UNIT_PREFXIES_WITH_DESC(hertz, scalar_unit / second_unit, "Hz", time);
 MAKE_UNIT_PREFXIES_WITH_DESC(newton, kilogram_unit* meter_unit / second_unit, "N", mass)
 MAKE_UNIT_PREFXIES_WITH_DESC(pascal, newton_unit / meter_unit / meter_unit, "Pa", mass)
 MAKE_UNIT_PREFXIES_WITH_DESC(joule, newton_unit* meter_unit, "J", mass)
@@ -191,21 +191,13 @@ MAKE_UNIT_PREFXIES_WITH_DESC(siemens, ampere_unit / volt_unit, "S", current)
 MAKE_UNIT_PREFXIES_WITH_DESC(weber, volt_unit* second_unit, "Wb", mass)
 MAKE_UNIT_PREFXIES_WITH_DESC(tesla, weber_unit / (meter_unit * meter_unit), "T", mass)
 MAKE_UNIT_PREFXIES_WITH_DESC(henry, weber_unit / ampere_unit, "H", mass)
-
-constexpr rational celsisus_offset{27'315, 100};
+constexpr rational celsisus_offset{-27'315, 100};
 MAKE_UNIT_WITH_DESC(Celsisus, kelvin_unit.adjust_offset_temperature<celsisus_offset>(), "°C")
-
 MAKE_UNIT_PREFXIES_WITH_DESC(lumen, candela_unit* steradian_unit, "lm", luminosity)
 MAKE_UNIT_PREFXIES_WITH_DESC(lux, lumen_unit / (meter_unit * meter_unit), "lx", luminosity)
-
-struct becquerel_unit_tag;
 MAKE_UNIT_PREFXIES_WITH_DESC(becquerel, hertz_unit.add_tag<becquerel_unit_tag>(), "Bq", time)
-
 MAKE_UNIT_PREFXIES_WITH_DESC(gray, joule_unit / kilogram_unit, "Gy", length)
-
-struct sievert_unit_tag;
 MAKE_UNIT_PREFXIES_WITH_DESC(sievert, gray_unit.add_tag<sievert_unit_tag>(), "Sv", length)
-
 MAKE_UNIT_PREFXIES_WITH_DESC(katal, mole_unit / second_unit, "kat", amount)
 
 MAKE_UNIT_WITH_DESC(square_quettameter, quettameter_unit* quettameter_unit, "Qm^2")
@@ -214,11 +206,51 @@ MAKE_UNIT_WITH_DESC(square_yottameter, yottameter_unit* yottameter_unit, "Ym^2")
 MAKE_UNIT_WITH_DESC(square_zettameter, zettameter_unit* zettameter_unit, "Zm^2")
 MAKE_UNIT_WITH_DESC(square_exameter, exameter_unit* exameter_unit, "Em^2")
 MAKE_UNIT_WITH_DESC(square_petameter, petameter_unit* petameter_unit, "Pm^2")
+MAKE_UNIT_WITH_DESC(square_terameter, terameter_unit* terameter_unit, "Tm^2")
+MAKE_UNIT_WITH_DESC(square_gigameter, gigameter_unit* gigameter_unit, "Gm^2")
+MAKE_UNIT_WITH_DESC(square_megameter, megameter_unit* megameter_unit, "Mm^2")
+MAKE_UNIT_WITH_DESC(square_kilometer, kilometer_unit* kilometer_unit, "km^2")
+MAKE_UNIT_WITH_DESC(square_hectometer, hectometer_unit* hectometer_unit, "hm^2")
+MAKE_UNIT_WITH_DESC(square_decameter, decameter_unit* decameter_unit, "dam^2")
 MAKE_UNIT_WITH_DESC(square_meter, meter_unit* meter_unit, "m^2")
 MAKE_UNIT_WITH_DESC(square_decimeter, decimeter_unit* decimeter_unit, "dm^2")
 MAKE_UNIT_WITH_DESC(square_centimeter, centimeter_unit* centimeter_unit, "cm^2")
+MAKE_UNIT_WITH_DESC(square_millimeter, millimeter_unit* millimeter_unit, "mm^2")
+MAKE_UNIT_WITH_DESC(square_micrometer, micrometer_unit* micrometer_unit, "µm^2")
+MAKE_UNIT_WITH_DESC(square_nanometer, nanometer_unit* nanometer_unit, "nm^2")
+MAKE_UNIT_WITH_DESC(square_picometer, picometer_unit* picometer_unit, "pm^2")
+MAKE_UNIT_WITH_DESC(square_femtometer, femtometer_unit* femtometer_unit, "fm^2")
+MAKE_UNIT_WITH_DESC(square_attometer, attometer_unit* attometer_unit, "am^2")
+MAKE_UNIT_WITH_DESC(square_zeptometer, zeptometer_unit* zeptometer_unit, "zm^2")
+MAKE_UNIT_WITH_DESC(square_yoctometer, yoctometer_unit* yoctometer_unit, "ym^2")
+MAKE_UNIT_WITH_DESC(square_rontometer, rontometer_unit* rontometer_unit, "rm^2")
+MAKE_UNIT_WITH_DESC(square_quectometer, quectometer_unit* quectometer_unit, "qm^2")
 
+MAKE_UNIT_WITH_DESC(cubic_quettameter, quettameter_unit* quettameter_unit* quettameter_unit, "Qm^3")
+MAKE_UNIT_WITH_DESC(cubic_ronnameter, ronnameter_unit* ronnameter_unit* ronnameter_unit, "Rm^3")
+MAKE_UNIT_WITH_DESC(cubic_yottameter, yottameter_unit* yottameter_unit* yottameter_unit, "Ym^3")
+MAKE_UNIT_WITH_DESC(cubic_zettameter, zettameter_unit* zettameter_unit* zettameter_unit, "Zm^3")
+MAKE_UNIT_WITH_DESC(cubic_exameter, exameter_unit* exameter_unit* exameter_unit, "Em^3")
+MAKE_UNIT_WITH_DESC(cubic_petameter, petameter_unit* petameter_unit* petameter_unit, "Pm^3")
+MAKE_UNIT_WITH_DESC(cubic_terameter, terameter_unit* terameter_unit* terameter_unit, "Tm^3")
+MAKE_UNIT_WITH_DESC(cubic_gigameter, gigameter_unit* gigameter_unit* gigameter_unit, "Gm^3")
+MAKE_UNIT_WITH_DESC(cubic_megameter, megameter_unit* megameter_unit* megameter_unit, "Mm^3")
+MAKE_UNIT_WITH_DESC(cubic_kilometer, kilometer_unit* kilometer_unit* kilometer_unit, "km^3")
+MAKE_UNIT_WITH_DESC(cubic_hectometer, hectometer_unit* hectometer_unit* hectometer_unit, "hm^3")
+MAKE_UNIT_WITH_DESC(cubic_decameter, decameter_unit* decameter_unit* decameter_unit, "dam^3")
 MAKE_UNIT_WITH_DESC(cubic_meter, square_meter_unit* meter_unit, "m^3")
+MAKE_UNIT_WITH_DESC(cubic_decimeter, decimeter_unit* decimeter_unit* decimeter_unit, "dm^3")
+MAKE_UNIT_WITH_DESC(cubic_centimeter, centimeter_unit* centimeter_unit* centimeter_unit, "cm^3")
+MAKE_UNIT_WITH_DESC(cubic_millimeter, millimeter_unit* millimeter_unit* millimeter_unit, "mm^3")
+MAKE_UNIT_WITH_DESC(cubic_micrometer, micrometer_unit* micrometer_unit* micrometer_unit, "µm^3")
+MAKE_UNIT_WITH_DESC(cubic_nanometer, nanometer_unit* nanometer_unit* nanometer_unit, "nm^3")
+MAKE_UNIT_WITH_DESC(cubic_picometer, picometer_unit* picometer_unit* picometer_unit, "pm^3")
+MAKE_UNIT_WITH_DESC(cubic_femtometer, femtometer_unit* femtometer_unit* femtometer_unit, "fm^3")
+MAKE_UNIT_WITH_DESC(cubic_attometer, attometer_unit* attometer_unit* attometer_unit, "am^3")
+MAKE_UNIT_WITH_DESC(cubic_zeptometer, zeptometer_unit* zeptometer_unit* zeptometer_unit, "zm^3")
+MAKE_UNIT_WITH_DESC(cubic_yoctometer, yoctometer_unit* yoctometer_unit* yoctometer_unit, "ym^3")
+MAKE_UNIT_WITH_DESC(cubic_rontometer, rontometer_unit* rontometer_unit* rontometer_unit, "rm^3")
+MAKE_UNIT_WITH_DESC(cubic_quectometer, quectometer_unit* quectometer_unit* quectometer_unit, "qm^3")
 
 MAKE_UNIT_WITH_DESC(meter_per_second, meter_unit / second_unit, "m/s")
 MAKE_UNIT_WITH_DESC(meter_per_second_per_second, meter_per_second_unit / second_unit, "m/s^2")
@@ -237,6 +269,53 @@ concept pressure_unit = unit_convertible_to<U, pascal_unit>;
 
 template <auto U>
 concept energy_unit = unit_convertible_to<U, joule_unit>;
+
+// Imperial units
+constexpr rational meter_to_foot{10'000, 3'048};
+constexpr rational foot_to_inch{12, 1};
+constexpr rational foot_to_yard{1, 3};
+constexpr rational foot_to_mile{1, 5'280};
+
+MAKE_UNIT_WITH_DESC(foot, meter_unit.adjust_scale_length<meter_to_foot>(), "ft")
+MAKE_UNIT_WITH_DESC(inch, foot_unit.adjust_scale_length<foot_to_inch>(), "in")
+MAKE_UNIT_WITH_DESC(mile, foot_unit.adjust_scale_length<foot_to_mile>(), "mi")
+MAKE_UNIT_WITH_DESC(yard, foot_unit.adjust_scale_length<foot_to_yard>(), "yd")
+
+MAKE_UNIT_WITH_DESC(square_foot, foot_unit* foot_unit, "ft^2")
+MAKE_UNIT_WITH_DESC(square_inch, inch_unit* inch_unit, "in^2")
+MAKE_UNIT_WITH_DESC(square_yard, yard_unit* yard_unit, "yd^2")
+MAKE_UNIT_WITH_DESC(square_mile, mile_unit* mile_unit, "mi^2")
+
+MAKE_UNIT_WITH_DESC(cubic_foot, foot_unit* foot_unit* foot_unit, "ft^3")
+MAKE_UNIT_WITH_DESC(cubic_inch, inch_unit* inch_unit* inch_unit, "in^3")
+MAKE_UNIT_WITH_DESC(cubic_yard, yard_unit* yard_unit* yard_unit, "yd^3")
+MAKE_UNIT_WITH_DESC(cubic_mile, mile_unit* mile_unit* mile_unit, "mi^3")
+
+constexpr rational second_to_minute{1, 60};
+constexpr rational minute_to_hour{1, 60};
+constexpr rational hour_to_day{1, 24};
+constexpr rational day_to_year{1, 365};
+
+MAKE_UNIT_WITH_DESC(minute, second_unit.adjust_scale_time<second_to_minute>(), "min")
+MAKE_UNIT_WITH_DESC(hour, minute_unit.adjust_scale_time<minute_to_hour>(), "h")
+MAKE_UNIT_WITH_DESC(day, hour_unit.adjust_scale_time<hour_to_day>(), "d")
+MAKE_UNIT_WITH_DESC(year, day_unit.adjust_scale_time<day_to_year>(), "y")
+MAKE_UNIT_WITH_DESC(week, day_unit.adjust_scale_time<7>(), "w")
+
+constexpr rational kilogram_to_pound{100'000'000, 45'359'237};
+constexpr rational pound_to_ounce{16, 1};
+
+MAKE_UNIT_WITH_DESC(pound, kilogram_unit.adjust_scale_mass<kilogram_to_pound>(), "lb")
+MAKE_UNIT_WITH_DESC(ounce, pound_unit.adjust_scale_mass<pound_to_ounce>(), "oz")
+
+constexpr rational celsisu_to_fahrenheit_scale{9, 5};
+constexpr rational celsisus_to_fahrenheit_offset{32};
+
+MAKE_UNIT_WITH_DESC(Fahrenheit,
+                    Celsisus_unit.adjust_scale_temperature<celsisu_to_fahrenheit_scale>()
+                        .adjust_offset_temperature<celsisus_to_fahrenheit_offset>(),
+                    "°F")
+// MAKE_UNIT_WITH_DESC(psi, pound_unit / square_inch_unit, "psi")
 } // namespace maxwell
 
 #endif
