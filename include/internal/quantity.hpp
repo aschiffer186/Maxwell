@@ -33,12 +33,14 @@
 /// \namespace maxwell Enclosing namespace of all public Maxwell API
 namespace maxwell {
 /// \cond
-template <unit auto U, typename T = double> class quantity;
+template <auto U, typename T = double>
+  requires unit<decltype(U)>
+class quantity;
 
 namespace _detail {
 template <typename> struct is_quantity : std::false_type {};
 
-template <typename T, unit auto U> struct is_quantity<quantity<U, T>> : std::true_type {};
+template <typename T, auto U> struct is_quantity<quantity<U, T>> : std::true_type {};
 
 template <typename T> constexpr bool is_quantity_v = is_quantity<T>::value;
 
@@ -83,7 +85,9 @@ constexpr double to_chrono_conversion_factor() {
 ///
 /// \tparam T the type of the quantity's magnitude
 /// \tparam U the quantity's units
-template <unit auto U, typename T> class quantity {
+template <auto U, typename T>
+  requires unit<decltype(U)>
+class quantity {
   static_assert(!std::is_const_v<T>);
 
 public:
@@ -233,7 +237,7 @@ public:
   /// \param q the \c quantity to construct from
   ///
   /// \throw any exceptions thrown by the copy constructor of \c magnitude_type
-  template <typename Up, unit auto V>
+  template <auto V, typename Up>
     requires unit_convertible_to<V, units> && std::constructible_from<magnitude_type, Up>
   constexpr quantity(const quantity<V, Up>& q) noexcept(std::is_nothrow_constructible_v<magnitude_type, const Up&>)
       : magnitude_(q.get_magnitude() * conversion_factor(V, units) + conversion_offset(V, units)) {}
@@ -256,7 +260,7 @@ public:
   /// \param q the \c quantity to construct from
   ///
   /// \throw any exceptions thrown by the move constructor of \c magnitude_type
-  template <typename Up, unit auto V>
+  template <typename Up, auto V>
     requires unit_convertible_to<V, units> && std::constructible_from<magnitude_type, Up>
   constexpr quantity(quantity<V, Up>&& q) noexcept(
       std::is_nothrow_constructible_v<magnitude_type, std::add_rvalue_reference_t<Up>>)
@@ -308,9 +312,7 @@ public:
   template <typename Rep, typename Period>
     requires std::assignable_from<magnitude_type&, Rep> && time_unit<units>
   MAXWELL_CONSTEXPR23 quantity(std::chrono::duration<Rep, Period> dur)
-      : magnitude_(dur.count() * _detail::from_chrono_conversion_factor<std::chrono::duration<Rep, Period>, units>()) {
-    return *this;
-  }
+      : magnitude_(dur.count() * _detail::from_chrono_conversion_factor<std::chrono::duration<Rep, Period>, units>()) {}
 
   /// \brief Assignment operator
   ///
@@ -759,34 +761,35 @@ template <typename M, unit auto U> constexpr auto operator-(const quantity<U, M>
 }
 
 template <typename T>
-concept amount = amount_unit<typename T::units_type{}>;
+concept amount = amount_unit<T::units>;
 
 template <typename T>
-concept current = current_unit<typename T::units_type{}>;
+concept current = current_unit<T::units>;
 
 template <typename T>
-concept length = length_unit<typename T::units_type{}>;
+concept length = length_unit<T::units>;
 
 template <typename T>
-concept luminosity = luminosity_unit<typename T::units_type{}>;
+concept luminosity = luminosity_unit<T::units>;
 
 template <typename T>
-concept mass = mass_unit<typename T::units_type{}>;
+concept mass = mass_unit<T::units>;
 
 template <typename T>
-concept temperature = temperature_unit<typename T::units_type{}>;
+concept temperature = temperature_unit<T::units>;
 
 template <typename T>
-concept time = time_unit<typename T::units_type{}>;
+concept time = time_unit<T::units>;
 
 template <typename T>
-concept scalar = unitless_unit<typename T::units_type{}>;
+concept scalar = unitless_unit<T::units>;
 
 template <unit auto U> using int_quantity = quantity<U, int>;
 // Quantity printing
 
 template <typename T, unit auto U> std::ostream& operator<<(std::ostream& os, const quantity<U, T>& q) {
   os << std::format("{}", q);
+  return os;
 }
 
 template <typename T, unit U>

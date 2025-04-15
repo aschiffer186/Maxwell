@@ -348,9 +348,7 @@ template <typename Tag> struct tag_conversion_factor<Tag, Tag> {
 /// \param to The target unit
 /// \return The factor the magnitude of a quantity with units \c from needs to
 /// be multiplied to be converted to a quantity with units \c to
-consteval double conversion_factor(unit auto from, unit auto to) noexcept
-  requires unit_convertible_to<from, to>
-{
+consteval double conversion_factor(unit auto from, unit auto to) noexcept {
   using From = decltype(from);
   using To = decltype(to);
 
@@ -392,9 +390,7 @@ consteval double conversion_factor(unit auto from, unit auto to) noexcept
 /// \param from the unit to convert from
 /// \param to the target unit
 /// \return the conversion offset that must be applied
-consteval double conversion_offset(unit auto from, unit auto to) noexcept
-  requires unit_convertible_to<from, to>
-{
+consteval double conversion_offset(unit auto from, unit auto to) noexcept {
   if (from == to) {
     return 0.0;
   } else {
