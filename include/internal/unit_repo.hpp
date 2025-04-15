@@ -164,12 +164,12 @@ struct sievert_unit_tag;
 /// \endcond
 
 MAKE_UNIT_WITH_DESC(radian, scalar_unit.add_tag<radian_unit_tag>(), "rad");
-MAKE_UNIT_WITH_DESC(steradian, scalar_unit.add_tag<degree_unit_tag>(), "sr");
-MAKE_UNIT_WITH_DESC(degree, scalar_unit.add_tag<steradian_unit_tag>(), "deg");
+MAKE_UNIT_WITH_DESC(steradian, scalar_unit.add_tag<steradian_unit_tag>(), "sr");
+MAKE_UNIT_WITH_DESC(degree, scalar_unit.add_tag<degree_unit_tag>(), "deg");
 
 /// \cond
-template <> struct is_tag_convertible<degree_unit_type, radian_unit_type> : std::true_type {};
-template <> struct is_tag_convertible<radian_unit_type, degree_unit_type> : std::true_type {};
+template <> struct is_tag_convertible<degree_unit_tag, radian_unit_tag> : std::true_type {};
+template <> struct is_tag_convertible<radian_unit_tag, degree_unit_tag> : std::true_type {};
 template <> struct tag_conversion_factor<radian_unit_type, degree_unit_type> {
   static constexpr double factor = 180.0 / std::numbers::pi;
 };

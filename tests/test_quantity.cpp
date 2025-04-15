@@ -205,6 +205,27 @@ TEST(TestQuantity, TestUnitConvertingConstructorTemperature) {
   EXPECT_FLOAT_EQ(k5.get_magnitude(), 1.0);
 }
 
+TEST(TestQuantity, TestUnitconvertingConstructorTime) {
+  second s{1.0};
+  nanosecond ns{s};
+  EXPECT_FLOAT_EQ(ns.get_magnitude(), 1e9);
+
+  kilosecond ks{s};
+  EXPECT_FLOAT_EQ(ks.get_magnitude(), 1e-3);
+
+  second s2{ns};
+  EXPECT_FLOAT_EQ(s2.get_magnitude(), 1.0);
+
+  second s3{ks};
+  EXPECT_FLOAT_EQ(s3.get_magnitude(), 1.0);
+
+  hour hr{ns};
+  EXPECT_FLOAT_EQ(hr.get_magnitude(), 0.0002777778);
+
+  second s4{hr};
+  EXPECT_FLOAT_EQ(s4.get_magnitude(), 1.0);
+}
+
 TEST(TestQuantity, TestUnitConvertingConstructorArea) {
   square_meter sm{1.0};
   square_centimeter cm{sm};
@@ -250,6 +271,10 @@ TEST(TestQuantity, TestCurrentConcept) {
 TEST(TestQuantity, TestLengthConcept) {
   EXPECT_TRUE(length<meter>);
   EXPECT_TRUE(length<quettameter>);
+  EXPECT_TRUE(length<inch>);
+  EXPECT_TRUE(length<foot>);
+  EXPECT_TRUE(length<yard>);
+  EXPECT_TRUE(length<mile>);
 }
 
 TEST(TestQuantity, TestLuminosityConcept) {
@@ -265,9 +290,17 @@ TEST(TestQuantity, TestMassConcept) {
 TEST(TestQuantity, TestTemperatureConcept) {
   EXPECT_TRUE(temperature<kelvin>);
   EXPECT_TRUE(temperature<quettakelvin>);
+  EXPECT_TRUE(temperature<Celsisus>);
+  EXPECT_TRUE(temperature<Fahrenheit>);
 }
 
-TEST(TestQuantity, TestTimeConcept) { EXPECT_TRUE(maxwell::time<second>); }
+TEST(TestQuantity, TestTimeConcept) {
+  EXPECT_TRUE(maxwell::time<second>);
+  EXPECT_TRUE(maxwell::time<minute>);
+  EXPECT_TRUE(maxwell::time<hour>);
+  EXPECT_TRUE(maxwell::time<day>);
+  EXPECT_TRUE(maxwell::time<year>);
+}
 
 TEST(TestQuantity, TestAngleConcept) {
   EXPECT_TRUE(angle<radian>);
