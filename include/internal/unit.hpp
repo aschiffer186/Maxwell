@@ -10,9 +10,11 @@
 #include "dimension.hpp"
 
 namespace maxwell {
+/// \cond
 namespace _detail {
 struct unit_base {};
 } // namespace _detail
+/// \endcond
 
 template <typename Tp>
 concept unit =

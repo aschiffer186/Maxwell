@@ -176,11 +176,13 @@ struct rational {
   }
 };
 
+/// \cond
 namespace _detail {
 template <typename> struct is_ratio_like : std::false_type {};
 
 template <std::intmax_t N, std::intmax_t D> struct is_ratio_like<std::ratio<N, D>> : std::true_type {};
 } // namespace _detail
+/// \endcond
 
 /**
  * @brief Creates a rational number from a \c std::ratio

@@ -11,19 +11,18 @@
 #ifndef QUANTITY_HPP
 #define QUANTITY_HPP
 
-#include <chrono>
-#include <compare>
-#include <concepts>
-#include <format>
-#include <functional>
-#include <initializer_list>
-#include <iterator>
-#include <limits>
-#include <ostream>
-#include <ratio>
-#include <string_view>
-#include <type_traits>
-#include <utility>
+#include <chrono>           // duration
+#include <compare>          // three_way_comparable_width
+#include <concepts>         // assignable_from, constructible_from, equality_comparable_with
+#include <format>           // formatter
+#include <functional>       // hash
+#include <initializer_list> // initializer_list
+#include <limits>           // numeric_limits
+#include <ostream>          // ostream
+#include <ratio>            // ratio, ratio_divide
+#include <string_view>      // formatter<string_view>
+#include <type_traits> // false_type, remove_cvref_t, is_default_constructible_v, is_constructible_v, is_nothrow_assignable_v, is_nothrow_constructible_v, true_type
+#include <utility>     // forward, move, swap
 
 #include "config.hpp"
 #include "dimension.hpp"
@@ -760,30 +759,80 @@ template <typename M, unit auto U> constexpr auto operator-(const quantity<U, M>
   return quantity<U, scalar_return_type>(-x.get_magnitude());
 }
 
+/// \brief Concept for quantities representing amount
+///
+/// Concept modeling a quantity that represents an amount.
+/// This concept is modeled if the quantity is convertible to mole.
+///
+/// \tparam T The type of the quantity
 template <typename T>
 concept amount = amount_unit<T::units>;
 
+/// \brief Concept for quantities representing current
+///
+/// Concept modeling a quantity that represents a current.
+/// This concept is modeled if the quantity is convertible to ampere.
+///
+/// \tparam T The type of the quantity
 template <typename T>
 concept current = current_unit<T::units>;
 
+/// \brief Concept for quantities representing length
+///
+/// Concept modeling a quantity that represents a length.
+/// This concept is modeled if the quantity is convertible to meter.
+///
+/// \tparam T The type of the quantity
 template <typename T>
 concept length = length_unit<T::units>;
 
+/// \brief Concept for quantities representing luminosity
+///
+/// Concept modeling a quantity that represents a luminosity.
+/// This concept is modeled if the quantity is convertible to candela.
+///
+/// \tparam T The type of the quantity
 template <typename T>
 concept luminosity = luminosity_unit<T::units>;
 
+/// \brief Concept for quantities representing mass
+///
+/// Concept modeling a quantity that represents an mass.
+/// This concept is modeled if the quantity is convertible to kilogram.
+///
+/// \tparam T The type of the quantity
 template <typename T>
 concept mass = mass_unit<T::units>;
 
+/// \brief Concept for quantities representing temperature
+///
+/// Concept modeling a quantity that represents a temperature
+/// This concept is modeled if the quantity is convertible to kelvin.
+///
+/// \tparam T The type of the quantity
 template <typename T>
 concept temperature = temperature_unit<T::units>;
 
+/// \brief Concept for quantities representing time
+///
+/// Concept modeling a quantity that represents a time
+/// This concept is modeled if the quantity is convertible to mole.
+///
+/// \tparam T The type of the quantity
 template <typename T>
 concept time = time_unit<T::units>;
 
+/// \brief Concept for scalar quantities
+///
+/// Concept modeling a quantity that has not units.
+///
+/// \tparam T The type of the quantity
 template <typename T>
 concept scalar = unitless_unit<T::units>;
 
+/// \brief Convenience type alias for a quantity whose \c magnitude_type is \c int
+///
+/// \tparam U the units of the quantity
 template <unit auto U> using int_quantity = quantity<U, int>;
 // Quantity printing
 
