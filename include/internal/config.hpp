@@ -1,3 +1,13 @@
+/**
+ * @file config.hpp
+ * @author Alex Schiffer
+ * @brief Configuration macros for Maxwell
+ * @version 1.0
+ * @date 2025-04-15
+ *
+ * @copyright Copyright (c) 2025
+ *
+ */
 #ifndef CONFIG_HPP
 #define CONFIG_HPP
 

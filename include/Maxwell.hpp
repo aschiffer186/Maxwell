@@ -1,3 +1,13 @@
+/**
+ * @file Maxwell.hpp
+ * @author Alex Schiffer
+ * @brief Main include file for Maxwell
+ * @version 1.0
+ * @date 2025-04-15
+ *
+ * @copyright Copyright (c) 2025
+ *
+ */
 #ifndef MAXWELL_HPP
 #define MAXWELL_HPP
 

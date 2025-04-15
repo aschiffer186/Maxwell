@@ -1,3 +1,13 @@
+/**
+ * @file unit.hpp
+ * @author Alex Schiffer
+ * @brief Definition of \c unit_type and related functions
+ * @version 1.0
+ * @date 2025-04-15
+ *
+ * @copyright Copyright (c) 2025
+ *
+ */
 #ifndef UNIT_HPP
 #define UNIT_HPP
 

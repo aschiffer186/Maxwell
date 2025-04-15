@@ -1,3 +1,13 @@
+/**
+ * @file quantity_math.hpp
+ * @author Alex Schiffer
+ * @brief Strongly typed units aware math functions
+ * @version 1.0
+ * @date 2025-04-15
+ *
+ * @copyright Copyright (c) 2025
+ *
+ */
 #ifndef QUANTITY_MATH_HPP
 #define QUANTITY_MATH_HPP
 

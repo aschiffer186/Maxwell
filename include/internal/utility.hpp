@@ -6,16 +6,15 @@
  * @date 2025-04-04
  *
  * @copyright Copyright (c) 2025
- *
  */
 #ifndef UTILITY_HPP
 #define UTILITY_HPP
 
-#include <cassert>
-#include <cstdint>
-#include <numeric>
-#include <ratio>
-#include <type_traits>
+#include <cassert>     // assert
+#include <cstdint>     // intmax_t
+#include <numeric>     // gcd
+#include <ratio>       // ratio
+#include <type_traits> // false_type, remove_cvref_t, true_type
 
 namespace maxwell {
 /**

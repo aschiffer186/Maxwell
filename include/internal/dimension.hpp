@@ -1,9 +1,19 @@
+/**
+ * @file dimension.hpp
+ * @author Alex Schiffer
+ * @brief Definition of \c dimension class
+ * @version 1.0
+ * @date 2025-04-15
+ *
+ * @copyright Copyright (c) 2025
+ */
 #ifndef DIMENSION_HPP
 #define DIMENSION_HPP
 
+#include <cstdint> // int8_t
+
 #include "config.hpp"
 #include "utility.hpp"
-#include <cstdint>
 
 namespace maxwell {
 

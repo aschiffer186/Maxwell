@@ -1,3 +1,13 @@
+/**
+ * @file quantity_repo.hpp
+ * @author Alex Schiffer
+ * @brief Definition of common instntiations of \c quantity
+ * @version 1.0
+ * @date 2025-04-15
+ *
+ * @copyright Copyright (c) 2025
+ *
+ */
 #ifndef QUANTITY_REPO_HPP
 #define QUANTITY_REPO_HPP
 

@@ -1,7 +1,17 @@
+/**
+ * @file unit_repo.hpp
+ * @author Alex Schiffer
+ * @brief Definition of common units and utilities to create more units
+ * @version 1.0
+ * @date 2025-04-15
+ *
+ * @copyright Copyright (c) 2025
+ *
+ */
 #ifndef UNIT_REPO_HPP
 #define UNIT_REPO_HPP
 
-#include <string>
+#include <string> // string
 
 #include "dimension.hpp"
 #include "unit.hpp"
