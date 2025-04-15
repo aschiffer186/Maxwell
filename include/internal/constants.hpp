@@ -6,7 +6,6 @@
  * @date 2025-04-15
  *
  * @copyright Copyright (c) 2025
- *
  */
 #ifndef CONSTANTS_HPP
 #define CONSTANTS_HPP
@@ -14,6 +13,8 @@
 #include "quantity_repo.hpp"
 
 namespace maxwell::constants {
+// Note: not using quantity literals to avoid using statement in header file
+
 constexpr meter_per_second c = 299792458.0 * meter_per_second_unit;
 constexpr quantity<joule_unit * second_unit> h = 6.62607015e-34 * joule_unit * second_unit;
 constexpr coulumb e = 1.602176634e-19 * coulomb_unit;
