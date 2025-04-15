@@ -2,6 +2,7 @@
 #include "internal/quantity_repo.hpp"
 
 #include <concepts>
+#include <limits>
 #include <type_traits>
 #include <vector>
 
@@ -305,4 +306,32 @@ TEST(TestQuantity, TestTimeConcept) {
 TEST(TestQuantity, TestAngleConcept) {
   EXPECT_TRUE(angle<radian>);
   EXPECT_TRUE(angle<degree>);
+}
+
+TEST(TestQuantity, TestQuantityNumericLimits) {
+  using test_type_1 = quantity<meter_unit, double>;
+  using test_type_2 = quantity<meter_unit, const double>;
+  using test_type_3 = quantity<meter_unit, std::vector<int>>;
+
+  EXPECT_FALSE(std::numeric_limits<test_type_3>::is_specialized);
+
+  EXPECT_TRUE(std::numeric_limits<test_type_1>::is_specialized);
+  EXPECT_TRUE(std::numeric_limits<test_type_2>::is_specialized);
+  EXPECT_EQ(std::numeric_limits<test_type_1>::is_signed, std::numeric_limits<double>::is_signed);
+  EXPECT_EQ(std::numeric_limits<test_type_1>::is_integer, std::numeric_limits<double>::is_integer);
+  EXPECT_EQ(std::numeric_limits<test_type_1>::is_exact, std::numeric_limits<double>::is_exact);
+  EXPECT_EQ(std::numeric_limits<test_type_1>::digits, std::numeric_limits<double>::digits);
+  EXPECT_EQ(std::numeric_limits<test_type_1>::digits10, std::numeric_limits<double>::digits10);
+  EXPECT_EQ(std::numeric_limits<test_type_1>::max_digits10, std::numeric_limits<double>::max_digits10);
+  EXPECT_EQ(std::numeric_limits<test_type_1>::has_infinity, std::numeric_limits<double>::has_infinity);
+  EXPECT_EQ(std::numeric_limits<test_type_1>::has_quiet_NaN, std::numeric_limits<double>::has_quiet_NaN);
+  EXPECT_EQ(std::numeric_limits<test_type_1>::has_signaling_NaN, std::numeric_limits<double>::has_signaling_NaN);
+  EXPECT_EQ(std::numeric_limits<test_type_1>::has_denorm, std::numeric_limits<double>::has_denorm);
+  EXPECT_EQ(std::numeric_limits<test_type_1>::has_denorm_loss, std::numeric_limits<double>::has_denorm_loss);
+  EXPECT_EQ(std::numeric_limits<test_type_1>::round_style, std::numeric_limits<double>::round_style);
+  EXPECT_EQ(std::numeric_limits<test_type_1>::is_iec559, std::numeric_limits<double>::is_iec559);
+  EXPECT_EQ(std::numeric_limits<test_type_1>::is_bounded, std::numeric_limits<double>::is_bounded);
+  EXPECT_EQ(std::numeric_limits<test_type_1>::is_modulo, std::numeric_limits<double>::is_modulo);
+  EXPECT_EQ(std::numeric_limits<test_type_1>::traps, std::numeric_limits<double>::traps);
+  EXPECT_EQ(std::numeric_limits<test_type_1>::tinyness_before, std::numeric_limits<double>::tinyness_before);
 }

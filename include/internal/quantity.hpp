@@ -880,6 +880,65 @@ template <typename T, maxwell::unit auto U> struct std::hash<maxwell::quantity<U
 };
 
 template <typename T, maxwell::unit auto U>
+  requires(!std::numeric_limits<T>::is_specialized)
 struct std::numeric_limits<maxwell::quantity<U, T>> : std::numeric_limits<T> {};
+
+template <typename T, auto U>
+  requires maxwell::unit<decltype(U)> && std::numeric_limits<T>::is_specialized
+struct std::numeric_limits<maxwell::quantity<U, T>> {
+private:
+  using b_limits = std::numeric_limits<T>;
+
+public:
+  static constexpr bool is_specialized = true;
+  static constexpr bool is_signed = b_limits::is_signed;
+  static constexpr bool is_integer = b_limits::is_integer;
+  static constexpr bool is_exact = b_limits::is_exact;
+  static constexpr bool has_infinity = b_limits::has_infinity;
+  static constexpr bool has_quiet_NaN = b_limits::has_quiet_NaN;
+  static constexpr bool has_signaling_NaN = b_limits::has_signaling_NaN;
+  static constexpr bool has_denorm = b_limits::has_denorm;
+  static constexpr bool has_denorm_loss = b_limits::has_denorm_loss;
+  static constexpr float_round_style round_style = b_limits::round_style;
+  static constexpr bool is_iec559 = b_limits::is_iec559;
+  static constexpr bool is_bounded = b_limits::is_bounded;
+  static constexpr bool is_modulo = b_limits::is_modulo;
+  static constexpr int digits = b_limits::digits;
+  static constexpr int digits10 = b_limits::digits10;
+  static constexpr int max_digits10 = b_limits::max_digits10;
+  static constexpr int radix = b_limits::radix;
+  static constexpr int min_exponent = b_limits::min_exponent;
+  static constexpr int min_exponent_10 = b_limits::min_exponent10;
+  static constexpr int max_eponent = b_limits::max_exponent;
+  static constexpr int max_exponent_10 = b_limits::max_exponent10;
+  static constexpr bool traps = b_limits::traps;
+  static constexpr bool tinyness_before = b_limits::tinyness_before;
+
+  static constexpr maxwell::quantity<U, T> min() noexcept { return maxwell::quantity<U, T>(b_limits::min()); }
+
+  static constexpr maxwell::quantity<U, T> lowest() noexcept { return maxwell::quantity<U, T>(b_limits::lowest()); }
+
+  static constexpr maxwell::quantity<U, T> max() noexcept { return maxwell::quantity<U, T>(b_limits::max()); }
+
+  static constexpr maxwell::quantity<U, T> epsilon() noexcept { return maxwell::quantity<U, T>(b_limits::epsilon()); }
+
+  static constexpr maxwell::quantity<U, T> round_error() noexcept {
+    return maxwell::quantity<U, T>(b_limits::round_error());
+  }
+
+  static constexpr maxwell::quantity<U, T> infinity() noexcept { return maxwell::quantity<U, T>(b_limits::infinity()); }
+
+  static constexpr maxwell::quantity<U, T> quiet_NaN() noexcept {
+    return maxwell::quantity<U, T>(b_limits::quiet_NaN());
+  }
+
+  static constexpr maxwell::quantity<U, T> signaling_NaN() noexcept {
+    return maxwell::quantity<U, T>(b_limits::signaling_NaN());
+  }
+
+  static constexpr maxwell::quantity<U, T> denorm_min() noexcept {
+    return maxwell::quantity<U, T>(b_limits::denorm_min());
+  }
+};
 
 #endif
