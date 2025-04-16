@@ -269,11 +269,20 @@ TEST(TestQuantity, TestMagnitudeTypeOperator) {
 
 TEST(TestQuantity, TestConstantExpressionUsage) {
   using constant_expression = quantity<meter_unit, double>;
+  using constant_expression2 = quantity<meter_unit, nothrow_noisy>;
   using non_constant_expression = quantity<meter_unit, std::list<double>>;
 
-  // TODO: Implement
+  EXPECT_TRUE(is_constant_expression([] { constant_expression{}; }));
+  EXPECT_TRUE(is_constant_expression([] { constant_expression{1.0}; }));
+  EXPECT_TRUE(is_constant_expression([] { constant_expression2{std::in_place, 1.0}; }));
+  EXPECT_TRUE(is_constant_expression([] { constant_expression2{std::in_place, {1.0, 2.0}, 3.0}; }));
+  EXPECT_TRUE(is_constant_expression([] {
+    foot f{1.0};
+    constant_expression{f};
+  }));
+  EXPECT_TRUE(is_constant_expression([] { constant_expression{foot{1.0}}; }));
 
-  SUCCEED();
+  EXPECT_FALSE(is_constant_expression([] { non_constant_expression{}; }));
 }
 
 TEST(TestQuantity, TestAmountConcept) {
