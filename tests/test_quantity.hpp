@@ -25,10 +25,14 @@ struct literal {};
 using nothrow_noisy = noisy<true>;
 using throwing_noisy = noisy<false>;
 
+// Checks if an expression is usable in a constant expression.
+// Returns true if the expression is usable in a constant expression, false otherwise.
 template <typename Lambda, int = (Lambda{}(), 0)> constexpr bool is_constant_expression(Lambda) noexcept {
   return true;
 }
 
+// Checks if an expression is usable in a constant expression
+// Returns true if the expression is usable in a constant expression, false otherwise.
 constexpr bool is_constant_expression(...) noexcept { return false; }
 
 #endif
