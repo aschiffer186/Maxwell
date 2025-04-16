@@ -1,8 +1,6 @@
-name: CMake workflows
+name: CMake Workflow
 
-on: 
-  push:
-    branches: [ $default_branch ]
+on: [push]
 
 jobs: 
   build: 
