@@ -140,12 +140,66 @@
             "name": "ninja-debug-examples",
             "configuration": "Debug",
             "configurePreset": "ninja-debug-examples"
+        },
+        {
+            "name": "ci-ninja-clang-debug",
+            "configuration": "Debug",
+            "configurePreset": "ci-ninja-clang-debug"
+        },
+        {
+            "name": "ci-ninja-clang-release",
+            "configuration": "Release",
+            "configurePreset": "ci-ninja-clang-release"
+        },
+        {
+            "name": "ci-ninja-gcc-debug",
+            "configuration": "Debug",
+            "configurePreset": "ci-ninja-gcc-debug"
+        },
+        {
+            "name": "ci-ninja-gcc-release",
+            "configuration": "Release",
+            "configurePreset": "ci-ninja-gcc-release"
         }
     ],
     "testPresets": [
         {
             "name": "ninja-debug",
+            "displayName": "Ninja Debug",
             "configurePreset": "ninja-debug",
+            "configuration": "Debug",
+            "output": {
+                "outputOnFailure": true
+            }
+        },
+        {
+            "name": "ci-ninja-clang-debug",
+            "configurePreset": "ci-ninja-clang-debug",
+            "configuration": "Debug",
+            "output": {
+                "outputOnFailure": true
+            }
+        },
+        {
+            "name": "ci-ninja-clang-release",
+            "configurePreset": "ci-ninja-clang-release",
+            "configuration": "Release",
+            "output": {
+                "outputOnFailure": true
+            }
+        },
+        {
+            "name": "ci-ninja-gcc-debug",
+            "configurePreset": "ci-ninja-gcc-debug",
+            "configuration": "Debug",
+            "output": {
+                "outputOnFailure": true
+            }
+        },
+        {
+            "name": "ci-ninja-gcc-release",
+            "configurePreset": "ci-ninja-gcc-release",
+            "configuration": "Release",
             "output": {
                 "outputOnFailure": true
             }
@@ -154,6 +208,21 @@
     "workflowPresets": [
         {
             "name": "ninja-debug",
+            "displayName": "Ninja Debug",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "ninja-debug"
+                },
+                {
+                    "type": "build",
+                    "name": "ninja-debug"
+                }
+            ]
+        },
+        {
+            "name": "ninja-debug-tests",
+            "displayName": "Ninja Debug with Tests Run",
             "steps": [
                 {
                     "type": "configure",
@@ -170,7 +239,8 @@
             ]
         },
         {
-            "name": "ninja-debug-examples",
+            "name": "ninja-debug-tests-examples",
+            "displayName": "Ninja Debug with Examples and Tests",
             "steps": [
                 {
                     "type": "configure",
@@ -183,6 +253,20 @@
                 {
                     "type": "test",
                     "name": "ninja-debug"
+                }
+            ]
+        },
+        {
+            "name": "ninja-debug-examples",
+            "displayName": "Ninja Debug with Examples",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "ninja-debug-examples"
+                },
+                {
+                    "type": "build",
+                    "name": "ninja-debug-examples"
                 }
             ]
         }
