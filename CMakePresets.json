@@ -2,66 +2,189 @@
     "version": 6,
     "configurePresets": [
         {
-            "name": "setup",
+            "name": "common",
+            "hidden": true,
             "binaryDir": "build/${presetName}",
             "cacheVariables": {
-                "CMAKE_EXPORT_COMPILE_COMMANDS": true,
-                "CMAKE_CXX_STANDARD": "20",
-                "CMAKE_CXX_EXTENSIONS": "off"
-            },
-            "hidden": true
-        },
-        {
-            "name": "gcc-like-setup",
-            "inherits": "setup",
-            "cacheVariables": {
-                "CMAKE_CXX_FLAGS": "-Wall -Wextra -Wpedantic"
-            },
-            "hidden": true
-        },
-        {
-            "name": "ninja-debug",
-            "generator": "Ninja",
-            "displayName": "Ninja (Debug)",
-            "inherits": "gcc-like-setup",
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug",
-                "CMAKE_CXX_FLAGS_DEBUG": "-g -O0"
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "On"
             }
         },
         {
-            "name": "ninja-release",
+            "name": "enable-examples",
+            "inherits": "common",
+            "hidden": true,
+            "cacheVariables": {
+                "BUILD_EXAMPLES": "On"
+            }
+        },
+        {
+            "name": "gcc-clang-setup",
+            "inherits": "common",
+            "hidden": true,
+            "cacheVariables": {
+                "CMAKE_CXX_FLAGS": "-Wall -Wextra -Wpedantic -fdiagnostics-color=always"
+            }
+        },
+        {
+            "name": "clang-setup",
+            "inherits": "gcc-clang-setup",
+            "hidden": true,
+            "cacheVariables": {
+                "CMAKE_CXX_COMPILER": "clang++",
+                "CMAKE_C_COMPILER": "clang"
+            }
+        },
+        {
+            "name": "gcc-setup",
+            "inherits": "gcc-clang-setup",
+            "hidden": true,
+            "cacheVariables": {
+                "CMAKE_CXX_COMPILER": "g++",
+                "CMAKE_C_COMPILER": "gcc"
+            }
+        },
+        {
+            "name": "ninja-debug",
+            "displayName": "Ninja Debug",
+            "inherits": "gcc-clang-setup",
             "generator": "Ninja",
-            "displayName": "Ninja (Release)",
-            "inherits": "gcc-like-setup",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_CXX_FLAGS_DEBUG": "-O0 -g",
+                "BUILD_TESTS": "On"
+            }
+        },
+        {
+            "name": "ninja-debug-examples",
+            "displayName": "Ninja Debug with Examples",
+            "inherits": [
+                "ninja-debug",
+                "enable-examples"
+            ]
+        },
+        {
+            "name": "ninja-release",
+            "displayName": "Ninja Release",
+            "inherits": "gcc-clang-setup",
+            "generator": "Ninja",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Release",
-                "CMAKE_CXX_FLAGS_RELEASE": "-O2 -DNDEBUG"
+                "CMAKE_CXX_FLAGS_RELEASE": "-O2 -DNDEBUG",
+                "BUILD_TESTS": "On"
+            }
+        },
+        {
+            "name": "ci-ninja-clang-debug",
+            "generator": "Ninja",
+            "inherits": [
+                "gcc-clang-setup",
+                "clang-setup"
+            ],
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_CXX_FLAGS_DEBUG": "-O0 -g",
+                "BUILD_EXAMPLES": "On",
+                "BUILD_TESTS": "On"
+            }
+        },
+        {
+            "name": "ci-ninja-clang-release",
+            "generator": "Ninja",
+            "inherits": [
+                "gcc-clang-setup",
+                "clang-setup"
+            ],
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                "CMAKE_CXX_FLAGS_RELEASE": "-O2 -DNDEBUG",
+                "BUILD_EXAMPLES": "On",
+                "BUILD_TESTS": "On"
+            }
+        },
+        {
+            "name": "ci-ninja-gcc-debug",
+            "generator": "Ninja",
+            "inherits": [
+                "gcc-clang-setup",
+                "gcc-setup"
+            ],
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_CXX_FLAGS_DEBUG": "-O0 -g",
+                "BUILD_EXAMPLES": "On",
+                "BUILD_TESTS": "On"
+            }
+        },
+        {
+            "name": "ci-ninja-gcc-release",
+            "generator": "Ninja",
+            "inherits": [
+                "gcc-clang-setup",
+                "gcc-setup"
+            ],
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                "CMAKE_CXX_FLAGS_RELEASE": "-O2 -DNDEBUG",
+                "BUILD_EXAMPLES": "On",
+                "BUILD_TESTS": "On"
             }
         }
     ],
     "buildPresets": [
         {
             "name": "ninja-debug",
-            "configurePreset": "ninja-debug",
             "configuration": "Debug",
-            "displayName": "Ninja (Debug)"
+            "configurePreset": "ninja-debug"
         },
         {
-            "name": "ninja-release",
-            "configurePreset": "ninja-release",
-            "configuration": "Release",
-            "displayName": "Ninja (Release)"
+            "name": "ninja-debug-examples",
+            "configuration": "Debug",
+            "configurePreset": "ninja-debug-examples"
         }
     ],
     "testPresets": [
         {
-            "name": "ninja-debug-tests",
+            "name": "ninja-debug",
             "configurePreset": "ninja-debug",
-            "displayName": "Debug tests (Ninja)",
             "output": {
                 "outputOnFailure": true
             }
+        }
+    ],
+    "workflowPresets": [
+        {
+            "name": "ninja-debug",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "ninja-debug"
+                },
+                {
+                    "type": "build",
+                    "name": "ninja-debug"
+                },
+                {
+                    "type": "test",
+                    "name": "ninja-debug"
+                }
+            ]
+        },
+        {
+            "name": "ninja-debug-examples",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "ninja-debug-examples"
+                },
+                {
+                    "type": "build",
+                    "name": "ninja-debug-examples"
+                },
+                {
+                    "type": "test",
+                    "name": "ninja-debug"
+                }
+            ]
         }
     ]
 }

@@ -7,7 +7,7 @@ set(MAXWELL_VERSION "${MAXWELL_MAJOR_VERSION}.${MAXWELL_MINOR_VERSION}.${MAXWELL
 project(Maxwell LANGUAGES CXX VERSION ${MAXWELL_VERSION})
 
 
-option(BUILD_EXAMPLES "Build examples" ON)
+option(BUILD_EXAMPLES "Build examples" OFF)
 option(BUILD_TESTS "Build tests" ON)
 option(DISABLE_PREDEFINED_UNITS "Disable predefined units" OFF)
 
