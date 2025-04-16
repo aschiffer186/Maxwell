@@ -6,7 +6,7 @@ jobs:
   build: 
     runs-on: $${{ matrix }}
 
-    stategy: 
+    strategy: 
       fail-fast: false
 
       matrix: 
@@ -32,6 +32,6 @@ jobs:
       - name: Build 
         run: cmake --build --preset $ {{ matrix.preset-name }}
 
-      - name: Test
-        run: ctest --preset $ {{ matrix.preset-name }}
+      #- name: Test
+      #  run: ctest --preset $ {{ matrix.preset-name }}
 

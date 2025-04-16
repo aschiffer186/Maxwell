@@ -122,8 +122,7 @@ public:
   /// \throws Any exceptions thrown by the constructor of \c magnitude_type
   template <typename Up = magnitude_type>
     requires std::constructible_from<magnitude_type, Up> && (!_detail::is_quantity_v<std::remove_cvref_t<Up>>)
-  constexpr explicit(!unitless_unit<units> || !std::convertible_to<Up, magnitude_type>)
-      quantity(Up&& u) noexcept(std::is_nothrow_constructible_v<magnitude_type, Up&&>)
+  constexpr explicit(!unitless_unit<units> || !std::convertible_to<Up, magnitude_type>) quantity(Up&& u)
       : magnitude_(std::forward<Up>(u)) {}
 
   /// \c Constructor
@@ -139,9 +138,7 @@ public:
   /// \throws Any exceptions thrown by the constructor of \c magnitude_type
   template <typename... Args>
     requires std::constructible_from<magnitude_type, Args...>
-  constexpr explicit quantity(std::in_place_t,
-                              Args&&... args) noexcept(std::is_nothrow_constructible_v<magnitude_type, Args&&...>)
-      : magnitude_(std::forward<Args>(args)...) {}
+  constexpr explicit quantity(std::in_place_t, Args&&... args) : magnitude_(std::forward<Args>(args)...) {}
 
   /// \c Constructor
   ///
@@ -155,9 +152,8 @@ public:
   ///
   /// \throws Any exceptions thrown by the constructor of \c magnitude_type
   template <typename Up, typename... Args>
-    requires std::constructible_from<magnitude_type, std::initializer_list<Up>, Args&&...>
-  constexpr explicit quantity(std::in_place_t, std::initializer_list<Up> il, Args&&... args) noexcept(
-      std::is_nothrow_constructible_v<magnitude_type, std::initializer_list<Up>, Args&&...>)
+    requires std::constructible_from<magnitude_type, std::initializer_list<Up>&, Args...>
+  constexpr explicit quantity(std::in_place_t, std::initializer_list<Up> il, Args&&... args)
       : magnitude_(il, std::forward<Args>(args)...) {}
 
   /// \brief Constructor
@@ -195,8 +191,7 @@ public:
   /// \throw any exceptions thrown by the copy constructor of \c magnitude_type
   template <typename Up>
     requires std::constructible_from<magnitude_type, Up>
-  constexpr explicit(!std::convertible_to<Up, magnitude_type>)
-      quantity(const quantity<units, Up>& q) noexcept(std::is_nothrow_constructible_v<magnitude_type, const Up&>)
+  constexpr explicit(!std::convertible_to<Up, magnitude_type>) quantity(const quantity<units, Up>& q)
       : magnitude_(q.get_magnitude()) {}
 
   /// \brief Converting constructor
@@ -214,8 +209,7 @@ public:
   /// \throw any exceptions thrown by the move constructor of \c magnitude_type
   template <typename Up>
     requires std::constructible_from<magnitude_type, Up>
-  constexpr explicit(!std::convertible_to<Up, magnitude_type>) quantity(quantity<units, Up>&& q) noexcept(
-      std::is_nothrow_constructible_v<magnitude_type, std::add_rvalue_reference_t<Up>>)
+  constexpr explicit(!std::convertible_to<Up, magnitude_type>) quantity(quantity<units, Up>&& q)
       : magnitude_(std::move(q).get_magnitude()) {}
 
   /// \brief Converting constructor
@@ -238,7 +232,7 @@ public:
   /// \throw any exceptions thrown by the copy constructor of \c magnitude_type
   template <auto V, typename Up>
     requires unit_convertible_to<V, units> && std::constructible_from<magnitude_type, Up>
-  constexpr quantity(const quantity<V, Up>& q) noexcept(std::is_nothrow_constructible_v<magnitude_type, const Up&>)
+  constexpr quantity(const quantity<V, Up>& q)
       : magnitude_(q.get_magnitude() * conversion_factor(V, units) + conversion_offset(V, units)) {}
 
   /// \brief Converting constructor
@@ -261,8 +255,7 @@ public:
   /// \throw any exceptions thrown by the move constructor of \c magnitude_type
   template <typename Up, auto V>
     requires unit_convertible_to<V, units> && std::constructible_from<magnitude_type, Up>
-  constexpr quantity(quantity<V, Up>&& q) noexcept(
-      std::is_nothrow_constructible_v<magnitude_type, std::add_rvalue_reference_t<Up>>)
+  constexpr quantity(quantity<V, Up>&& q)
       : magnitude_(std::move(q).get_magnitude() * conversion_factor(V, units) + conversion_offset(V, units)) {}
 
   /// \brief Converting assignment operator
