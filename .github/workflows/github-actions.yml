@@ -1,0 +1,39 @@
+name: CMake workflows
+
+on: 
+  push:
+    branches: [ $default_branch ]
+
+jobs: 
+  build: 
+    runs-on: $${{ matrix }}
+
+    stategy: 
+      fail-fast: false
+
+      matrix: 
+        os: [ubuntu-latest]
+        build_type: [Debug, Release]
+        c_compiler: [gcc, clang]
+        include: 
+          - os: ubuntu-latest 
+            preset-name: ci-ninja-clang-debug 
+          - os: ubuntu-latest
+            preset-name: ci-ninja-clang-release 
+          - os: ubuntu-latest
+            preset-name: ci-ninja-gcc-debug
+          - os: ubuntu-latest
+            preset-name: ci-ninja-gcc-release
+    
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure 
+        run: cmake --preset $ {{ matrix.preset-name }}
+
+      - name: Build 
+        run: cmake --build --preset $ {{ matrix.preset-name }}
+
+      - name: Test
+        run: ctest --preset $ {{ matrix.preset-name }}
+
