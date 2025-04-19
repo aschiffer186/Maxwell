@@ -408,7 +408,7 @@ public:
   ///
   /// \param other The quantity to subtract from this \c *this
   /// \return A reference to the modified value \c *this
-  constexpr quantity& operator-=(const quantity& other) noexcept(nothrow_subtractable<magnitude_type>)
+  constexpr quantity& operator-=(const quantity& other)
     requires subtractable<magnitude_type>
   {
     if constexpr (requires(magnitude_type value) { value -= value; }) {
@@ -428,7 +428,7 @@ public:
   /// \return A reference to the modified value of \c *this
   template <typename Up, unit auto V>
     requires addable_with<T, Up> && unit_convertible_to<V, units>
-  constexpr quantity& operator+=(const quantity<V, Up>& other) noexcept(nothrow_addable_with<T, Up>) {
+  constexpr quantity& operator+=(const quantity<V, Up>& other) {
     return *this += quantity(other);
   }
 
@@ -441,7 +441,7 @@ public:
   /// \return A reference to the modified value of \c *this
   template <typename Up, unit auto V>
     requires unit_convertible_to<V, units> && subtractable_with<T, Up>
-  constexpr quantity& operator-=(const quantity<V, Up>& other) noexcept(nothrow_subtractable_with<T, Up>) {
+  constexpr quantity& operator-=(const quantity<V, Up>& other) {
     return *this -= quantity(other);
   }
 
@@ -451,7 +451,7 @@ public:
   ///
   /// \param scalar the scalar value to multiply \c *this by
   /// \return A reference to the modified value of \c *this
-  constexpr quantity& operator*=(const magnitude_type& scalar) noexcept(nothrow_multiply<magnitude_type>)
+  constexpr quantity& operator*=(const magnitude_type& scalar)
     requires multiply<magnitude_type>
   {
     if constexpr (requires(magnitude_type value) { value *= value; }) {
@@ -613,6 +613,8 @@ constexpr auto operator*(const quantity<U1, S1>& lhs, const quantity<U2, S2>& rh
 /// of this type as it may produce unexpected results (e.g. if expression templates are
 /// used for lazy evaluation).
 ///
+/// Note: if both \c S1 and \c S2 are integer types, integer division is performed.
+///
 /// \pre <tt>std::divide_with<S1, S2><\tt>
 ///
 /// \tparam S1 The type of the magnitude of the left hand side of the division
@@ -697,9 +699,12 @@ constexpr auto operator*(const M2& lhs, const quantity<U1, M1>& rhs) {
 ///
 /// divides a quantity by a scalar value. The resulting quantity has the
 /// same units as the original quantity. The type of the magnitude of the resulting
-/// quantity is determined from the type of S1 / S2. It is not recommended to use \c auto
+/// quantity is determined from the type of <tt>S1 / S2</tt> and may not be the same as \c M1 or \c M2.
+/// It is not recommended to use \c auto
 /// for the result of this type as it may produce unexpected results (e.g. if expression templates are
 /// used for lazy evaluation).
+///
+/// Note, if both \c M1 and \c M2 are integer types, integer division is performed.
 ///
 /// \pre <tt>std::divide_with<S1, S2><\tt>
 /// \pre \c M2 is not a specialization of \c quantity or \c unit_type
@@ -717,6 +722,24 @@ constexpr auto operator/(const quantity<U1, M1>& lhs, const M2& rhs) {
   return quantity<U1, return_scalar_type>(lhs.get_magnitude() / rhs);
 }
 
+/// \brief Addition operator
+///
+/// First converts both quantities to SI base units then computes their sum.
+/// The magnitude type of the resulting quantity is determined from the type of
+/// \c M1 and \c M2 and may not be the same as \c M1 or \c M2.
+/// It is not recommended to use \c auto as it may produce unexpected results (e.g. if expression templates are
+/// used for lazy evaluation or the units are not as expected).
+///
+/// \pre <tt>std::addable_with<S1, S2><\tt>
+/// \pre <tt>std::convertible_to<S1, S2><\tt>
+///
+/// \tparam S1 The type of the magnitude of the left hand side of the addition
+/// \tparam U1 The units of the left hand side of the addition
+/// \tparam S2 The type of the magnitude of the right hand side of the addition
+/// \tparam U2 The units of the right hand side of the addition
+/// \param lhs The left hand side of the addition
+/// \param rhs The right hand side of the addition
+/// \return The sum of the two quantities
 template <typename M1, unit auto U1, typename M2, unit auto U2>
   requires unit_convertible_to<U1, U2> && addable_with<M1, M2>
 constexpr auto operator+(quantity<U1, M1> lhs, const quantity<U2, M2>& rhs) {
@@ -726,6 +749,24 @@ constexpr auto operator+(quantity<U1, M1> lhs, const quantity<U2, M2>& rhs) {
                                                              rhs.to_SI_base_units().get_magnitude());
 }
 
+/// \brief Subtraction operator
+///
+/// First converts both quantities to SI base units then computes their difference.
+/// The magnitude type of the resulting quantity is determined from the type of
+/// <tt>M1 - M2</tt> and may not be the same as \c M1 or \c M2.
+/// It is not recommended to use \c auto as it may produce unexpected results (e.g. if expression templates are
+/// used for lazy evaluation or the units are not as expected).
+///
+/// \pre <tt>std::subtractable_with<S1, S2><\tt>
+/// \pre <tt>std::convertible_to<S1, S2><\tt>
+///
+/// \tparam S1 The type of the magnitude of the left hand side of the subtraction
+/// \tparam U1 The units of the left hand side of the subtraction
+/// \tparam S2 The type of the magnitude of the right hand side of the subtraction
+/// \tparam U2 The units of the right hand side of the subtraction
+/// \param lhs The left hand side of the subtraction
+/// \param rhs The right hand side of the subtraction
+/// \return The difference the two quantities
 template <typename M1, unit auto U1, typename M2, unit auto U2>
   requires unit_convertible_to<U1, U2> && subtractable_with<M1, M2>
 constexpr auto operator-(quantity<U1, M1> lhs, const quantity<U2, M2>& rhs) {
@@ -860,6 +901,7 @@ struct std::formatter<maxwell::quantity<U, T>> : std::formatter<std::string_view
   auto format(const maxwell::quantity<U, T>& q, std::format_context& ctx) const {
     std::string temp;
     std::format_to(std::back_inserter(temp), "{}", q.get_magnitude());
+    temp.append(" ").append(q.get_units().unit_string());
     return std::formatter<std::string_view>::format(temp, ctx);
   }
 };

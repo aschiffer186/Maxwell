@@ -1,10 +1,13 @@
 #include "test_quantity.hpp"
 #include "internal/quantity_repo.hpp"
+#include "internal/unit_repo.hpp"
 
-#include <concepts>    // convertible_to
-#include <limits>      // numeric_limits
-#include <list>        // list
-#include <memory>      // unique_ptr
+#include <concepts> // convertible_to
+#include <format>
+#include <limits> // numeric_limits
+#include <list>   // list
+#include <memory> // unique_ptr
+#include <string>
 #include <type_traits> // constructible traits, assignable traits, destructible traits
 
 #include <Maxwell.hpp>
@@ -282,6 +285,49 @@ TEST(TestQuantity, TestConstantExpressionUsage) {
   EXPECT_TRUE(is_constant_expression([] { constant_expression{foot{1.0}}; }));
 
   EXPECT_FALSE(is_constant_expression([] { non_constant_expression{}; }));
+}
+
+TEST(TestQuantity, TestUnitAddition) {
+  quantity<meter_unit, double> q1{1.0};
+  quantity<meter_unit, double> q2{2.0};
+  quantity<meter_unit, double> q3{3.0};
+
+  EXPECT_EQ(q1 + q2, q3);
+  EXPECT_EQ(q1 += q2, q3);
+
+  quantity<centimeter_unit, double> q4 = q3 + q3;
+  EXPECT_FLOAT_EQ(q4.get_magnitude(), 600.0);
+
+  q4 += q2;
+  EXPECT_FLOAT_EQ(q4.get_magnitude(), 800.0);
+
+  quantity<mile_unit, double> q5 = quantity<meter_unit, double>{1.0} + quantity<foot_unit, double>{1.0};
+  EXPECT_NEAR(q5.get_magnitude(), 0.00081, 1e-5);
+
+  q5 += quantity<meter_unit, double>{1.0} + quantity<foot_unit, double>{1.0};
+  EXPECT_NEAR(q5.get_magnitude(), 0.00162, 1e-5);
+
+  quantity<kelvin_unit, double> q7{1.0};
+  quantity<Celsisus_unit, double> q8 = q7 + q7;
+  EXPECT_FLOAT_EQ(q8.get_magnitude(), -271.15);
+}
+
+TEST(TestQuantity, TestPrinting) {
+  quantity<meter_unit, int> q1{1};
+  std::string str = std::format("{}", q1);
+  EXPECT_STREQ(str.c_str(), "1 m");
+
+  quantity<square_meter_unit, int> q2 = q1 * q1;
+  str = std::format("{}", q2);
+  EXPECT_STREQ(str.c_str(), "1 m^2");
+
+  quantity<joule_unit * second_unit, int> q3{100};
+  str = std::format("{}", q3);
+  EXPECT_STREQ(str.c_str(), "100 J*s");
+
+  quantity<degree_unit / second_unit, int> q4{100};
+  str = std::format("{}", q4);
+  EXPECT_STREQ(str.c_str(), "100 deg/s");
 }
 
 TEST(TestQuantity, TestAmountConcept) {
