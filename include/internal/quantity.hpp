@@ -450,8 +450,9 @@ public:
   /// \param other The quantity to add to \c *this
   /// \return A reference to the modified value of \c *this
   template <typename Up, unit auto V>
-    requires addable_with<T, Up> && unit_convertible_to<V, units>
+    requires addable_with<T, Up>
   constexpr quantity& operator+=(const quantity<V, Up>& other) {
+    static_assert(unit_convertible_to<V, U>, "Attempting to add quantities with incompatible units");
     return *this += quantity(other);
   }
 
@@ -463,8 +464,9 @@ public:
   /// \param other The quantity to subtract \c *this
   /// \return A reference to the modified value of \c *this
   template <typename Up, unit auto V>
-    requires unit_convertible_to<V, units> && subtractable_with<T, Up>
+    requires subtractable_with<T, Up>
   constexpr quantity& operator-=(const quantity<V, Up>& other) {
+    static_assert(unit_convertible_to<V, U>, "Attempting to subtract quantities with incompatible units");
     return *this -= quantity(other);
   }
 
@@ -572,6 +574,7 @@ private:
 template <unit auto U1, typename S1, unit auto U2, typename S2>
   requires std::equality_comparable_with<S1, S2>
 constexpr bool operator==(const quantity<U1, S1>& lhs, const quantity<U2, S2>& rhs) {
+  static_assert(unit_convertible_to<U1, U2>, "Attempting to compare quantities with incompatible units");
   return lhs.to_SI_base_units().get_magnitude() == rhs.to_SI_base_units().get_magnitude();
 }
 
@@ -595,6 +598,8 @@ template <unit auto U1, typename S1, unit auto U2, typename S2>
   requires std::three_way_comparable_with<S1, S2>
 constexpr std::compare_three_way_result_t<S1, S2> operator<=>(const quantity<U1, S1>& lhs,
                                                               const quantity<U2, S2>& rhs) {
+  static_assert(unit_convertible_to<U1, U2>,
+                "Attempting to perform three-way-comparison on quantities with incompatible units");
   return lhs.to_SI_base_units().get_magnitude() <=> rhs.to_SI_base_units().get_magnitude();
 }
 
@@ -764,8 +769,9 @@ constexpr auto operator/(const quantity<U1, M1>& lhs, const M2& rhs) {
 /// \param rhs The right hand side of the addition
 /// \return The sum of the two quantities
 template <typename M1, unit auto U1, typename M2, unit auto U2>
-  requires unit_convertible_to<U1, U2> && addable_with<M1, M2>
+  requires addable_with<M1, M2>
 constexpr auto operator+(quantity<U1, M1> lhs, const quantity<U2, M2>& rhs) {
+  static_assert(unit_convertible_to<U1, U2>, "Attempting to add quantities with incompatible units");
   using return_scalar_type = std::remove_cvref_t<decltype(lhs.get_magnitude() + rhs.get_magnitude())>;
 
   return quantity<U1.to_SI_base_units(), return_scalar_type>(lhs.to_SI_base_units().get_magnitude() +
@@ -791,8 +797,9 @@ constexpr auto operator+(quantity<U1, M1> lhs, const quantity<U2, M2>& rhs) {
 /// \param rhs The right hand side of the subtraction
 /// \return The difference the two quantities
 template <typename M1, unit auto U1, typename M2, unit auto U2>
-  requires unit_convertible_to<U1, U2> && subtractable_with<M1, M2>
+  requires subtractable_with<M1, M2>
 constexpr auto operator-(quantity<U1, M1> lhs, const quantity<U2, M2>& rhs) {
+  static_assert(unit_convertible_to<U1, U2>, "Attempting to subtract quantities with incompatible units");
   using return_scalar_type = std::remove_cvref_t<decltype(lhs.get_magnitude() - rhs.get_magnitude())>;
 
   return quantity<U1.to_SI_base_units(), return_scalar_type>(lhs.to_SI_base_units().get_magnitude() -
