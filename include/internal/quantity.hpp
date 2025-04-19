@@ -32,9 +32,7 @@
 /// \namespace maxwell Enclosing namespace of all public Maxwell API
 namespace maxwell {
 /// \cond
-template <auto U, typename T = double>
-  requires unit<decltype(U)>
-class quantity;
+template <auto U, typename T = double> class quantity;
 
 namespace _detail {
 template <typename> struct is_quantity : std::false_type {};
@@ -66,91 +64,97 @@ constexpr double to_chrono_conversion_factor() {
 } // namespace _detail
 /// \endcond
 
-/// \class quantity
-/// \brief A dimensioned quantity
+/// \brief Class template \c quantity represents a physical quantity with both a magnitude and units
 ///
-/// <tt>class quantity</tt> represents a value that has both a magnitude
-/// and units. The units are part of the quantity's type, allowing for
-/// verification of unit coherency and conversion of units at compile-time.
-/// A program is ill-formed if an invalid operation is performed between
-/// two quantities with incompatability types.
+/// An instance of \c quantity represents a physical quantity with both a magnitude and units.
+/// Instances of \c quantity can be manipulated like arithmetic types, but only when such operations
+/// obey the rules of dimensional analysis. Additionally, instances of \c quantity can only be created
+/// from values with units that are convertible to the \c quantities units.
 ///
-/// \sa unitType
+/// The magnitude of the quantity is allocated within the storage of the quantity object.
 ///
-/// Mandates: \c T is not cv-qualified, not \c std::in_place_t, not a
-/// specialization of \c std::chrono::duration, not a specialization of \c
-/// quantity, and is not a specialization of \c unit_type or \c
-/// measure_type
+/// \note For the purposes of exposition, a quantity contains a single member variable of type \c T called \c mag
+/// representing the magnitude of the quantity.
 ///
-/// \tparam T the type of the quantity's magnitude
-/// \tparam U the quantity's units
-template <auto U, typename T>
-  requires unit<decltype(U)>
-class quantity {
+/// The units of a \c quantity are part of its type, allowing for checking of dimensional coherence and
+/// performance of unit conversions at compile-time.
+///
+/// \sa unit_type
+///
+/// \tparam U A value representing the units of the quantity. \c U must be an instantiation of \c unit_type.
+/// \tparam T The type of the quantity's magnitue. \c T shall not be a _cv_ qualified type or \c std::in_place_t,
+///           and must be \c destructible.
+template <auto U, typename T> class quantity {
   static_assert(!std::is_const_v<T>);
+  static_assert(!std::is_volatile_v<T>);
+  static_assert(!std::same_as<std::remove_cv_t<T>, std::in_place_t>);
+  static_assert(std::destructible<T>);
+  static_assert(unit<decltype(U)>, "Units of quantity must be an instantiation of unit_type");
 
 public:
-  /// The type of the quantity's magnitude
+  /// The magnitude type of thq quantity
   using magnitude_type = T;
   /// The type of the quantity's units
-  using units_type = std::remove_cvref_t<decltype(U)>;
+  using units_type = std::remove_cv_t<decltype(U)>;
   /// The quantity's units
   static constexpr units_type units = U;
 
   /// \brief Default constructor
   ///
-  /// Creates a \c Quantity whose magnitude is default constructed.
+  /// _Constraints_: \c std::is_default_constructible_v<T> is \c true <br>
+  /// _Effects_: Constructs a \c quantity whose magnitude is value initialzed. <br>
+  /// _Remarks_: This constructor is \c constexpr if and only if the value initialization of \c T
+  ///            would satisfy the requirements for a constexpr function. The exception specifier is
+  ///            equivalent to \c std::is_nothrow_default_constructible_v<T>
   ///
-  /// \pre \c magnitude_type is default constructible
-  /// \post <tt> this->magnitude()</tt> is equal to \c magnitude_type{}
-  ///
-  /// \throws any exceptions thrown by the default constructor of \c
-  /// magnitude_type
+  /// \throws Any exceptions thrown by the default constructor of \c T
   constexpr quantity()
     requires std::is_default_constructible_v<magnitude_type>
   = default;
 
   /// \brief Constructor
   ///
-  /// Constructs a \c quantity whose magnitude is constructed using the
-  /// value \c std::forward<Up>(magnitude)
+  /// _Constraints_: <tt>std::is_constructible_v<T, Up></tt> is \c true and \c Up is not a specialization of
+  ///                 \c quantity. <br>
+  /// _Effects_: Direct intializes the magnitude of \c *this with \c std::forward<Up>(u). <br>
+  /// _Remarks_: This constructor is a constexpr constructor if the selcted constructor of \c T satisfies the
+  /// requirements
+  ///            for a constexpr function. The exception specification is equivalent to
+  ///            <tt>std::is_nothrow_constructible_v<T, Up></tt>. This constructor is explicit if the \c quantity object
+  ///            is not unitless of <tt>std::is_convertible_to_v<Up, T></tt> is \c false.
   ///
-  /// \pre \c magnitude_type is constructible from \c Up&&
-  /// \post \c this->magnitude() is equal to \c
-  /// magnitude_type(std::forward<Up>(magnitude))
-  ///
-  /// \throws Any exceptions thrown by the constructor of \c magnitude_type
+  /// \tparam Up The type of the value used to initialize the magnitude of \c *this.
+  /// \param[in] u The value used to initialize the magnitude of \c *this.
+  /// \throws Any exceptions thrown by the constructor of \c magnitude_type.
   template <typename Up = magnitude_type>
     requires std::constructible_from<magnitude_type, Up> && (!_detail::is_quantity_v<std::remove_cvref_t<Up>>)
-  constexpr explicit(!unitless_unit<units> || !std::convertible_to<Up, magnitude_type>) quantity(Up&& u)
+  constexpr explicit(!unitless_unit<units> || !std::convertible_to<Up, magnitude_type>)
+      quantity(Up&& u) noexcept(std::is_nothrow_constructible_v<T, Up>)
       : magnitude_(std::forward<Up>(u)) {}
 
-  /// \c Constructor
+  /// \brief Constructor
   ///
-  /// Constructs a \c quantity whose magnitude s constructed in place from
-  /// the specified arguments using the expression \c
-  /// std::forward<Args>(args)...
+  /// _Constraints_: <tt>std::is_constructible_v<T, Args...></tt> is \c true. <br>
+  /// _Effects_: Direct non-list-initializes the magnitude of \c *this with \c std::forward<Args>(args)... <br>
+  /// _Remarks_: This constructor is a constexpr constructor if the selected constructor of \c T is a constexpr
+  /// constructor.
   ///
-  /// \pre \c magnitude_type is constructible from \c Args
-  /// \post \c this->magnitude() is equal to \c
-  /// magnitude_type(std::forward<Args>(args)...)
-  ///
-  /// \throws Any exceptions thrown by the constructor of \c magnitude_type
+  /// \tparam Args The type of the argument(s) used to initialize the magnitude of \c *this.
+  /// \param[in] args The value(s) used to initialize the magnitude of \c *this.
+  /// \throws Any exceptions thrown by the selected constructor of \c T.
   template <typename... Args>
     requires std::constructible_from<magnitude_type, Args...>
   constexpr explicit quantity(std::in_place_t, Args&&... args) : magnitude_(std::forward<Args>(args)...) {}
 
   /// \c Constructor
   ///
-  /// Constructs a \c quantity whose magnitude s constructed in place from
-  /// the specified initializer list and arguments arguments using the
-  /// expression <tt>magnitude_type(il, std::forward<Args>(args)...)</tt>
+  /// _Constraints_: <tt>std::is_constructible_v<T, std::initialize_list<Up>&, Args...></tt> is \c true. <br>
+  /// _Effects_: Direct non-list-initializes the magnitude of \c *this with <tt>il, std::forward<Args>(args)...</tt>
+  /// <br>
+  /// _Remarks_: This constructor is a constexpr constructor if the selected constructor of \c T is a constexpr
+  /// constructor.
   ///
-  /// \pre \c magnitude_type is constructible from \c Args
-  /// \post \c this->magnitude() is equal to <tt>magnitude_type(il,
-  /// std::forward<Args>(args)...)</t>>
-  ///
-  /// \throws Any exceptions thrown by the constructor of \c magnitude_type
+  /// \throws Any exceptions thrown by the selected constructor of \c T
   template <typename Up, typename... Args>
     requires std::constructible_from<magnitude_type, std::initializer_list<Up>&, Args...>
   constexpr explicit quantity(std::in_place_t, std::initializer_list<Up> il, Args&&... args)
@@ -158,19 +162,19 @@ public:
 
   /// \brief Constructor
   ///
-  /// Constructs a \c quantity from a \c std::chrono::duration type,
-  /// allowing for integration with the standard library. This constructor is
-  /// implicit if there would be no loss of information converting from the
-  /// specified \c std::chrono::duration type.
+  /// _Constraints_:
+  ///  - <tt>std::is_constructible_v<T, Rep></tt> is \c true.
+  ///  - The units of \c *this have dimensions of time.
   ///
-  /// \pre \c magnitude_type is constructible from \c Rep
-  /// \pre \c units has dimensions of time
-  /// \post \c this->magnitude() is equal to \c dur.count()
+  /// _Effects_: Initializes the magnitude of \c *this with \c dur.count(), potentially first multiplying the value of
+  ///            \c dur.count() by a constant to convert from the units of <tt>std::chrono::duration<Rep, Period></tt>
+  ///            to the units of \c *this <br>
+  /// _Remarks_: If a unit conversion is required, the conversion factor is calculated at compile-time.
   ///
-  /// \param dur the \c std::chrono::duration value to construct from
-  ///
-  /// \throw any exceptions thrown by \c dur or by the constructor of \c
-  /// magnitude_type
+  /// \tparam Rep An arithmetic type representing the number of ticks of the duration object.
+  /// \tparam Period A \c std::ratio representing the tick period of the duration object.
+  /// \param[in] dur The \c std::chrono::duration object used to initialize the magnitude of \c *this.
+  /// \throw Any exceptions thrown by the selected constructor of \c T.
   template <typename Rep, typename Period>
     requires std::constructible_from<magnitude_type, Rep> && time_unit<units>
   MAXWELL_CONSTEXPR23 quantity(std::chrono::duration<Rep, Period> dur)
@@ -178,35 +182,30 @@ public:
 
   /// \brief Converting constructor
   ///
-  /// Constructs a \c quantity from the specified \c quantity with
-  /// different \c magnitude_type.
+  /// _Constraints_: <tt>std::is_constructible_v<T, Up></tt> is \c true. <br>
+  /// _Effects_: Direct non-initializes the magnitude of \c *this with \c q.get_magnitude(). <br>
+  /// _Remarks_: This constructor is explicit if <tt>std::is_convertible_v<const Up&, T></tt> is \c false.
+  ///            This constructor is a constexpr constructor if the selected constructor of \c T is a constexpr
+  ///            constructor.
   ///
-  /// \pre \c magnitude_type is constructible from \c Up
-  /// \post <tt>this->magnitude() == other.magnitude()
-  ///
-  /// \tparam Up the type of the magnitude of the \c quantity to construct
-  ///
-  /// \param q the \c quantity to construct from
-  ///
-  /// \throw any exceptions thrown by the copy constructor of \c magnitude_type
+  /// \tparam Up The type of the magnitude of the \c quantity used to initialize \c *this.
+  /// \param[in] q The \c quantity used to initialize the magnitude of \c *this.
+  /// \throw Any exceptins thrown by the selected constructor of \c T.
   template <typename Up>
     requires std::constructible_from<magnitude_type, Up>
-  constexpr explicit(!std::convertible_to<Up, magnitude_type>) quantity(const quantity<units, Up>& q)
+  constexpr explicit(!std::convertible_to<const Up&, magnitude_type>) quantity(const quantity<units, Up>& q)
       : magnitude_(q.get_magnitude()) {}
 
   /// \brief Converting constructor
   ///
-  /// Constructs a \c quantity from the specified \c quantity with
-  /// different \c magnitude_type.
+  /// _Constraints_: <tt>std::is_constructible_v<T, Up></tt> is \c true. <br>
+  /// _Effects_: Direct non-initializes the magnitude of \c *this with \c std::move(q.get_magnitude()). <br>
+  /// _Remarks_: This constructor is explicit if <tt>std::is_convertible_v<const Up&, T></tt> is \c false. This
+  ///            constructor is a constexpr constructor if the selected constructor of \c T is a constexpr constructor.
   ///
-  /// \pre \c magnitude_type is constructible from \c Up
-  /// \post <tt>this->magnitude() == other.magnitude()
-  ///
-  /// \tparam Up the type of the magnitude of the \c quantity to construct
-  ///
-  /// \param q the \c quantity to construct from
-  ///
-  /// \throw any exceptions thrown by the move constructor of \c magnitude_type
+  /// \tparam Up The type of the magnitude of the \c quantity used to initialize \c *this.
+  /// \param[in] q The \c quantity used to initialize the magnitude of \c *this.
+  /// \throw Any exceptins thrown by the selected constructor of \c T.
   template <typename Up>
     requires std::constructible_from<magnitude_type, Up>
   constexpr explicit(!std::convertible_to<Up, magnitude_type>) quantity(quantity<units, Up>&& q)
@@ -214,70 +213,78 @@ public:
 
   /// \brief Converting constructor
   ///
-  /// Constructs a \c quantity from the specified \c quantity with
-  /// different units, automatically converting the units of the specified
-  /// quantity to \c Units. The magnitude of \c *this is copy constructed from
-  /// \c q.magnitude() then multiplied by the appropriate conversion factor
-  /// between \c Other and \c Units.
+  /// _Constraints_:
+  ///   - <tt>std::is_constructible_v<T, Up></tt> is \c true
+  ///   - \c unit<decltype(V)> is modeled.
   ///
-  /// \pre \c magnitude_type is constructible from \c Up
-  /// \pre \c Other is convertible to \c Units.
-  /// \post <tt>this->magnitude() == conversion_factor(Other,
-  /// Units)*q.magnitude()</tt>
+  /// _Mandates_: <tt>unit_convertible_to<V, units></tt> is modeled. <br>
+  /// _Effects_: Direct non-list-initializes the magnitude of \c *this from \c q.get_magnitude(), first performing any
+  ///            arithmetic operations necessary to convert from the units of \c q to the units of \c *this. <br>
+  /// _Remarks_: The values needed to convert from the units of \c q to the units of \c *this are calculated at
+  ///            compile-time. This constructor is explicit if <tt>std::is_convertible_v<const Up&, T></tt> is false.
+  ///            This constructor is a constexpr constructor if the selected constructor of \c T is a constexpr
+  ///            constructor and arthmetic operations on \c T are usable in constant expressions.
   ///
-  /// \tparam Up the type of the magnitude of the \c quantity to construct
-  /// from \tparam Other the units ofthe \c quantity to construct from
-  /// \param q the \c quantity to construct from
-  ///
-  /// \throw any exceptions thrown by the copy constructor of \c magnitude_type
+  /// \tparam V The units of the quantity used to initialize the magnitude of \c *this.
+  /// \tparam Up The type of the magnitude of the quantity used to initialize the magnitude of \c *this.
+  /// \param[in] q The \c quantity used to initialize the magnitude of \c *this.
+  /// \throw Any exceptions thrown by the selected constructor of \c T or arthmetic operations on \c T.
   template <auto V, typename Up>
-    requires unit_convertible_to<V, units> && std::constructible_from<magnitude_type, Up>
-  constexpr quantity(const quantity<V, Up>& q)
-      : magnitude_(q.get_magnitude() * conversion_factor(V, units) + conversion_offset(V, units)) {}
+    requires std::constructible_from<magnitude_type, Up> && unit<decltype(V)>
+  constexpr explicit(!std::is_convertible_v<const Up&, T>) quantity(const quantity<V, Up>& q)
+      : magnitude_(q.get_magnitude() * conversion_factor(V, units) + conversion_offset(V, units)) {
+    static_assert(unit_convertible_to<V, U>,
+                  "Attempting to construct a quantity from another quantity with incompatible units");
+  }
 
   /// \brief Converting constructor
   ///
-  /// Constructs a \c quantity from the specified \c quantity with
-  /// different units, automatically converting the units of the specified
-  /// quantity to \c Units. The magnitude of \c *this is copy constructed from
-  /// \c q.magnitude() then multiplied by the appropriate conversion factor
-  /// between \c Other and \c Units.
+  /// _Constraints_:
+  ///   - <tt>std::is_constructible_v<T, Up></tt> is \c true.
+  ///   - \c unit<decltype(V)> is modeled.
   ///
-  /// \pre \c magnitude_type is constructible from \c Up
-  /// \pre \c Other is convertible to \c Units.
-  /// \post <tt>this->magnitude() == conversion_factor(Other,
-  /// Units)*q.magnitude()</tt>
+  /// _Mandates_: <tt>unit_convertible_to<V, units></tt> is modeled <br>
+  /// _Effects_: Direct non-list-initializes the magnitude of \c *this from \c std::move(q).get_magnitude(), first
+  ///            performing any arithmetic operations necessary to convert from the units of \c q to the units of \c
+  ///            *this. <br>
+  /// _Remarks_: The values needed to convert from the units of \c q to the units of \c *this are calculated at
+  ///            compile-time. This constructor is explicit if <tt>std::is_convertible_v<Up, T></tt> is false. This
+  ///            constructor is a constexpr constructor if the selected constructor of \c T is a constexpr constructor
+  ///            and arthmetic operations on \c T are usable in constant expressions.
   ///
-  /// \tparam Up the type of the magnitude of the \c quantity to construct
-  /// from \tparam Other the units ofthe \c quantity to construct from
-  /// \param q the \c quantity to construct from
-  ///
-  /// \throw any exceptions thrown by the move constructor of \c magnitude_type
+  /// \tparam V The units of the quantity used to initialize the magnitude of \c *this.
+  /// \tparam Up The type of the magnitude of the quantity used to initialize the magnitude of \c *this.
+  /// \param[in] q The \c quantity used to initialize the magnitude of \c *this.
+  /// \throw Any exceptions thrown by the selected constructor of \c T or arithmetic operations on \c T.
   template <typename Up, auto V>
-    requires unit_convertible_to<V, units> && std::constructible_from<magnitude_type, Up>
-  constexpr quantity(quantity<V, Up>&& q)
-      : magnitude_(std::move(q).get_magnitude() * conversion_factor(V, units) + conversion_offset(V, units)) {}
+    requires std::constructible_from<magnitude_type, Up>
+  constexpr explicit(!std::is_convertible_v<Up, T>) quantity(quantity<V, Up>&& q)
+      : magnitude_(std::move(q).get_magnitude() * conversion_factor(V, units) + conversion_offset(V, units)) {
+    static_assert(unit_convertible_to<V, U>,
+                  "Attempting to construct a quantity from another quantity with incompatible units");
+  }
 
-  /// \brief Converting assignment operator
+  /// \brief Assignment operator
   ///
-  /// Converts the magitude of \c q from \c Other to \c Units then assigns the
-  /// value to the magnitude of \c *this.
+  /// _Constraints_:
+  ///    - <tt>std::is_constructible_v<T, Up></tt> is \c true.
+  ///    - <tt>std::is_swappable_v<T, Up></tt> is \c true.
+  ///    - \c unit<decltype(V)> is modeled.
   ///
-  /// \pre \c Up is swappable with \c magnitude_type
-  /// \pre \c Other is convertible to \c units
-  /// \post <tt>this->magnitude() == conversion_factor(Other,
-  /// Units)*q.magnitude()</tt>
-  ///
-  /// \tparam Up the type of the magnitude of the \c quantity being
-  /// assigned from \tparam Other the units of the \c quantity being
-  /// assigned from \param q the \c quantity to assign to \c *this
-  ///
-  /// \return a reference to \c *this
-  ///
-  /// \throws any exceptions through by swapping \c Up and \c magnitude_type
-  template <typename Up, unit auto V>
-    requires unit_convertible_to<V, units> && std::constructible_from<magnitude_type, Up>
+  /// _Mandates_: <tt>unit_convertible_to<V, units></tt> is modeled. <br>
+  /// _Effects_: Assigns the magnitude of \c other to the magnitude of \c *this, first
+  ///            performing any arithmetic operations necessary to convert from the units of \c q to the units of \c
+  ///            *this. <br>
+  /// _Remarks_: The values needed to convert from the units of \c q to the units of \c *this are calculated at
+  ///            compile-time.
+  /// \tparam Up The type of the magnitude of the quantity whose magnitude will be assigned to \c *this.
+  /// \tparam V The units of the quantity whose magnitude will be assigned to \c *this.
+  /// \param[in] other The quantity whose magnitude will be assigned to \c *this.
+  /// \return \c *this
+  template <typename Up, auto V>
+    requires std::constructible_from<magnitude_type, Up> && unit<decltype(V)>
   constexpr quantity& operator=(quantity other) {
+    static_assert(unit_convertible_to<V, U>, "Attempting to assign quantities with incompatible units");
     using std::swap;
     quantity temp(std::move(other));
     swap(temp.magnitude_, magnitude_);
@@ -292,7 +299,7 @@ public:
   /// \pre \c magnitude_type is constructible from \c Rep
   /// \pre \c time_unit<units>
   /// \post <tt>this->magnitude() == conversion_factor(Other,
-  /// Units)*dur.coun</tt>
+  /// Units)*dur.count()/tt>
   ///
   /// \tparam Rep the representation type of the \c std::chrono::duration
   /// \tparam Period the period of the \c std::chrono::duration
@@ -303,23 +310,26 @@ public:
   /// \throws any exceptions thrown by the copy constructor of \c dur
   template <typename Rep, typename Period>
     requires std::assignable_from<magnitude_type&, Rep> && time_unit<units>
-  MAXWELL_CONSTEXPR23 quantity(std::chrono::duration<Rep, Period> dur)
-      : magnitude_(dur.count() * _detail::from_chrono_conversion_factor<std::chrono::duration<Rep, Period>, units>()) {}
+  MAXWELL_CONSTEXPR23 quantity& operator=(std::chrono::duration<Rep, Period> dur) {
+    using std::swap;
+    quantity temp(std::move(dur));
+    swap(temp.magnitude_, magnitude_);
+    return *this;
+  }
 
   /// \brief Assignment operator
   ///
-  /// Assigns the specified value to the magnitude of \c *this. This operator
-  /// only applies to unitless quantities.
+  /// _Constraints_:
+  ///   - <tt>std::is_assignable_v<Up, T></tt> is \c true.
+  ///   - \c *this is unitless
   ///
-  /// \pre \c magnitude_type is assignable from \c Up
-  /// \pre \c *this is unitless
+  /// _Effcts_: Assigns \c std::forward<Up>(other) to the magnitude of \c *this.
   ///
-  /// \tparam Up the the type of the value to assign to \c *this
-  /// \param up the value to assign to \c *this
-  ///
-  /// \return a reference to \c *this
+  /// \tparam Up The type of the value to assign to the magnitude of \c *this.
+  /// \param[in] other The value to assign to the magnitude of \c *this.
+  /// \return *this
   template <typename Up = magnitude_type>
-    requires unitless_unit<units> && std::assignable_from<magnitude_type&, Up>
+    requires unitless_unit<units> && std::assignable_from<magnitude_type, Up>
   constexpr quantity& operator=(Up&& other) noexcept(std::is_nothrow_assignable_v<magnitude_type&, Up>) {
     magnitude_ = std::forward<Up>(other);
     return *this;
@@ -327,31 +337,44 @@ public:
 
   /// \brief Returns the units of \c *this
   ///
+  /// _Effects_: Returns the units of \c *this. <br>
+  /// _Remarks_: This function is a constexpr function.
+  ///
   /// \return The units of \c *this
   constexpr units_type get_units() const noexcept { return units; }
 
   /// \brief Returns the magnitude of the \c *this
   ///
-  /// \return A \c const reference to the magnitude of \c *this
+  /// _Effects_: Returns \c mag. <br>
+  /// _Remarks_: This function is a constxpr function.
+  ///
+  /// \return A \c const reference to the magnitude of \c *this.
   constexpr const magnitude_type& get_magnitude() const& noexcept { return magnitude_; }
 
   /// \brief Returns the magnitude of the \c *this
   ///
-  /// \return An rvalue reference to the magnitude of \c *this
+  /// _Effects_: Returns \c std::move(mag). <br>
+  /// _Remarks_: This function is a constexpr function.
+  ///
+  /// \return An rvalue-reference to the magnitude of \c *this.
   constexpr magnitude_type&& get_magnitude() && noexcept { return std::move(magnitude_); }
 
   /// \brief Returns the magnitude of the \c *this
   ///
-  /// \return A \c const rvalue reference to the magnitude of \c *this
+  /// _Effects_: Returns \c std::move(mag). <br>
+  /// _Remarks_: This function is a constexpr function.
+  ///
+  /// \return A \c const rvalue reference to the magnitude of \c *this.
   constexpr const magnitude_type&& get_magnitude() const&& noexcept { return std::move(magnitude_); }
 
   /// \brief Conversion operator to underlying magnitude type
   ///
-  /// Converts the quantity to the underlying type. This operation is implicit
-  /// if the quantity is unitless. It is highly recommended to only call this
-  /// operator if the quantity is unitless.
+  /// _Effects_: Returns \c mag. <br>
+  /// _Remarks_: The conversion operator is explicit if the \c quantity object is not unitless. This function
+  ///            is a constexpr function.
   ///
-  /// \return the underlying magnitude of the \c quantity
+  /// \note It is not recommended to use this function unless the \c quantity is unitless.
+  /// \return The magnitude of \c *this.
   constexpr explicit(!unitless_unit<units>) operator magnitude_type() const noexcept { return magnitude_; }
 
   /// \brief Conversion operator to \c std::chrono::duration
