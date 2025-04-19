@@ -312,6 +312,31 @@ TEST(TestQuantity, TestUnitAddition) {
   EXPECT_FLOAT_EQ(q8.get_magnitude(), -271.15);
 }
 
+TEST(TestQuantity, TestUnitSubtraction) {
+  quantity<meter_unit, double> q1{1.0};
+  quantity<meter_unit, double> q2{2.0};
+  quantity<meter_unit, double> q3{3.0};
+
+  EXPECT_EQ(q3 - q2, q1);
+  EXPECT_EQ(q3 -= q2, q1);
+
+  quantity<centimeter_unit, double> q4 = q3 - q3;
+  EXPECT_FLOAT_EQ(q4.get_magnitude(), 0.0);
+
+  q4 -= q2;
+  EXPECT_FLOAT_EQ(q4.get_magnitude(), -200.0);
+
+  quantity<mile_unit, double> q5 = quantity<meter_unit, double>{1.0} - quantity<foot_unit, double>{1.0};
+  EXPECT_NEAR(q5.get_magnitude(), 0.00043197725284339455, 1e-5);
+
+  q5 -= quantity<meter_unit, double>{2.0} - quantity<foot_unit, double>{.0};
+  EXPECT_NEAR(q5.get_magnitude(), -0.0008107651316312733, 1e-5);
+
+  quantity<kelvin_unit, double> q7{1.0};
+  quantity<Celsisus_unit, double> q8 = q7 - q7;
+  EXPECT_FLOAT_EQ(q8.get_magnitude(), -273.15);
+}
+
 TEST(TestQuantity, TestPrinting) {
   quantity<meter_unit, int> q1{1};
   std::string str = std::format("{}", q1);
