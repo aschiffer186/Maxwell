@@ -11,7 +11,6 @@
 #ifndef QUANTITY_REPO_HPP
 #define QUANTITY_REPO_HPP
 
-#include "dimension.hpp"
 #include "quantity.hpp"
 #include "unit.hpp"
 #include "unit_repo.hpp"
