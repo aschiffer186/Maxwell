@@ -180,10 +180,10 @@ MAKE_UNIT_WITH_DESC(degree, scalar_unit.add_tag<degree_unit_tag>(), "deg");
 /// \cond
 template <> struct is_tag_convertible<degree_unit_tag, radian_unit_tag> : std::true_type {};
 template <> struct is_tag_convertible<radian_unit_tag, degree_unit_tag> : std::true_type {};
-template <> struct tag_conversion_factor<radian_unit_type, degree_unit_type> {
+template <> struct tag_conversion_factor<radian_unit_tag, degree_unit_tag> {
   static constexpr double factor = 180.0 / std::numbers::pi;
 };
-template <> struct tag_conversion_factor<degree_unit_type, radian_unit_type> {
+template <> struct tag_conversion_factor<degree_unit_tag, radian_unit_tag> {
   static constexpr double factor = std::numbers::pi / 180.0;
 };
 /// \endcond

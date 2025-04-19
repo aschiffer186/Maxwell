@@ -224,6 +224,16 @@ TEST(TestQuantity, TestUnitconvertingConstructorTime) {
   EXPECT_FLOAT_EQ(s4.get_magnitude(), 1.0);
 }
 
+TEST(TestQuantity, TestUnitConvertinConstructorAngle) {
+  radian r{1.0};
+  degree d{r};
+
+  EXPECT_FLOAT_EQ(d.get_magnitude(), 57.2957795);
+
+  radian r2{d};
+  EXPECT_FLOAT_EQ(r2.get_magnitude(), 1.0);
+}
+
 TEST(TestQuantity, TestUnitConvertingConstructorArea) {
   square_meter sm{1.0};
   square_centimeter cm{sm};
