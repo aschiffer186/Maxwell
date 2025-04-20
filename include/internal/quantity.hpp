@@ -69,7 +69,10 @@ constexpr double to_chrono_conversion_factor() {
 /// An instance of \c quantity represents a physical quantity with both a magnitude and units.
 /// Instances of \c quantity can be manipulated like arithmetic types, but only when such operations
 /// obey the rules of dimensional analysis. Additionally, instances of \c quantity can only be created
-/// from values with units that are convertible to the \c quantities units.
+/// from values with units that are convertible to the quantity's units.
+///
+/// \warning The quantity class may have unexpected behavior if \c T behaves like an integral type or a collection
+///          of integral types.
 ///
 /// The magnitude of the quantity is allocated within the storage of the quantity object.
 ///
@@ -82,14 +85,6 @@ constexpr double to_chrono_conversion_factor() {
 /// The following definitions are used to define this class:
 ///   - A quantity's magnitude refers the value returned by \c get_magnitude().
 ///   - A quantity's value refers to the magnitude of the class expression in the units returned by \c get_units().
-///   - _Constraints_ has the same defintion as _constraints_ in the C++ 20 draft standard (see
-///   [clause 16.3.2.4](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2023/n4928.pdf)).
-///   - _Mandates_ has the same defintion as _mandates_ in the C++ 20 draft standard (see
-///   [clause 16.3.2.4](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2023/n4928.pdf)).
-///   - _Effects_ has the same definition as _effects_ in the C++ 20 draft standard (see
-///   [clause 16.3.2.4](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2023/n4928.pdf)).
-///   - Remarks_ has the same definition as _remarks_ in the C++ 20 draft standard (see
-///   [clause 16.3.2.4](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2023/n4928.pdf)).
 ///
 /// \sa unit_type
 ///
@@ -141,7 +136,7 @@ public:
   /// \throws Any exceptions thrown by the constructor of \c magnitude_type.
   template <typename Up = magnitude_type>
     requires std::constructible_from<T, Up> && (!_detail::is_quantity_v<std::remove_cvref_t<Up>>)
-  constexpr explicit(!unitless_unit<U> || !std::convertible_to<Up, magnitude_type>)
+  constexpr explicit(!unitless_unit<U> || !std::convertible_to<Up, T>)
       quantity(Up&& u) noexcept(std::is_nothrow_constructible_v<T, Up>)
       : magnitude_(std::forward<Up>(u)) {}
 
@@ -182,7 +177,11 @@ public:
   /// _Effects_: Initializes the magnitude of \c *this with \c dur.count(), potentially first multiplying the value of
   ///            \c dur.count() by a constant to convert from the units of <tt>std::chrono::duration<Rep, Period></tt>
   ///            to the units of \c *this <br>
-  /// _Remarks_: If a unit conversion is required, the conversion factor is calculated at compile-time.
+  /// _Remarks_: If a unit conversion is required, the conversion factor is calculated at compile-time. Truncation may
+  ///            be performed if the units of \c *this are not an exact multiple of \c Period and \c T is not a
+  ///            floating-point type, potentially initializing \c *this with an inexact magnitude.
+  ///
+  /// \warning If \c T is not a floating-point type, \c *this may be constructed with an inexact value.
   ///
   /// \tparam Rep An arithmetic type representing the number of ticks of the duration object.
   /// \tparam Period A \c std::ratio representing the tick period of the duration object.
@@ -238,7 +237,10 @@ public:
   /// _Remarks_: The values needed to convert from the units of \c q to the units of \c *this are calculated at
   ///            compile-time. This constructor is explicit if <tt>std::is_convertible_v<const Up&, T></tt> is false.
   ///            This constructor is a constexpr constructor if the selected constructor of \c T is a constexpr
-  ///            constructor and arthmetic operations on \c T are usable in constant expressions.
+  ///            constructor and arthmetic operations on \c T are usable in constant expressions. If \c T is an integral
+  ///            type or a collection of integral types, \c *this may be initialized with an incorrect or inexact value.
+  /// \warning If \c T is an integer or collection of integers, the quantity may be constructed with a incorrect or
+  /// inexact value.
   ///
   /// \tparam V The units of the quantity used to initialize the magnitude of \c *this.
   /// \tparam Up The type of the magnitude of the quantity used to initialize the magnitude of \c *this.
@@ -265,7 +267,10 @@ public:
   /// _Remarks_: The values needed to convert from the units of \c q to the units of \c *this are calculated at
   ///            compile-time. This constructor is explicit if <tt>std::is_convertible_v<Up, T></tt> is false. This
   ///            constructor is a constexpr constructor if the selected constructor of \c T is a constexpr constructor
-  ///            and arthmetic operations on \c T are usable in constant expressions.
+  ///            and arthmetic operations on \c T are usable in constant expressions. If \c T behaves like an integral
+  ///            type or collection of integral types, \c *this may be assigned an inexact or incorrect value.
+  /// \warning If \c T is an integer or behaves like a collection of integers, the quantity may be assgined an incorrect
+  ///          or inexact value.
   ///
   /// \tparam V The units of the quantity used to initialize the magnitude of \c *this.
   /// \tparam Up The type of the magnitude of the quantity used to initialize the magnitude of \c *this.
@@ -291,7 +296,11 @@ public:
   ///            performing any arithmetic operations necessary to convert from the units of \c q to the units of \c
   ///            *this. <br>
   /// _Remarks_: The values needed to convert from the units of \c q to the units of \c *this are calculated at
-  ///            compile-time.
+  ///            compile-time. If \c T behaves like an integral type or collection of integral types, \c *this may be
+  ///            assigned an inexact or incorrect value.
+  /// \warning If \c T is an integer or behaves like a collection of integers, the quantity may be assgined an incorrect
+  ///          or inexact value.
+  ///
   /// \tparam Up The type of the magnitude of the quantity whose magnitude will be assigned to \c *this.
   /// \tparam V The units of the quantity whose magnitude will be assigned to \c *this.
   /// \param[in] other The quantity whose magnitude will be assigned to \c *this.
@@ -315,7 +324,11 @@ public:
   ///
   /// _Effects_: Assigns the value of \c dur.count() to the \c *this, potentially multiplying by a constant to
   ///            to convert from the units of the duration object to the units of \c *this. <br>
-  /// _Remarks_: The conversion factor is calculated at compile-time.
+  /// _Remarks_: The conversion factor is calculated at compile-time. If \c T behaves like an integral type,
+  ///            and the units of \c *this are not an exact multiple of \c Period, truncation may be perfomed.
+  ///
+  /// \warning If \c T behaves like an integer , \c *this may be assigned an inexact value.
+  ///
   /// \tparam Rep An arithmetic type representing the number of ticks of the duration object.
   /// \tparam Period A \c std::ratio representing the tick period of the duration object.
   /// \param[in] dur The \c std::chrono::duration object whose value will be assigned to \c *this.
@@ -398,7 +411,13 @@ public:
   /// _Effects_: Returns a \c std::chrono::duration object whose time interval is the same value as the
   ///            magnitude of \c *this when both objects are converted to the same units. <br>
   /// _Remarks_: If a conversion factor is required to convert from the units of \c *this to the specified
-  ///            \c std::chrono::duration object, it is calculted at compile-time.
+  ///            \c std::chrono::duration object, it is calculted at compile-time. If \c
+  ///            std::chrono::treat_as_floating_point<Rep> is \c false or the units of \c *this are not an exact
+  ///            multiple of \c Period, truncation may be perfomed.
+  ///
+  /// \warning The converted value may be inexact or incorrect if \c std::chrono::treat_as_floating_point<Rep> is \c
+  ///          false.
+  ///
   /// \tparam Rep An arithmetic type representing the number of ticks of the duration object.
   /// \tparam Period A \c std::ratio representing the tick period of the duration object.
   /// \return A \c std::chrono::duration object with the same value as \c *this.
@@ -413,7 +432,11 @@ public:
   ///
   /// _Effects_: Returns a \c quantity with th same value of \c *this but whose units are the SI base units
   ///            of the units of \c *this. <br>
-  /// _Remarks_: This is a constexpr function.
+  /// _Remarks_: This is a constexpr function. The value of the returned \c quantity object may be inexact if
+  ///            \c T behaves like an integral type of collection of integral types.
+  ///
+  /// \warning The value of the retuned quantity may be exact if \c T is an integer or collection of integers.
+  ///
   /// \return A new \c quantity with the same dimension of \c *this in SI
   /// base units.
   /// \throws Any exceptions thrown by the copy constructor of \c T.
@@ -602,7 +625,6 @@ private:
 /// _Effects_: Compares the values of lhs and \c rhs for equality. <br>
 /// _Remarks_: If \c S1 or \c S2 is a floating-point type, this function uses floating-point equality checks.
 ///            The exception specifier is equivalent to `noexcept(lhs.get_magnitude() == rhs.get_magnitude())`
-///
 ///
 /// \warning Comparing two \c quantity objects where at least one quantity has a floating-point magnitude type is
 ///           likely to result in false inequalities. Use <=, >=, or <=> instead.
