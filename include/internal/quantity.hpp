@@ -972,10 +972,20 @@ template <typename T, unit auto U> std::ostream& operator<<(std::ostream& os, co
   return os;
 }
 
+/// \brief Quantity synthesis operator
+///
+/// _Constraints_: \c T is not a specialization of \c unit_type. <br>
+/// _Effects_: Creates a \c quantity object with units of \c U and whose magnitude is direct non-list-initialized with
+/// \c std::forward<T>(lhs).
+///
+/// \tparam T The type of the magnitude of the quantity.
+/// \tparam U The units of the quantity.
+/// \param[in] lhs The value to initialize the magnitude of the quantity with.
+/// \return A \c quantity with the specified units and magnitude.
 template <typename T, unit U>
   requires(!unit<T>)
-constexpr quantity<U{}, T> operator*(T&& lhs, U) {
-  return quantity<U{}, T>(std::forward<T>(lhs));
+constexpr quantity<U{}, std::remove_cvref_t<T>> operator*(T&& lhs, U) {
+  return quantity<U{}, std::remove_cvref_t<T>>(std::forward<T>(lhs));
 }
 
 template <typename T, unit auto U, unit U2> constexpr quantity<U * U2{}, T> operator*(const quantity<U, T>& lhs, U2) {
@@ -984,6 +994,10 @@ template <typename T, unit auto U, unit U2> constexpr quantity<U * U2{}, T> oper
 
 template <typename T, unit auto U, unit U2> constexpr quantity<U * U2{}, T> operator*(quantity<U, T>&& lhs, U2) {
   return quantity<U * U2{}, T>(std::move(lhs).get_magnitude());
+}
+
+template <typename T, unit auto U, unit U2> constexpr quantity<U / U2{}, T> operator/(const quantity<U, T>& lhs, U2) {
+  return quantity<U / U2{}, T>(lhs.get_magnitude());
 }
 
 template <typename T, unit auto U, unit U2> constexpr quantity<U / U2{}, T> operator/(quantity<U, T>&& lhs, U2) {
