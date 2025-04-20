@@ -96,6 +96,25 @@ TEST(TestQuantity, TestInPlaceConstructor) {
   EXPECT_EQ(q4.get_magnitude().value, 15.0);
 }
 
+TEST(TestQuantity, TestChronoConstructor) {
+  using namespace std::chrono;
+  using namespace std::chrono_literals;
+
+  quantity<second_unit, double> q{1min};
+  EXPECT_FLOAT_EQ(q.get_magnitude(), 60.0);
+
+  quantity<minute_unit, double> q2{1s};
+  EXPECT_FLOAT_EQ(q2.get_magnitude(), 1.0 / 60.0);
+
+  using from_duration = std::chrono::duration<double, std::ratio<12, 50>>;
+  const from_duration from{12};
+  quantity<hour_unit, double> q3{from};
+
+  using to_duration = std::chrono::duration<double, std::ratio<3'600, 1>>;
+  const auto test_val = std::chrono::duration_cast<to_duration>(from);
+  EXPECT_FLOAT_EQ(q3.get_magnitude(), test_val.count());
+}
+
 TEST(TestQuantity, TestUnitConvertingConstructorAmount) {
   mole m{1.0};
   nanomole nm{m};

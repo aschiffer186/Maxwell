@@ -114,6 +114,24 @@ template <auto U, typename T>
 MAXWELL_MATH_CONSTEXPR26 double tan(const quantity<U, T>& q) MATH_NOEXCEPT(tan) {
   return std::tan(radian{q}.get_magnitude());
 }
+
+template <auto U, typename T>
+  requires angle_unit<U> && _detail::cmath_compatible_type<T>
+MAXWELL_MATH_CONSTEXPR26 double csc(const quantity<U, T>& q) MATH_NOEXCEPT(sin) {
+  return 1.0 / sin(q);
+}
+
+template <auto U, typename T>
+  requires angle_unit<U> && _detail::cmath_compatible_type<T>
+MAXWELL_MATH_CONSTEXPR26 double sec(const quantity<U, T>& q) MATH_NOEXCEPT(cos) {
+  return 1.0 / cos(q);
+}
+
+template <auto U, typename T>
+  requires angle_unit<U> && _detail::cmath_compatible_type<T>
+MAXWELL_MATH_CONSTEXPR26 double cot(const quantity<U, T>& q) MATH_NOEXCEPT(tan) {
+  return 1.0 / tan(q);
+}
 } // namespace maxwell
 
 #endif

@@ -178,7 +178,7 @@ public:
   template <typename Rep, typename Period>
     requires std::constructible_from<magnitude_type, Rep> && time_unit<units>
   MAXWELL_CONSTEXPR23 quantity(std::chrono::duration<Rep, Period> dur)
-      : magnitude_(dur.cout() * _detail::from_chrono_conversion_factor<std::chrono::duration<Rep, Period>, units>()) {}
+      : magnitude_(dur.count() * _detail::from_chrono_conversion_factor<std::chrono::duration<Rep, Period>, units>()) {}
 
   /// \brief Converting constructor
   ///
@@ -408,11 +408,11 @@ public:
   // --- Quantity manipulation ---
   /// \brief Addition operator
   ///
-  /// Adds the magnitude of the specified quantity to the magnitude of
-  /// \c *this
+  /// _Constraints_: \c addable<T> is modeled. <br>
+  /// _Effects_: Adds the magnitude of \c other to the magnitude of \c *this and stores the result in \c *this.
   ///
-  /// \param other The quantity to add to \c *this
-  /// \return A reference to the modified value \c *this
+  /// \param[in] other The quantity to add to \c *this
+  /// \return \c *this
   constexpr quantity& operator+=(const quantity& other)
     requires addable<magnitude_type>
   {
@@ -424,13 +424,13 @@ public:
     return *this;
   }
 
-  /// \brief Subtrction operator
+  /// \brief Subtraction operator
   ///
-  /// Subtraction the magnitude of the specified quantity from the magnitude of
-  /// \c *this
+  /// _Constraints_: \c subtractable<T> is modeled. <br>
+  /// _Effects_: Subtracts the magnitude of \c other from the magnitude of \c *this and stores the result in \c *this.
   ///
-  /// \param other The quantity to subtract from this \c *this
-  /// \return A reference to the modified value \c *this
+  /// \param[in] other The quantity to subtract from \c *this
+  /// \return \c *this
   constexpr quantity& operator-=(const quantity& other)
     requires subtractable<magnitude_type>
   {
@@ -442,13 +442,18 @@ public:
     return *this;
   }
 
-  /// \brief Converting addition operator
+  /// \brief Addition operator
   ///
-  /// Converts the specified quantity to the units of \c *this then adds the converted
-  /// magnitude to \c *this
+  /// _Constraints_: <tt>addable_with<T, Up></tt> is modeled. <br>
+  /// _Mandates_: <tt>unit_convertible_to<V, U></tt> is modeled <br>
+  /// _Effects_: Converts the quantity \c other to the units of \c *this then adds the converted magnitude to
+  ///            the magnitude of \c *this and stores the result in \c *this. <br>
+  /// _Remarks_: The conversion is calculated at compile-time.
   ///
-  /// \param other The quantity to add to \c *this
-  /// \return A reference to the modified value of \c *this
+  /// \tparam Up The type of the magnitude of the quantity to add to \c *this.
+  /// \tparam V The units of the quantity to add to \c *this.
+  /// \param[in] other The quantity to add to \c *this.
+  /// \return \c *this
   template <typename Up, unit auto V>
     requires addable_with<T, Up>
   constexpr quantity& operator+=(const quantity<V, Up>& other) {
@@ -456,13 +461,18 @@ public:
     return *this += quantity(other);
   }
 
-  /// \brief Converting subtraction operator
+  /// \brief Subtraction operator
   ///
-  /// Converts the specified quantity to the units of \c *this then subtracts the converted
-  /// magnitude to \c *this
+  /// _Constraints_: <tt>subtractable_with<T, Up></tt> is modeled. <br>
+  /// _Mandates_: <tt>unit_convertible_to<V, U></tt> is modeled <br>
+  /// _Effects_: Converts the quantity \c other to the units of \c *this then subtracts the converted magnitude from
+  ///            the magnitude of \c *this and stores the result in \c *this. <br>
+  /// _Remarks_: The conversion is calculated at compile-time.
   ///
-  /// \param other The quantity to subtract \c *this
-  /// \return A reference to the modified value of \c *this
+  /// \tparam Up The type of the magnitude of the quantity to subtract from \c *this.
+  /// \tparam V The units of the quantity to subtract from \c *this.
+  /// \param[in] other The quantity to subtract from \c *this.
+  /// \return \c *this
   template <typename Up, unit auto V>
     requires subtractable_with<T, Up>
   constexpr quantity& operator-=(const quantity<V, Up>& other) {
@@ -472,10 +482,11 @@ public:
 
   /// \brief Multiplication operator
   ///
-  /// Multiplies the quantity by the specified scalar value
+  /// _Constraints_: \c multiply<T> is modeled. <br>
+  /// _Effects_: Multiplies the magnitude of \c *this by \c scalar and stores the result in \c *this.
   ///
-  /// \param scalar the scalar value to multiply \c *this by
-  /// \return A reference to the modified value of \c *this
+  /// \param[in] scalar The scalar value to multiply the magnitude of \c *this by
+  /// \return \c *this
   constexpr quantity& operator*=(const magnitude_type& scalar)
     requires multiply<magnitude_type>
   {
@@ -489,10 +500,11 @@ public:
 
   /// \brief Division operator
   ///
-  /// Divides the quantity by the specified scalar value
+  /// _Constraints_: \c divide<T> is modeled. <br>
+  /// _Effects_: Divides the magnitude of \c *this by \c scalar and stores the result in \c *this.
   ///
-  /// \param scalar the scalar value to divide \c *this by
-  /// \return A reference to the modified value of \c *this
+  /// \param[in] scalar The scalar value to divide the magnitude of \c *this by
+  /// \return \c *this
   constexpr quantity& operator/=(const magnitude_type& scalar) noexcept(nothrow_divide<magnitude_type>)
     requires divide<magnitude_type>
   {
@@ -530,7 +542,7 @@ public:
   /// returns a copy of the \c quantity prior to the increment
   ///
   /// \return A copy of the \c quantity prior to the increment
-  constexpr quantity& operator++(int) {
+  constexpr quantity operator++(int) {
     quantity temp{*this};
     ++magnitude_;
     return temp;
@@ -542,7 +554,7 @@ public:
   /// returns a copy of the \c quantity prior to the decremet
   ///
   /// \return A copy of the \c quantity prior to the decrement
-  constexpr quantity& operator--(int) {
+  constexpr quantity operator--(int) {
     quantity temp{*this};
     --magnitude_;
     return temp;
