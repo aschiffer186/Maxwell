@@ -303,6 +303,12 @@ TEST(TestQuantity, TestConstantExpressionUsage) {
   }));
   EXPECT_TRUE(is_constant_expression([] { constant_expression{foot{1.0}}; }));
 
+  EXPECT_TRUE(is_constant_expression([] { constant_expression{1.0}.get_magnitude(); }));
+  EXPECT_TRUE(is_constant_expression([] {
+    constant_expression ce{1.0};
+    ce.get_magnitude();
+  }));
+
   EXPECT_FALSE(is_constant_expression([] { non_constant_expression{}; }));
 }
 

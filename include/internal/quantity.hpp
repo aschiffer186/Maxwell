@@ -79,6 +79,18 @@ constexpr double to_chrono_conversion_factor() {
 /// The units of a \c quantity are part of its type, allowing for checking of dimensional coherence and
 /// performance of unit conversions at compile-time.
 ///
+/// The following definitions are used to define this class:
+///   - A quantity's magnitude refers the value returned by \c get_magnitude().
+///   - A quantity's value refers to the magnitude of the class expression in the units returned by \c get_units().
+///   - _Constraints_ has the same defintion as _constraints_ in the C++ 20 draft standard (see
+///   [clause 16.3.2.4](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2023/n4928.pdf)).
+///   - _Mandates_ has the same defintion as _mandates_ in the C++ 20 draft standard (see
+///   [clause 16.3.2.4](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2023/n4928.pdf)).
+///   - _Effects_ has the same definition as _effects_ in the C++ 20 draft standard (see
+///   [clause 16.3.2.4](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2023/n4928.pdf)).
+///   - Remarks_ has the same definition as _remarks_ in the C++ 20 draft standard (see
+///   [clause 16.3.2.4](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2023/n4928.pdf)).
+///
 /// \sa unit_type
 ///
 /// \tparam U A value representing the units of the quantity. \c U must be an instantiation of \c unit_type.
@@ -87,8 +99,9 @@ constexpr double to_chrono_conversion_factor() {
 template <auto U, typename T> class quantity {
   static_assert(!std::is_const_v<T>);
   static_assert(!std::is_volatile_v<T>);
-  static_assert(!std::same_as<std::remove_cv_t<T>, std::in_place_t>);
-  static_assert(std::destructible<T>);
+  static_assert(!std::same_as<std::remove_cvref_t<T>, std::in_place_t>);
+  static_assert(!std::is_reference_v<T>);
+  static_assert(!std::is_array_v<T>);
   static_assert(unit<decltype(U)>, "Units of quantity must be an instantiation of unit_type");
 
 public:
@@ -109,7 +122,7 @@ public:
   ///
   /// \throws Any exceptions thrown by the default constructor of \c T
   constexpr quantity()
-    requires std::is_default_constructible_v<magnitude_type>
+    requires std::is_default_constructible_v<T>
   = default;
 
   /// \brief Constructor
@@ -127,8 +140,8 @@ public:
   /// \param[in] u The value used to initialize the magnitude of \c *this.
   /// \throws Any exceptions thrown by the constructor of \c magnitude_type.
   template <typename Up = magnitude_type>
-    requires std::constructible_from<magnitude_type, Up> && (!_detail::is_quantity_v<std::remove_cvref_t<Up>>)
-  constexpr explicit(!unitless_unit<units> || !std::convertible_to<Up, magnitude_type>)
+    requires std::constructible_from<T, Up> && (!_detail::is_quantity_v<std::remove_cvref_t<Up>>)
+  constexpr explicit(!unitless_unit<U> || !std::convertible_to<Up, magnitude_type>)
       quantity(Up&& u) noexcept(std::is_nothrow_constructible_v<T, Up>)
       : magnitude_(std::forward<Up>(u)) {}
 
@@ -143,12 +156,12 @@ public:
   /// \param[in] args The value(s) used to initialize the magnitude of \c *this.
   /// \throws Any exceptions thrown by the selected constructor of \c T.
   template <typename... Args>
-    requires std::constructible_from<magnitude_type, Args...>
+    requires std::constructible_from<T, Args...>
   constexpr explicit quantity(std::in_place_t, Args&&... args) : magnitude_(std::forward<Args>(args)...) {}
 
   /// \c Constructor
   ///
-  /// _Constraints_: <tt>std::is_constructible_v<T, std::initialize_list<Up>&, Args...></tt> is \c true. <br>
+  /// _Constraints_: <tt>std::is_constructible_v<T, std::initializer_list<Up>&, Args...></tt> is \c true. <br>
   /// _Effects_: Direct non-list-initializes the magnitude of \c *this with <tt>il, std::forward<Args>(args)...</tt>
   /// <br>
   /// _Remarks_: This constructor is a constexpr constructor if the selected constructor of \c T is a constexpr
@@ -156,7 +169,7 @@ public:
   ///
   /// \throws Any exceptions thrown by the selected constructor of \c T
   template <typename Up, typename... Args>
-    requires std::constructible_from<magnitude_type, std::initializer_list<Up>&, Args...>
+    requires std::constructible_from<T, std::initializer_list<Up>&, Args...>
   constexpr explicit quantity(std::in_place_t, std::initializer_list<Up> il, Args&&... args)
       : magnitude_(il, std::forward<Args>(args)...) {}
 
@@ -176,7 +189,7 @@ public:
   /// \param[in] dur The \c std::chrono::duration object used to initialize the magnitude of \c *this.
   /// \throw Any exceptions thrown by the selected constructor of \c T.
   template <typename Rep, typename Period>
-    requires std::constructible_from<magnitude_type, Rep> && time_unit<units>
+    requires std::constructible_from<T, Rep> && time_unit<U>
   MAXWELL_CONSTEXPR23 quantity(std::chrono::duration<Rep, Period> dur)
       : magnitude_(dur.count() * _detail::from_chrono_conversion_factor<std::chrono::duration<Rep, Period>, units>()) {}
 
@@ -190,10 +203,11 @@ public:
   ///
   /// \tparam Up The type of the magnitude of the \c quantity used to initialize \c *this.
   /// \param[in] q The \c quantity used to initialize the magnitude of \c *this.
-  /// \throw Any exceptins thrown by the selected constructor of \c T.
+  /// \throw Any exceptions thrown by the selected constructor of \c T.
   template <typename Up>
-    requires std::constructible_from<magnitude_type, Up>
-  constexpr explicit(!std::convertible_to<const Up&, magnitude_type>) quantity(const quantity<units, Up>& q)
+    requires std::constructible_from<T, Up>
+  constexpr explicit(!std::convertible_to<const Up&, T>)
+      quantity(const quantity<U, Up>& q) noexcept(std::is_nothrow_constructible_v<T, const Up&>)
       : magnitude_(q.get_magnitude()) {}
 
   /// \brief Converting constructor
@@ -205,10 +219,11 @@ public:
   ///
   /// \tparam Up The type of the magnitude of the \c quantity used to initialize \c *this.
   /// \param[in] q The \c quantity used to initialize the magnitude of \c *this.
-  /// \throw Any exceptins thrown by the selected constructor of \c T.
+  /// \throw Any exceptions thrown by the selected constructor of \c T.
   template <typename Up>
-    requires std::constructible_from<magnitude_type, Up>
-  constexpr explicit(!std::convertible_to<Up, magnitude_type>) quantity(quantity<units, Up>&& q)
+    requires std::constructible_from<T, Up>
+  constexpr explicit(!std::convertible_to<Up, T>)
+      quantity(quantity<U, Up>&& q) noexcept(std::is_nothrow_constructible_v<T, Up>)
       : magnitude_(std::move(q).get_magnitude()) {}
 
   /// \brief Converting constructor
@@ -230,7 +245,7 @@ public:
   /// \param[in] q The \c quantity used to initialize the magnitude of \c *this.
   /// \throw Any exceptions thrown by the selected constructor of \c T or arthmetic operations on \c T.
   template <auto V, typename Up>
-    requires std::constructible_from<magnitude_type, Up> && unit<decltype(V)>
+    requires std::constructible_from<T, Up> && unit<decltype(V)>
   constexpr explicit(!std::is_convertible_v<const Up&, T>) quantity(const quantity<V, Up>& q)
       : magnitude_(q.get_magnitude() * conversion_factor(V, units) + conversion_offset(V, units)) {
     static_assert(unit_convertible_to<V, U>,
@@ -257,7 +272,7 @@ public:
   /// \param[in] q The \c quantity used to initialize the magnitude of \c *this.
   /// \throw Any exceptions thrown by the selected constructor of \c T or arithmetic operations on \c T.
   template <typename Up, auto V>
-    requires std::constructible_from<magnitude_type, Up>
+    requires std::constructible_from<T, Up>
   constexpr explicit(!std::is_convertible_v<Up, T>) quantity(quantity<V, Up>&& q)
       : magnitude_(std::move(q).get_magnitude() * conversion_factor(V, units) + conversion_offset(V, units)) {
     static_assert(unit_convertible_to<V, U>,
@@ -282,7 +297,7 @@ public:
   /// \param[in] other The quantity whose magnitude will be assigned to \c *this.
   /// \return \c *this
   template <typename Up, auto V>
-    requires std::constructible_from<magnitude_type, Up> && unit<decltype(V)>
+    requires std::constructible_from<T, Up> && unit<decltype(V)>
   constexpr quantity& operator=(quantity other) {
     static_assert(unit_convertible_to<V, U>, "Attempting to assign quantities with incompatible units");
     using std::swap;
@@ -293,27 +308,22 @@ public:
 
   /// \brief Converting assignment operator
   ///
-  /// Converts the magitude of \c dur from the period specified by the \c
-  /// std::chrono::duration to \c Units
+  /// _Constraints_:
+  ///   - <tt>std::is_assignable_v<T, Rep></tt> is \c true.
+  ///   - \c *this has units of time.
+  ///   - <tt>multiply_with<Rep, T></tt> is modeled.
   ///
-  /// \pre \c magnitude_type is constructible from \c Rep
-  /// \pre \c time_unit<units>
-  /// \post <tt>this->magnitude() == conversion_factor(Other,
-  /// Units)*dur.count()/tt>
-  ///
-  /// \tparam Rep the representation type of the \c std::chrono::duration
-  /// \tparam Period the period of the \c std::chrono::duration
-  /// \param dur the \c std::chrono::duration to assign to \c *this
-  ///
-  /// \return a refeence to \c *this
-  ///
-  /// \throws any exceptions thrown by the copy constructor of \c dur
+  /// _Effects_: Assigns the value of \c dur.count() to the \c *this, potentially multiplying by a constant to
+  ///            to convert from the units of the duration object to the units of \c *this. <br>
+  /// _Remarks_: The conversion factor is calculated at compile-time.
+  /// \tparam Rep An arithmetic type representing the number of ticks of the duration object.
+  /// \tparam Period A \c std::ratio representing the tick period of the duration object.
+  /// \param[in] dur The \c std::chrono::duration object whose value will be assigned to \c *this.
+  /// \throw Any exceptions thrown by the selected assignment operator of \c T.
   template <typename Rep, typename Period>
-    requires std::assignable_from<magnitude_type&, Rep> && time_unit<units>
+    requires std::assignable_from<T, Rep> && time_unit<U> && multiply_with<Rep, T>
   MAXWELL_CONSTEXPR23 quantity& operator=(std::chrono::duration<Rep, Period> dur) {
-    using std::swap;
-    quantity temp(std::move(dur));
-    swap(temp.magnitude_, magnitude_);
+    magnitude_ = dur.count() * _detail::from_chrono_conversion_factor<std::chrono::duration<Rep, Period>, units>();
     return *this;
   }
 
@@ -328,9 +338,10 @@ public:
   /// \tparam Up The type of the value to assign to the magnitude of \c *this.
   /// \param[in] other The value to assign to the magnitude of \c *this.
   /// \return *this
-  template <typename Up = magnitude_type>
-    requires unitless_unit<units> && std::assignable_from<magnitude_type, Up>
-  constexpr quantity& operator=(Up&& other) noexcept(std::is_nothrow_assignable_v<magnitude_type&, Up>) {
+  /// \throw Any exceptions thrown by the selected assignment operator of \c T.
+  template <typename Up = T>
+    requires unitless_unit<units> && std::assignable_from<T, Up>
+  constexpr quantity& operator=(Up&& other) {
     magnitude_ = std::forward<Up>(other);
     return *this;
   }
@@ -375,35 +386,40 @@ public:
   ///
   /// \note It is not recommended to use this function unless the \c quantity is unitless.
   /// \return The magnitude of \c *this.
-  constexpr explicit(!unitless_unit<units>) operator magnitude_type() const noexcept { return magnitude_; }
+  constexpr explicit(!unitless_unit<U>) operator magnitude_type() const { return magnitude_; }
 
   /// \brief Conversion operator to \c std::chrono::duration
   ///
-  /// Converts the quantity to a \c std::chrono::duration. This conversion is implicit if
-  /// the conversion would not result in a loss of information.
-  /// \pre \c units has dimensions of time
-  /// \pre \c Rep is constructible from \c magnitude_type
+  /// _Constaints_:
+  ///   - <tt>std::is_constructible_v<std::chrono<Rep, Period>, T></tt> is \c true.
+  ///   - \c *this has units of time.
+  ///   - <tt>multiply_with<T, Rep></tt> is modeled.
   ///
-  /// \tparam Rep the representation type of the \c std::chrono::duration
-  /// \tparam Period the period of the \c std::chrono::duration
-  /// \return a \c std::chrono::duration that is the same value \c *this
+  /// _Effects_: Returns a \c std::chrono::duration object whose time interval is the same value as the
+  ///            magnitude of \c *this when both objects are converted to the same units. <br>
+  /// _Remarks_: If a conversion factor is required to convert from the units of \c *this to the specified
+  ///            \c std::chrono::duration object, it is calculted at compile-time.
+  /// \tparam Rep An arithmetic type representing the number of ticks of the duration object.
+  /// \tparam Period A \c std::ratio representing the tick period of the duration object.
+  /// \return A \c std::chrono::duration object with the same value as \c *this.
   template <typename Rep, typename Period>
-    requires time_unit<units> && multiply_with<magnitude_type, Rep>
+    requires time_unit<U> && multiply_with<T, Rep> && std::constructible_from<std::chrono::duration<Rep, Period>, T>
   MAXWELL_CONSTEXPR23 operator std::chrono::duration<Rep, Period>() const {
-    return std::chrono::duration<Rep, Period>(static_cast<Rep>(
-        magnitude_ * _detail::to_chrono_conversion_factor<std::chrono::duration<Rep, Period>, units>()));
+    return std::chrono::duration<Rep, Period>(
+        magnitude_ * _detail::to_chrono_conversion_factor<std::chrono::duration<Rep, Period>, units>());
   }
 
-  /// \brief Returns a new \c quantity with the same dimensions of \c
-  /// *this but in SI base units
+  /// \brief Returns a new quantity with the same value of \c *this in SI base units
   ///
-  /// Returns a new \c quantity with the same dimension of \c *this, but
-  /// in SI base units. The magnitude of the returned quantity is equivalent to
-  /// \c this->magnitude() converted to SI base units
-  ///
+  /// _Effects_: Returns a \c quantity with th same value of \c *this but whose units are the SI base units
+  ///            of the units of \c *this. <br>
+  /// _Remarks_: This is a constexpr function.
   /// \return A new \c quantity with the same dimension of \c *this in SI
   /// base units.
-  constexpr auto to_SI_base_units() const { return quantity<units.to_SI_base_units(), magnitude_type>(*this); }
+  /// \throws Any exceptions thrown by the copy constructor of \c T.
+  constexpr auto to_SI_base_units() const noexcept(std::is_nothrow_copy_constructible_v<T>) {
+    return quantity<units.to_SI_base_units(), magnitude_type>(*this);
+  }
 
   // --- Quantity manipulation ---
   /// \brief Addition operator
@@ -411,10 +427,10 @@ public:
   /// _Constraints_: \c addable<T> is modeled. <br>
   /// _Effects_: Adds the magnitude of \c other to the magnitude of \c *this and stores the result in \c *this.
   ///
-  /// \param[in] other The quantity to add to \c *this
-  /// \return \c *this
+  /// \param[in] other The quantity to add to \c *this.
+  /// \return \c *this.
   constexpr quantity& operator+=(const quantity& other)
-    requires addable<magnitude_type>
+    requires addable<T>
   {
     if constexpr (requires(magnitude_type value) { value += value; }) {
       magnitude_ += other.get_magnitude();
@@ -429,10 +445,10 @@ public:
   /// _Constraints_: \c subtractable<T> is modeled. <br>
   /// _Effects_: Subtracts the magnitude of \c other from the magnitude of \c *this and stores the result in \c *this.
   ///
-  /// \param[in] other The quantity to subtract from \c *this
-  /// \return \c *this
+  /// \param[in] other The quantity to subtract from \c *this.
+  /// \return \c *this.
   constexpr quantity& operator-=(const quantity& other)
-    requires subtractable<magnitude_type>
+    requires subtractable<T>
   {
     if constexpr (requires(magnitude_type value) { value -= value; }) {
       magnitude_ -= other.get_magnitude();
@@ -453,7 +469,7 @@ public:
   /// \tparam Up The type of the magnitude of the quantity to add to \c *this.
   /// \tparam V The units of the quantity to add to \c *this.
   /// \param[in] other The quantity to add to \c *this.
-  /// \return \c *this
+  /// \return \c *this.
   template <typename Up, unit auto V>
     requires addable_with<T, Up>
   constexpr quantity& operator+=(const quantity<V, Up>& other) {
@@ -472,7 +488,7 @@ public:
   /// \tparam Up The type of the magnitude of the quantity to subtract from \c *this.
   /// \tparam V The units of the quantity to subtract from \c *this.
   /// \param[in] other The quantity to subtract from \c *this.
-  /// \return \c *this
+  /// \return \c *this.
   template <typename Up, unit auto V>
     requires subtractable_with<T, Up>
   constexpr quantity& operator-=(const quantity<V, Up>& other) {
@@ -486,9 +502,9 @@ public:
   /// _Effects_: Multiplies the magnitude of \c *this by \c scalar and stores the result in \c *this.
   ///
   /// \param[in] scalar The scalar value to multiply the magnitude of \c *this by
-  /// \return \c *this
+  /// \return \c *this.
   constexpr quantity& operator*=(const magnitude_type& scalar)
-    requires multiply<magnitude_type>
+    requires multiply<T>
   {
     if constexpr (requires(magnitude_type value) { value *= value; }) {
       magnitude_ *= scalar;
@@ -503,10 +519,10 @@ public:
   /// _Constraints_: \c divide<T> is modeled. <br>
   /// _Effects_: Divides the magnitude of \c *this by \c scalar and stores the result in \c *this.
   ///
-  /// \param[in] scalar The scalar value to divide the magnitude of \c *this by
-  /// \return \c *this
-  constexpr quantity& operator/=(const magnitude_type& scalar) noexcept(nothrow_divide<magnitude_type>)
-    requires divide<magnitude_type>
+  /// \param[in] scalar The scalar value to divide the magnitude of \c *this by.
+  /// \return \c *this.
+  constexpr quantity& operator/=(const magnitude_type& scalar)
+    requires divide<T>
   {
     if constexpr (requires(magnitude_type value) { value /= value; }) {
       magnitude_ /= scalar;
@@ -518,19 +534,21 @@ public:
 
   /// \brief Pre-increment operator
   ///
-  /// Incerements the magnitude of \c *this by one
+  /// _Constraints_: The exprssion `++std::declval<T>()` is well formed. <br>
+  /// _Effects_: Increments the magnitude of \c *this by one
   ///
-  /// \return A reference to the modified value \c *this
+  /// \return \c *this
   constexpr quantity& operator++() {
     ++magnitude_;
     return *this;
   }
 
-  /// \brief Pre-decrement operator
+  /// \brief Pre-increment operator
   ///
-  /// Decrements the magnitude of \c *this by one
+  /// _Constraints_: The exprssion `--std::declval<T>()` is well formed. <br>
+  /// _Effects_: Decrements the magnitude of \c *this by one
   ///
-  /// \return A reference to the modified value \c *this
+  /// \return \c *this
   constexpr quantity& operator--() {
     --magnitude_;
     return *this;
@@ -538,23 +556,35 @@ public:
 
   /// \brief Post-increment operator
   ///
-  /// Increments the magnitude of \c *this by one and
-  /// returns a copy of the \c quantity prior to the increment
+  /// _Constraints_:
+  ///    - The exprssion `std::declval<T>()++` is well formed.
+  ///    - <tt>std::is_copy_constructible_v<T></tt> is \c *this.
   ///
-  /// \return A copy of the \c quantity prior to the increment
-  constexpr quantity operator++(int) {
+  /// _Effects_: Increments the magnitude of \c *this by one
+  ///
+  /// \return The value of \c *this prior to the increment operation.
+  /// \throws Any exceptions thrown by the copy constructor or the post-increment operator of \c T.
+  constexpr quantity operator++(int)
+    requires std::is_copy_constructible_v<T>
+  {
     quantity temp{*this};
     ++magnitude_;
     return temp;
   }
 
-  /// \brief Post-decrement operator
+  /// \brief Post-increment operator
   ///
-  /// Decrements the magnitude of \c *this by one and
-  /// returns a copy of the \c quantity prior to the decremet
+  /// _Constraints_:
+  ///    - The exprssion `std::declval<T>()--` is well formed.
+  ///    - <tt>std::is_copy_constructible_v<T></tt> is \c *this.
   ///
-  /// \return A copy of the \c quantity prior to the decrement
-  constexpr quantity operator--(int) {
+  /// _Effects_: Decrements the magnitude of \c *this by one
+  ///
+  /// \return The value of \c *this prior to the decrement operation.
+  /// \throws Any exceptions thrown by the copy constructor or the post-decrement operator of \c T.
+  constexpr quantity operator--(int)
+    requires std::is_copy_constructible_v<T>
+  {
     quantity temp{*this};
     --magnitude_;
     return temp;
@@ -566,50 +596,53 @@ private:
 
 /// \brief Equality operator
 ///
-/// Compares the magnitudes of two quantities for equality. Two
-/// quanities are if their magnitudes, after conversion to the quantity's SI base units,
-/// are equal.
+/// _Constraints_: The expression `lhs.get_magnitude() == rhs.get_magnitude()` is well-formed and contextually
+/// convertible to \c bool. <br>
+/// _Mandates_: \c U1 is convertible to \c U2. <br>
+/// _Effects_: Compares the values of lhs and \c rhs for equality. <br>
+/// _Remarks_: If \c S1 or \c S2 is a floating-point type, this function uses floating-point equality checks.
+///            The exception specifier is equivalent to `noexcept(lhs.get_magnitude() == rhs.get_magnitude())`
 ///
-/// Warning: floating-point equality will be performed if the underlying magnitude's are
-///          floating-point types.
 ///
-/// \pre <tt>std::equality_comparable_with<S1, S2><\tt>
+/// \warning Comparing two \c quantity objects where at least one quantity has a floating-point magnitude type is
+///           likely to result in false inequalities. Use <=, >=, or <=> instead.
 ///
-/// \tparam U1 The units of the left hand side quantity
-/// \tparam S1 The magnitude type of the left hand side quantity
-/// \tparam U2 The units of the right hand side quantity
-/// \tparam S2 The magnitude type of the right hand side quantity
-///
-/// \param lhs The left hand side of the comparison
-/// \param rhs The right hand side of the comparison
-/// \return \c true if the two quantities are equal
+/// \tparam U1 The units of \c lhs.
+/// \tparam S1 The magnitude type of \c lhs.
+/// \tparam U2 The units of \c rhs.
+/// \tparam S2 The magnitude type of rhs.
+/// \param[in] lhs The left hand side of the equality comparison.
+/// \param[in] rhs The right hand side of the equality comparison.
+/// \return \c true if the values of the \c lhs and \c rhs are exactly equal.
+/// \throw Any exception thrown by the equality comparison of \c S1 and \c S2.
 template <unit auto U1, typename S1, unit auto U2, typename S2>
   requires std::equality_comparable_with<S1, S2>
-constexpr bool operator==(const quantity<U1, S1>& lhs, const quantity<U2, S2>& rhs) {
+constexpr bool operator==(const quantity<U1, S1>& lhs,
+                          const quantity<U2, S2>& rhs) noexcept(noexcept(lhs.get_magnitude() == rhs.get_magnitude())) {
   static_assert(unit_convertible_to<U1, U2>, "Attempting to compare quantities with incompatible units");
   return lhs.to_SI_base_units().get_magnitude() == rhs.to_SI_base_units().get_magnitude();
 }
 
 /// \brief Three-way comparison operator
 ///
-/// Performs three-way comparison on two quantities. Prior to the conversion, both
-/// quantities are converted to SI base units to ensure equivalent quantities with
-/// different magnitudes are compared correctly
+/// _Constraints_: The expression `lhs.get_magnitude() <=> rhs.get_magnitude()` is well formed. <br>
+/// _Mandates_: \c U1 is convertible to \c U2. <br>
+/// _Effect_: Performs three way comparison the values of \c lhs and \c thrs.
+/// _Remarks_: The exception specifier is equivalent to `noexcept(lhs.get_magnitude() <=> rhs.get_magnitude())`
 ///
-/// \pre <tt>std::three_way_comparable_with<S1, S2><\tt>
-///
-/// \tparam U1 The units of the left hand side quantity
-/// \tparam S1 The magnitude type of the left hand side quantity
-/// \tparam U2 The units of the right hand side quantity
-/// \tparam S2 The magnitude type of the right hand side quantity
-///
-/// \param lhs The left hand side of the comparison
-/// \param rhs The right hand side of the comparison
-/// \return the three way comparison of the quantities
+/// \tparam U1 The units of the left hand side quantity.
+/// \tparam S1 The magnitude type of the left hand side quantity.
+/// \tparam U2 The units of the right hand side quantity.
+/// \tparam S2 The magnitude type of the right hand side quantity.
+/// \param[in] lhs The left hand side of the comparison.
+/// \param[in] rhs The right hand side of the comparison.
+/// \return The result of the three way comparison of the values of \c lhs and \c rhs.
+/// \throws Any exceptions thrown by the three-way comparison of \c S1 and \c S2.
 template <unit auto U1, typename S1, unit auto U2, typename S2>
   requires std::three_way_comparable_with<S1, S2>
-constexpr std::compare_three_way_result_t<S1, S2> operator<=>(const quantity<U1, S1>& lhs,
-                                                              const quantity<U2, S2>& rhs) {
+constexpr std::compare_three_way_result_t<S1, S2>
+operator<=>(const quantity<U1, S1>& lhs,
+            const quantity<U2, S2>& rhs) noexcept(noexcept(lhs.get_magnitude() <=> rhs.get_magnitude())) {
   static_assert(unit_convertible_to<U1, U2>,
                 "Attempting to perform three-way-comparison on quantities with incompatible units");
   return lhs.to_SI_base_units().get_magnitude() <=> rhs.to_SI_base_units().get_magnitude();
