@@ -218,6 +218,9 @@ TEST(TestQuantity, TestUnitConvertingConstructorTemperature) {
   Fahrenheit f{k};
   EXPECT_FLOAT_EQ(f.get_magnitude(), -457.87);
 
+  Celsisus c2{f};
+  EXPECT_FLOAT_EQ(c2.get_magnitude(), -272.15);
+
   kelvin k4{c};
   EXPECT_FLOAT_EQ(k4.get_magnitude(), 1.0);
 

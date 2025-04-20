@@ -325,9 +325,19 @@ constexpr double conversion_factor_prefix(std::int8_t from, std::int8_t to, cons
   }
 }
 
-constexpr double conversion_factor_offset(const rational& from, const rational& to, const rational& pow_diff) noexcept {
+constexpr double conversion_factor_scale(const rational& from, const rational& to, const rational& pow_diff) noexcept {
   const rational res_ratio = to / from;
   return pow(static_cast<double>(res_ratio), pow_diff.numerator);
+}
+
+constexpr double conversion_factor_offset(const dimension& from, const dimension& to) noexcept {
+  constexpr rational one{1};
+  if (from.scale == one) {
+    return static_cast<double>(to.offset - from.offset);
+  } else {
+    const rational offset = to.offset - from.offset / from.scale;
+    return static_cast<double>(offset);
+  }
 }
 } // namespace _detail
 /// \endcond
@@ -391,19 +401,19 @@ constexpr double conversion_factor(unit auto from, unit auto to) noexcept {
 
     // Convert ratios
     conversionFactor *=
-        _detail::conversion_factor_offset(from.get_amount().scale, to.get_amount().scale, from.get_amount().power);
+        _detail::conversion_factor_scale(from.get_amount().scale, to.get_amount().scale, from.get_amount().power);
     conversionFactor *=
-        _detail::conversion_factor_offset(from.get_current().scale, to.get_current().scale, from.get_current().power);
+        _detail::conversion_factor_scale(from.get_current().scale, to.get_current().scale, from.get_current().power);
     conversionFactor *=
-        _detail::conversion_factor_offset(from.get_length().scale, to.get_length().scale, from.get_length().power);
-    conversionFactor *= _detail::conversion_factor_offset(from.get_luminosity().scale, to.get_luminosity().scale,
-                                                          from.get_luminosity().power);
+        _detail::conversion_factor_scale(from.get_length().scale, to.get_length().scale, from.get_length().power);
+    conversionFactor *= _detail::conversion_factor_scale(from.get_luminosity().scale, to.get_luminosity().scale,
+                                                         from.get_luminosity().power);
     conversionFactor *=
-        _detail::conversion_factor_offset(from.get_mass().scale, to.get_mass().scale, from.get_mass().power);
-    conversionFactor *= _detail::conversion_factor_offset(from.get_temperature().scale, to.get_temperature().scale,
-                                                          from.get_temperature().power);
+        _detail::conversion_factor_scale(from.get_mass().scale, to.get_mass().scale, from.get_mass().power);
+    conversionFactor *= _detail::conversion_factor_scale(from.get_temperature().scale, to.get_temperature().scale,
+                                                         from.get_temperature().power);
     conversionFactor *=
-        _detail::conversion_factor_offset(from.get_time().scale, to.get_time().scale, from.get_time().power);
+        _detail::conversion_factor_scale(from.get_time().scale, to.get_time().scale, from.get_time().power);
     return conversionFactor;
   }
 }
@@ -421,14 +431,14 @@ constexpr double conversion_offset(unit auto from, unit auto to) noexcept {
   if (from == to) {
     return 0.0;
   } else {
-    const double amount_difference = static_cast<double>(to.get_amount().offset - from.get_amount().offset);
-    const double current_difference = static_cast<double>(to.get_current().offset - from.get_current().offset);
-    const double length_difference = static_cast<double>(to.get_length().offset - from.get_length().offset);
-    const double luminosity_difference = static_cast<double>(to.get_luminosity().offset - from.get_luminosity().offset);
-    const double mass_difference = static_cast<double>(to.get_mass().offset - from.get_mass().offset);
+    const double amount_difference = _detail::conversion_factor_offset(from.get_amount(), to.get_amount());
+    const double current_difference = _detail::conversion_factor_offset(from.get_current(), to.get_current());
+    const double length_difference = _detail::conversion_factor_offset(from.get_length(), to.get_length());
+    const double luminosity_difference = _detail::conversion_factor_offset(from.get_luminosity(), to.get_luminosity());
+    const double mass_difference = _detail::conversion_factor_offset(from.get_mass(), to.get_mass());
     const double temperature_difference =
-        static_cast<double>(to.get_temperature().offset - from.get_temperature().offset);
-    const double time_difference = static_cast<double>(to.get_time().offset - from.get_time().offset);
+        _detail::conversion_factor_offset(from.get_temperature(), to.get_temperature());
+    const double time_difference = _detail::conversion_factor_offset(from.get_time(), to.get_time());
 
     return /*conversion_factor(from, to) **/
         (amount_difference + current_difference + length_difference + luminosity_difference + mass_difference +

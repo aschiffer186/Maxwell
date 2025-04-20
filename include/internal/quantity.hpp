@@ -875,16 +875,13 @@ constexpr auto operator-(quantity<U1, M1> lhs, const quantity<U2, M2>& rhs) {
 
 /// \brief Negation operator
 ///
-/// Negates the magnitude of the specified quantity. The returned quantity has the
-/// same units as the original quantity; however, the magnitude type may be different.
-/// It is not recommended to use \c auto
-/// for the result of this type as it may produce unexpected results (e.g. if expression templates are
-/// used for lazy evaluation).
+/// _Constraints_: The expression `-std::declval<T>()` is well formed. <br>
+/// _Effects_: Returns a new \c quantity object whose magnitude is equal to `-x.get_magnitude()`
 ///
-/// \tparam M The type of the magnitude of the quantity
-/// \tparam U The units of the quantity
-/// \param x The quantity to negate
-/// \return The negated quantity
+/// \tparam M The type of the magnitude of the quantity.
+/// \tparam U The units of the quantity.
+/// \param[in] x The quantity to negate.
+/// \return A new \c quantity object whose magnitude is equal to `-x.get_magnitude()`.
 template <typename M, unit auto U> constexpr auto operator-(const quantity<U, M>& x) {
   using scalar_return_type = std::remove_cvref_t<decltype(-x.get_magnitude())>;
   return quantity<U, scalar_return_type>(-x.get_magnitude());

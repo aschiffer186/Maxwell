@@ -318,11 +318,11 @@ constexpr rational pound_to_ounce{16, 1};
 MAKE_UNIT_WITH_DESC(pound, kilogram_unit.adjust_scale_mass<kilogram_to_pound>(), "lb")
 MAKE_UNIT_WITH_DESC(ounce, pound_unit.adjust_scale_mass<pound_to_ounce>(), "oz")
 
-constexpr rational celsisu_to_fahrenheit_scale{9, 5};
+constexpr rational celsisus_to_fahrenheit_scale{9, 5};
 constexpr rational celsisus_to_fahrenheit_offset{32};
 
 MAKE_UNIT_WITH_DESC(Fahrenheit,
-                    Celsisus_unit.adjust_scale_temperature<celsisu_to_fahrenheit_scale>()
+                    Celsisus_unit.adjust_scale_temperature<celsisus_to_fahrenheit_scale>()
                         .adjust_offset_temperature<celsisus_to_fahrenheit_offset>(),
                     "°F")
 // MAKE_UNIT_WITH_DESC(psi, pound_unit / square_inch_unit, "psi")
