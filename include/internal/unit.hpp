@@ -295,7 +295,7 @@ constexpr std::array pow10{1e-30, 1e-29, 1e-28, 1e-27, 1e-26, 1e-25, 1e-24, 1e-2
                            1e9,   1e10,  1e11,  1e12,  1e13,  1e14,  1e15,  1e16,  1e17,  1e18,  1e19,  1e20,  1e21,
                            1e22,  1e23,  1e24,  1e25,  1e26,  1e27,  1e28,  1e29,  1e30};
 
-constexpr double pow(double base, std::intmax_t power) noexcept {
+consteval double pow(double base, std::intmax_t power) noexcept {
   if (power < 0) {
     return 1.0 / pow(base, -power);
   }
@@ -315,7 +315,7 @@ constexpr double pow(double base, std::intmax_t power) noexcept {
   return pow(base * base, (power - 1) / 2);
 }
 
-constexpr double conversion_factor_prefix(std::int8_t from, std::int8_t to, const rational& pow_diff) noexcept {
+consteval double conversion_factor_prefix(std::int8_t from, std::int8_t to, const rational& pow_diff) noexcept {
   if ((from - to) < 30) {
     const double base_conversion = pow10[(from - to) + 30];
     return pow(base_conversion, pow_diff.numerator);
@@ -325,12 +325,12 @@ constexpr double conversion_factor_prefix(std::int8_t from, std::int8_t to, cons
   }
 }
 
-constexpr double conversion_factor_scale(const rational& from, const rational& to, const rational& pow_diff) noexcept {
+consteval double conversion_factor_scale(const rational& from, const rational& to, const rational& pow_diff) noexcept {
   const rational res_ratio = to / from;
   return pow(static_cast<double>(res_ratio), pow_diff.numerator);
 }
 
-constexpr double conversion_factor_offset(const dimension& from, const dimension& to) noexcept {
+consteval double conversion_factor_offset(const dimension& from, const dimension& to) noexcept {
   constexpr rational one{1};
   if (from.scale == one) {
     return static_cast<double>(to.offset - from.offset);
@@ -372,12 +372,12 @@ template <typename Tag> struct tag_conversion_factor<Tag, Tag> {
 /// \param to The target unit
 /// \return The factor the magnitude of a quantity with units \c from needs to
 /// be multiplied to be converted to a quantity with units \c to
-constexpr double conversion_factor(unit auto from, unit auto to) noexcept {
+consteval double conversion_factor(unit auto from, unit auto to) noexcept {
   using From = decltype(from);
   using To = decltype(to);
 
   // Short circuit for identical types
-  if (from == to) {
+  if constexpr (From{} == To{}) {
     return 1.0;
   } else {
 
@@ -427,8 +427,10 @@ constexpr double conversion_factor(unit auto from, unit auto to) noexcept {
 /// \param from the unit to convert from
 /// \param to the target unit
 /// \return the conversion offset that must be applied
-constexpr double conversion_offset(unit auto from, unit auto to) noexcept {
-  if (from == to) {
+consteval double conversion_offset(unit auto from, unit auto to) noexcept {
+  using From = decltype(from);
+  using To = decltype(to);
+  if constexpr (From{} == To{}) {
     return 0.0;
   } else {
     const double amount_difference = _detail::conversion_factor_offset(from.get_amount(), to.get_amount());
