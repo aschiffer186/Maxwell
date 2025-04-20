@@ -295,7 +295,7 @@ constexpr std::array pow10{1e-30, 1e-29, 1e-28, 1e-27, 1e-26, 1e-25, 1e-24, 1e-2
                            1e9,   1e10,  1e11,  1e12,  1e13,  1e14,  1e15,  1e16,  1e17,  1e18,  1e19,  1e20,  1e21,
                            1e22,  1e23,  1e24,  1e25,  1e26,  1e27,  1e28,  1e29,  1e30};
 
-consteval double pow(double base, std::intmax_t power) noexcept {
+constexpr double pow(double base, std::intmax_t power) noexcept {
   if (power < 0) {
     return 1.0 / pow(base, -power);
   }
@@ -315,17 +315,19 @@ consteval double pow(double base, std::intmax_t power) noexcept {
   return pow(base * base, (power - 1) / 2);
 }
 
-consteval double conversion_factor_prefix(std::int8_t from, std::int8_t to) noexcept {
+constexpr double conversion_factor_prefix(std::int8_t from, std::int8_t to, const rational& pow_diff) noexcept {
   if ((from - to) < 30) {
-    return pow10[(from - to) + 30];
+    const double base_conversion = pow10[(from - to) + 30];
+    return pow(base_conversion, pow_diff.numerator);
   } else {
-    return pow(10, (from - to));
+    const double base_conversion = pow(10, (from - to));
+    return pow(base_conversion, pow_diff.numerator);
   }
 }
 
-consteval double conversion_factor_offset(const rational& from, const rational& to) noexcept {
+constexpr double conversion_factor_offset(const rational& from, const rational& to, const rational& pow_diff) noexcept {
   const rational res_ratio = to / from;
-  return static_cast<double>(res_ratio);
+  return pow(static_cast<double>(res_ratio), pow_diff.numerator);
 }
 } // namespace _detail
 /// \endcond
@@ -360,7 +362,7 @@ template <typename Tag> struct tag_conversion_factor<Tag, Tag> {
 /// \param to The target unit
 /// \return The factor the magnitude of a quantity with units \c from needs to
 /// be multiplied to be converted to a quantity with units \c to
-consteval double conversion_factor(unit auto from, unit auto to) noexcept {
+constexpr double conversion_factor(unit auto from, unit auto to) noexcept {
   using From = decltype(from);
   using To = decltype(to);
 
@@ -371,24 +373,37 @@ consteval double conversion_factor(unit auto from, unit auto to) noexcept {
 
     double conversionFactor{1.0};
     // Convert prefixes
-    conversionFactor *= _detail::conversion_factor_prefix(from.get_amount().prefix, to.get_amount().prefix);
-    conversionFactor *= _detail::conversion_factor_prefix(from.get_current().prefix, to.get_current().prefix);
-    conversionFactor *= _detail::conversion_factor_prefix(from.get_length().prefix, to.get_length().prefix);
-    conversionFactor *= _detail::conversion_factor_prefix(from.get_luminosity().prefix, to.get_luminosity().prefix);
-    conversionFactor *= _detail::conversion_factor_prefix(from.get_mass().prefix, to.get_mass().prefix);
-    conversionFactor *= _detail::conversion_factor_prefix(from.get_temperature().prefix, to.get_temperature().prefix);
-    conversionFactor *= _detail::conversion_factor_prefix(from.get_time().prefix, to.get_time().prefix);
-    // conversionFactor *= _detail::conversion_factor_prefix(from.prefix, to.prefix);
+    conversionFactor *=
+        _detail::conversion_factor_prefix(from.get_amount().prefix, to.get_amount().prefix, from.get_amount().power);
+    conversionFactor *=
+        _detail::conversion_factor_prefix(from.get_current().prefix, to.get_current().prefix, from.get_current().power);
+    conversionFactor *=
+        _detail::conversion_factor_prefix(from.get_length().prefix, to.get_length().prefix, from.get_length().power);
+    conversionFactor *= _detail::conversion_factor_prefix(from.get_luminosity().prefix, to.get_luminosity().prefix,
+                                                          from.get_luminosity().power);
+    conversionFactor *=
+        _detail::conversion_factor_prefix(from.get_mass().prefix, to.get_mass().prefix, from.get_mass().power);
+    conversionFactor *= _detail::conversion_factor_prefix(from.get_temperature().prefix, to.get_temperature().prefix,
+                                                          from.get_temperature().power);
+    conversionFactor *=
+        _detail::conversion_factor_prefix(from.get_time().prefix, to.get_time().prefix, from.get_time().power);
     conversionFactor *= tag_conversion_factor<typename From::tag, typename To::tag>::factor;
 
     // Convert ratios
-    conversionFactor *= _detail::conversion_factor_offset(from.get_amount().scale, to.get_amount().scale);
-    conversionFactor *= _detail::conversion_factor_offset(from.get_current().scale, to.get_current().scale);
-    conversionFactor *= _detail::conversion_factor_offset(from.get_length().scale, to.get_length().scale);
-    conversionFactor *= _detail::conversion_factor_offset(from.get_luminosity().scale, to.get_luminosity().scale);
-    conversionFactor *= _detail::conversion_factor_offset(from.get_mass().scale, to.get_mass().scale);
-    conversionFactor *= _detail::conversion_factor_offset(from.get_temperature().scale, to.get_temperature().scale);
-    conversionFactor *= _detail::conversion_factor_offset(from.get_time().scale, to.get_time().scale);
+    conversionFactor *=
+        _detail::conversion_factor_offset(from.get_amount().scale, to.get_amount().scale, from.get_amount().power);
+    conversionFactor *=
+        _detail::conversion_factor_offset(from.get_current().scale, to.get_current().scale, from.get_current().power);
+    conversionFactor *=
+        _detail::conversion_factor_offset(from.get_length().scale, to.get_length().scale, from.get_length().power);
+    conversionFactor *= _detail::conversion_factor_offset(from.get_luminosity().scale, to.get_luminosity().scale,
+                                                          from.get_luminosity().power);
+    conversionFactor *=
+        _detail::conversion_factor_offset(from.get_mass().scale, to.get_mass().scale, from.get_mass().power);
+    conversionFactor *= _detail::conversion_factor_offset(from.get_temperature().scale, to.get_temperature().scale,
+                                                          from.get_temperature().power);
+    conversionFactor *=
+        _detail::conversion_factor_offset(from.get_time().scale, to.get_time().scale, from.get_time().power);
     return conversionFactor;
   }
 }
@@ -402,7 +417,7 @@ consteval double conversion_factor(unit auto from, unit auto to) noexcept {
 /// \param from the unit to convert from
 /// \param to the target unit
 /// \return the conversion offset that must be applied
-consteval double conversion_offset(unit auto from, unit auto to) noexcept {
+constexpr double conversion_offset(unit auto from, unit auto to) noexcept {
   if (from == to) {
     return 0.0;
   } else {
@@ -564,18 +579,18 @@ struct kelvin_unit_type : unit_type<null_dimension, null_dimension, null_dimensi
 constexpr kelvin_unit_type kelvin_unit;
 
 struct second_unit_type : unit_type<null_dimension, null_dimension, null_dimension, null_dimension, null_dimension,
-                                    base_dimension, null_dimension> {
+                                    null_dimension, base_dimension> {
   using base_type = unit_type<null_dimension, null_dimension, null_dimension, null_dimension, null_dimension,
-                              base_dimension, null_dimension>;
+                              null_dimension, base_dimension>;
 
   constexpr static std::string unit_string() { return "s"; }
 };
 constexpr second_unit_type second_unit;
 
 struct scalar_unit_type : unit_type<null_dimension, null_dimension, null_dimension, null_dimension, null_dimension,
-                                    null_dimension, null_dimension> {
+                                    null_dimension, base_dimension> {
   using base_type = unit_type<null_dimension, null_dimension, null_dimension, null_dimension, null_dimension,
-                              null_dimension, null_dimension>;
+                              null_dimension, base_dimension>;
 
   constexpr static std::string unit_string() { return "[]"; }
 };

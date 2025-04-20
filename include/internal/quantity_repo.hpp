@@ -223,7 +223,7 @@ using meter_per_second_per_second = quantity<meter_per_second_per_second_unit>;
 using int_meter_per_second_per_second = int_quantity<meter_per_second_per_second_unit>;
 
 #define QUANTITY_LITERAL(name, unit)                                                                                   \
-  constexpr int_quantity<unit> operator""_##name(unsigned long long x) noexcept { return int_quantity<unit>(x); }      \
+  constexpr int_quantity<unit> operator""_##name(unsigned long long x) noexcept { return quantity<unit>(x); }          \
   constexpr quantity<unit> operator""_##name(long double x) noexcept { return quantity<unit>(x); }
 
 namespace metric_literals {
@@ -287,6 +287,10 @@ using int_ounce = int_quantity<ounce_unit>;
 
 using Fahrenheit = quantity<Fahrenheit_unit>;
 using int_Fahrenheit = int_quantity<Fahrenheit_unit>;
+
+namespace other_literals {
+QUANTITY_LITERAL(ft, foot_unit)
+}
 #endif
 } // namespace maxwell
 
