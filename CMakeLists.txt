@@ -9,7 +9,6 @@ set(MAXWELL_PATCH_VERSION ${PROJECT_VERSION_PATCH})
 
 option(BUILD_EXAMPLES "Build examples" OFF)
 option(BUILD_TESTS "Build tests" ON)
-option(DISABLE_PREDEFINED_UNITS "Disable predefined units" OFF)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)

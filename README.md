@@ -13,6 +13,21 @@ Maxwell is a strongly-typed, header-only, dimensional analysis library for C++20
 
 The library consists of one main header file, [Maxwell.hpp](include/Maxwell.hpp) and a library of unit tests. Additionally, several examples showing how to use Maxwell are provided. 
 
+# Installing Maxwell
+There are several ways to install Maxwell
+
+## Using Fetch Content 
+If using another project with CMake, the easiest way to add Maxwell to your project is to use `FetchContent`.
+
+```
+include(FetchContent)
+FetchContent_Declare(
+    Maxwell
+    GIT_REPOSITORY "https://github.com/aschiffer186/Maxwell.git"
+)
+FetchContent_MakeAvailable(Maxwell)
+```
+
 # Getting Started
 To get started using Maxwell, simply include the header file `Maxwell.hpp` to your project. For convenience, you may wish to add the using director `using namespace maxwell;` to your project as well. To use the pre-defined unit literals, you must also add the using directives:
 * `using namespace maxwell::metric_literals;` for literals for metric units
@@ -27,4 +42,6 @@ using namespace maxwell;
 using namespace maxwell::metric_literals; // For accessing literals
 ```
 
-The main type of the Maxwell library is the `quantity` type. This type represents a dimensioned quantity with both a magnitude and units! Unlike other units libraries, Maxwell places no restrictions and relies on minimal assumptions about the underlying type of the quantities used. However, the default type used by the quantity is `double`.
+The main type of the Maxwell library is the `quantity` type. This type represents a dimensioned quantity with both a magnitude and units! Unlike other units libraries, Maxwell places no restrictions and relies on minimal assumptions about the underlying type of the quantities used. However, the default type used by the quantity is `double`. 
+
+The `quantity` type can be used wherever the underlying type can be used.
