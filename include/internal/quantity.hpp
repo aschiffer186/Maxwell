@@ -962,8 +962,8 @@ concept scalar = unitless_unit<T::units>;
 ///
 /// \tparam U the units of the quantity
 template <unit auto U> using int_quantity = quantity<U, int>;
-// Quantity printing
 
+// Quantity printing
 template <typename T, unit auto U> std::ostream& operator<<(std::ostream& os, const quantity<U, T>& q) {
   os << std::format("{}", q);
   return os;

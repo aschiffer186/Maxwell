@@ -105,6 +105,24 @@ remquo(const quantity<U1, T>& x, const quantity<U2, T>& y,
   return quantity<U1 / U2, T>(mag);
 }
 
+/// \brief Returns the larger of two ranges.
+///
+/// _Constraints_: The expression `std::fmax(std::declval<T>(), std::declval<T>())` is well formed. <br>
+/// _Effects_: Returns the larger of \c x and \c y. <br>
+/// _Remarks_: This function requires the units of \c x and \c y be the same. For comparison of quantities with mixed
+///            units, use max.
+///
+/// \tparam U The units of \c x and \c y.
+/// \tparam T The type of the magnitude of \c x and \c y.
+/// \param[in] x The left hand side of the comparison.
+/// \param[in] y The right hand side of the comparison.
+/// \return The larger of \c x and \c y.
+template <unit auto U, typename T>
+  requires requires(T a) { std::fmax(a, a); }
+MAXWELL_MATH_CONSTEXPR23 quantity<U, T> fmax(const quantity<U, T>& x, const quantity<U, T>& y) MATH_NOEXCEPT(fmax) {
+  return quantity<U, T>(std::fmax(x.get_magnitude(), y.get_magnitude()));
+}
+
 template <typename T>
   requires requires(T a) { std::exp(a); }
 MAXWELL_MATH_CONSTEXPR26 T exp(quantity<scalar_unit, T> x) MATH_NOEXCEPT(exp) {
