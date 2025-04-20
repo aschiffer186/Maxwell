@@ -384,11 +384,29 @@ TEST(TestQuantity, TestPrinting) {
 TEST(TestQuantity, TestAmountConcept) {
   EXPECT_TRUE(amount<mole>);
   EXPECT_TRUE(amount<quettamole>);
+
+  EXPECT_FALSE(amount<ampere>);
+  EXPECT_FALSE(amount<meter>);
+  EXPECT_FALSE(amount<candela>);
+  EXPECT_FALSE(amount<gram>);
+  EXPECT_FALSE(amount<kelvin>);
+  EXPECT_FALSE(amount<second>);
+  EXPECT_FALSE(amount<radian>);
+  EXPECT_FALSE((amount<quantity<scalar_unit, double>>));
 }
 
 TEST(TestQuantity, TestCurrentConcept) {
   EXPECT_TRUE(current<ampere>);
   EXPECT_TRUE(current<quettaampere>);
+
+  EXPECT_FALSE(current<mole>);
+  EXPECT_FALSE(current<meter>);
+  EXPECT_FALSE(current<candela>);
+  EXPECT_FALSE(current<gram>);
+  EXPECT_FALSE(current<kelvin>);
+  EXPECT_FALSE(current<second>);
+  EXPECT_FALSE(current<radian>);
+  EXPECT_FALSE((current<quantity<scalar_unit, double>>));
 }
 
 TEST(TestQuantity, TestLengthConcept) {
@@ -398,16 +416,46 @@ TEST(TestQuantity, TestLengthConcept) {
   EXPECT_TRUE(length<foot>);
   EXPECT_TRUE(length<yard>);
   EXPECT_TRUE(length<mile>);
+
+  EXPECT_FALSE(length<mole>);
+  EXPECT_FALSE(length<ampere>);
+  EXPECT_FALSE(length<candela>);
+  EXPECT_FALSE(length<gram>);
+  EXPECT_FALSE(length<kelvin>);
+  EXPECT_FALSE(length<second>);
+  EXPECT_FALSE(length<radian>);
+  EXPECT_FALSE((length<quantity<scalar_unit, double>>));
 }
 
 TEST(TestQuantity, TestLuminosityConcept) {
   EXPECT_TRUE(luminosity<candela>);
   EXPECT_TRUE(luminosity<quettacandela>);
+
+  EXPECT_FALSE(luminosity<mole>);
+  EXPECT_FALSE(luminosity<ampere>);
+  EXPECT_FALSE(luminosity<meter>);
+  EXPECT_FALSE(luminosity<gram>);
+  EXPECT_FALSE(luminosity<kelvin>);
+  EXPECT_FALSE(luminosity<second>);
+  EXPECT_FALSE(luminosity<radian>);
+  EXPECT_FALSE((luminosity<quantity<scalar_unit, double>>));
 }
 
 TEST(TestQuantity, TestMassConcept) {
   EXPECT_TRUE(mass<gram>);
   EXPECT_TRUE(mass<quettagram>);
+
+  EXPECT_TRUE(mass<ounce>);
+  EXPECT_TRUE(mass<pound>);
+
+  EXPECT_FALSE(mass<mole>);
+  EXPECT_FALSE(mass<ampere>);
+  EXPECT_FALSE(mass<meter>);
+  EXPECT_FALSE(mass<candela>);
+  EXPECT_FALSE(mass<kelvin>);
+  EXPECT_FALSE(mass<second>);
+  EXPECT_FALSE(mass<radian>);
+  EXPECT_FALSE((mass<quantity<scalar_unit, double>>));
 }
 
 TEST(TestQuantity, TestTemperatureConcept) {
@@ -415,6 +463,15 @@ TEST(TestQuantity, TestTemperatureConcept) {
   EXPECT_TRUE(temperature<quettakelvin>);
   EXPECT_TRUE(temperature<Celsisus>);
   EXPECT_TRUE(temperature<Fahrenheit>);
+
+  EXPECT_FALSE(temperature<mole>);
+  EXPECT_FALSE(temperature<ampere>);
+  EXPECT_FALSE(temperature<meter>);
+  EXPECT_FALSE(temperature<candela>);
+  EXPECT_FALSE(temperature<gram>);
+  EXPECT_FALSE(temperature<second>);
+  EXPECT_FALSE(temperature<radian>);
+  EXPECT_FALSE((temperature<quantity<scalar_unit, double>>));
 }
 
 TEST(TestQuantity, TestTimeConcept) {
@@ -423,11 +480,41 @@ TEST(TestQuantity, TestTimeConcept) {
   EXPECT_TRUE(maxwell::time<hour>);
   EXPECT_TRUE(maxwell::time<day>);
   EXPECT_TRUE(maxwell::time<year>);
+
+  EXPECT_FALSE(maxwell::time<mole>);
+  EXPECT_FALSE(maxwell::time<ampere>);
+  EXPECT_FALSE(maxwell::time<meter>);
+  EXPECT_FALSE(maxwell::time<candela>);
+  EXPECT_FALSE(maxwell::time<gram>);
+  EXPECT_FALSE(maxwell::time<kelvin>);
+  EXPECT_FALSE(maxwell::time<radian>);
+  EXPECT_FALSE((maxwell::time<quantity<scalar_unit, double>>));
 }
 
 TEST(TestQuantity, TestAngleConcept) {
   EXPECT_TRUE(angle<radian>);
   EXPECT_TRUE(angle<degree>);
+
+  EXPECT_FALSE(angle<mole>);
+  EXPECT_FALSE(angle<ampere>);
+  EXPECT_FALSE(angle<meter>);
+  EXPECT_FALSE(angle<candela>);
+  EXPECT_FALSE(angle<gram>);
+  EXPECT_FALSE(angle<kelvin>);
+  EXPECT_FALSE(angle<second>);
+  EXPECT_FALSE((angle<quantity<scalar_unit, double>>));
+}
+
+TEST(TestQuantity, TestScalarConcept) {
+  EXPECT_TRUE((scalar<quantity<scalar_unit, double>>));
+  EXPECT_FALSE(scalar<mole>);
+  EXPECT_FALSE(scalar<ampere>);
+  EXPECT_FALSE(scalar<meter>);
+  EXPECT_FALSE(scalar<candela>);
+  EXPECT_FALSE(scalar<gram>);
+  EXPECT_FALSE(scalar<kelvin>);
+  EXPECT_FALSE(scalar<second>);
+  EXPECT_FALSE(scalar<radian>);
 }
 
 TEST(TestQuantity, TestQuantityNumericLimits) {

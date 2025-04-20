@@ -588,9 +588,9 @@ struct second_unit_type : unit_type<null_dimension, null_dimension, null_dimensi
 constexpr second_unit_type second_unit;
 
 struct scalar_unit_type : unit_type<null_dimension, null_dimension, null_dimension, null_dimension, null_dimension,
-                                    null_dimension, base_dimension> {
+                                    null_dimension, null_dimension> {
   using base_type = unit_type<null_dimension, null_dimension, null_dimension, null_dimension, null_dimension,
-                              null_dimension, base_dimension>;
+                              null_dimension, null_dimension>;
 
   constexpr static std::string unit_string() { return "[]"; }
 };
