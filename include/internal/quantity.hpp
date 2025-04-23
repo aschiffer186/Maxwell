@@ -26,18 +26,19 @@
 
 #include "config.hpp"
 #include "dimension.hpp"
+#include "scalar_traits.hpp"
 #include "unit.hpp"
 #include "utility.hpp"
 
 /// \namespace maxwell Enclosing namespace of all public Maxwell API
 namespace maxwell {
 /// \cond
-template <auto U, typename T = double> class quantity;
+template <auto U, typename T = double, typename Traits = scalar_traits<T>> class quantity;
 
 namespace _detail {
 template <typename> struct is_quantity : std::false_type {};
 
-template <typename T, auto U> struct is_quantity<quantity<U, T>> : std::true_type {};
+template <typename T, auto U, typename Traits> struct is_quantity<quantity<U, T, Traits>> : std::true_type {};
 
 template <typename T> constexpr bool is_quantity_v = is_quantity<T>::value;
 
@@ -91,7 +92,7 @@ constexpr double to_chrono_conversion_factor() {
 /// \tparam U A value representing the units of the quantity. \c U must be an instantiation of \c unit_type.
 /// \tparam T The type of the quantity's magnitue. \c T shall not be a _cv_ qualified type or \c std::in_place_t,
 ///           and must be \c destructible.
-template <auto U, typename T> class quantity {
+template <auto U, typename T, typename Traits> class quantity {
   static_assert(!std::is_const_v<T>);
   static_assert(!std::is_volatile_v<T>);
   static_assert(!std::same_as<std::remove_cvref_t<T>, std::in_place_t>);
@@ -106,6 +107,8 @@ public:
   using units_type = std::remove_cv_t<decltype(U)>;
   /// The quantity's units
   static constexpr units_type units = U;
+  /// The quantity's traits
+  using traits_type = Traits;
 
   /// \brief Default constructor
   ///
@@ -249,7 +252,8 @@ public:
   template <auto V, typename Up>
     requires std::constructible_from<T, Up> && unit<decltype(V)>
   constexpr explicit(!std::is_convertible_v<const Up&, T>) quantity(const quantity<V, Up>& q)
-      : magnitude_(q.get_magnitude() * conversion_factor(V, units) + conversion_offset(V, units)) {
+      : magnitude_(traits_type::add(traits_type::multiply(q.get_magnitude(), conversion_factor(V, units)),
+                                    conversion_offset(V, units))) {
     static_assert(unit_convertible_to<V, U>,
                   "Attempting to construct a quantity from another quantity with incompatible units");
   }
@@ -279,7 +283,8 @@ public:
   template <typename Up, auto V>
     requires std::constructible_from<T, Up>
   constexpr explicit(!std::is_convertible_v<Up, T>) quantity(quantity<V, Up>&& q)
-      : magnitude_(std::move(q).get_magnitude() * conversion_factor(V, units) + conversion_offset(V, units)) {
+      : magnitude_(traits_type::add(traits_type::multiply(std::move(q).get_magnitude(), conversion_factor(V, units)),
+                                    conversion_offset(V, units))) {
     static_assert(unit_convertible_to<V, U>,
                   "Attempting to construct a quantity from another quantity with incompatible units");
   }
@@ -616,6 +621,10 @@ public:
 private:
   magnitude_type magnitude_{};
 };
+
+template <auto U, typename T>
+  requires unit<decltype(U)>
+quantity(quantity<U, T>) -> quantity<U, T>;
 
 /// \brief Equality operator
 ///

@@ -10,10 +10,12 @@
 #ifndef UTILITY_HPP
 #define UTILITY_HPP
 
+#include <algorithm>
 #include <cassert>     // assert
 #include <cstdint>     // intmax_t
 #include <numeric>     // gcd
 #include <ratio>       // ratio
+#include <string>      // string
 #include <type_traits> // false_type, remove_cvref_t, true_type
 
 namespace maxwell {
@@ -277,6 +279,7 @@ template <typename T, typename U>
 concept nothrow_multiply_with = requires(T a, U b) {
   { a * b } noexcept;
 };
+
 // clang-format on
 
 template <typename T>
@@ -295,6 +298,28 @@ concept nothrow_divide_with = requires(T a, U b) {
 
 template <typename T>
 concept nothrow_divide = nothrow_divide_with<T, T>;
+
+template <size_t N> struct constexpr_string {
+  static_assert(N > 0);
+  constexpr constexpr_string(const char (&str)[N]) { std::copy_n(str, N, value); }
+
+  constexpr std::size_t length() const noexcept { return N - 1; }
+
+  constexpr operator std::string() const { return std::string(value, N - 1); }
+
+  char value[N];
+};
+
+template <std::size_t N> constexpr_string(const char (&str)[N]) -> constexpr_string<N>;
+
+template <std::size_t N1, std::size_t N2>
+constexpr bool operator==(const constexpr_string<N1>& lhs, const constexpr_string<N2>& rhs) {
+  if constexpr (N1 != N2) {
+    return false;
+  } else {
+    return std::ranges::equal(lhs.value, rhs.value);
+  }
+}
 } // namespace maxwell
 
 #endif

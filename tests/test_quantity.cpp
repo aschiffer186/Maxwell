@@ -2,6 +2,7 @@
 #include "internal/quantity_repo.hpp"
 #include "internal/unit_repo.hpp"
 
+#include "gtest/gtest.h"
 #include <concepts> // convertible_to
 #include <format>
 #include <limits> // numeric_limits
@@ -267,6 +268,33 @@ TEST(TestQuantity, TestUnitConvertingConstructorArea) {
 
   square_meter m2{cm};
   EXPECT_FLOAT_EQ(m2.get_magnitude(), 1.0);
+}
+
+template <typename T> class UnitIncompatabilityTest : public ::testing::Test {
+public:
+  T value_;
+};
+
+using test_quantity_types = ::testing::Types<
+    std::pair<mole, meter>, std::pair<mole, ampere>, std::pair<mole, meter>, std::pair<mole, candela>,
+    std::pair<mole, gram>, std::pair<mole, kelvin>, std::pair<mole, second>, std::pair<mole, radian>,
+    std::pair<mole, quantity<scalar_unit, double>>, std::pair<ampere, meter>, std::pair<ampere, candela>,
+    std::pair<ampere, gram>, std::pair<ampere, kelvin>, std::pair<ampere, second>, std::pair<ampere, radian>,
+    std::pair<ampere, quantity<scalar_unit, double>>, std::pair<meter, candela>, std::pair<meter, gram>,
+    std::pair<meter, kelvin>, std::pair<meter, second>, std::pair<meter, radian>,
+    std::pair<meter, quantity<scalar_unit, double>>, std::pair<gram, kelvin>, std::pair<gram, second>,
+    std::pair<gram, radian>, std::pair<gram, quantity<scalar_unit, double>>, std::pair<kelvin, second>,
+    std::pair<kelvin, radian>, std::pair<kelvin, quantity<scalar_unit, double>>, std::pair<second, radian>,
+    std::pair<second, quantity<scalar_unit, double>>, std::pair<hertz, quantity<becquerel_unit, double>>,
+    std::pair<radian, quantity<steradian_unit, double>>, std::pair<degree, quantity<steradian_unit, double>>>;
+TYPED_TEST_SUITE(UnitIncompatabilityTest, test_quantity_types);
+
+TYPED_TEST(UnitIncompatabilityTest, TestUnitIncompatability) {
+  using first_type = typename TypeParam::first_type;
+  using second_type = typename TypeParam::second_type;
+
+  EXPECT_FALSE((unit_convertible_to<first_type::units, second_type::units>));
+  EXPECT_FALSE((unit_convertible_to<second_type::units, first_type::units>));
 }
 
 TEST(TestQuantity, TestGetMagnitude) {

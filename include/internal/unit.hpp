@@ -608,6 +608,34 @@ struct scalar_unit_type : unit_type<null_dimension, null_dimension, null_dimensi
 };
 constexpr scalar_unit_type scalar_unit;
 
+constexpr constexpr_string<1> default_name("");
+using uncategorized = void;
+
+template <unit auto Definition, typename Kind = uncategorized, constexpr_string Name = default_name> struct make_unit {
+private:
+  struct defined_unit : unit_type<Definition.get_amount(), Definition.get_current(), Definition.get_length(),
+                                  Definition.get_luminosity(), Definition.get_mass(), Definition.get_temperature(),
+                                  Definition.get_time(), Kind> {
+    using base_type = unit_type<Definition.get_amount(), Definition.get_current(), Definition.get_length(),
+                                Definition.get_luminosity(), Definition.get_mass(), Definition.get_temperature(),
+                                Definition.get_time(), Kind>;
+
+    constexpr static std::string unit_string() {
+      if constexpr (Name == default_name) {
+        return base_type::unit_string();
+      } else {
+        return Name;
+      }
+    }
+  };
+
+public:
+  using type = defined_unit;
+};
+
+template <unit auto Definition, typename Kind = uncategorized, constexpr_string Name = default_name>
+using make_unit_t = make_unit<Definition, Kind, Name>::type;
+
 template <auto U>
 concept amount_unit = unit_convertible_to<U, mole_unit>;
 

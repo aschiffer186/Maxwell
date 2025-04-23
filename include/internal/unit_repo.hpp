@@ -173,9 +173,14 @@ struct becquerel_unit_tag;
 struct sievert_unit_tag;
 /// \endcond
 
-MAKE_UNIT_WITH_DESC(radian, scalar_unit.add_tag<radian_unit_tag>(), "rad");
-MAKE_UNIT_WITH_DESC(steradian, scalar_unit.add_tag<steradian_unit_tag>(), "sr");
-MAKE_UNIT_WITH_DESC(degree, scalar_unit.add_tag<degree_unit_tag>(), "deg");
+constexpr struct radian_unit_type : make_unit_t<scalar_unit, radian_unit_tag, "rad"> {
+} radian_unit;
+
+constexpr struct steradian_unit_type : make_unit_t<scalar_unit, steradian_unit_tag, "sr"> {
+} steradian_unit;
+
+constexpr struct degree_unit_type : make_unit_t<scalar_unit, degree_unit_tag, "deg"> {
+} degree_unit;
 
 /// \cond
 template <> struct is_tag_convertible<degree_unit_tag, radian_unit_tag> : std::true_type {};
