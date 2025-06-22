@@ -10,3 +10,8 @@ add_executable(test_dimensional_product test_dimensional_product.cpp)
 target_link_libraries(test_dimensional_product PRIVATE maxwell GTest::gtest_main)
 add_test(NAME test_dimensional_product COMMAND test_dimensional_product)
 gtest_discover_tests(test_dimensional_product)
+
+add_executable(test_unit test_unit.cpp)
+target_link_libraries(test_unit PRIVATE maxwell GTest::gtest_main)
+add_test(NAME test_unit COMMAND test_unit)
+gtest_discover_tests(test_unit)

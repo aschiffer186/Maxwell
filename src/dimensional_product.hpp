@@ -129,6 +129,7 @@ operator==(dimension_product_type<LHS, LHSDimensions...>,
   return false;
 }
 
+/// \cond
 namespace _detail {
 template <typename> struct is_dimension_product_type : std::false_type {};
 
@@ -136,6 +137,7 @@ template <dimension... Dimensions>
 struct is_dimension_product_type<dimension_product_type<Dimensions...>>
     : std::true_type {};
 } // namespace _detail
+/// \endcond
 
 /// \brief Concept modeling if a type is an instantiation of \c
 /// dimension_product_type

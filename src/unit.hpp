@@ -1,7 +1,8 @@
+/// \file unit.hpp
+/// \brief Definition of \c unit_type and related functions and concepts
 #ifndef UNIT_HPP
 #define UNIT_HPP
 
-#include <string>
 #include <type_traits>
 
 #include "dimensional_product.hpp"
@@ -13,9 +14,11 @@ template <auto DimensionalProduct, auto Multiplier, string_literal Name = "">
            rational<decltype(Multiplier)>
 class unit_type;
 
+/// \cond
 namespace _detail {
 template <typename> constexpr bool dependent_false = false;
 }
+/// \endcond
 
 template <auto DimensionalProduct, auto Multiplier, string_literal Name>
 unit_type<DimensionalProduct, Multiplier, Name>
@@ -29,6 +32,7 @@ underlying_unit(unit_type<DimensionalProduct, Multiplier, Name>) {
 template <typename T>
 using underlying_unit_type = decltype(underlying_unit(std::declval<T>()));
 
+/// \cond
 namespace _detail {
 template <typename, typename = void>
 struct has_underlying_unit : std::false_type {};
@@ -37,10 +41,12 @@ template <typename T>
 struct has_underlying_unit<T, std::void_t<underlying_unit_type<T>>>
     : std::true_type {};
 } // namespace _detail
+/// \endcond
 
 template <typename T>
 concept unit = _detail::has_underlying_unit<std::remove_cvref_t<T>>::value;
 
+/// \cond
 namespace _detail {
 template <unit LHS, unit RHS> struct unit_product_impl {
   using type = unit_type<LHS::dimensional_product * RHS::dimensional_product,
@@ -52,24 +58,19 @@ template <unit LHS, unit RHS> struct unit_quotient_impl {
                          LHS::multiplier / RHS::multiplier>;
 };
 } // namespace _detail
+/// \endcond
 
 template <unit LHS, unit RHS>
 struct unit_product : _detail::unit_product_impl<LHS, RHS>::type {
-  constexpr static std::string unit_name() {
-    std::string name = LHS::unit_name();
-    name.append("*");
-    name.append(RHS::unit_name());
-    return name;
+  constexpr static auto unit_name() {
+    return LHS::unit_name() + string_literal{"*"} + RHS::unit_name();
   }
 };
 
 template <unit LHS, unit RHS>
 struct unit_quotient : _detail::unit_quotient_impl<LHS, RHS>::type {
-  constexpr static std::string unit_name() {
-    std::string name = LHS::unit_name();
-    name.append("/");
-    name.append(RHS::unit_name());
-    return name;
+  constexpr static auto unit_name() {
+    return LHS::unit_name() + string_literal{"*"} + RHS::unit_name();
   }
 };
 
@@ -79,12 +80,15 @@ template <auto DimensionalProduct, auto Multiplier, string_literal Name>
 struct unit_type {
   constexpr static dimension_product auto dimensional_product =
       DimensionalProduct;
+  /// The multiplier of the unit relative to the corresponding coherent unit
   constexpr static rational auto multiplier = Multiplier;
+  /// The name of the unit
   constexpr static string_literal name = Name;
 
-  constexpr static std::string unit_name() {
-    return std::string{name.begin(), name.end()};
-  }
+  /// \brief Return the name of the unit
+  ///
+  /// \return The name of the unit.
+  constexpr static auto unit_name() { return name; }
 };
 
 template <unit LHS, unit RHS> consteval unit auto operator*(LHS, RHS) {
@@ -128,14 +132,12 @@ template <auto From, auto To>
 concept unit_convertible_to =
     unit<decltype(From)> && unit<decltype(To)> &&
     From.dimensional_product == To.dimensional_product;
-// ft*m -> nm^2 == (ft * (m / ft)) * m
-// = (ft * m / ft * (nm / m)) * m
-// = (ft * (m / ft) * (nm / m)) * (nm / m)
-// = nm^2
 
-// m * m == unit_product_t<m, m>
-// If m^2 : make_unit_t<m * m, m^2>, underlying_unit_t<m^2> = unit_type<m * m,
-// 1, m^2> != unit_product_t<m, m>.
+// cm * m / s -> m^2 / hr
+// cm * m / s -> cm * (m / cm) * m / s
+// cm * m / s -> cm * (1m / 100cm) * m / (s * (1hr / 3600s))
+// m^2 / hr = (1/100) * cm * (m / cm) * m / (1/3600 * s * (hr / s))
+// m^2 /hr = 1/100 * 3600 * cm * (m / cm) * m / (s * hr / s)
 } // namespace maxwell
 
 #endif

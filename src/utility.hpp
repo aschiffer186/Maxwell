@@ -147,7 +147,7 @@ consteval std::intmax_t pos_pow_10(std::intmax_t pow) noexcept {
 } // namespace _detail
 /// \endcond
 
-/// \brief Concept modeling if a type is an instantiation of \c rational_type.
+/// \brief Concept modeling if a type is an instantiation of \c std::ratio
 template <typename T>
 concept ratio_like = _detail::is_ratio<std::remove_cvref_t<T>>::value;
 
@@ -208,6 +208,7 @@ consteval auto reduce() {
 } // namespace _detail
 /// \endcond
 
+/// \brief Concept modeling if a type is an instantiation of \c rational_type
 template <typename T>
 concept rational = _detail::is_rational_type<std::remove_cvref_t<T>>::value;
 
