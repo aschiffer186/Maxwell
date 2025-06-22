@@ -144,6 +144,19 @@ consteval std::intmax_t pos_pow_10(std::intmax_t pow) noexcept {
     return base * pos_pow_10(pow - 1);
   }
 }
+
+consteval std::intmax_t pos_pow(std::intmax_t base,
+                                std::intmax_t pow) noexcept {
+  assert(pow >= 0);
+  if (pow == 0) {
+    return 1;
+  } else if (pow % 2 == 0) {
+    const std::intmax_t res = pos_pow(base, pow / 2);
+    return res * res;
+  } else {
+    return base * pos_pow(base, pow - 1);
+  }
+}
 } // namespace _detail
 /// \endcond
 
@@ -176,7 +189,7 @@ struct rational_type {
   constexpr static std::intmax_t exp = E;
 
   /// \brief Convert \c rational_number to a \c double
-  consteval operator long double() const noexcept {
+  consteval explicit operator long double() const noexcept {
     const long double pow = (exp >= 0) ? _detail::pos_pow_10(num)
                                        : (1.0 / _detail::pos_pow_10(-exp));
     return pow * static_cast<long double>(num) / static_cast<long double>(den);
@@ -212,6 +225,15 @@ consteval auto reduce() {
 template <typename T>
 concept rational = _detail::is_rational_type<std::remove_cvref_t<T>>::value;
 
+template <std::intmax_t N1, std::intmax_t D1, std::intmax_t E1,
+          std::intmax_t N2, std::intmax_t D2, std::intmax_t E2>
+constexpr bool operator==(rational_type<N1, D1, E1>,
+                          rational_type<N2, D2, E2>) noexcept {
+  const rational auto lhs = _detail::reduce<N1, D1, E1>();
+  const rational auto rhs = _detail::reduce<N2, D2, E2>();
+  return lhs.num == rhs.num && lhs.den == rhs.den && lhs.exp == rhs.exp;
+}
+
 /// \brief Multiplication operator.
 ///
 /// Computes the product of two rational numbers. The resulting rational
@@ -240,7 +262,7 @@ consteval rational auto operator*(rational_type<N1, D1, E1> /*lhs*/,
   } else {
     constexpr std::intmax_t res_num = N1 * N2;
     constexpr std::intmax_t res_den = D1 * D2;
-    constexpr std::intmax_t res_exp = E1 * E2;
+    constexpr std::intmax_t res_exp = E1 + E2;
     return _detail::reduce<res_num, res_den, res_exp>();
   }
 }
@@ -340,6 +362,38 @@ consteval auto operator-(rational_type<N1, D1, E1> /*lhs*/,
     constexpr std::intmax_t output_num = (N1 * new_den) - (new_num * D1);
     constexpr std::intmax_t output_den = D1 * new_den;
     return _detail::reduce<output_num, output_den, common_pow>();
+  }
+}
+
+/// \brief Converts a \c std::ratio type to a \c rational_type
+///
+/// Converts a \c std::ratio type to a \c rational_type. The resulting \c
+/// rational_type will be equivalent to the \c std::ratio after reduction.
+///
+/// \tparam Ratio the \c std::ratio_type to convert.
+/// \return A \c rational_type equivalent to the specified \c std::ratio.
+template <ratio_like Ratio> consteval rational auto from_ratio() noexcept {
+  using type = Ratio::type;
+  return rational_type<type::num, type::den, 0>{};
+}
+
+// cm^2 * nK =
+
+template <std::intmax_t N, std::intmax_t D, std::intmax_t E, rational Power>
+consteval rational auto pow(rational_type<N, D, E>) noexcept {
+  constexpr rational auto reduced =
+      _detail::reduce<Power::num, Power::den, Power::exp>();
+  assert(reduced.den == 1);
+  if constexpr (Power::num > 0) {
+    constexpr std::intmax_t new_num = _detail::pos_pow(N, Power::num);
+    constexpr std::intmax_t new_den = _detail::pos_pow(D, Power::num);
+    constexpr std::intmax_t new_exp = E + Power::num;
+    return _detail::reduce<new_num, new_den, new_exp>();
+  } else {
+    constexpr std::intmax_t new_num = _detail::pos_pow(D, -Power::num);
+    constexpr std::intmax_t new_den = _detail::pos_pow(N, -Power::num);
+    constexpr std::intmax_t new_exp = E + Power::num;
+    return _detail::reduce<new_num, new_den, new_exp>();
   }
 }
 

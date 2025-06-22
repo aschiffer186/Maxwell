@@ -68,3 +68,11 @@ TEST(TestUtilities, TestRationalNumberSubtraction) {
   EXPECT_EQ(diff.den, 6);
   EXPECT_EQ(diff.exp, 2);
 }
+
+TEST(TestUtilties, TestFromRatio) {
+  const rational auto r = from_ratio<std::ratio<10, 20>>();
+
+  EXPECT_EQ(r.num, 1);
+  EXPECT_EQ(r.den, 2);
+  EXPECT_EQ(r.exp, 0);
+}

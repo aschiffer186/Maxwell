@@ -93,6 +93,8 @@ template <dimension... Dimensions> struct dimension_product_type {
   static_assert(sizeof...(Dimensions) > 0);
 
   using as_tuple = std::tuple<Dimensions...>;
+
+  auto consteval static tuple_form() { return as_tuple{}; }
 };
 
 /// \brief Equality operator

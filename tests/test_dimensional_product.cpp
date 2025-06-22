@@ -192,6 +192,12 @@ TEST(TestDimensionProduct, TestDimensionProductDivision) {
   EXPECT_EQ(std::get<0>(quot8_tuple), (dimension_type<std::ratio<-1>, "A">{}));
   EXPECT_EQ(std::get<1>(quot8_tuple), d2);
   EXPECT_EQ(std::get<2>(quot8_tuple), (dimension_type<std::ratio<0>, "C">{}));
+
+  const dimension_product auto quot9 = d1 / d1;
+  const auto quot9_tuple = quot9.tuple_form();
+
+  EXPECT_EQ(std::tuple_size_v<decltype(quot9_tuple)>, 1);
+  EXPECT_EQ(std::get<0>(quot9_tuple), (dimension_type<std::ratio<0>, "A">{}));
 }
 
 TEST(TestDimensionProduct, TestDimensionProductEquality) {
@@ -223,6 +229,4 @@ TEST(TestDimensionProduct, TestDimensionProductEquality) {
   EXPECT_EQ(d4, d4);
 }
 
-TEST(TestDimensionProduct, TestDimensionProductConcept) {
-  
-}
+TEST(TestDimensionProduct, TestDimensionProductConcept) {}
