@@ -1,76 +1,70 @@
+#include "utility.hpp"
+
 #include <gtest/gtest.h>
 
-#include "Maxwell.hpp"
+using namespace maxwell;
 
-TEST(TestUtilities, TestRationalAddition) {
-  maxwell::rational r1(1, 2); // 1/2
-  maxwell::rational r2(1, 3); // 1/3
-  r1 += r2;                   // 1/2 + 1/3 = 5/6
-  EXPECT_EQ(r1, maxwell::rational(5, 6));
-
-  maxwell::rational r4(1, 4);
-  maxwell::rational r5(1, 4);
-  r4 += r5; // 1/4 + 1/4 = 1/2
-  EXPECT_EQ(r4, maxwell::rational(1, 2));
-
-  const maxwell::rational r6(1, 2);
-  const maxwell::rational r7(1, 3);
-  EXPECT_EQ(r6 + r7, maxwell::rational(5, 6));
-
-  const maxwell::rational r8(1, 4);
-  const maxwell::rational r9(1, 4);
-  EXPECT_EQ(r8 + r9, maxwell::rational(1, 2));
+TEST(TestUtilities, TestSimilar) {
+  EXPECT_TRUE((similar<int, int>));
+  EXPECT_TRUE((similar<const int, int>));
+  EXPECT_TRUE((similar<int&, int>));
+  EXPECT_TRUE((similar<const int&, int>));
+  EXPECT_TRUE((similar<int&&, int>));
+  EXPECT_TRUE((similar<const int&&, int>));
+  EXPECT_FALSE((similar<int, double>));
 }
 
-TEST(TestUtilities, TestRationalSubtraction) {
-  maxwell::rational r1(1, 2); // 1/2
-  maxwell::rational r2(1, 3); // 1/3
-  r1 -= r2;                   // 1/2 - 1/3 = 1/6
-  EXPECT_EQ(r1.numerator, 1);
-  EXPECT_EQ(r1.denominator, 6);
+TEST(TestUtilities, TestStringLiteral) {
+  EXPECT_TRUE(std::ranges::range<string_literal<2>>);
+  EXPECT_TRUE(std::ranges::sized_range<string_literal<2>>);
 
-  maxwell::rational r4(3, 6);
-  maxwell::rational r5(1, 6);
-  r4 -= r5; // 3/6 - 1/6 = 1/3
-  EXPECT_EQ(r4.numerator, 1);
-  EXPECT_EQ(r4.denominator, 3);
+  const string_literal foo{"foo"};
+  EXPECT_EQ(foo.size(), 3);
 
-  const maxwell::rational r6(1, 2);
-  const maxwell::rational r7(1, 3);
-  EXPECT_EQ(r6 - r7, maxwell::rational(1, 6));
-
-  const maxwell::rational r8(3, 6);
-  const maxwell::rational r9(1, 6);
-  EXPECT_EQ(r8 - r9, maxwell::rational(1, 3));
+  const string_literal bar{"bar"};
+  EXPECT_EQ(foo + bar, string_literal{"foobar"});
 }
 
-TEST(TestUtilities, TestRationalMultiplication) {
-  maxwell::rational r1(1, 2); // 1/2
-  maxwell::rational r2(2, 3); // 1/3
-  r1 *= r2;                   // 1/2 * 2/3 = 1/3
-  EXPECT_EQ(r1.numerator, 1);
-  EXPECT_EQ(r1.denominator, 3);
-
-  maxwell::rational r3(1, 2);
-  EXPECT_EQ(r3 * r2, maxwell::rational(1, 3));
+TEST(TestUtilities, TestRatioLike) {
+  EXPECT_TRUE((ratio_like<std::ratio<1, 1>>));
+  EXPECT_FALSE(ratio_like<int>);
 }
 
-TEST(TestUtilities, TestRationalDivision) {
-  maxwell::rational r1(1, 2); // 1/2
-  maxwell::rational r2(2, 3); // 1/3
-  r1 /= r2;                   // 1/2 / 2/3 = 3/4
-  EXPECT_EQ(r1.numerator, 3);
-  EXPECT_EQ(r1.denominator, 4);
+TEST(TestUtilities, TestRationalTypeMultiplication) {
+  const rational_type<2, 4, 2> lhs;
+  const rational_type<2, 4, 2> rhs;
 
-  maxwell::rational r3(1, 2);
-  EXPECT_EQ(r3 / r2, maxwell::rational(3, 4));
+  const rational auto prod = lhs * rhs;
+
+  EXPECT_EQ(prod.num, 1);
+  EXPECT_EQ(prod.den, 4);
+  EXPECT_EQ(prod.exp, 4);
 }
 
-TEST(TestUtilities, TestRationalReduce) {
-  maxwell::rational r(8, 16);
-  r.reduce();
-  EXPECT_EQ(r.numerator, 1);
-  EXPECT_EQ(r.denominator, 2);
+TEST(TestUtilities, TestRationalTypeDivision) {
+  const rational_type<3, 6, 4> lhs;
+  const rational_type<4, 8, 2> rhs;
+
+  const rational auto quot = lhs / rhs;
+  EXPECT_EQ(quot.num, 1);
+  EXPECT_EQ(quot.den, 1);
+  EXPECT_EQ(quot.exp, 2);
 }
 
-TEST(TestUtilities, TestRationalComparsion) { EXPECT_EQ(maxwell::rational(1, 2), maxwell::rational(2, 4)); }
+TEST(TestUtilities, TestRationalNumberAddition) {
+  const rational_type<3, 6, 2> lhs;
+  const rational_type<8, 12, 2> rhs;
+  const rational auto sum = lhs + rhs;
+  EXPECT_EQ(sum.num, 7);
+  EXPECT_EQ(sum.den, 6);
+  EXPECT_EQ(sum.exp, 2);
+}
+
+TEST(TestUtilities, TestRationalNumberSubtraction) {
+  const rational_type<3, 6, 2> lhs;
+  const rational_type<8, 12, 2> rhs;
+  const rational auto diff = lhs - rhs;
+  EXPECT_EQ(diff.num, -1);
+  EXPECT_EQ(diff.den, 6);
+  EXPECT_EQ(diff.exp, 2);
+}

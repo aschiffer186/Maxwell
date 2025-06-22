@@ -4,3 +4,7 @@ build/*
 
 html/*
 latex/*
+
+*.txt
+
+test.cpp
