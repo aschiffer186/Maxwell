@@ -189,10 +189,10 @@ struct rational_type {
   constexpr static std::intmax_t exp = E;
 
   /// \brief Convert \c rational_number to a \c double
-  consteval explicit operator long double() const noexcept {
+  consteval explicit operator double() const noexcept {
     const long double pow = (exp >= 0) ? _detail::pos_pow_10(num)
                                        : (1.0 / _detail::pos_pow_10(-exp));
-    return pow * static_cast<long double>(num) / static_cast<long double>(den);
+    return pow * static_cast<double>(num) / static_cast<double>(den);
   }
 };
 

@@ -31,6 +31,7 @@ public:
   using magnitude_type = Magnitude;
   using kind = Kind;
   using unit_type = std::remove_cvref_t<decltype(Unit)>;
+  static constexpr unit auto units = Unit;
 
   constexpr quantity_type()
     requires std::is_default_constructible_v<Magnitude>
@@ -101,7 +102,7 @@ public:
   template <auto FromUnit, typename K2, typename M>
     requires std::constructible_from<Magnitude, M>
   constexpr static quantity_type
-  from_same_dimension(const quantity_type<FromUnit, K2, M>& other) {
+  from(const quantity_type<FromUnit, K2, M>& other) {
     static_assert(unit_convertible_to<FromUnit, Unit>,
                   "Units of other cannot be converted to units of quantity "
                   "being constructed");
@@ -110,16 +111,15 @@ public:
     return quantity_type(std::move(converted));
   }
 
-  template <auto U2, typename K2, typename M>
+  template <auto FromUnit, typename K2, typename M>
     requires std::constructible_from<Magnitude, M>
-  constexpr static quantity_type
-  from_same_dimension(quantity_type<U2, K2, M>&& other) {
-    static_assert(unit_convertible_to<U2, Unit>,
+  constexpr static quantity_type from(quantity_type<FromUnit, K2, M>&& other) {
+    static_assert(unit_convertible_to<FromUnit, Unit>,
                   "Units of other cannot be converted to units of quantity "
                   "being constructed");
     const auto converted =
-        conversion_factor(U2, Unit) * std::move(other).magnitude();
-    return quantity_type(converted);
+        conversion_factor(FromUnit, Unit) * std::move(other).magnitude();
+    return quantity_type(std::move(converted));
   }
 
   template <auto U2, typename K2, typename M>
@@ -139,6 +139,20 @@ public:
     return *this;
   }
 
+  template <typename Q>
+    requires _detail::is_quantity<Q>::value
+  constexpr Q as() const& {
+    static_assert(unit_convertible_to<Unit, Q::units>);
+    return Q(value_);
+  }
+
+  template <typename Q>
+    requires _detail::is_quantity<Q>::value
+  constexpr Q as() && {
+    static_assert(unit_convertible_to<Unit, Q::units>);
+    return Q(std::move(value_));
+  }
+
   constexpr const magnitude_type& magnitude() const& noexcept { return value_; }
 
   constexpr magnitude_type&& magnitude() && noexcept {
@@ -149,7 +163,7 @@ public:
     return std::move(value_);
   }
 
-  constexpr unit_type units() const noexcept { return Unit; }
+  constexpr unit_type get_units() const noexcept { return Unit; }
 
   constexpr quantity_type& operator++() {
     ++value_;
@@ -171,6 +185,42 @@ public:
     quantity_type temp(*this);
     --(*this);
     return temp;
+  }
+
+  constexpr quantity_type& operator+=(const quantity_type& other) {
+    value_ += other.value_;
+    return *this;
+  }
+
+  constexpr quantity_type& operator-=(const quantity_type& other) {
+    value_ -= other.value_;
+    return *this;
+  }
+
+  template <auto FromUnit, typename FromKind, typename M>
+  constexpr quantity_type&
+  operator+=(const quantity_type<FromUnit, FromKind, M>& other) {
+    static_assert(unit_convertible_to<FromUnit, Unit>,
+                  "Units of other cannot be converted to units of quantity "
+                  "being constructed");
+    static_assert(kind_convertible_to<FromKind, Kind>,
+                  "Kind of other is not compatible with kind of quantity being "
+                  "constructed. Use from_same_dimension to forcibly construct "
+                  "from a quantity of a different kind.");
+    return value_ += quantity_type(other).value();
+  }
+
+  template <auto FromUnit, typename FromKind, typename M>
+  constexpr quantity_type&
+  operator-=(const quantity_type<FromUnit, FromKind, M>& other) {
+    static_assert(unit_convertible_to<FromUnit, Unit>,
+                  "Units of other cannot be converted to units of quantity "
+                  "being constructed");
+    static_assert(kind_convertible_to<FromKind, Kind>,
+                  "Kind of other is not compatible with kind of quantity being "
+                  "constructed. Use from_same_dimension to forcibly construct "
+                  "from a quantity of a different kind.");
+    return value_ -= quantity_type(other).value();
   }
 
   friend auto constexpr operator<=>(const quantity_type& lhs,

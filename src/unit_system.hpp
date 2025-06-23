@@ -21,7 +21,8 @@ template <string_literal... BaseQuantityNames> struct unit_system {
 
   template <string_literal Name>
     requires((Name == BaseQuantityNames) || ...)
-  using base_kind = kind_type<Name>;
+  using base_kind =
+      kind_type<Name, dimension_product_type<base_dimension_type<Name>>{}>;
 
   template <string_literal QuantityName, string_literal UnitName>
   using base_unit = make_base_unit_t<base_dimension<QuantityName>, UnitName>;
