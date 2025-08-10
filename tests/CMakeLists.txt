@@ -1,0 +1,2 @@
+add_executable(compile_check compile_check.cpp)
+target_link_libraries(compile_check Maxwell-Utility Maxwell-Systems Maxwell-Quantity)

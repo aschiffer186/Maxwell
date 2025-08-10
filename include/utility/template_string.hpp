@@ -1,0 +1,115 @@
+/// \file template_string.hpp
+/// \brief Definition of NTTP representation of string literals.
+
+#ifndef TEMPLATE_STRING_HPP
+#define TEMPLATE_STRING_HPP
+
+#include <algorithm>
+#include <array>
+#include <compare>
+#include <concepts>
+#include <cstddef>
+#include <functional>
+#include <iterator>
+
+/// \namespace maxwell::utility
+/// \brief Namespace for uility classes.
+namespace maxwell::utility {
+/// \brief Representation of string literal as template parameter.
+///
+/// Class template \c template_string is a simple wrapper around a
+/// null-terminated string literal that can be used as a template parameter.
+///
+/// \tparam Length The length of the string literal excluding the null
+/// terminator.
+template <std::size_t Length> struct template_string {
+  std::array<char, Length + 1> _data;
+
+  /// \brief Constructor
+  ///
+  /// Creates a \c template_string instance from a character array.
+  /// The resulting \c template_string contains a copy of the data of the array.
+  ///
+  /// \post <tt>std::ranges::equal(str, *this)</tt>
+  /// \param str The character array used to initialize \c *this.
+  constexpr template_string(const char (&str)[Length + 1]) {
+    std::ranges::copy(str, _data.begin());
+  }
+
+  /// \brief Returns an iterator to the beginning of the string
+  ///
+  /// Returns an iterator pointing to the first character of the string.
+  /// The returned iterator models \c std::contiguous_iterator.
+  ///
+  /// \return An iterator to the beginning of the string.
+  constexpr std::contiguous_iterator auto begin() const noexcept {
+    return _data.begin();
+  }
+
+  /// \brief Returns an iterator pointing past the end of the string
+  ///
+  /// Returns an iterator pointing past the end of the string.
+  /// Dereferencing this iterator is undefined beheavior.
+  /// The returned iterator models \c std::contiguous_iterator.
+  ///
+  /// \return An iterator pointing past the end of the string.
+  constexpr std::contiguous_iterator auto end() const noexcept {
+    return _data.end() - 1;
+  }
+
+  /// \brief Returns the number of elements in the string.
+  ///
+  /// Returns the number of elements in the string.
+  /// Equivalent to <tt>std::distance(begin(), end())</tt>.
+  ///
+  //// \return The number of elements in the string.
+  constexpr std::unsigned_integral auto size() const noexcept { return Length; }
+};
+
+template <std::size_t N>
+template_string(const char (&)[N]) -> template_string<(N - 1)>;
+
+/// \brief Three way comparison operator of \c template_string
+///
+/// Perfoms a lexicographical comparison of two \c template_string instances
+/// using three way comparison.
+///
+/// \tparam N1 The length of the left hand side of the comaprison.
+/// \tparam N2 The length of the right hand side of the comparison.
+/// \param lhs The left hand side of the comparison.
+/// \param rhs The right hand side of the comparison.
+/// \return The order between the fist non-equivalent pair of elements.
+template <std::size_t N1, std::size_t N2>
+constexpr auto operator<=>(const template_string<N1>& lhs,
+                           const template_string<N2>& rhs) {
+  return std::lexicographical_compare_three_way(lhs.begin(), lhs.end(),
+                                                rhs.begin(), rhs.end());
+}
+
+template <std::size_t N1, std::size_t N2>
+constexpr auto operator==(const template_string<N1>& lhs,
+                          const template_string<N2>& rhs) {
+  return (lhs <=> rhs) == std::strong_ordering::equal;
+}
+
+template <std::size_t L, std::size_t R>
+constexpr template_string<L + R> operator+(const template_string<L>& lhs,
+                                           const template_string<R>& rhs) {
+  char data[L + R + 1];
+  auto it = std::ranges::copy(lhs, data);
+  std::ranges::copy(rhs, it.out);
+  data[L + R] = '\0';
+  return template_string(data);
+}
+} // namespace maxwell::utility
+
+template <std::size_t N>
+struct std::hash<maxwell::utility::template_string<N>> {
+  std::size_t
+  operator()(const maxwell::utility::template_string<N>& str) noexcept {
+    return std::hash<std::string_view>{}(
+        std::string_view{str.begin(), str.end()});
+  }
+};
+
+#endif
