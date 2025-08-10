@@ -7,7 +7,6 @@
 #include <algorithm>
 #include <array>
 #include <compare>
-#include <concepts>
 #include <cstddef>
 #include <functional>
 #include <iterator>
@@ -86,12 +85,30 @@ constexpr auto operator<=>(const template_string<N1>& lhs,
                                                 rhs.begin(), rhs.end());
 }
 
+/// \brief Equality operator
+///
+/// Compares two \c template_string instances for equality.
+///
+/// \tparam N1 The length of the left hand side of the comparison.
+/// \tparam N2 The length of the right hand side of the comparison.
+/// \param lhs The left hand side of the comparison.
+/// \param rhs The right hand side of the comparison.
+/// \return \c true if the strings are equal.
 template <std::size_t N1, std::size_t N2>
 constexpr auto operator==(const template_string<N1>& lhs,
                           const template_string<N2>& rhs) {
   return (lhs <=> rhs) == std::strong_ordering::equal;
 }
 
+/// \brief Concatenation operator
+///
+/// Concatenates two \c template_string instances.
+///
+/// \tparam L The length of the first string.
+/// \tparam R The length of the second string.
+/// \param lhs The left hand side of the concatenation
+/// \param rhs The right hand side of the concatenation
+/// \return The concatenation of \c lhs and \c rhs.
 template <std::size_t L, std::size_t R>
 constexpr template_string<L + R> operator+(const template_string<L>& lhs,
                                            const template_string<R>& rhs) {

@@ -3,6 +3,7 @@
 
 #include "compile_time_math.hpp"
 #include "template_string.hpp"
+#include "type_traits.hpp"
 
 namespace maxwell {
 template <utility::template_string Name, utility::rational auto Power>
@@ -64,24 +65,21 @@ template <dimension... Dimensions> struct dimension_product_type {
   consteval static auto as_tuple() { return tuple_type{}; }
 };
 
-template <typename T, typename U>
-concept similar = std::same_as<std::remove_cvref_t<T>, std::remove_cvref_t<U>>;
-
 template <dimension LHS, dimension... LHSRest, dimension RHS,
           dimension... RHSRest>
 constexpr bool
 operator==(dimension_product_type<LHS, LHSRest...> /*lhs*/,
            dimension_product_type<RHS, RHSRest...> /*rhs*/) noexcept {
   if constexpr (sizeof...(LHSRest) == sizeof...(RHSRest)) {
-    return similar<dimension_product_type<LHS, LHSRest...>,
-                   dimension_product_type<RHS, RHSRest...>>;
+    return utility::similar<dimension_product_type<LHS, LHSRest...>,
+                            dimension_product_type<RHS, RHSRest...>>;
   } else if constexpr (LHS::power == utility::zero) {
     return dimension_product_type<LHSRest...>{} ==
            dimension_product_type<RHS, RHSRest...>{};
   } else if constexpr (RHS::power == utility::zero) {
     return dimension_product_type<LHS, LHSRest...>{} ==
            dimension_product_type<RHSRest...>{};
-  } else if constexpr (similar<LHS, RHS>) {
+  } else if constexpr (utility::similar<LHS, RHS>) {
     return dimension_product_type<LHSRest...>{} ==
            dimension_product_type<RHSRest...>{};
   } else {

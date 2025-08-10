@@ -7,6 +7,7 @@
 #include <utility>
 
 #include "quantity.hpp"
+#include "type_traits.hpp"
 #include "unit.hpp"
 
 namespace maxwell {
@@ -69,7 +70,7 @@ public:
   constexpr quantity_value(
       const quantity_value<FromQuantity, FromUnit, Up>& other)
       : value_(other.get_value() *
-               _detail::constant<conversion_factor(FromUnit, U)>) {
+               utility::as_constant<conversion_factor(FromUnit, U)>) {
     static_assert(unit_convertible_to<FromUnit, U>,
                   "Units of other cannot be converted to units of value being "
                   "constructed");
@@ -80,7 +81,7 @@ public:
   constexpr quantity_value(
       quantity_value<FromQuantity, FromUnit, Up>&& other) noexcept
       : value_(std::move(other).get_value() *
-               _detail::constant<conversion_factor(FromUnit, U)>) {
+               utility::as_constant<conversion_factor(FromUnit, U)>) {
     static_assert(unit_convertible_to<FromUnit, U>,
                   "Units of other cannot be converted to units of value being "
                   "constructed");
@@ -143,6 +144,22 @@ public:
   constexpr quantity_value& operator%=(const quantity_value& rhs) {
     value_ %= rhs.value_;
     return *this;
+  }
+
+  template <auto FromQuantity, auto FromUnit, typename Up>
+  constexpr quantity_value&
+  operator+=(const quantity_value<FromQuantity, FromUnit, Up>& rhs) {
+    static_assert(unit_convertible_to<FromUnit, U>,
+                  "Cannot add quantities with incompatible units");
+    return *this += quantity_value(rhs);
+  }
+
+  template <auto FromQuantity, auto FromUnit, typename Up>
+  constexpr quantity_value&
+  operator-=(const quantity_value<FromQuantity, FromUnit, Up>& rhs) {
+    static_assert(unit_convertible_to<FromUnit, U>,
+                  "Cannot add quantities with incompatible units");
+    return *this -= quantity_value(rhs);
   }
 
 private:

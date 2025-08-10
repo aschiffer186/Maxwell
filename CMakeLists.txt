@@ -8,5 +8,11 @@ set(MAXWELL_VERSION "${MAXWELL_VERSION_MAJOR}.${MAXWELL_VERSION_MINOR}.${MAXWELL
 
 project(Maxwell LANGUAGES CXX VERSION ${MAXWELL_VERSION})
 
+option(BUILD_TESTS "Build unit tests" OFF)
+
 add_subdirectory(include) 
-add_subdirectory(tests)
+
+if (BUILD_TESTS)
+    enable_testing()
+    add_subdirectory(tests)
+endif()
