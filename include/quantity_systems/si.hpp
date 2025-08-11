@@ -1,3 +1,6 @@
+/// \file si.hpp
+/// \brief Definition of units in the SI system.
+
 #ifndef SI_HPP
 #define SI_HPP
 

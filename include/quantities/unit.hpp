@@ -1,7 +1,11 @@
+/// \file unit.hpp
+/// \brief Definition of class template \c unit_type
+
 #ifndef UNIT_HPP
 #define UNIT_HPP
 
 #include <type_traits> // false_type, remove_cvref_t, true_type
+#include <utility>     // declval
 
 #include "compile_time_math.hpp"
 #include "dimension.hpp"
@@ -39,6 +43,7 @@ struct has_underlying_unit<T, std::void_t<underlying_unit_t<T>>>
 template <typename T>
 concept unit = _detail::has_underlying_unit<std::remove_cvref_t<T>>::value;
 
+/// \cond
 namespace _detail {
 template <unit LHS, unit RHS> struct unit_product_impl {
   using type = unit_type<LHS::name + utility::template_string{"*"} + RHS::name,
@@ -52,6 +57,7 @@ template <unit LHS, unit RHS> struct unit_quotient_impl {
                          LHS::multiplier / RHS::multiplier>;
 };
 } // namespace _detail
+/// \endcond
 
 template <unit LHS, unit RHS>
 struct unit_product : _detail::unit_product_impl<LHS, RHS>::type {};

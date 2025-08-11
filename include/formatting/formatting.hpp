@@ -1,3 +1,6 @@
+/// \file formatting.hpp
+/// \brief Provides formatting and printing functions for types in maxwell.
+
 #ifndef FORMATTING_HPP
 #define FORMATTING_HPP
 

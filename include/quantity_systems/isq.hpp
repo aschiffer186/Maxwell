@@ -1,10 +1,14 @@
+/// \file isq.hpp
+/// \brief Definition of quantities in the ISQ system
+
 #ifndef ISQ_HPP
 #define ISQ_HPP
+
+#include <type_traits> // true_type
 
 #include "quantity.hpp"
 #include "quantity_system.hpp"
 #include "type_traits.hpp"
-#include <type_traits>
 
 namespace maxwell::isq {
 using isq_system = quantity_system<"L", "M", "T", "I", "Θ", "N", "J">;
@@ -19,5 +23,8 @@ constexpr auto luminosity_quantity = isq_system::base_quantity<"J", "J">{};
 
 } // namespace maxwell::isq
 
-namespace maxwell {}
+namespace maxwell {
+template <>
+struct enable_chrono_conversions<isq::time_quantity> : std::true_type {};
+} // namespace maxwell
 #endif

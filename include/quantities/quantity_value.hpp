@@ -1,13 +1,16 @@
+/// \file quantity_value.hpp
+/// \brief Definition of class template \c quantity_value.hpp
+
 #ifndef QUANTITY_VALUE_HPP
 #define QUANTITY_VALUE_HPP
 
-#include <chrono> // duration
-#include <compare>
-#include <concepts>         // constructible_from
+#include <chrono>           // duration
+#include <compare>          // spaceship operator
+#include <concepts>         // constructible_from, convertible_to, swappable
 #include <functional>       // hash
 #include <initializer_list> // initializer_list
-#include <type_traits>      // remove_cvref_t
-#include <utility>          // forward, in_place_t, move
+#include <type_traits> // false_type, is_assignable_v, remove_cvref_t, true_type
+#include <utility>     // forward, in_place_t, move
 
 #include "config.hpp"
 #include "quantity.hpp"
@@ -15,14 +18,11 @@
 #include "unit.hpp"
 
 namespace maxwell {
-namespace _detail {
-template <double V> constexpr double constant = V;
-}
-
 template <auto Q, auto U, typename T = double>
   requires unit<decltype(U)> && quantity<decltype(Q)>
 class quantity_value;
 
+/// \cond
 namespace _detail {
 template <typename> struct is_quantity_value : std::false_type {};
 
@@ -33,6 +33,7 @@ template <typename T>
 constexpr bool is_quantity_value_v =
     is_quantity_value<std::remove_cvref_t<T>>::value;
 } // namespace _detail
+/// \endcond
 
 template <auto Q, auto U, typename T>
   requires unit<decltype(U)> && quantity<decltype(Q)>
@@ -233,17 +234,41 @@ public:
   = default;
 
 private:
-  template <auto Q2, auto U2, auto T2> friend class quantity_value;
+  template <auto Q2, auto U2, typename T2>
+    requires unit<decltype(U)> && quantity<decltype(Q)>
+  friend class quantity_value;
 
   T value_{};
 };
 } // namespace maxwell
 
+/// \brief Specialization of \c std::hash
+///
+/// Specialization of \c std::hash for \c quantity_value.
+/// Two \c quantity_value instances have the same hash code if they represent
+/// the same value after being converted to base units.
+/// Two \c quantity_values instances will have difference hash codes if they
+/// have the same value and same units, but represent different quantities.
+///
+/// \note The specialization of \c std::hash is not suitable as cryptographic
+/// hash function.
+///
+/// \tparam Q The quantity of the \c quantity_value
+/// \tparam U The units of the \c quantity_value
+/// \tparam T The underlying type of the \c quantity_value
 template <auto Q, auto U, typename T>
 struct std::hash<maxwell::quantity_value<Q, U, T>> {
   auto operator()(const maxwell::quantity_value<Q, U, T>& q) noexcept
       -> std::size_t {
-    return 0;
+    const auto in_base_units = q.in_base_units();
+    std::size_t hash_code =
+        std::hash<typename decltype(q)::value_type>{}(q.get_value());
+    hash_code ^= std::hash<decltype(q.get_units().name)>{}(q.get_units().name) +
+                 0x9e377b9b + (hash_code << 6) + (hash_code >> 2);
+    hash_code ^=
+        std::hash<decltype(q.quantity_kind::name)>{q.quantity_kind.name} +
+        0x9e377b9b + (hash_code << 6) + (hash_code >> 2);
+    return hash_code;
   }
 };
 

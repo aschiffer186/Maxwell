@@ -1,15 +1,20 @@
+/// \file quantity_holder.hpp
+/// \brief Definition of class template \c quantity_holder.
+
 #ifndef QUANTITY_HOLDER_HPP
 #define QUANTITY_HOLDER_HPP
 
+#include <type_traits> // false_type, remove_cvref_t, true_type
+
 #include "quantity.hpp"
 #include "quantity_value.hpp"
-#include <type_traits>
 
 namespace maxwell {
 template <auto Q, typename T = double>
   requires quantity<decltype(Q)>
 class quantity_holder;
 
+/// \cond
 namespace _detail {
 template <typename> struct is_quantity_holder : std::false_type {};
 
@@ -17,8 +22,10 @@ template <auto Q, typename T>
 struct is_quantity_holder<quantity_holder<Q, T>> : std::false_type {};
 
 template <typename T>
-constexpr bool is_quantity_holder_v = is_quantity_holder<T>::value;
+constexpr bool is_quantity_holder_v =
+    is_quantity_holder<std::remove_cvref_t<T>>::value;
 } // namespace _detail
+/// \endcond
 
 template <auto Q, typename T>
   requires quantity<decltype(Q)>

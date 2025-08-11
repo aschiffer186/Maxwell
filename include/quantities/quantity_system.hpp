@@ -1,3 +1,6 @@
+/// \file quantity_system.hpp
+/// \brief Definition of \c quantity_system helper class template
+
 #ifndef QUANTITY_SYSTEM_HPP
 #define QUANTITY_SYSTEM_HPP
 

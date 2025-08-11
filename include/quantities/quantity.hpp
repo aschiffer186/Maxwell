@@ -1,9 +1,15 @@
+/// \file quantity.hpp
+/// \brief Definition of class template \c quantity_type
+
 #ifndef QUANTITY_HPP
 #define QUANTITY_HPP
 
+#include <concepts>    // derived_from
+#include <type_traits> // false_type, remove_cvref_t, true_type
+#include <utility>     // declval
+
 #include "dimension.hpp"
 #include "template_string.hpp"
-#include <type_traits>
 
 namespace maxwell {
 template <utility::template_string Kind, auto Dim>
@@ -19,12 +25,14 @@ auto quantity_base(quantity_type<Kind, Dim>) -> quantity_type<Kind, Dim>;
 template <typename T>
 using quantity_base_t = decltype(quantity_base(std::declval<T>()));
 
+/// \cond
 namespace _detail {
 template <typename, typename = void> struct is_quantity : std::false_type {};
 
 template <typename T>
 struct is_quantity<T, std::void_t<quantity_base_t<T>>> : std::true_type {};
 } // namespace _detail
+/// \endcond
 
 template <typename T>
 concept quantity = _detail::is_quantity<std::remove_cvref_t<T>>::value;
@@ -64,6 +72,7 @@ constexpr quantity auto operator/(quantity auto lhs,
   return quantity_quotient_t<decltype(lhs), decltype(rhs)>{};
 }
 
+/// \cond
 namespace _detail {
 template <utility::template_string Kind, auto Base>
   requires quantity<decltype(Base)>
@@ -72,6 +81,7 @@ struct derived_quantity_impl : decltype(Base) {
   constexpr static auto kind = Kind;
 };
 } // namespace _detail
+/// \endcond
 
 template <utility::template_string Derived, auto Base>
 struct make_derived_quantity {

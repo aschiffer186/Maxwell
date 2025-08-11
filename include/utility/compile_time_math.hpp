@@ -1,4 +1,4 @@
-/// \file rational.hpp
+/// \file compile_time_math.hpp
 /// \brief Definition of compile-time rational number and related operations.
 
 #ifndef RATIONAL_HPP
