@@ -4,6 +4,7 @@
 #ifndef QUANTITY_HOLDER_HPP
 #define QUANTITY_HOLDER_HPP
 
+#include <functional>  // hash
 #include <type_traits> // false_type, remove_cvref_t, true_type
 
 #include "quantity.hpp"
@@ -74,9 +75,22 @@ public:
   }
 
 private:
+  friend class std::hash<maxwell::quantity_holder<Q, T>>;
+
   T value_{};
   double multiplier_{1.0};
 };
 } // namespace maxwell
+
+template <auto Q, typename T> struct std::hash<maxwell::quantity_holder<Q, T>> {
+  auto
+  operator()(const maxwell::quantity_holder<Q, T>& q) noexcept -> std::size_t {
+    std::size_t hash_code = std::hash<T>{}(q.value_);
+    hash_code ^=
+        std::hash<decltype(q.quantity_kind.name)>{}(q.quantity_kind.name) +
+        0x9e377b9b + (hash_code << 6) + (hash_code >> 2);
+    return hash_code;
+  }
+};
 
 #endif
