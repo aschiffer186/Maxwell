@@ -14,7 +14,7 @@ struct quantity_type {
 };
 
 template <utility::template_string Kind, auto Dim>
-quantity_type<Kind, Dim> quantity_base(quantity_type<Kind, Dim>);
+auto quantity_base(quantity_type<Kind, Dim>) -> quantity_type<Kind, Dim>;
 
 template <typename T>
 using quantity_base_t = decltype(quantity_base(std::declval<T>()));

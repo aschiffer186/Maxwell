@@ -1,16 +1,19 @@
 #ifndef UNIT_HPP
 #define UNIT_HPP
 
+#include <type_traits> // false_type, remove_cvref_t, true_type
+
 #include "compile_time_math.hpp"
+#include "dimension.hpp"
 #include "quantity.hpp"
-#include <type_traits>
 
 namespace maxwell {
 template <utility::template_string Name, quantity auto Quantity,
           utility::rational auto Multiplier>
 struct unit_type {
   constexpr static auto name = Name;
-  constexpr static auto quantity = Quantity;
+  constexpr static quantity auto quantity = Quantity;
+  constexpr static dimension_product auto dimensions = quantity.dimensions;
   constexpr static utility::rational auto multiplier = Multiplier;
 };
 
@@ -80,7 +83,7 @@ using make_base_unit_t = make_base_unit<Q, Name>::type;
 
 template <auto FromUnit, auto ToUnit>
 concept unit_convertible_to =
-    quantity_convertible_to<FromUnit.quantity, ToUnit.quantity>;
+    dimension_convertible_to<FromUnit.dimensions, ToUnit.dimensions>;
 
 template <unit From, unit To>
 constexpr double conversion_factor(From, To) noexcept {

@@ -58,7 +58,7 @@ public:
   }
 
   template <auto ToQuantity, auto ToUnit>
-  constexpr quantity_value<ToQuantity, ToUnit, T> as() const {
+  constexpr auto as() const -> quantity_value<ToQuantity, ToUnit, T> {
     static_assert(quantity_convertible_to<Q, ToUnit.quantity>,
                   "Cannot convert to specified unit");
 

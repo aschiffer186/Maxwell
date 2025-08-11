@@ -1,8 +1,11 @@
 #ifndef FORMATTING_HPP
 #define FORMATTING_HPP
 
-#include <format>
-#include <string_view>
+#include <format>      // formatter
+#include <iterator>    // back_inserter
+#include <ostream>     // ostream
+#include <string>      // string
+#include <string_view> // string_view
 
 #include "dimension.hpp"
 #include "quantity_value.hpp"
@@ -64,7 +67,7 @@ struct std::formatter<U> : std::formatter<std::string_view> {
 };
 
 namespace maxwell {
-std::ostream& operator<<(std::ostream& os, const dimension auto& dim) {
+auto operator<<(std::ostream& os, const dimension auto& dim) -> std::ostream& {
 #ifdef MAXWELL_HAS_PRINT
   std::print(os, "{}", dim);
 #else
@@ -73,7 +76,8 @@ std::ostream& operator<<(std::ostream& os, const dimension auto& dim) {
   return os;
 }
 
-std::ostream& operator<<(std::ostream& os, const dimension_product auto& prod) {
+auto operator<<(std::ostream& os,
+                const dimension_product auto& prod) -> std::ostream& {
 #ifdef MAXWELL_HAS_PRINT
   std::print(os, "{}", prod);
 #else
@@ -82,7 +86,7 @@ std::ostream& operator<<(std::ostream& os, const dimension_product auto& prod) {
   return os;
 }
 
-std::ostream& operator<<(std::ostream& os, const unit auto& u) {
+auto operator<<(std::ostream& os, const unit auto& u) -> std::ostream& {
 #ifdef MAXWELL_HAS_PRINT
   std::print(os, "{}", u);
 #else

@@ -4,19 +4,28 @@
 #ifndef RATIONAL_HPP
 #define RATIONAL_HPP
 
-#include <cassert>
-#include <compare>
-#include <cstdint>
-#include <numeric>
-#include <ratio>
-#include <type_traits>
+#include <cassert>     // assert
+#include <compare>     // strong_ordering
+#include <cstdint>     // intmax_t
+#include <numeric>     // gcd
+#include <ratio>       // ratio
+#include <type_traits> // false_type, remove_cvref_t, true_type
 
 /// \namespace maxwell::utility
 /// \brief Namespace for uility classes.
 namespace maxwell::utility {
 
-constexpr std::intmax_t pos_pow(std::intmax_t base,
-                                std::intmax_t pow) noexcept {
+/// \brief Computes the value of exponentiation by a positive power
+///
+/// Computes the value of \f$base^{pow}\f$ where \c base and \c pow are both
+/// integers, and \c pow is a positive number.
+/// This guarantees the return type is also an integer.
+///
+/// \param base The base of the exponentiation.
+/// \param pow The power of the exponentiation.
+/// \return \f$base^{pow}\f$
+constexpr auto pos_pow(std::intmax_t base,
+                       std::intmax_t pow) noexcept -> std::intmax_t {
   assert(pow >= 0);
   if (pow == 0) {
     return 1;
@@ -34,7 +43,7 @@ constexpr std::intmax_t pos_pow(std::intmax_t base,
 ///
 /// \param pow The exponent to which 10 is raised.
 /// \return \f$10^{pow}\f$
-constexpr std::intmax_t pos_pow_10(std::intmax_t pow) noexcept {
+constexpr auto pos_pow_10(std::intmax_t pow) noexcept -> std::intmax_t {
   return pos_pow(10, pow);
 }
 
@@ -214,8 +223,9 @@ constexpr rational auto from_ratio(std::ratio<N, D> /*rat*/) noexcept {
 
 template <std::intmax_t N1, std::intmax_t D1, std::intmax_t E1,
           std::intmax_t N2, std::intmax_t D2, std::intmax_t E2>
-constexpr std::strong_ordering operator<=>(rational_type<N1, D1, E1> /*lhs*/,
-                                           rational_type<N2, D2, E2> /*rhs*/) {
+constexpr auto
+operator<=>(rational_type<N1, D1, E1> /*lhs*/,
+            rational_type<N2, D2, E2> /*rhs*/) -> std::strong_ordering {
   static_assert(D1 != 0);
   static_assert(D2 != 0);
   const std::intmax_t common_pow = E1;

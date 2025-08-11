@@ -1,6 +1,9 @@
 #ifndef DIMENSION_HPP
 #define DIMENSION_HPP
 
+#include <tuple>       // tuple
+#include <type_traits> // false_type, true_type, remove_cvref_t
+
 #include "compile_time_math.hpp"
 #include "template_string.hpp"
 #include "type_traits.hpp"
@@ -25,7 +28,8 @@ struct dimension_type {
 template <typename T>
 concept dimension = _detail::is_dimension_type<std::remove_cvref_t<T>>::value;
 
-constexpr bool operator==(dimension auto lhs, dimension auto rhs) noexcept {
+constexpr auto operator==(dimension auto lhs,
+                          dimension auto rhs) noexcept -> bool {
   return lhs.name == rhs.name && lhs.power == rhs.power;
 }
 
@@ -62,14 +66,14 @@ concept dimension_product =
 
 template <dimension... Dimensions> struct dimension_product_type {
   using tuple_type = std::tuple<Dimensions...>;
-  consteval static auto as_tuple() { return tuple_type{}; }
+  consteval static auto as_tuple() -> tuple_type { return tuple_type{}; }
 };
 
 template <dimension LHS, dimension... LHSRest, dimension RHS,
           dimension... RHSRest>
-constexpr bool
+constexpr auto
 operator==(dimension_product_type<LHS, LHSRest...> /*lhs*/,
-           dimension_product_type<RHS, RHSRest...> /*rhs*/) noexcept {
+           dimension_product_type<RHS, RHSRest...> /*rhs*/) noexcept -> bool {
   if constexpr (sizeof...(LHSRest) == sizeof...(RHSRest)) {
     return utility::similar<dimension_product_type<LHS, LHSRest...>,
                             dimension_product_type<RHS, RHSRest...>>;

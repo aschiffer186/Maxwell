@@ -4,12 +4,13 @@
 #ifndef TEMPLATE_STRING_HPP
 #define TEMPLATE_STRING_HPP
 
-#include <algorithm>
-#include <array>
-#include <compare>
-#include <cstddef>
-#include <functional>
-#include <iterator>
+#include <algorithm>  // ranges::copy, lexicographical_compare_three_way
+#include <array>      // array
+#include <compare>    // strong_ordering
+#include <concepts>   // unsigned_integral
+#include <cstddef>    // size_t
+#include <functional> // hash
+#include <iterator>   // contiguous_iterator
 
 /// \namespace maxwell::utility
 /// \brief Namespace for uility classes.
@@ -96,7 +97,7 @@ constexpr auto operator<=>(const template_string<N1>& lhs,
 /// \return \c true if the strings are equal.
 template <std::size_t N1, std::size_t N2>
 constexpr auto operator==(const template_string<N1>& lhs,
-                          const template_string<N2>& rhs) {
+                          const template_string<N2>& rhs) -> bool {
   return (lhs <=> rhs) == std::strong_ordering::equal;
 }
 
@@ -110,8 +111,9 @@ constexpr auto operator==(const template_string<N1>& lhs,
 /// \param rhs The right hand side of the concatenation
 /// \return The concatenation of \c lhs and \c rhs.
 template <std::size_t L, std::size_t R>
-constexpr template_string<L + R> operator+(const template_string<L>& lhs,
-                                           const template_string<R>& rhs) {
+constexpr auto
+operator+(const template_string<L>& lhs,
+          const template_string<R>& rhs) -> template_string<L + R> {
   char data[L + R + 1];
   auto it = std::ranges::copy(lhs, data);
   std::ranges::copy(rhs, it.out);

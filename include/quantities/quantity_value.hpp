@@ -1,11 +1,15 @@
 #ifndef QUANTITY_VALUE_HPP
 #define QUANTITY_VALUE_HPP
 
-#include <concepts>
-#include <functional>
-#include <initializer_list>
-#include <utility>
+#include <chrono> // duration
+#include <compare>
+#include <concepts>         // constructible_from
+#include <functional>       // hash
+#include <initializer_list> // initializer_list
+#include <type_traits>      // remove_cvref_t
+#include <utility>          // forward, in_place_t, move
 
+#include "config.hpp"
 #include "quantity.hpp"
 #include "type_traits.hpp"
 #include "unit.hpp"
@@ -45,12 +49,15 @@ public:
   static constexpr unit auto units = U;
   static constexpr quantity auto quantity_kind = Q;
 
+  // --- Constructors ---
+
   constexpr quantity_value() = default;
 
   template <typename Up = T>
     requires std::constructible_from<T, Up> &&
              (!_detail::is_quantity_value_v<Up>)
-  constexpr explicit quantity_value(Up&& value)
+  constexpr explicit(!std::convertible_to<Up, T> || !unitless<U>)
+      quantity_value(Up&& value)
       : value_(std::forward<Up>(value)) {}
 
   template <typename... Args>
@@ -64,6 +71,11 @@ public:
                                     std::initializer_list<Up> il,
                                     Args&&... args)
       : value_(il, std::forward<Args>(args)...) {}
+
+  template <typename Rep, typename Period>
+    requires enable_chrono_conversions_v<Q> && std::constructible_from<T, Rep>
+  MAXWELL_CONSTEXPR23 explicit quantity_value(
+      const std::chrono::duration<Rep, Period>& d) {}
 
   template <auto FromQuantity, auto FromUnit, typename Up = T>
     requires std::constructible_from<T, Up> && unit<decltype(FromUnit)>
@@ -85,91 +97,152 @@ public:
     static_assert(unit_convertible_to<FromUnit, U>,
                   "Units of other cannot be converted to units of value being "
                   "constructed");
+    static_assert(quantity_convertible_to<FromQuantity, Q>,
+                  "Attempting to construct value from incompatible quantity");
   }
 
-  constexpr const T& get_value() const& noexcept { return value_; }
+  // --- Assignment Operators ---
 
-  constexpr T&& get_value() && noexcept { return std::move(value_); }
+  template <auto FromQuantity, auto FromUnit, typename Up = T>
+    requires std::constructible_from<T, Up> && std::swappable<T>
+  constexpr auto operator=(quantity_value<FromQuantity, FromUnit, Up> other)
+      -> quantity_value& {
+    using std::swap;
 
-  constexpr const T&& get_value() const&& noexcept { return std::move(value_); }
+    static_assert(unit_convertible_to<FromUnit, U>,
+                  "Units of other cannot be converted to units of value being "
+                  "constructed");
+    static_assert(quantity_convertible_to<FromQuantity, Q>,
+                  "Attempting to construct value from incompatible quantity");
+
+    quantity_value temp(std::move(other));
+    swap(temp.value_, value_);
+    return *this;
+  }
+
+  template <typename Rep, typename Period>
+    requires std::constructible_from<T, Rep> && std::swappable<T> &&
+                 enable_chrono_conversions_v<Q>
+  constexpr auto
+  operator=(const std::chrono::duration<Rep, Period>& d) -> quantity_value& {
+    using std::swap;
+    quantity_value temp(d);
+    swap(temp.value_, value_);
+    return *this;
+  }
+
+  template <typename Up = T>
+    requires(!_detail::is_quantity_value_v<Up> && std::is_assignable_v<T&, Up>)
+  constexpr auto operator=(Up&& other) -> quantity_value& {
+    static_assert(unitless<U>);
+
+    value_ = std::forward<U>(other);
+  }
+
+  // --- Accessor Methods ---
+
+  constexpr auto get_value() const& noexcept -> const T& { return value_; }
+  constexpr auto get_value() && noexcept -> T&& { return std::move(value_); }
+  constexpr auto get_value() const&& noexcept -> const T&& {
+    return std::move(value_);
+  }
 
   constexpr explicit(!unitless<U>) operator value_type() const {
     return value_;
   }
 
-  constexpr units_type get_units() const noexcept { return units; }
+  constexpr auto get_units() const noexcept -> units_type { return units; }
 
-  constexpr quantity_value& operator++() {
+  constexpr auto in_base_units() const { return *this; }
+
+  // --- Arithmetic Operators ---
+
+  constexpr auto operator++() -> quantity_value& {
     ++value_;
     return *this;
   }
 
-  constexpr quantity_value operator++(int) {
+  constexpr auto operator++(int) -> quantity_value {
     const quantity_value temp(*this);
     ++(*this);
     return temp;
   }
 
-  constexpr quantity_value& operator--() {
+  constexpr auto operator--() -> quantity_value& {
     --value_;
     return *this;
   }
 
-  constexpr quantity_value operator--(int) {
+  constexpr auto operator--(int) -> quantity_value& {
     const quantity_value temp(*this);
     --(*this);
     return temp;
   }
 
-  constexpr quantity_value& operator+=(const quantity_value& rhs) {
+  constexpr auto operator+=(const quantity_value& rhs) -> quantity_value& {
     value_ += rhs.value_;
     return *this;
   }
 
-  constexpr quantity_value& operator-=(const quantity_value& rhs) {
+  constexpr auto operator-=(const quantity_value& rhs) -> quantity_value& {
     value_ -= rhs.value_;
     return *this;
   }
 
-  constexpr quantity_value& operator*=(const quantity_value& rhs) {
+  constexpr auto operator*=(const quantity_value& rhs) -> quantity_value& {
     value_ *= rhs.value_;
     return *this;
   }
 
-  constexpr quantity_value& operator/=(const quantity_value& rhs) {
+  constexpr auto operator/=(const quantity_value& rhs) -> quantity_value& {
     value_ /= rhs.value_;
     return *this;
   }
 
-  constexpr quantity_value& operator%=(const quantity_value& rhs) {
+  constexpr auto operator%=(const quantity_value& rhs) -> quantity_value& {
     value_ %= rhs.value_;
     return *this;
   }
 
   template <auto FromQuantity, auto FromUnit, typename Up>
-  constexpr quantity_value&
-  operator+=(const quantity_value<FromQuantity, FromUnit, Up>& rhs) {
+  constexpr auto
+  operator+=(const quantity_value<FromQuantity, FromUnit, Up>& rhs)
+      -> quantity_value& {
     static_assert(unit_convertible_to<FromUnit, U>,
                   "Cannot add quantities with incompatible units");
     return *this += quantity_value(rhs);
   }
 
   template <auto FromQuantity, auto FromUnit, typename Up>
-  constexpr quantity_value&
-  operator-=(const quantity_value<FromQuantity, FromUnit, Up>& rhs) {
+  constexpr auto
+  operator-=(const quantity_value<FromQuantity, FromUnit, Up>& rhs)
+      -> quantity_value& {
     static_assert(unit_convertible_to<FromUnit, U>,
                   "Cannot add quantities with incompatible units");
     return *this -= quantity_value(rhs);
   }
 
+  // --- Comparison Functions ---
+
+  friend auto operator<=>(const quantity_value& lhs, const quantity_value& rhs)
+    requires std::three_way_comparable<T>
+  = default;
+
+  friend bool operator==(const quantity_value& lhs, const quantity_value& rhs)
+    requires std::equality_comparable<T>
+  = default;
+
 private:
+  template <auto Q2, auto U2, auto T2> friend class quantity_value;
+
   T value_{};
 };
 } // namespace maxwell
 
 template <auto Q, auto U, typename T>
 struct std::hash<maxwell::quantity_value<Q, U, T>> {
-  std::size_t operator()(const maxwell::quantity_value<Q, U, T>& q) noexcept {
+  auto operator()(const maxwell::quantity_value<Q, U, T>& q) noexcept
+      -> std::size_t {
     return 0;
   }
 };
