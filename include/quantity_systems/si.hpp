@@ -35,11 +35,16 @@ constexpr struct candela_unit_type
     : make_base_unit_t<isq::luminosity_quantity, "cd"> {
 } candela_unit;
 
-template <typename T = double>
-using meter = quantity_value<isq::length_quantity, meter_unit, T>;
+// --- SI derived unit types ---
+constexpr struct radian_unit_type
+    : make_derived_unit_t<isq::plane_angle_quantity, "rad"> {
+} radian_unit;
 
 template <typename T = double>
-using ampere = quantity_value<isq::current_quantity, ampere_unit, T>;
+using meter = quantity_value<meter_unit, isq::length_quantity, T>;
+
+template <typename T = double>
+using ampere = quantity_value<ampere_unit, isq::current_quantity, T>;
 } // namespace maxwell::si
 
 #endif

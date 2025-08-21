@@ -168,7 +168,7 @@ operator==(dimension_product_type<LHS, LHSRest...> /*lhs*/,
 template <auto From, auto To>
 concept dimension_convertible_to =
     dimension_product<decltype(From)> && dimension_product<decltype(To)> &&
-    From == To;
+    (From == To);
 
 /// \brief Multiplies two dimensions.
 ///
@@ -191,7 +191,7 @@ constexpr dimension_product auto operator*(LHS /*lhs*/, RHS /*rhs*/) noexcept {
     return dimension_product_type<RHS, LHS>{};
   } else {
     return dimension_product_type<
-        dimension_type<LHS::power + RHS::power, LHS::name>>{};
+        dimension_type<LHS::name, LHS::power + RHS::power>>{};
   }
 }
 

@@ -9,11 +9,15 @@ constexpr struct wavelength_quantity_type
 } wavelength_quantity;
 
 template <auto U>
-using wavelength = maxwell::quantity_value<wavelength_quantity, U, double>;
+using wavelength = maxwell::quantity_value<U, wavelength_quantity, double>;
 
 int main() {
   maxwell::si::meter<> q1;
-  wavelength<maxwell::si::meter_unit> q2{q1};
+
+  maxwell::quantity_value<maxwell::kilo<maxwell::si::meter_unit>> k;
+  // maxwell::quantity_value<maxwell::si::ampere_unit> a{k};
+
+  // wavelength<maxwell::si::meter_unit> q2{q1};
   maxwell::quantity_holder<wavelength_quantity> w;
   //   maxwell::si::meter<> q3{q2};
   // wavelength w{1_nm};

@@ -18,7 +18,7 @@
 #include "unit.hpp"
 
 namespace maxwell {
-template <auto Q, auto U, typename T = double>
+template <auto U, auto Q = U.quantity, typename T = double>
   requires unit<decltype(U)> && quantity<decltype(Q)>
 class quantity_value;
 
@@ -26,18 +26,143 @@ class quantity_value;
 namespace _detail {
 template <typename> struct is_quantity_value : std::false_type {};
 
-template <auto Q, auto U, typename T>
-struct is_quantity_value<quantity_value<Q, U, T>> : std::true_type {};
+template <auto U, auto Q, typename T>
+struct is_quantity_value<quantity_value<U, Q, T>> : std::true_type {};
 
 template <typename T>
 constexpr bool is_quantity_value_v =
     is_quantity_value<std::remove_cvref_t<T>>::value;
+
+template <typename T>
+concept quantity_value_like = is_quantity_value_v<T>;
+
+struct _quantity_value_operators {
+  friend constexpr quantity_value_like auto&
+  operator++(quantity_value_like auto& q) {
+    ++q.value_;
+    return q;
+  }
+
+  friend constexpr quantity_value_like auto
+  operator++(quantity_value_like auto& q, int) {
+    auto temp{q};
+    ++q;
+    return temp;
+  }
+
+  friend constexpr quantity_value_like auto&
+  operator--(quantity_value_like auto& q) {
+    --q.value_;
+    return q;
+  }
+
+  friend quantity_value_like auto operator--(quantity_value_like auto& q, int) {
+    auto temp{q};
+    --q;
+    return temp;
+  }
+
+  friend constexpr quantity_value_like auto&
+  operator+=(const quantity_value_like auto& lhs,
+             const quantity_value_like auto& rhs) {
+    static_assert(quantity_convertible_to<rhs.quantity_kind, lhs.quantity_kind>,
+                  "Cannot add quantities of different kinds");
+    return lhs;
+  }
+
+  friend constexpr quantity_value_like auto&
+  operator-=(const quantity_value_like auto& lhs,
+             const quantity_value_like auto& rhs) {
+    static_assert(quantity_convertible_to<rhs.quantity_kind, lhs.quantity_kind>,
+                  "Cannot subtract quantities of different kinds");
+    lhs.value_ -= rhs.value_;
+    return lhs;
+  }
+
+  friend constexpr quantity_value_like auto
+  operator+(const quantity_value_like auto& lhs,
+            const quantity_value_like auto& rhs) {
+    return lhs += rhs;
+  }
+
+  friend constexpr quantity_value_like auto
+  operator-(const quantity_value_like auto& lhs,
+            const quantity_value_like auto& rhs) {
+    return lhs -= rhs;
+  }
+
+  friend constexpr quantity_value_like auto
+  operator*(const quantity_value_like auto& lhs,
+            const quantity_value_like auto& rhs) {
+    using lhs_type = std::remove_cvref_t<decltype(lhs)>;
+    using rhs_type = std::remove_cvref_t<decltype(rhs)>;
+    using result_type =
+        std::remove_cvref_t<decltype(lhs.get_value() * rhs.get_value())>;
+    constexpr unit auto result_units = lhs_type::units * rhs_type::units;
+    constexpr quantity auto result_quantity =
+        lhs_type::quantity_kind * rhs_type::quantity_kind;
+    return quantity_value<result_units, result_quantity, result_type>(
+        lhs.get_value() * rhs.get_value());
+  }
+
+  friend constexpr quantity_value_like auto
+  operator/(const quantity_value_like auto& lhs,
+            const quantity_value_like auto& rhs) {
+    using lhs_type = std::remove_cvref_t<decltype(lhs)>;
+    using rhs_type = std::remove_cvref_t<decltype(rhs)>;
+    using result_type =
+        std::remove_cvref_t<decltype(lhs.get_value() / rhs.get_value())>;
+    constexpr unit auto result_units = lhs_type::units / rhs_type::units;
+    constexpr quantity auto result_quantity =
+        lhs_type::quantity_kind / rhs_type::quantity_kind;
+    return quantity_value<result_units, result_quantity, result_type>(
+        lhs.get_value() / rhs.get_value());
+  }
+
+  friend constexpr quantity_value_like auto
+  operator%(const quantity_value_like auto& lhs,
+            const quantity_value_like auto& rhs) {
+    using lhs_type = std::remove_cvref_t<decltype(lhs)>;
+    using rhs_type = std::remove_cvref_t<decltype(rhs)>;
+    using result_type =
+        std::remove_cvref_t<decltype(lhs.get_value() % rhs.get_value())>;
+    constexpr unit auto result_units = lhs_type::units / rhs_type::units;
+    constexpr quantity auto result_quantity =
+        lhs_type::quantity_kind / rhs_type::quantity_kind;
+    return quantity_value<result_units, result_quantity, result_type>(
+        lhs.get_value() % rhs.get_value());
+  }
+
+  friend constexpr auto operator<=>(const quantity_value_like auto& lhs,
+                                    const quantity_value_like auto& rhs)
+    requires std::three_way_comparable_with<
+        std::remove_cvref_t<decltype(lhs.get_value())>,
+        std::remove_cvref_t<decltype(rhs.get_value())>>
+  {
+    static_assert(quantity_convertible_to<lhs.quantity_kind, rhs.quantity_kind>,
+                  "Cannot compare quantities of different kinds");
+    return lhs.in_base_units().get_value() <=> rhs.in_base_units().get_value();
+  }
+
+  friend bool operator==(const quantity_value_like auto& lhs,
+                         const quantity_value_like auto& rhs)
+    requires std::equality_comparable_with<
+        std::remove_cvref_t<decltype(lhs.get_value())>,
+        std::remove_cvref_t<decltype(rhs.get_value())>>
+  {
+    static_assert(quantity_convertible_to<lhs.quantity_kind, rhs.quantity_kind>,
+                  "Cannot compare quantities of different kinds");
+    return lhs.in_base_units().get_value() == rhs.in_base_units().get_value();
+  }
+};
+
+#undef QUANTITY_VALUE_TEMPLATE
 } // namespace _detail
 /// \endcond
 
-template <auto Q, auto U, typename T>
+template <auto U, auto Q, typename T>
   requires unit<decltype(U)> && quantity<decltype(Q)>
-class quantity_value {
+class quantity_value : public _detail::_quantity_value_operators {
   static_assert(
       quantity_convertible_to<Q, U.quantity>,
       "Attempting to instantiate quantity value with incompatible units");
@@ -81,18 +206,20 @@ public:
   template <auto FromQuantity, auto FromUnit, typename Up = T>
     requires std::constructible_from<T, Up> && unit<decltype(FromUnit)>
   constexpr quantity_value(
-      const quantity_value<FromQuantity, FromUnit, Up>& other)
+      const quantity_value<FromUnit, FromQuantity, Up>& other)
       : value_(other.get_value() *
                utility::as_constant<conversion_factor(FromUnit, U)>) {
     static_assert(unit_convertible_to<FromUnit, U>,
                   "Units of other cannot be converted to units of value being "
                   "constructed");
+    static_assert(quantity_convertible_to<FromQuantity, Q>,
+                  "Attempting to construct value from incompatible quantity");
   }
 
   template <auto FromQuantity, auto FromUnit, typename Up = T>
     requires std::constructible_from<T, Up> && unit<decltype(FromUnit)>
   constexpr quantity_value(
-      quantity_value<FromQuantity, FromUnit, Up>&& other) noexcept
+      quantity_value<FromUnit, FromQuantity, Up>&& other) noexcept
       : value_(std::move(other).get_value() *
                utility::as_constant<conversion_factor(FromUnit, U)>) {
     static_assert(unit_convertible_to<FromUnit, U>,
@@ -106,7 +233,7 @@ public:
 
   template <auto FromQuantity, auto FromUnit, typename Up = T>
     requires std::constructible_from<T, Up> && std::swappable<T>
-  constexpr auto operator=(quantity_value<FromQuantity, FromUnit, Up> other)
+  constexpr auto operator=(quantity_value<FromUnit, FromQuantity, Up> other)
       -> quantity_value& {
     using std::swap;
 
@@ -156,75 +283,6 @@ public:
 
   constexpr auto in_base_units() const { return *this; }
 
-  // --- Arithmetic Operators ---
-
-  constexpr auto operator++() -> quantity_value& {
-    ++value_;
-    return *this;
-  }
-
-  constexpr auto operator++(int) -> quantity_value {
-    const quantity_value temp(*this);
-    ++(*this);
-    return temp;
-  }
-
-  constexpr auto operator--() -> quantity_value& {
-    --value_;
-    return *this;
-  }
-
-  constexpr auto operator--(int) -> quantity_value& {
-    const quantity_value temp(*this);
-    --(*this);
-    return temp;
-  }
-
-  constexpr auto operator+=(const quantity_value& rhs) -> quantity_value& {
-    value_ += rhs.value_;
-    return *this;
-  }
-
-  constexpr auto operator-=(const quantity_value& rhs) -> quantity_value& {
-    value_ -= rhs.value_;
-    return *this;
-  }
-
-  constexpr auto operator*=(const quantity_value& rhs) -> quantity_value& {
-    value_ *= rhs.value_;
-    return *this;
-  }
-
-  constexpr auto operator/=(const quantity_value& rhs) -> quantity_value& {
-    value_ /= rhs.value_;
-    return *this;
-  }
-
-  constexpr auto operator%=(const quantity_value& rhs) -> quantity_value& {
-    value_ %= rhs.value_;
-    return *this;
-  }
-
-  template <auto FromQuantity, auto FromUnit, typename Up>
-  constexpr auto
-  operator+=(const quantity_value<FromQuantity, FromUnit, Up>& rhs)
-      -> quantity_value& {
-    static_assert(unit_convertible_to<FromUnit, U>,
-                  "Cannot add quantities with incompatible units");
-    return *this += quantity_value(rhs);
-  }
-
-  template <auto FromQuantity, auto FromUnit, typename Up>
-  constexpr auto
-  operator-=(const quantity_value<FromQuantity, FromUnit, Up>& rhs)
-      -> quantity_value& {
-    static_assert(unit_convertible_to<FromUnit, U>,
-                  "Cannot add quantities with incompatible units");
-    return *this -= quantity_value(rhs);
-  }
-
-  // --- Comparison Functions ---
-
   friend auto operator<=>(const quantity_value& lhs, const quantity_value& rhs)
     requires std::three_way_comparable<T>
   = default;
@@ -234,6 +292,8 @@ public:
   = default;
 
 private:
+  friend _detail::_quantity_value_operators;
+
   template <auto Q2, auto U2, typename T2>
     requires unit<decltype(U)> && quantity<decltype(Q)>
   friend class quantity_value;

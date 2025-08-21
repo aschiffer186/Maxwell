@@ -16,7 +16,7 @@
 #if defined(__cpp_constexpr) && __cpp_constexpr >= 202207L
 #define MAXWELL_CONSTEXPR23 constexpr
 #else
-#define MAXWELL_CONSTEXPR23 constexpr
+#define MAXWELL_CONSTEXPR23
 #endif
 
 #endif
