@@ -39,5 +39,16 @@
             "displayName": "Ninja Release",
             "description": "Release build using Ninja on Linux with GCC/clang"
         }
+    ],
+    "testPresets": [
+        {
+            "name": "default",
+            "configuration": "Debug",
+            "configurePreset": "ninja",
+            "displayName": "Run Tests",
+            "output": {
+                "outputOnFailure": true
+            }
+        }
     ]
 }

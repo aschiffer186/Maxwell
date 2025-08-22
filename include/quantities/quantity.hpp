@@ -19,6 +19,8 @@ struct quantity_type {
   constexpr static auto kind = Kind;
 };
 
+constexpr quantity_type<"[]", dimension_one> number;
+
 template <utility::template_string Kind, auto Dim>
 auto quantity_base(quantity_type<Kind, Dim>) -> quantity_type<Kind, Dim>;
 

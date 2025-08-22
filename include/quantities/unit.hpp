@@ -19,6 +19,12 @@ struct unit_type {
   constexpr static quantity auto quantity = Quantity;
   constexpr static dimension_product auto dimensions = quantity.dimensions;
   constexpr static utility::rational auto multiplier = Multiplier;
+
+  using quantity_rep = std::remove_cvref_t<decltype(quantity)>;
+
+  constexpr static auto base_units() {
+    return unit_type<Name, Quantity, utility::one>{};
+  }
 };
 
 template <utility::template_string Name, quantity auto Quantity,
@@ -148,80 +154,81 @@ template <utility::rational auto Prefix, auto U, utility::template_string Name>
 using prefixed_unit_t = prefixed_unit<Prefix, U, Name>::type;
 
 template <auto U>
-constexpr unit auto quetta =
+constexpr unit auto quetta_unit =
     prefixed_unit_t<quetta_prefix, U, utility::template_string{"Q"} + U.name>{};
 template <auto U>
-constexpr unit auto ronna =
+constexpr unit auto ronna_unit =
     prefixed_unit_t<ronna_prefix, U, utility::template_string{"R"} + U.name>{};
 template <auto U>
-constexpr unit auto yotta =
+constexpr unit auto yotta_unit =
     prefixed_unit_t<yotta_prefix, U, utility::template_string{"Y"} + U.name>{};
 template <auto U>
-constexpr unit auto zetta =
+constexpr unit auto zetta_unit =
     prefixed_unit_t<zetta_prefix, U, utility::template_string{"Z"} + U.name>{};
 template <auto U>
-constexpr unit auto exa =
+constexpr unit auto exa_unit =
     prefixed_unit_t<exa_prefix, U, utility::template_string{"E"} + U.name>{};
 template <auto U>
-constexpr unit auto peta =
+constexpr unit auto peta_unit =
     prefixed_unit_t<peta_prefix, U, utility::template_string{"P"} + U.name>{};
 template <auto U>
-constexpr unit auto tera =
+constexpr unit auto tera_unit =
     prefixed_unit_t<tera_prefix, U, utility::template_string{"T"} + U.name>{};
 template <auto U>
-constexpr unit auto giga =
+constexpr unit auto giga_unit =
     prefixed_unit_t<giga_prefix, U, utility::template_string{"G"} + U.name>{};
 template <auto U>
-constexpr unit auto mega =
+constexpr unit auto mega_unit =
     prefixed_unit_t<mega_prefix, U, utility::template_string{"M"} + U.name>{};
 template <auto U>
-constexpr unit auto kilo =
+constexpr unit auto kilo_unit =
     prefixed_unit_t<kilo_prefix, U, utility::template_string{"k"} + U.name>{};
 template <auto U>
-constexpr unit auto hecto =
+constexpr unit auto hecto_unit =
     prefixed_unit_t<hecto_prefix, U, utility::template_string{"h"} + U.name>{};
 template <auto U>
-constexpr unit auto deca =
+constexpr unit auto deca_unit =
     prefixed_unit_t<deca_prefix, U, utility::template_string{"da"} + U.name>{};
 template <auto U>
-constexpr unit auto deci =
+constexpr unit auto deci_unit =
     prefixed_unit_t<deci_prefix, U, utility::template_string{"d"} + U.name>{};
 template <auto U>
-constexpr unit auto centi =
+constexpr unit auto centi_unit =
     prefixed_unit_t<centi_prefix, U, utility::template_string{"c"} + U.name>{};
 template <auto U>
-constexpr unit auto milli =
+constexpr unit auto milli_unit =
     prefixed_unit_t<milli_prefix, U, utility::template_string{"m"} + U.name>{};
 template <auto U>
-constexpr unit auto micro =
+constexpr unit auto micro_unit =
     prefixed_unit_t<micro_prefix, U, utility::template_string{"μ"} + U.name>{};
 template <auto U>
-constexpr unit auto nano =
+constexpr unit auto nano_unit =
     prefixed_unit_t<nano_prefix, U, utility::template_string{"n"} + U.name>{};
 template <auto U>
-constexpr unit auto pico =
+constexpr unit auto pico_unit =
     prefixed_unit_t<pico_prefix, U, utility::template_string{"p"} + U.name>{};
 template <auto U>
-constexpr unit auto femto =
+constexpr unit auto femto_unit =
     prefixed_unit_t<femto_prefix, U, utility::template_string{"f"} + U.name>{};
 template <auto U>
-constexpr unit auto atto =
+constexpr unit auto atto_unit =
     prefixed_unit_t<atto_prefix, U, utility::template_string{"a"} + U.name>{};
 template <auto U>
-constexpr unit auto zepto =
+constexpr unit auto zepto_unit =
     prefixed_unit_t<zepto_prefix, U, utility::template_string{"z"} + U.name>{};
 template <auto U>
-constexpr unit auto yocto =
+constexpr unit auto yocto_unit =
     prefixed_unit_t<yocto_prefix, U, utility::template_string{"y"} + U.name>{};
 template <auto U>
-constexpr unit auto ronto =
+constexpr unit auto ronto_unit =
     prefixed_unit_t<ronto_prefix, U, utility::template_string{"r"} + U.name>{};
 template <auto U>
-constexpr unit auto quecto =
+constexpr unit auto quecto_unit =
     prefixed_unit_t<quecto_prefix, U, utility::template_string{"q"} + U.name>{};
 
 template <auto U>
-concept unitless = false;
+concept unitless =
+    std::same_as<typename decltype(U)::quantity_rep, decltype(number)>;
 } // namespace maxwell
 
 #endif

@@ -144,8 +144,8 @@ struct _quantity_value_operators {
     return lhs.in_base_units().get_value() <=> rhs.in_base_units().get_value();
   }
 
-  friend bool operator==(const quantity_value_like auto& lhs,
-                         const quantity_value_like auto& rhs)
+  friend auto operator==(const quantity_value_like auto& lhs,
+                         const quantity_value_like auto& rhs) -> bool
     requires std::equality_comparable_with<
         std::remove_cvref_t<decltype(lhs.get_value())>,
         std::remove_cvref_t<decltype(rhs.get_value())>>
@@ -235,14 +235,13 @@ public:
     requires std::constructible_from<T, Up> && std::swappable<T>
   constexpr auto operator=(quantity_value<FromUnit, FromQuantity, Up> other)
       -> quantity_value& {
-    using std::swap;
-
     static_assert(unit_convertible_to<FromUnit, U>,
                   "Units of other cannot be converted to units of value being "
                   "constructed");
     static_assert(quantity_convertible_to<FromQuantity, Q>,
                   "Attempting to construct value from incompatible quantity");
 
+    using std::swap;
     quantity_value temp(std::move(other));
     swap(temp.value_, value_);
     return *this;
@@ -269,8 +268,31 @@ public:
 
   // --- Accessor Methods ---
 
+  /// \brief Returns the numerical value of the quantity.
+  ///
+  /// Returns a constant lvalue-reference to the numerical value of the \c
+  /// quantity_value instance.
+  ///
+  /// \return A constant lvalue-reference to the numerical value of the \c
+  /// quantity_value instance.
   constexpr auto get_value() const& noexcept -> const T& { return value_; }
+
+  /// \brief Returns the numerical value of the quantity.
+  ///
+  /// Returns an rvalue-reference to the numerical value of the \c
+  /// quantity_value instance.
+  ///
+  /// \return An rvalue-reference to the numerical value of the \c
+  /// quantity_value instance.
   constexpr auto get_value() && noexcept -> T&& { return std::move(value_); }
+
+  /// \brief Returns the numerical value of the quantity.
+  ///
+  /// Returns a constant rvalue-reference to the numerical value of the \c
+  /// quantity_value instance.
+  ///
+  /// \return A constant rvalue-reference to the numerical value of the \c
+  /// quantity_value instance.
   constexpr auto get_value() const&& noexcept -> const T&& {
     return std::move(value_);
   }
@@ -281,7 +303,11 @@ public:
 
   constexpr auto get_units() const noexcept -> units_type { return units; }
 
-  constexpr auto in_base_units() const { return *this; }
+  constexpr auto in_base_units() const -> quantity_value<U.base_units(), Q, T> {
+    constexpr unit auto base_units = U.base_units();
+    constexpr double factor = conversion_factor(U, base_units);
+    return quantity_value<base_units, Q, T>{value_ * factor};
+  }
 
   friend auto operator<=>(const quantity_value& lhs, const quantity_value& rhs)
     requires std::three_way_comparable<T>
@@ -300,6 +326,79 @@ private:
 
   T value_{};
 };
+
+template <typename Q>
+using quetta = quantity_value<quetta_unit<Q::units>, Q::quantity_kind,
+                              typename Q::value_type>;
+template <typename Q>
+using ronna = quantity_value<ronna_unit<Q::units>, Q::quantity_kind,
+                             typename Q::value_type>;
+template <typename Q>
+using yotta = quantity_value<yotta_unit<Q::units>, Q::quantity_kind,
+                             typename Q::value_type>;
+template <typename Q>
+using zetta = quantity_value<zetta_unit<Q::units>, Q::quantity_kind,
+                             typename Q::value_type>;
+template <typename Q>
+using exa = quantity_value<exa_unit<Q::units>, Q::quantity_kind,
+                           typename Q::value_type>;
+template <typename Q>
+using peta = quantity_value<peta_unit<Q::units>, Q::quantity_kind,
+                            typename Q::value_type>;
+template <typename Q>
+using tera = quantity_value<tera_unit<Q::units>, Q::quantity_kind,
+                            typename Q::value_type>;
+template <typename Q>
+using giga = quantity_value<giga_unit<Q::units>, Q::quantity_kind,
+                            typename Q::value_type>;
+template <typename Q>
+using mega = quantity_value<mega_unit<Q::units>, Q::quantity_kind,
+                            typename Q::value_type>;
+template <typename Q>
+using kilo = quantity_value<kilo_unit<Q::units>, Q::quantity_kind,
+                            typename Q::value_type>;
+template <typename Q>
+using hecto = quantity_value<hecto_unit<Q::units>, Q::quantity_kind,
+                             typename Q::value_type>;
+template <typename Q>
+using deca = quantity_value<deca_unit<Q::units>, Q::quantity_kind,
+                            typename Q::value_type>;
+template <typename Q>
+using deci = quantity_value<deci_unit<Q::units>, Q::quantity_kind,
+                            typename Q::value_type>;
+template <typename Q>
+using centi = quantity_value<centi_unit<Q::units>, Q::quantity_kind,
+                             typename Q::value_type>;
+template <typename Q>
+using milli = quantity_value<milli_unit<Q::units>, Q::quantity_kind,
+                             typename Q::value_type>;
+template <typename Q>
+using micro = quantity_value<micro_unit<Q::units>, Q::quantity_kind,
+                             typename Q::value_type>;
+template <typename Q>
+using nano = quantity_value<nano_unit<Q::units>, Q::quantity_kind,
+                            typename Q::value_type>;
+template <typename Q>
+using pico = quantity_value<pico_unit<Q::units>, Q::quantity_kind,
+                            typename Q::value_type>;
+template <typename Q>
+using femto = quantity_value<femto_unit<Q::units>, Q::quantity_kind,
+                             typename Q::value_type>;
+template <typename Q>
+using atto = quantity_value<atto_unit<Q::units>, Q::quantity_kind,
+                            typename Q::value_type>;
+template <typename Q>
+using zepto = quantity_value<zepto_unit<Q::units>, Q::quantity_kind,
+                             typename Q::value_type>;
+template <typename Q>
+using yocto = quantity_value<yocto_unit<Q::units>, Q::quantity_kind,
+                             typename Q::value_type>;
+template <typename Q>
+using ronto = quantity_value<ronto_unit<Q::units>, Q::quantity_kind,
+                             typename Q::value_type>;
+template <typename Q>
+using quecto = quantity_value<quecto_unit<Q::units>, Q::quantity_kind,
+                              typename Q::value_type>;
 } // namespace maxwell
 
 /// \brief Specialization of \c std::hash

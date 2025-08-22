@@ -96,10 +96,18 @@ template <std::intmax_t Numerator, std::intmax_t Denominator,
 struct rational_type {
   static_assert(Denominator != 0, "Attempting to divide by zero");
 
+  /// The numerator of the rational number
   static constexpr std::intmax_t numerator = Numerator;
+  /// The denominator of the rational number
   static constexpr std::intmax_t denominator = Denominator;
+  /// The exponent of the rational number
   static constexpr std::intmax_t exponent = Exponent;
 
+  /// \brief Conversion operator
+  ///
+  /// Returns a floating point representation of the rational number.
+  ///
+  /// \return A floating point representation of the rational number.
   constexpr explicit operator double() const noexcept {
     const double pow =
         (exponent >= 0) ? pos_pow_10(numerator) : 1.0 / pos_pow_10(-exponent);
@@ -108,7 +116,9 @@ struct rational_type {
   }
 };
 
+/// Constant representing the rational number zero.
 constexpr rational_type<0, 1, 0> zero;
+/// Constant representing the rational number one.
 constexpr rational_type<1, 1, 0> one;
 
 template <std::intmax_t Num, std::intmax_t Den, std::intmax_t Exp>
@@ -185,6 +195,18 @@ constexpr rational auto operator/(rational_type<N1, D1, E1> lhs,
   }
 }
 
+/// \brief Division operator.
+///
+/// Computes the sum of two rational numbers.
+/// The resulting rational number is in the most reduced form possible.
+///
+/// \tparam N1 The numerator of the left-hand side of the addition.
+/// \tparam D1 The denominator of the left-hand side of the addition.
+/// \tparam E1 The exponent of the left-hand side of the addition.
+/// \tparam N2 The numerator of the right-hand side of the addition.
+/// \tparam D2 The denominator of the right-hand side of the addition.
+/// \tparam E2 The exponent of the right-hand side of the addition.
+/// \return The sum of two rational numbers.
 template <std::intmax_t N1, std::intmax_t D1, std::intmax_t E1,
           std::intmax_t N2, std::intmax_t D2, std::intmax_t E2>
 constexpr rational auto operator+(rational_type<N1, D1, E1> /*lhs*/,
@@ -206,6 +228,39 @@ constexpr rational auto operator+(rational_type<N1, D1, E1> /*lhs*/,
   }
 }
 
+/// \brief Subtraction operator.
+///
+/// Computes the difference of two rational numbers. The resulting rational
+/// number is in the most reduced form possible.
+///
+/// \tparam N1 The numerator of the left-hand side of the subtraction.
+/// \tparam D1 The denominator of the left-hand side of the subtraction.
+/// \tparam E1 The exponent of the left-hand side of the subtraction.
+/// \tparam N2 The numerator of the right-hand side of the subtraction.
+/// \tparam D2 The denominator of the right-hand side of the subtraction.
+/// \tparam E2 The exponent of the right-hand side of the subtraction.
+/// \return The difference of two rational numbers.
+template <std::intmax_t N1, std::intmax_t D1, std::intmax_t E1,
+          std::intmax_t N2, std::intmax_t D2, std::intmax_t E2>
+constexpr rational auto operator-(rational_type<N1, D1, E1> /*lhs*/,
+                                  rational_type<N2, D2, E2> /*rhs*/) noexcept {
+  constexpr std::intmax_t common_pow = E1;
+  constexpr std::intmax_t pow_diff = common_pow - E2;
+  if constexpr (pow_diff > 0) {
+    constexpr std::intmax_t new_den = D2;
+    constexpr std::intmax_t new_num = N2 * pos_pow_10(pow_diff);
+    constexpr std::intmax_t output_num = (N1 * new_den) - (new_num * D1);
+    constexpr std::intmax_t output_den = D1 * new_den;
+    return rational_type<output_num, output_den, common_pow>{};
+  } else {
+    constexpr std::intmax_t new_num = N2;
+    constexpr std::intmax_t new_den = D2 * pos_pow_10(-pow_diff);
+    constexpr std::intmax_t output_num = (N1 * new_den) - (new_num * D1);
+    constexpr std::intmax_t output_den = D1 * new_den;
+    return reduce<output_num, output_den, common_pow>({});
+  }
+}
+
 /// \brief Creates a \c rational_type from a \c std::ratio.
 ///
 /// Creates a \c rational_type instance from a \c std::ratio.
@@ -221,6 +276,22 @@ constexpr rational auto from_ratio(std::ratio<N, D> /*rat*/) noexcept {
   return rational_type<N, D, 0>{};
 }
 
+/// \brief Three way comparison operator
+///
+/// Three-way comparison operator for \c rational_type.
+/// The comparison is performed on the most reduced form of the provided
+/// rational numbers.
+///
+/// \tparam N1 The numerator of the left hand side of the comparison.
+/// \tparam D1 The denominator of the left hand side of the comparison.
+/// \tparam E1 The exponent of the left hand side of the comparison.
+/// \tparam N2 The numerator of the right hand side of the comparison.
+/// \tparam D2 The denominator of the right hand side of the comparison.
+/// \tparam E2 The exponent of the right hand side of the comparison.
+/// \param lhs The left hand side of the comparison.
+/// \param rhs The right hand side of the comparison.
+/// \return A \c std::strong_ordering value indicating the result of the
+/// comparison.
 template <std::intmax_t N1, std::intmax_t D1, std::intmax_t E1,
           std::intmax_t N2, std::intmax_t D2, std::intmax_t E2>
 constexpr auto
@@ -239,6 +310,13 @@ operator<=>(rational_type<N1, D1, E1> /*lhs*/,
     const std::intmax_t new_den = D2 * pos_pow_10(-pow_diff);
     return (new_num * D1) <=> (N1 * new_den);
   }
+}
+
+template <std::intmax_t N1, std::intmax_t D1, std::intmax_t E1,
+          std::intmax_t N2, std::intmax_t D2, std::intmax_t E2>
+constexpr auto operator==(rational_type<N1, D1, E1> lhs,
+                          rational_type<N2, D2, E2> rhs) -> bool {
+  return (lhs <=> rhs) == std::strong_ordering::equal;
 }
 } // namespace maxwell::utility
 

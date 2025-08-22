@@ -40,6 +40,17 @@ constexpr struct radian_unit_type
     : make_derived_unit_t<isq::plane_angle_quantity, "rad"> {
 } radian_unit;
 
+constexpr struct steradian_unit_type : make_derived_unit_t<isq::solid_angle_quantity,
+                                                     "sr"> {
+} steradian_unit;
+
+constexpr struct hertz_unit_type
+    : make_derived_unit_t<isq::frequency_quantity, "Hz"> {
+} hertz_unit;
+
+constexpr struct newton_unit_type : make_derived_unit_t<isq::force_quantity, "N"> {
+} newton_unit;
+
 template <typename T = double>
 using meter = quantity_value<meter_unit, isq::length_quantity, T>;
 

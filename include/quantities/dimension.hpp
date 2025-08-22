@@ -70,11 +70,17 @@ template <dimension D> struct dimension_inverse {
   using type = dimension_type<D::name, inverse_power{}>;
 };
 
+/// \brief Helper alias for dimension inverse.
+/// \tparam D The dimension to compute the inverse of.
 template <dimension D> using dimension_inverse_t = dimension_inverse<D>::type;
 
+/// \brief Helper alias to create a base dimension.
+/// \tparam Name The name of the base dimenson.
 template <utility::template_string Name>
 using base_dimension_type = dimension_type<Name, utility::one>;
 
+/// \brief Helper alias to create a null dimension.
+/// \tparam D The dimension to nullify.
 template <auto D>
 using null_dimension_type = dimension_type<D.name, utility::zero>;
 
@@ -120,6 +126,8 @@ template <dimension... Dimensions> struct dimension_product_type {
   /// product.
   consteval static auto as_tuple() -> tuple_type { return tuple_type{}; }
 };
+
+constexpr dimension_product_type<> dimension_one;
 
 /// \brief Equality operator
 ///

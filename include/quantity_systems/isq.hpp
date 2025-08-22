@@ -67,6 +67,10 @@ constexpr struct force_quantity_type
                                            (time_quantity * time_quantity)> {
 } force_quantity;
 
+constexpr struct pressure_quantity_type
+    : make_derived_quantity_t<"Pressure", force_quantity /
+                                              (length_quantity * length_quantity)> {
+} pressure_quantity;
 } // namespace maxwell::isq
 
 namespace maxwell {
