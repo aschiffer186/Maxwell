@@ -86,17 +86,17 @@ consteval unit auto operator*(LHS /*lhs*/, RHS /*rhs*/) noexcept {
 }
 
 template <unit RHS>
-consteval unit auto operator*(utility::rational auto lhs, RHS) noexcept {
+constexpr unit auto operator*(utility::rational auto lhs, RHS) noexcept {
   using LHS = decltype(lhs);
   return unit_type<RHS::name, RHS::quantity, LHS{} * RHS::multiplier>{};
 }
 
-template <unit LHS, unit RHS> consteval unit auto operator/(LHS, RHS) noexcept {
+template <unit LHS, unit RHS> constexpr unit auto operator/(LHS, RHS) noexcept {
   return unit_quotient<LHS, RHS>{};
 }
 
 template <auto Q, utility::template_string Name> struct make_base_unit {
-  using type = unit_type<Name, Q, utility::one>;
+  using type = unit_type<Name, Q, 1.0>;
 };
 
 template <auto Q, utility::template_string Name>
@@ -113,7 +113,7 @@ struct make_derived_unit<U, Name> {
 template <auto Q, utility::template_string Name>
   requires quantity<decltype(Q)>
 struct make_derived_unit<Q, Name> {
-  using type = unit_type<Name, Q, utility::one>;
+  using type = unit_type<Name, Q, 1.0>;
 };
 
 template <auto Val, utility::template_string Name>
@@ -154,12 +154,19 @@ constexpr double yocto_prefix{1e-24};
 constexpr double ronto_prefix{1e-27};
 constexpr double quecto_prefix{1e-30};
 
-template <utility::rational auto Prefix, auto U, utility::template_string Name>
-struct prefixed_unit : make_derived_unit_t<Prefix * U, Name> {
-  using type = make_derived_unit_t<Prefix * U, Name>;
+template <auto Prefix, auto U, utility::template_string Name>
+struct prefixed_unit {
+public:
+  // clang-format off
+
+  using type = unit_type<Name, U.quantity,
+                pow(Prefix, U.quantity.dimensions.dimension_exponent_sum()) *
+                    U.multiplier>;
+  
+  // clang-format on 
 };
 
-template <utility::rational auto Prefix, auto U, utility::template_string Name>
+template <auto Prefix, auto U, utility::template_string Name>
 using prefixed_unit_t = prefixed_unit<Prefix, U, Name>::type;
 
 template <auto U>

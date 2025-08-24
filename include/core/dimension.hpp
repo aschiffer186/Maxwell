@@ -131,7 +131,7 @@ template <dimension... Dimensions> struct dimension_product_type {
   /// Computes the sum of the exponents of all dimensions in the dimension
   /// product.
   /// \return The sum of the dimension exponents.
-  constexpr utility::rational auto dimension_exponent_sum() {
+  constexpr static utility::rational auto dimension_exponent_sum() {
     return (Dimensions::power + ... + utility::zero);
   }
 };

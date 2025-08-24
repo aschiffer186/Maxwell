@@ -329,13 +329,15 @@ constexpr auto operator==(rational_type<N1, D1, E1> lhs,
 /// \param base The base to be raised to the rational power.
 /// \return The value of base raised to the rational power
 template <std::intmax_t N, std::intmax_t D, std::intmax_t E>
-constexpr double pow(double base) noexcept {
+constexpr double pow(double base, rational_type<N, D, E>) noexcept {
   assert(N % D == 0 && "For now only integer powers are supported");
   assert(E == 0 && "For now only exponent 0 is supported");
   const int exp = N / D;
   double result = 1.0;
 
-  for (int i = 0; i < std::abs(exp); ++i) {
+  int pos_exp = (exp < 0) ? -exp : exp;
+
+  for (int i = 0; i < pos_exp; ++i) {
     result *= base;
   }
 
