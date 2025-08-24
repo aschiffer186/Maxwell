@@ -86,7 +86,7 @@ using null_dimension_type = dimension_type<D.name, utility::zero>;
 
 /// \brief Product of dimensions
 ///
-/// Class template \c dimension_produc_type represents a product of dimesions
+/// Class template \c dimension_product_type represents a product of dimesions
 /// where each factor in the product is the dimension of a base quantity raised
 /// to some power.
 /// For example, given the base quantities A, B, C, ... from a
@@ -125,6 +125,15 @@ template <dimension... Dimensions> struct dimension_product_type {
   /// \return A \c std::tuple containing the dimensions of the dimension
   /// product.
   consteval static auto as_tuple() -> tuple_type { return tuple_type{}; }
+
+  /// \brief Returns the sum of the dimension exponents.
+  ///
+  /// Computes the sum of the exponents of all dimensions in the dimension
+  /// product.
+  /// \return The sum of the dimension exponents.
+  constexpr utility::rational auto dimension_exponent_sum() {
+    return (Dimensions::power + ... + utility::zero);
+  }
 };
 
 constexpr dimension_product_type<> dimension_one;
@@ -323,7 +332,7 @@ constexpr dimension_product auto operator/(LHS /*lhs*/, RHS /*rhs*/) noexcept {
     return dimension_product_type<dimension_inverse_t<RHS>, LHS>{};
   } else {
     return dimension_product_type<
-        dimension_type<LHS::power - RHS::power, LHS::name>>{};
+        dimension_type<LHS::name, LHS::power - RHS::power>>{};
   }
 }
 

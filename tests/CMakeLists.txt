@@ -1,5 +1,5 @@
 add_executable(compile_check compile_check.cpp)
-target_link_libraries(compile_check Maxwell-Utility Maxwell-Systems Maxwell-Quantity)
+target_link_libraries(compile_check PRIVATE Maxwell)
 
 find_package(GTest REQUIRED)
 include(CTest)
@@ -16,5 +16,10 @@ gtest_discover_tests(test_compile_time_math)
 
 add_executable(test_dimension test_dimension.cpp)
 add_test(NAME TestDimension COMMAND test_dimension)
-target_link_libraries(test_dimension PRIVATE Maxwell-Quantity GTest::gtest_main)
+target_link_libraries(test_dimension PRIVATE Maxwell-Base GTest::gtest_main)
 gtest_discover_tests(test_dimension)
+
+add_executable(test_quantity_value test_quantity_value.cpp) 
+add_test(NAME TestQuantityValue COMMAND test_quantity_value)
+target_link_libraries(test_quantity_value PRIVATE Maxwell GTest::gtest_main)
+gtest_discover_tests(test_quantity_value)

@@ -38,6 +38,24 @@ template <auto Q> struct enable_chrono_conversions : std::false_type {};
 template <auto Q>
 constexpr bool enable_chrono_conversions_v =
     enable_chrono_conversions<Q>::value;
+
+/// \brief Trait to return the units of a quantity
+///
+/// Returns the units of a quantity.
+/// This helps prevent formatting functions from being dependent
+/// on quantity headers.
+///
+/// \tparam Q The quantity to find the units of.
+template <typename Q> constexpr auto units_of = Q::units;
+
+/// \brief Trait to return the value type of a quantity
+///
+/// Returns the value type of a quantity.
+/// This helpts prevent formatting functions from being dependent
+/// on quantity headers.
+///
+/// \tparam Q The quantity to find the units of.
+template <typename Q> using value_type_t = Q::value_type;
 } // namespace maxwell
 
 #endif

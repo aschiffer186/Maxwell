@@ -1,8 +1,5 @@
-#include "isq.hpp"
-#include "quantity.hpp"
-#include "quantity_holder.hpp"
-#include "quantity_value.hpp"
-#include "si.hpp"
+#include <Maxwell.hpp>
+#include <iostream>
 
 constexpr struct wavelength_quantity_type
     : maxwell::make_derived_quantity_t<"W", maxwell::isq::length_quantity> {
@@ -14,7 +11,9 @@ using wavelength = maxwell::quantity_value<U, wavelength_quantity, double>;
 int main() {
   maxwell::si::meter<> q1;
 
-  maxwell::quantity_value<maxwell::kilo_unit<maxwell::si::meter_unit>> k;
+  maxwell::kilo<maxwell::si::meter<>> k;
+
+  std::cout << k << "\n";
   // maxwell::quantity_value<maxwell::si::ampere_unit> a{k};
 
   // wavelength<maxwell::si::meter_unit> q2{q1};

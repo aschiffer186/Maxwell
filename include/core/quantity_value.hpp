@@ -4,25 +4,78 @@
 #ifndef QUANTITY_VALUE_HPP
 #define QUANTITY_VALUE_HPP
 
-#include <chrono>           // duration
-#include <compare>          // spaceship operator
-#include <concepts>         // constructible_from, convertible_to, swappable
+#include <chrono>   // duration
+#include <compare>  // spaceship operator
+#include <concepts> // constructible_from, convertible_to, swappable
+#include <format>
 #include <functional>       // hash
 #include <initializer_list> // initializer_list
+#include <iterator>
+#include <ostream>
+#include <string_view>
 #include <type_traits> // false_type, is_assignable_v, remove_cvref_t, true_type
 #include <utility>     // forward, in_place_t, move
 
 #include "config.hpp"
+#include "formatting.hpp"
 #include "quantity.hpp"
 #include "type_traits.hpp"
 #include "unit.hpp"
 
 namespace maxwell {
+/// \brief Class template representing the value of a quantity with a particular
+/// unit.
+///
+/// Class template \c quantity_value represents the value of a quantity
+/// expressed in a particular unit. Both the quantity and unit of the \c
+/// quantity_value are specified at compile-time and are part of the type of the
+/// \c quantity_value. By making the quantity and unit part of the type of the
+/// \c quantity_value, unit coherence can be verified at compile-time. It is not
+/// permited to mix instances of \c quantity_value representing different
+/// quantities. However, two \c quantity_value instances may have the same unit,
+/// but represent different quantities, e.g. length and wavelength can both be
+/// expressed in nanometers, but may represent different quantities. This allows
+/// for an additional level of type safety. <br>
+///
+/// By making the unit part of the type, unit conversions can be performed
+/// automatically at compile-time rather than run-time. This makes the library
+/// extremely efficient. <br>
+///
+/// Both the units and the quantity of the \c quantity_value are specified as
+/// non-type template parameters (NTTPs).
+/// Using NTTPs allows for more natural definitions of custom units and
+/// definitions.
+///
+/// \warning Using an integral type with \c quantity_value will perform
+/// truncation when converting units and integer division when performing
+/// division.
+///
+/// \pre \c Q is convertible to the quantity of the specified units \c U.
+///       The program is ill-formed if this is violated.
+///
+/// \tparam U The units of the \c quantity_value.
+/// \tparam Q The quantity of the \c quantity_value. Default: the quantity of
+/// the units.
+/// \tparam T The type of the \c quantity_value. Default: \c double.
 template <auto U, auto Q = U.quantity, typename T = double>
   requires unit<decltype(U)> && quantity<decltype(Q)>
 class quantity_value;
+} // namespace maxwell
 
-/// \cond
+template <auto U, auto Q, typename T>
+struct std::formatter<maxwell::quantity_value<U, Q, T>>
+    : formatter<string_view> {
+  auto constexpr parse(std::format_parse_context& ctx) { return ctx.begin(); }
+
+  auto constexpr format(const maxwell::quantity_value<U, Q, T>& q,
+                        format_context& ctx) const {
+    string str;
+    format_to(back_inserter(str), "{} {}", q.get_value(), q.get_units());
+    return formatter<string_view>::format(str, ctx);
+  }
+};
+
+namespace maxwell {
 namespace _detail {
 template <typename> struct is_quantity_value : std::false_type {};
 
@@ -63,15 +116,16 @@ struct _quantity_value_operators {
   }
 
   friend constexpr quantity_value_like auto&
-  operator+=(const quantity_value_like auto& lhs,
+  operator+=(quantity_value_like auto& lhs,
              const quantity_value_like auto& rhs) {
     static_assert(quantity_convertible_to<rhs.quantity_kind, lhs.quantity_kind>,
                   "Cannot add quantities of different kinds");
+    lhs.value_ += rhs.value_;
     return lhs;
   }
 
   friend constexpr quantity_value_like auto&
-  operator-=(const quantity_value_like auto& lhs,
+  operator-=(quantity_value_like auto& lhs,
              const quantity_value_like auto& rhs) {
     static_assert(quantity_convertible_to<rhs.quantity_kind, lhs.quantity_kind>,
                   "Cannot subtract quantities of different kinds");
@@ -80,14 +134,12 @@ struct _quantity_value_operators {
   }
 
   friend constexpr quantity_value_like auto
-  operator+(const quantity_value_like auto& lhs,
-            const quantity_value_like auto& rhs) {
+  operator+(quantity_value_like auto lhs, const quantity_value_like auto& rhs) {
     return lhs += rhs;
   }
 
   friend constexpr quantity_value_like auto
-  operator-(const quantity_value_like auto& lhs,
-            const quantity_value_like auto& rhs) {
+  operator-(quantity_value_like auto lhs, const quantity_value_like auto& rhs) {
     return lhs -= rhs;
   }
 
@@ -103,6 +155,24 @@ struct _quantity_value_operators {
         lhs_type::quantity_kind * rhs_type::quantity_kind;
     return quantity_value<result_units, result_quantity, result_type>(
         lhs.get_value() * rhs.get_value());
+  }
+
+  template <typename T>
+  friend constexpr quantity_value_like auto
+  operator*(const quantity_value_like auto& lhs, const T& rhs) {
+    using lhs_type = std::remove_cvref_t<decltype(lhs)>;
+    using product_type = std::remove_cvref_t<decltype(lhs.get_value() * rhs)>;
+    return quantity_value<lhs_type::units, lhs_type::quantity_kind,
+                          product_type>(lhs.get_value() * rhs);
+  }
+
+  template <typename T>
+  friend constexpr quantity_value_like auto
+  operator*(const T& lhs, const quantity_value_like auto& rhs) {
+    using rhs_type = std::remove_cvref_t<decltype(rhs)>;
+    using product_type = std::remove_cvref_t<decltype(lhs * rhs.get_value())>;
+    return quantity_value<rhs_type::units, rhs_type::quantity_kind,
+                          product_type>(lhs * rhs.get_value());
   }
 
   friend constexpr quantity_value_like auto
@@ -156,29 +226,68 @@ struct _quantity_value_operators {
   }
 };
 
-#undef QUANTITY_VALUE_TEMPLATE
+struct quantity_value_output {
+  friend std::ostream& operator<<(std::ostream& os,
+                                  const quantity_value_like auto& q) {
+#ifdef MAXWELL_HAS_PRINT
+    std::print(os, q);
+#else
+    os << std::format("{}", q);
+#endif
+    return os;
+  }
+};
 } // namespace _detail
-/// \endcond
 
 template <auto U, auto Q, typename T>
   requires unit<decltype(U)> && quantity<decltype(Q)>
-class quantity_value : public _detail::_quantity_value_operators {
+class quantity_value : _detail::_quantity_value_operators,
+                       _detail::quantity_value_output {
   static_assert(
       quantity_convertible_to<Q, U.quantity>,
       "Attempting to instantiate quantity value with incompatible units");
 
 public:
+  /// The type of the numerical value of the \c quantity_value.
   using value_type = T;
+  /// The type of the quantity of the \c quantity_value.
   using quantity_kind_type = std::remove_cv_t<decltype(U)>;
+  /// The type of the units of the \c quantity_value.
   using units_type = std::remove_cv_t<decltype(U)>;
-
+  /// The units of the \c quantity_value.
   static constexpr unit auto units = U;
+  /// The quantity of the \c quantity_value.
   static constexpr quantity auto quantity_kind = Q;
 
   // --- Constructors ---
 
-  constexpr quantity_value() = default;
+  /// \brief Default constructor
+  ///
+  /// Value initializes the numerical value of the \c quantity_value.
+  /// This constructor only participates in overload resolution if
+  /// \c std::is_default_constructible_v<T> is \c true.
+  ///
+  /// \pre \c T is default constructible.
+  constexpr quantity_value()
+    requires std::is_default_constructible_v<T>
+  = default;
 
+  /// \brief Constructor
+  ///
+  /// Direct initializes the numerical value of the \c quantity_value from
+  /// \c std::forward<Up>(value).
+  /// This constructor only participates in overload resolution if
+  ///   1. <tt>std::is_constructible_from_v<T, Up></tt> is \c true.
+  ///   2. \c Up is not an instantiation of \c quantity_value.
+  ///
+  /// This constructor is explicit if either of the following is \c false
+  ///   1. <tt>std::convertible_to<Up, T></tt>
+  ///   2.  <tt>unitless<U></tt> is true
+  ///
+  /// \pre <tt>std::is_constructible_from_v<T, Up></tt> is \c true and
+  ///      \c Up is not an instantiation of \c quantity_value.
+  ////
+  /// \param value The value used to initialize the \c quantity_value.
   template <typename Up = T>
     requires std::constructible_from<T, Up> &&
              (!_detail::is_quantity_value_v<Up>)
@@ -325,7 +434,7 @@ private:
   friend class quantity_value;
 
   T value_{};
-};
+}; // namespace maxwell
 
 template <typename Q>
 using quetta = quantity_value<quetta_unit<Q::units>, Q::quantity_kind,

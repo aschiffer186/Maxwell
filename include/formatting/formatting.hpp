@@ -11,7 +11,7 @@
 #include <string_view> // string_view
 
 #include "dimension.hpp"
-#include "quantity_value.hpp"
+#include "unit.hpp"
 
 template <maxwell::dimension D>
 struct std::formatter<D> : std::formatter<std::string_view> {
@@ -65,7 +65,9 @@ struct std::formatter<U> : std::formatter<std::string_view> {
 
   auto format(const maxwell::unit auto&, std::format_context& ctx) const {
     std::string temp;
-    std::format_to(std::back_inserter(temp), "{}", U::name);
+    std::string name{U::name.begin(), U::name.end()};
+    std::format_to(std::back_inserter(temp), "{}", name);
+    return std::formatter<std::string_view>::format(temp, ctx);
   }
 };
 

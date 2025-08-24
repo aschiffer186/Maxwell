@@ -5,6 +5,7 @@
 #define RATIONAL_HPP
 
 #include <cassert>     // assert
+#include <cmath>       // abs
 #include <compare>     // strong_ordering
 #include <cstdint>     // intmax_t
 #include <numeric>     // gcd
@@ -317,6 +318,32 @@ template <std::intmax_t N1, std::intmax_t D1, std::intmax_t E1,
 constexpr auto operator==(rational_type<N1, D1, E1> lhs,
                           rational_type<N2, D2, E2> rhs) -> bool {
   return (lhs <=> rhs) == std::strong_ordering::equal;
+}
+
+/// \brief Computes base raised to a rational power.
+///
+/// Computes the value of a real number rasied to a rational power.
+/// \tparam N The numerator of the rational power.
+/// \tparam D The denominator of the rational power.
+/// \tparam E The exponent of the rational power.
+/// \param base The base to be raised to the rational power.
+/// \return The value of base raised to the rational power
+template <std::intmax_t N, std::intmax_t D, std::intmax_t E>
+constexpr double pow(double base) noexcept {
+  assert(N % D == 0 && "For now only integer powers are supported");
+  assert(E == 0 && "For now only exponent 0 is supported");
+  const int exp = N / D;
+  double result = 1.0;
+
+  for (int i = 0; i < std::abs(exp); ++i) {
+    result *= base;
+  }
+
+  if (exp < 0) {
+    return 1.0 / result;
+  }
+
+  return result;
 }
 } // namespace maxwell::utility
 

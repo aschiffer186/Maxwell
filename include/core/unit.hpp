@@ -4,6 +4,7 @@
 #ifndef UNIT_HPP
 #define UNIT_HPP
 
+#include <concepts>
 #include <type_traits> // false_type, remove_cvref_t, true_type
 #include <utility>     // declval
 
@@ -13,24 +14,13 @@
 
 namespace maxwell {
 template <utility::template_string Name, quantity auto Quantity,
-          utility::rational auto Multiplier>
-struct unit_type {
-  constexpr static auto name = Name;
-  constexpr static quantity auto quantity = Quantity;
-  constexpr static dimension_product auto dimensions = quantity.dimensions;
-  constexpr static utility::rational auto multiplier = Multiplier;
-
-  using quantity_rep = std::remove_cvref_t<decltype(quantity)>;
-
-  constexpr static auto base_units() {
-    return unit_type<Name, Quantity, utility::one>{};
-  }
-};
+          auto Multiplier>
+struct unit_type;
 
 template <utility::template_string Name, quantity auto Quantity,
-          utility::rational auto Multiplier>
+          auto Multiplier>
 constexpr unit_type<Name, Quantity, Multiplier>
-    underlying_unit(unit_type<Name, Quantity, Multiplier>);
+underlying_unit(const unit_type<Name, Quantity, Multiplier>&);
 
 template <typename T>
 using underlying_unit_t = decltype(underlying_unit(std::declval<T>()));
@@ -48,6 +38,25 @@ struct has_underlying_unit<T, std::void_t<underlying_unit_t<T>>>
 
 template <typename T>
 concept unit = _detail::has_underlying_unit<std::remove_cvref_t<T>>::value;
+
+template <utility::template_string Name, quantity auto Quantity,
+          auto Multiplier>
+struct unit_type {
+  constexpr static auto name = Name;
+  constexpr static quantity auto quantity = Quantity;
+  constexpr static dimension_product auto dimensions = quantity.dimensions;
+  constexpr static auto multiplier = Multiplier;
+
+  using quantity_rep = std::remove_cvref_t<decltype(quantity)>;
+
+  constexpr static auto base_units() {
+    return unit_type<Name, Quantity, utility::one>{};
+  }
+};
+
+constexpr bool operator==(unit auto lhs, unit auto rhs) noexcept {
+  return std::same_as<decltype(lhs), decltype(rhs)>;
+}
 
 /// \cond
 namespace _detail {
@@ -120,30 +129,30 @@ constexpr double conversion_factor(From, To) noexcept {
          static_cast<double>(From::multiplier);
 }
 
-constexpr utility::rational_type<1, 1, 30> quetta_prefix;
-constexpr utility::rational_type<1, 1, 27> ronna_prefix;
-constexpr utility::rational_type<1, 1, 24> yotta_prefix;
-constexpr utility::rational_type<1, 1, 21> zetta_prefix;
-constexpr utility::rational_type<1, 1, 18> exa_prefix;
-constexpr utility::rational_type<1, 1, 15> peta_prefix;
-constexpr utility::rational_type<1, 1, 12> tera_prefix;
-constexpr utility::rational_type<1, 1, 9> giga_prefix;
-constexpr utility::rational_type<1, 1, 6> mega_prefix;
-constexpr utility::rational_type<1, 1, 3> kilo_prefix;
-constexpr utility::rational_type<1, 1, 2> hecto_prefix;
-constexpr utility::rational_type<1, 1, 1> deca_prefix;
-constexpr utility::rational_type<1, 1, -1> deci_prefix;
-constexpr utility::rational_type<1, 1, -2> centi_prefix;
-constexpr utility::rational_type<1, 1, -3> milli_prefix;
-constexpr utility::rational_type<1, 1, -6> micro_prefix;
-constexpr utility::rational_type<1, 1, -9> nano_prefix;
-constexpr utility::rational_type<1, 1, -12> pico_prefix;
-constexpr utility::rational_type<1, 1, -15> femto_prefix;
-constexpr utility::rational_type<1, 1, -18> atto_prefix;
-constexpr utility::rational_type<1, 1, -21> zepto_prefix;
-constexpr utility::rational_type<1, 1, -24> yocto_prefix;
-constexpr utility::rational_type<1, 1, -27> ronto_prefix;
-constexpr utility::rational_type<1, 1, -30> quecto_prefix;
+constexpr double quetta_prefix{1e30};
+constexpr double ronna_prefix{1e27};
+constexpr double yotta_prefix{1e24};
+constexpr double zetta_prefix{1e21};
+constexpr double exa_prefix{1e18};
+constexpr double peta_prefix{1e15};
+constexpr double tera_prefix{1e12};
+constexpr double giga_prefix{1e9};
+constexpr double mega_prefix{1e6};
+constexpr double kilo_prefix{1e3};
+constexpr double hecto_prefix{1e2};
+constexpr double deca_prefix{1e1};
+constexpr double deci_prefix{1e-1};
+constexpr double centi_prefix{1e-2};
+constexpr double milli_prefix{1e-3};
+constexpr double micro_prefix{1e-6};
+constexpr double nano_prefix{1e-9};
+constexpr double pico_prefix{1e-12};
+constexpr double femto_prefix{1e-15};
+constexpr double atto_prefix{1e-18};
+constexpr double zepto_prefix{1e-21};
+constexpr double yocto_prefix{1e-24};
+constexpr double ronto_prefix{1e-27};
+constexpr double quecto_prefix{1e-30};
 
 template <utility::rational auto Prefix, auto U, utility::template_string Name>
 struct prefixed_unit : make_derived_unit_t<Prefix * U, Name> {
