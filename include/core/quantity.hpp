@@ -12,17 +12,19 @@
 #include "template_string.hpp"
 
 namespace maxwell {
-template <utility::template_string Kind, auto Dim>
+template <utility::template_string Kind, auto Dim, bool Derived>
   requires dimension_product<decltype(Dim)>
 struct quantity_type {
   constexpr static dimension_product auto dimensions = Dim;
   constexpr static auto kind = Kind;
+  constexpr static bool derived = Derived;
 };
 
-constexpr quantity_type<"[]", dimension_one> number;
+constexpr quantity_type<"[]", dimension_one, false> number;
 
-template <utility::template_string Kind, auto Dim>
-auto quantity_base(quantity_type<Kind, Dim>) -> quantity_type<Kind, Dim>;
+template <utility::template_string Kind, auto Dim, bool Derived>
+auto quantity_base(quantity_type<Kind, Dim, Derived>)
+    -> quantity_type<Kind, Dim, Derived>;
 
 template <typename T>
 using quantity_base_t = decltype(quantity_base(std::declval<T>()));
@@ -39,17 +41,11 @@ struct is_quantity<T, std::void_t<quantity_base_t<T>>> : std::true_type {};
 template <typename T>
 concept quantity = _detail::is_quantity<std::remove_cvref_t<T>>::value;
 
-template <auto From, auto To>
-concept quantity_convertible_to =
-    quantity<decltype(From)> && quantity<decltype(To)> &&
-    dimension_convertible_to<From.dimensions, To.dimensions> &&
-    std::derived_from<std::remove_cvref_t<decltype(From)>,
-                      std::remove_cvref_t<decltype(To)>>;
-
 template <quantity LHS, quantity RHS> struct quantity_product {
   using type =
       quantity_type<LHS::kind + utility::template_string{"*"} + RHS::kind,
-                    LHS::dimensions * RHS::dimensions>;
+                    LHS::dimensions * RHS::dimensions,
+                    LHS::derived || RHS::derived>;
 };
 
 template <quantity LHS, quantity RHS>
@@ -58,7 +54,8 @@ using quantity_product_t = quantity_product<LHS, RHS>::type;
 template <quantity LHS, quantity RHS> struct quantity_quotient {
   using type =
       quantity_type<LHS::kind + utility::template_string{"/"} + RHS::kind,
-                    LHS::dimensions / RHS::dimensions>;
+                    LHS::dimensions / RHS::dimensions,
+                    LHS::derived || RHS::derived>;
 };
 
 template <quantity LHS, quantity RHS>
@@ -76,22 +73,72 @@ constexpr quantity auto operator/(quantity auto lhs,
 
 /// \cond
 namespace _detail {
-template <utility::template_string Kind, auto Base>
+template <utility::template_string Kind, auto Base, bool IsDerived = true>
   requires quantity<decltype(Base)>
 struct derived_quantity_impl : decltype(Base) {
   constexpr static dimension_product auto dimensions = Base.dimensions;
   constexpr static auto kind = Kind;
+  constexpr static bool derived = IsDerived;
 };
 } // namespace _detail
 /// \endcond
 
-template <utility::template_string Derived, auto Base>
+template <utility::template_string Derived, auto Base, bool IsDerived = true>
 struct make_derived_quantity {
-  using type = _detail::derived_quantity_impl<Derived, Base>;
+  using type = _detail::derived_quantity_impl<Derived, Base, IsDerived>;
 };
 
-template <utility::template_string Derived, auto Base>
-using make_derived_quantity_t = make_derived_quantity<Derived, Base>::type;
+template <utility::template_string Derived, auto Base, bool IsDerived = true>
+using make_derived_quantity_t =
+    make_derived_quantity<Derived, Base, IsDerived>::type;
+
+/// \cond
+namespace _detail {
+template <quantity LHS, quantity RHS>
+auto product_base(quantity_product_t<LHS, RHS>) -> quantity_product_t<LHS, RHS>;
+
+template <typename T>
+using product_base_t = decltype(product_base(std::declval<T>()));
+
+template <typename, typename = void>
+struct has_product_base : std::false_type {};
+
+template <typename T>
+struct has_product_base<T, std::void_t<T>> : std::true_type {};
+
+template <utility::template_string Derived, auto Base, bool IsDerived>
+auto derived_base(_detail::derived_quantity_impl<Derived, Base, IsDerived>)
+    -> _detail::derived_quantity_impl<Derived, Base, IsDerived>;
+
+template <typename T>
+using derived_base_t = decltype(derived_base(std::declval<T>()));
+
+template <typename, typename = void>
+struct has_derived_base : std::false_type {};
+
+template <typename T>
+struct has_derived_base<T, std::void_t<derived_base_t<T>>> : std::true_type {};
+
+template <quantity From, quantity To>
+consteval bool quantity_convertible_to_impl(From, To) noexcept {
+  if (has_product_base<From>::value && !has_derived_base<From>::value) {
+    return From::dimensions == To::dimensions;
+  } else if (!From::derived && !To::derived) {
+    return From::dimensions == To::dimensions;
+  } else if (!From::derived && To::derived) {
+    return false;
+  } else if (From::derived && !To::derived) {
+    return std::derived_from<From, To> && From::dimensions == To::dimensions;
+  } else {
+    return std::derived_from<From, To> && From::dimensions == To::dimensions;
+  }
+}
+} // namespace _detail
+/// \endcond
+
+template <auto From, auto To>
+concept quantity_convertible_to =
+    _detail::quantity_convertible_to_impl(From, To);
 } // namespace maxwell
 
 #endif

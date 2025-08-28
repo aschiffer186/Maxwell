@@ -21,10 +21,12 @@ template <utility::template_string... Dimensions> struct quantity_system {
 
   template <utility::template_string Kind>
     requires((Kind == Dimensions) || ...)
-  using base_quantity = quantity_type<Kind, base_dimension_product<Kind>{}>;
+  using base_quantity =
+      quantity_type<Kind, base_dimension_product<Kind>{}, false>;
 
   using dimensionless_quantity = quantity_type<
-      "[]", dimension_product_type<dimension_type<"Null", utility::zero>>{}>;
+      "[]", dimension_product_type<dimension_type<"Null", utility::zero>>{},
+      false>;
 
   template <utility::template_string Name, auto Definition>
   struct make_derived {

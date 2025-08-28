@@ -17,7 +17,6 @@
 #include <utility>     // forward, in_place_t, move
 
 #include "config.hpp"
-#include "formatting.hpp"
 #include "quantity.hpp"
 #include "type_traits.hpp"
 #include "unit.hpp"
@@ -158,6 +157,7 @@ struct _quantity_value_operators {
   }
 
   template <typename T>
+    requires(!quantity_value_like<T> && !unit<T>)
   friend constexpr quantity_value_like auto
   operator*(const quantity_value_like auto& lhs, const T& rhs) {
     using lhs_type = std::remove_cvref_t<decltype(lhs)>;
@@ -167,6 +167,7 @@ struct _quantity_value_operators {
   }
 
   template <typename T>
+    requires(!quantity_value_like<T> && !unit<T>)
   friend constexpr quantity_value_like auto
   operator*(const T& lhs, const quantity_value_like auto& rhs) {
     using rhs_type = std::remove_cvref_t<decltype(rhs)>;
@@ -310,7 +311,8 @@ public:
   template <typename Rep, typename Period>
     requires enable_chrono_conversions_v<Q> && std::constructible_from<T, Rep>
   MAXWELL_CONSTEXPR23 explicit quantity_value(
-      const std::chrono::duration<Rep, Period>& d) {}
+      const std::chrono::duration<Rep, Period>& d)
+      : value_(d.count()) {}
 
   template <auto FromQuantity, auto FromUnit, typename Up = T>
     requires std::constructible_from<T, Up> && unit<decltype(FromUnit)>
@@ -321,8 +323,10 @@ public:
     static_assert(unit_convertible_to<FromUnit, U>,
                   "Units of other cannot be converted to units of value being "
                   "constructed");
-    static_assert(quantity_convertible_to<FromQuantity, Q>,
-                  "Attempting to construct value from incompatible quantity");
+    static_assert(
+        quantity_convertible_to<FromQuantity, Q>,
+        "Attempting to construct value from incompatible quantity. Note, "
+        "quantities can be incompatible even if they have te same units.");
   }
 
   template <auto FromQuantity, auto FromUnit, typename Up = T>
@@ -334,8 +338,10 @@ public:
     static_assert(unit_convertible_to<FromUnit, U>,
                   "Units of other cannot be converted to units of value being "
                   "constructed");
-    static_assert(quantity_convertible_to<FromQuantity, Q>,
-                  "Attempting to construct value from incompatible quantity");
+    static_assert(
+        quantity_convertible_to<FromQuantity, Q>,
+        "Attempting to construct value from incompatible quantity. Note, "
+        "quantities can be incompatible even if they have te same units.");
   }
 
   // --- Assignment Operators ---
@@ -347,8 +353,10 @@ public:
     static_assert(unit_convertible_to<FromUnit, U>,
                   "Units of other cannot be converted to units of value being "
                   "constructed");
-    static_assert(quantity_convertible_to<FromQuantity, Q>,
-                  "Attempting to construct value from incompatible quantity");
+    static_assert(
+        quantity_convertible_to<FromQuantity, Q>,
+        "Attempting to construct value from incompatible quantity. Note, "
+        "quantities can be incompatible even if they have te same units.");
 
     using std::swap;
     quantity_value temp(std::move(other));
@@ -429,10 +437,6 @@ public:
 private:
   friend _detail::_quantity_value_operators;
 
-  template <auto Q2, auto U2, typename T2>
-    requires unit<decltype(U)> && quantity<decltype(Q)>
-  friend class quantity_value;
-
   T value_{};
 }; // namespace maxwell
 
@@ -508,6 +512,57 @@ using ronto = quantity_value<ronto_unit<Q::units>, Q::quantity_kind,
 template <typename Q>
 using quecto = quantity_value<quecto_unit<Q::units>, Q::quantity_kind,
                               typename Q::value_type>;
+
+template <auto ToUnits, auto ToQuantity = ToUnits.quantity, auto FromUnits,
+          auto FromQuantity, typename T>
+constexpr auto
+quantity_cast(const quantity_value<FromUnits, FromQuantity, T>& value)
+    -> quantity_value<ToUnits, ToQuantity, T> {
+  static_assert(quantity_convertible_to<ToQuantity, ToUnits.quantity>,
+                "ToQuantity and ToUnits are incompatbile");
+  static_assert(unit_convertible_to<FromUnits, ToUnits>,
+                "Cannot convert from FromUnits to ToUnits");
+
+  constexpr double multiplier = conversion_factor(FromUnits, ToUnits);
+  return quantity_value<ToUnits, ToQuantity, T>(value.get_value() * multiplier);
+}
+
+template <typename T, unit U>
+  requires(!_detail::is_quantity_value_v<T> && !unit<T>)
+constexpr auto operator*(T&& value, U) -> quantity_value<U{}, U::quantity, T> {
+  return quantity_value<U{}, U::quantity, T>(std::forward<T>(value));
+}
+
+template <auto U1, auto Q1, typename T, unit U2>
+constexpr auto operator*(const quantity_value<U1, Q1, T>& value, U2) {
+  constexpr unit auto new_units = U1 * U2{};
+  constexpr quantity auto new_quantity = new_units.quantity;
+  return quantity_value<new_units, new_quantity, T>(value.get_value());
+}
+
+template <auto U1, auto Q1, typename T, unit U2>
+constexpr auto operator*(quantity_value<U1, Q1, T>&& value, U2) {
+  constexpr unit auto new_units = U1 * U2{};
+  constexpr quantity auto new_quantity = new_units.quantity;
+  return quantity_value<new_units, new_quantity, T>(
+      std::move(value).get_value());
+}
+
+template <auto U1, auto Q1, typename T, unit U2>
+constexpr auto operator/(const quantity_value<U1, Q1, T>& value, U2) {
+  constexpr unit auto new_units = U1 / U2{};
+  constexpr quantity auto new_quantity = new_units.quantity;
+  return quantity_value<new_units, new_quantity, T>(value.get_value());
+}
+
+template <auto U1, auto Q1, typename T, unit U2>
+constexpr auto operator/(quantity_value<U1, Q1, T>&& value, U2) {
+  constexpr unit auto new_units = U1 / U2{};
+  constexpr quantity auto new_quantity = new_units.quantity;
+  return quantity_value<new_units, new_quantity, T>(
+      std::move(value).get_value());
+}
+
 } // namespace maxwell
 
 /// \brief Specialization of \c std::hash

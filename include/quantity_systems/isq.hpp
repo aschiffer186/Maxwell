@@ -51,41 +51,51 @@ constexpr struct solid_angle_quantity_type
 
 constexpr struct frequency_quantity_type
     : make_derived_quantity_t<"Frequency",
-                              dimensionless_quantity / time_quantity> {
+                              dimensionless_quantity / time_quantity, false> {
 } frequency_quantity;
 
 constexpr struct force_quantity_type
-    : make_derived_quantity_t<"Force", mass_quantity * length_quantity /
-                                           (time_quantity * time_quantity)> {
+    : make_derived_quantity_t<"Force",
+                              mass_quantity * length_quantity /
+                                  (time_quantity * time_quantity),
+                              false> {
 } force_quantity;
 
 constexpr struct pressure_quantity_type
-    : make_derived_quantity_t<"Pressure", force_quantity / (length_quantity *
-                                                            length_quantity)> {
+    : make_derived_quantity_t<
+          "Pressure", force_quantity / (length_quantity * length_quantity),
+          false> {
 } pressure_quantity;
 
 constexpr struct work_quantity_type
-    : make_derived_quantity_t<"Work", force_quantity * length_quantity> {
+    : make_derived_quantity_t<"Work", force_quantity * length_quantity, false> {
 } work_quantity;
 
 constexpr struct power_quantity_type
-    : make_derived_quantity_t<"Power", work_quantity / time_quantity> {
+    : make_derived_quantity_t<"Power", work_quantity / time_quantity, false> {
 } power_quantity;
+
+constexpr struct charge_quantity_type
+    : make_derived_quantity_t<"Charge", current_quantity * time_quantity,
+                              false> {
+} charge_quantity;
 
 // --- Other Derived Quantities ---
 constexpr struct area_quantity_type
-    : make_derived_quantity_t<"Area", length_quantity * length_quantity> {
+    : make_derived_quantity_t<"Area", length_quantity * length_quantity,
+                              false> {
 } area_quantity;
 
 constexpr struct volume_quantity_type
-    : make_derived_quantity_t<"Volume", area_quantity * length_quantity> {
+    : make_derived_quantity_t<"Volume", area_quantity * length_quantity,
+                              false> {
 } volume_quantity;
 
 constexpr struct torque_quantity_type
     : make_derived_quantity_t<"Torque", work_quantity> {
 } torque_quantity;
-// --- Convenience Concepts ---
 
+// --- Convenience Concepts ---
 template <typename Q>
 concept length = quantity_convertible_to<Q::quantity_kind, length_quantity>;
 

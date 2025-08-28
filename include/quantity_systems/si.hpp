@@ -72,6 +72,14 @@ constexpr struct watt_unit_type
     : make_derived_unit_t<isq::power_quantity, "W"> {
 } watt_unit;
 
+constexpr struct coulumb_unit_type
+    : make_derived_unit_t<isq::charge_quantity, "C"> {
+} coulumb_unit;
+
+constexpr struct square_meter_unit_type
+    : make_derived_unit_t<isq::area_quantity, "m^2"> {
+} square_meter_unit;
+
 template <typename T = double>
 using meter = quantity_value<meter_unit, isq::length_quantity, T>;
 
@@ -94,7 +102,19 @@ template <typename T = double>
 using number = quantity_value<number_unit, isq::dimensionless_quantity, T>;
 
 template <typename T = double>
+using newton = quantity_value<newton_unit, isq::force_quantity, T>;
+
+template <typename T = double>
 using pascal = quantity_value<pascal_unit, isq::pressure_quantity, T>;
+
+template <typename T = double>
+using joule = quantity_value<joule_unit, isq::work_quantity, T>;
+
+template <typename T = double>
+using square_meter = quantity_value<square_meter_unit, isq::area_quantity, T>;
+
+template <typename T = double>
+using newton_meter = quantity_value<newton_meter_unit, isq::torque_quantity, T>;
 } // namespace maxwell::si
 
 #endif
