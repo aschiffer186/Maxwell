@@ -68,3 +68,48 @@ In most cases, it is not necessary to specify the `Quantity` or `UnderlyingType`
 > If an integral type is specified for the underlying type, integer division will be performed when dividing quantity values and truncation will be performed when converting from another quantity value.
 
 An instance of `quantity_value` can only be assigned to `quantity_values` of the same kind or a more general kind. If this is violated, a compile-time error is issued. Therefore, if a program using Maxwell is well formed, it is guaranteed the units of the expressions in the program are correct. 
+```c++
+quantity_value<si::meter_unit> q1 = quantity_value<si::ampere_unit>{}; // Error - will not compile because units are different
+// Assume wavelength is a derived quantity from length
+quantity_value<si::meter_unit, wavelength> = quantity<si::meter_unit>{}; // Error - will not compile because quantity kinds are different
+```
+
+## Constructing Quantity Values
+Quantity values can always be constructed from the underlying type. The value passed to the constructor is forward to the underlying value for efficiency.
+```c++
+quantity_value<si::meter_unit> q1{100.0}; // q1 represents a length of 100 m 
+quantity_value<si::meter_unit, wavelength> q2{500.0}; // q3 represents a length of 500 m 
+quantity_value<si::meter_unit, isq::length_quantity, BigNumber> q3{BigNumber{factorial(500)}}; // Big number is moved into quantity. 
+```
+
+A quantity value can be constructed from any quantity of the same kind, even if the units are different. In this case, the units of the other quantity are automatically converted to the units of the quantity being constructed. Importantly, the conversion factor is computed **at compile time** instead of at **runtime**. This means there is virtually no overhead using Maxwell instead of raw arithmetic types. 
+```c++
+quantity_value<si::meter_unit> q1 = quantity_value<si::kilometer_unit>{1}; // q1 represents a length of 1,000 m
+quantity_value<us::lb_unit> q2 = quantity_value<si::kilogram_unit>{2}; // q2 represens a mass of 4.40925 pounds
+```
+
+For convenience, many type aliases are provided to make constructing quantites less verbose. If no underlying type is specified, `double` is assumed.
+```c++
+si::meter<> q1{100}; // Same as quantity_value<si::meter_unit, isq::length_quantity, double> q1{100};
+si::mole<long double> q2{25}; // Same as quantity_value<si::meter_unit, isq::amount_quantity, long double> q2{25}
+```
+
+> [!Note]
+> The angle brackets (<>) are always necessary even when the default type is used. This is due to how C++ type alias and variable templates are defined.
+ 
+For larger types, the underlying value of the quantity can be constructed in place, similar to `std::optional` or `std::variant`. 
+```c++
+using vector_quantity = quantity_value<si::meter_unit, isq::length_quantity, std::vector<double>>;
+vector_quantity q1(std::in_place, {1.0, 2.0, 3.0, 4.0, 5.0, 6.0}, MyCustomAllocator{}); // Constructs the underlying value in place!
+```
+
+For more complicated units or more complicated initialization expressions, abbreviated symbols are provided to ease construction.
+```c++
+si::newton_meter<> q1 = 100 * N * m; // q1 represents 100 N-m.
+```
+
+The definition of the `quantity` prevents mixing incompatible quantities with the same dimenions, but allows for initializing them with exprerssions consisting of the base units. 
+```c++
+si::newton_meter<> q1 = 100 * N * m; // OK - q1 represents 100 N-m
+si::joule<> q2 
+```
