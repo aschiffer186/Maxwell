@@ -132,6 +132,26 @@ struct _quantity_value_operators {
     return lhs;
   }
 
+  template <auto U, auto Q, typename T, typename T2>
+    requires(!quantity_value_like<T2>)
+  friend constexpr quantity_value_like auto&
+  operator+=(quantity_value<U, Q, T>& lhs, T&& rhs)
+    requires unitless<U>
+  {
+    lhs.value_ += std::forward<T>(rhs);
+    return lhs;
+  }
+
+  template <auto U, auto Q, typename T, typename T2>
+    requires(!quantity_value_like<T2>)
+  friend constexpr quantity_value_like auto&
+  operator-=(quantity_value<U, Q, T>& lhs, T2&& rhs)
+    requires unitless<U>
+  {
+    lhs.value_ -= std::forward<T>(rhs);
+    return lhs;
+  }
+
   friend constexpr quantity_value_like auto
   operator+(quantity_value_like auto lhs, const quantity_value_like auto& rhs) {
     return lhs += rhs;
@@ -140,6 +160,36 @@ struct _quantity_value_operators {
   friend constexpr quantity_value_like auto
   operator-(quantity_value_like auto lhs, const quantity_value_like auto& rhs) {
     return lhs -= rhs;
+  }
+
+  template <typename T>
+    requires(!quantity_value_like<T>)
+  friend constexpr quantity_value_like auto&
+  operator+(quantity_value_like auto& lhs, T&& rhs) {
+    return lhs += std::forward<rhs>(rhs);
+  }
+
+  template <typename T>
+    requires(!quantity_value_like<T>)
+  friend constexpr quantity_value_like auto&
+  operator+(T&& lhs, quantity_value_like auto& rhs) {
+    return rhs += std::forward<T>(lhs);
+  }
+
+  template <typename T>
+    requires(!quantity_value_like<T>)
+  friend constexpr quantity_value_like auto&
+  operator-(quantity_value_like auto& lhs, T&& rhs) {
+    return lhs -= std::forward<T>(rhs);
+  }
+
+  template <typename T>
+    requires(!quantity_value_like<T>)
+  friend constexpr quantity_value_like auto&
+  operator-(T&& lhs, quantity_value_like auto& rhs)
+    requires unitless<decltype(rhs)::units>
+  {
+    return rhs -= std::forward<T>(lhs);
   }
 
   friend constexpr quantity_value_like auto
@@ -188,6 +238,26 @@ struct _quantity_value_operators {
         lhs_type::quantity_kind / rhs_type::quantity_kind;
     return quantity_value<result_units, result_quantity, result_type>(
         lhs.get_value() / rhs.get_value());
+  }
+
+  template <typename T>
+    requires(!quantity_value_like<T> && !unit<T>)
+  friend constexpr quantity_value_like auto
+  operator/(const quantity_value_like auto& lhs, const T& rhs) {
+    using lhs_type = std::remove_cvref_t<decltype(lhs)>;
+    using product_type = std::remove_cvref_t<decltype(lhs.get_value() / rhs)>;
+    return quantity_value<lhs_type::units, lhs_type::quantity_kind,
+                          product_type>(lhs.get_value() / rhs);
+  }
+
+  template <typename T>
+    requires(!quantity_value_like<T> && !unit<T>)
+  friend constexpr quantity_value_like auto
+  operator/(const T& lhs, const quantity_value_like auto& rhs) {
+    using rhs_type = std::remove_cvref_t<decltype(rhs)>;
+    using product_type = std::remove_cvref_t<decltype(lhs / rhs.get_value())>;
+    return quantity_value<rhs_type::units, rhs_type::quantity_kind,
+                          product_type>(lhs / rhs.get_value());
   }
 
   friend constexpr quantity_value_like auto
@@ -425,14 +495,6 @@ public:
     constexpr double factor = conversion_factor(U, base_units);
     return quantity_value<base_units, Q, T>{value_ * factor};
   }
-
-  friend auto operator<=>(const quantity_value& lhs, const quantity_value& rhs)
-    requires std::three_way_comparable<T>
-  = default;
-
-  friend bool operator==(const quantity_value& lhs, const quantity_value& rhs)
-    requires std::equality_comparable<T>
-  = default;
 
 private:
   friend _detail::_quantity_value_operators;

@@ -10,7 +10,7 @@ auto normal_shock(Mach M, maxwell::isq::temperature auto T0,
     -> std::tuple<Mach, maxwell::si::kelvin<>, maxwell::si::pascal<>> {
   constexpr maxwell::si::number<> gamma{1.4};
 
-  //   const Mach M1_num = (gamma - 1) * M * M;
+  // const Mach M1_num = (gamma - 1) * M * M;
 }
 
 int main() {

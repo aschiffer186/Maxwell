@@ -80,6 +80,10 @@ constexpr struct square_meter_unit_type
     : make_derived_unit_t<isq::area_quantity, "m^2"> {
 } square_meter_unit;
 
+constexpr struct meter_per_second_unit_type
+    : make_derived_unit_t<isq::velocity_quantity, "m/s"> {
+} meter_per_second_unit;
+
 template <typename T = double>
 using meter = quantity_value<meter_unit, isq::length_quantity, T>;
 
@@ -115,6 +119,33 @@ using square_meter = quantity_value<square_meter_unit, isq::area_quantity, T>;
 
 template <typename T = double>
 using newton_meter = quantity_value<newton_meter_unit, isq::torque_quantity, T>;
+
+template <typename T = double>
+using meter_per_second =
+    quantity_value<meter_per_second_unit, isq::velocity_quantity, T>;
+
+/// \namespace maxwell::si::symbols
+/// \brief Convenience symbols for creating units
+namespace symbols {
+constexpr unit auto m = meter_unit;
+constexpr unit auto kg = kilogram_unit;
+constexpr unit auto s = second_unit;
+constexpr unit auto A = ampere_unit;
+constexpr unit auto K = kelvin_unit;
+constexpr unit auto mol = mole_unit;
+constexpr unit auto cd = candela_unit;
+constexpr unit auto one = number_unit;
+constexpr unit auto rad = radian_unit;
+constexpr unit auto sr = steradian_unit;
+constexpr unit auto Hz = hertz_unit;
+constexpr unit auto N = newton_unit;
+constexpr unit auto Pa = pascal_unit;
+constexpr unit auto J = joule_unit;
+constexpr unit auto N_m = newton_meter_unit;
+constexpr unit auto W = watt_unit;
+constexpr unit auto C = coulumb_unit;
+constexpr unit auto m2 = square_meter_unit;
+} // namespace symbols
 } // namespace maxwell::si
 
 #endif
