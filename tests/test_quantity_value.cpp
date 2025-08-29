@@ -46,7 +46,7 @@ TEST(TestQuantityValue, TestDefaultConstructor) {
   EXPECT_EQ(m2.get_units(), si::meter_unit);
 
   using throwing_test_type =
-      quantity_value<si::meter_unit, isq::length_quantity, throwing_tattle>;
+      quantity_value<si::meter_unit, isq::length, throwing_tattle>;
 
   throwing_test_type m3;
 
@@ -56,9 +56,9 @@ TEST(TestQuantityValue, TestDefaultConstructor) {
 
 TEST(TestQuantityValue, TestValueConstructor) {
   using nothrow_test_type =
-      quantity_value<si::meter_unit, isq::length_quantity, nothrow_tattle>;
+      quantity_value<si::meter_unit, isq::length, nothrow_tattle>;
   using throwing_test_type =
-      quantity_value<si::meter_unit, isq::length_quantity, throwing_tattle>;
+      quantity_value<si::meter_unit, isq::length, throwing_tattle>;
 
   int start_copy_ctor_count = nothrow_tattle::copy_ctor_count;
   int start_move_ctor_count = nothrow_tattle::move_ctor_count;

@@ -41,7 +41,12 @@ struct is_quantity<T, std::void_t<quantity_base_t<T>>> : std::true_type {};
 template <typename T>
 concept quantity = _detail::is_quantity<std::remove_cvref_t<T>>::value;
 
-template <quantity LHS, quantity RHS> struct quantity_product {
+namespace _detail {
+struct quantity_product_tag {};
+
+struct quantity_quotient_tag {};
+
+template <quantity LHS, quantity RHS> struct quantity_product_impl {
   using type =
       quantity_type<LHS::kind + utility::template_string{"*"} + RHS::kind,
                     LHS::dimensions * RHS::dimensions,
@@ -49,17 +54,26 @@ template <quantity LHS, quantity RHS> struct quantity_product {
 };
 
 template <quantity LHS, quantity RHS>
-using quantity_product_t = quantity_product<LHS, RHS>::type;
+struct quantity_product : quantity_product_impl<LHS, RHS>::type,
+                          quantity_product_tag {};
 
-template <quantity LHS, quantity RHS> struct quantity_quotient {
+template <quantity LHS, quantity RHS> struct quantity_quotient_impl {
   using type =
-      quantity_type<LHS::kind + utility::template_string{"/"} + RHS::kind,
+      quantity_type<LHS::kind + utility::template_string{"*"} + RHS::kind,
                     LHS::dimensions / RHS::dimensions,
                     LHS::derived || RHS::derived>;
 };
 
 template <quantity LHS, quantity RHS>
-using quantity_quotient_t = quantity_quotient<LHS, RHS>::type;
+struct quantity_quotient : quantity_quotient_impl<LHS, RHS>::type,
+                           quantity_quotient_tag {};
+} // namespace _detail
+
+template <quantity LHS, quantity RHS>
+using quantity_product_t = _detail::quantity_product<LHS, RHS>;
+
+template <quantity LHS, quantity RHS>
+using quantity_quotient_t = _detail::quantity_quotient<LHS, RHS>;
 
 constexpr quantity auto operator*(quantity auto lhs,
                                   quantity auto rhs) noexcept {
@@ -112,10 +126,11 @@ template <typename T> struct has_derived_base<const T> : has_derived_base<T> {};
 template <quantity From, quantity To>
 consteval bool quantity_convertible_to_impl(From, To) noexcept {
   // If dimensions size > 1 we know it's a product or a quotient
-  const std::unsigned_integral auto from_dim_size =
-      std::tuple_size_v<decltype(From::dimensions.as_tuple())>;
-
-  if (from_dim_size > 1 && !has_derived_base<From>::value) {
+  if (std::derived_from<From, _detail::quantity_product_tag> &&
+      !has_derived_base<From>::value) {
+    return From::dimensions == To::dimensions;
+  } else if (std::derived_from<From, _detail::quantity_quotient_tag> &&
+             !has_derived_base<From>::value) {
     return From::dimensions == To::dimensions;
   } else if (!From::derived && !To::derived) {
     return From::dimensions == To::dimensions;

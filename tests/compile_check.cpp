@@ -4,7 +4,7 @@
 #include <iostream>
 
 constexpr struct wavelength_quantity_type
-    : maxwell::make_derived_quantity_t<"W", maxwell::isq::length_quantity> {
+    : maxwell::make_derived_quantity_t<"W", maxwell::isq::length> {
 } wavelength_quantity;
 
 template <auto U>
@@ -32,8 +32,10 @@ int main() {
   // wavelength w2 = 1_nm;
   using namespace maxwell::si::symbols;
   // constexpr maxwell::si::meter_per_second<> c = 300'000'00 * m / s;
-  // wavelength<maxwell::si::meter_unit> w2 =
-  //     maxwell::si::square_meter<>{} / maxwell::si::meter<>{};
+  wavelength<maxwell::si::meter_unit> w2 =
+      maxwell::si::square_meter<>{} / maxwell::si::meter<>{};
+
+  // wavelength<maxwell::si::meter_unit> w3 = maxwell::si::meter<>{};
   constexpr maxwell::si::meter<> q = 100.0 * m;
 
   return 0;
