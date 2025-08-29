@@ -18,4 +18,6 @@
 
 #include "formatting.hpp"
 
+#include "quantity_limits.hpp"
+
 #endif

@@ -145,6 +145,7 @@ constexpr unit auto N_m = newton_meter_unit;
 constexpr unit auto W = watt_unit;
 constexpr unit auto C = coulumb_unit;
 constexpr unit auto m2 = square_meter_unit;
+constexpr unit auto m_s = meter_per_second_unit;
 } // namespace symbols
 } // namespace maxwell::si
 

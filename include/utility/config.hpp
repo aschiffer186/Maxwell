@@ -3,6 +3,10 @@
 
 #include <version> // version macros
 
+#if __cplusplus >= 202300L
+#define MAXWELL_HAS_CXX23
+#endif
+
 #if defined(__cpp_lib_print) && __cpp_lib_print >= 202207L
 #define MAXWELL_HAS_PRINT
 #endif

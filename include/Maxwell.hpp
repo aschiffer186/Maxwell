@@ -18,5 +18,7 @@
 
 #include "isq.hpp"
 #include "si.hpp"
+#include "si_constants.hpp"
 
+#include "quantity_limits.hpp"
 #endif

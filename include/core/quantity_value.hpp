@@ -4,15 +4,15 @@
 #ifndef QUANTITY_VALUE_HPP
 #define QUANTITY_VALUE_HPP
 
-#include <chrono>   // duration
-#include <compare>  // spaceship operator
-#include <concepts> // constructible_from, convertible_to, swappable
-#include <format>
+#include <chrono>           // duration
+#include <compare>          // spaceship operator
+#include <concepts>         // constructible_from, convertible_to, swappable
+#include <format>           // formatter
 #include <functional>       // hash
 #include <initializer_list> // initializer_list
-#include <iterator>
-#include <ostream>
-#include <string_view>
+#include <iterator>         // back_inserter
+#include <ostream>          // ostream
+#include <string_view>      // string_view
 #include <type_traits> // false_type, is_assignable_v, remove_cvref_t, true_type
 #include <utility>     // forward, in_place_t, move
 
