@@ -223,8 +223,12 @@ constexpr dimension_product auto operator*(LHS /*lhs*/, RHS /*rhs*/) noexcept {
   } else if constexpr (RHS::name < LHS::name) {
     return dimension_product_type<RHS, LHS>{};
   } else {
-    return dimension_product_type<
-        dimension_type<LHS::name, LHS::power + RHS::power>>{};
+    if constexpr (LHS::power + RHS::power == utility::zero) {
+      return dimension_product_type<>{};
+    } else {
+      return dimension_product_type<
+          dimension_type<LHS::name, LHS::power + RHS::power>>{};
+    }
   }
 }
 
@@ -312,19 +316,47 @@ operator*(dimension_product_type<LHS, LHSRest...>,
               dimension_product_type<RHSRest...>{});
     }
   } else {
-    using first = dimension_type<LHS::name, LHS::power + RHS::power>;
-    if constexpr (sizeof...(LHSRest) == 0) {
-      return dimension_product_type<first>{} *
-             dimension_product_type<RHSRest...>{};
-    } else if constexpr (sizeof...(RHSRest) == 0) {
-      return dimension_product_type<first>{} *
-             dimension_product_type<LHSRest...>{};
+    if constexpr (LHS::power + RHS::power != utility::zero) {
+      using first = dimension_type<LHS::name, LHS::power + RHS::power>;
+      if constexpr (sizeof...(LHSRest) == 0) {
+        return dimension_product_type<first>{} *
+               dimension_product_type<RHSRest...>{};
+      } else if constexpr (sizeof...(RHSRest) == 0) {
+        return dimension_product_type<first>{} *
+               dimension_product_type<LHSRest...>{};
+      } else {
+        return dimension_product_type<first>{} *
+               (dimension_product_type<LHSRest...>{} *
+                dimension_product_type<RHSRest...>{});
+      }
     } else {
-      return dimension_product_type<first>{} *
-             (dimension_product_type<LHSRest...>{} *
-              dimension_product_type<RHSRest...>{});
+      if constexpr (sizeof...(LHSRest) == 0) {
+        return dimension_product_type<RHSRest...>{};
+      } else if constexpr (sizeof...(RHSRest) == 0) {
+        return dimension_product_type<LHSRest...>{};
+      } else {
+        return dimension_product_type<LHSRest...>{} *
+               dimension_product_type<RHSRest...>{};
+      }
     }
   }
+}
+
+constexpr dimension_product auto operator*(dimension_product_type<>,
+                                           dimension_product_type<>) {
+  return dimension_product_type<>{};
+}
+
+template <dimension D, dimension... Ds>
+constexpr dimension_product auto operator*(dimension_product_type<D, Ds...>,
+                                           dimension_product_type<>) {
+  return dimension_product_type<D, Ds...>{};
+}
+
+template <dimension D, dimension... Ds>
+constexpr dimension_product auto operator*(dimension_product_type<>,
+                                           dimension_product_type<D, Ds...>) {
+  return dimension_product_type<D, Ds...>{};
 }
 
 /// \brief Divides two dimensions.
@@ -347,8 +379,12 @@ constexpr dimension_product auto operator/(LHS /*lhs*/, RHS /*rhs*/) noexcept {
   } else if constexpr (RHS::name < LHS::name) {
     return dimension_product_type<dimension_inverse_t<RHS>, LHS>{};
   } else {
-    return dimension_product_type<
-        dimension_type<LHS::name, LHS::power - RHS::power>>{};
+    if constexpr (LHS::power - RHS::power == utility::zero) {
+      return dimension_product_type<>{};
+    } else {
+      return dimension_product_type<
+          dimension_type<LHS::name, LHS::power - RHS::power>>{};
+    }
   }
 }
 
@@ -438,19 +474,49 @@ operator/(dimension_product_type<LHS, LHSRest...>,
               dimension_product_type<dimension_inverse_t<RHSRest>...>{});
     }
   } else {
-    using first = dimension_type<LHS::name, LHS::power - RHS::power>;
-    if constexpr (sizeof...(LHSRest) == 0) {
-      return dimension_product_type<first>{} *
-             dimension_product_type<dimension_inverse_t<RHSRest>...>{};
-    } else if constexpr (sizeof...(RHSRest) == 0) {
-      return dimension_product_type<first>{} *
-             dimension_product_type<LHSRest...>{};
+    if constexpr (LHS::power - RHS::power != utility::zero) {
+      using first = dimension_type<LHS::name, LHS::power - RHS::power>;
+      if constexpr (sizeof...(LHSRest) == 0) {
+        return dimension_product_type<first>{} *
+               dimension_product_type<dimension_inverse_t<RHSRest>...>{};
+      } else if constexpr (sizeof...(RHSRest) == 0) {
+        return dimension_product_type<first>{} *
+               dimension_product_type<LHSRest...>{};
+      } else {
+        return dimension_product_type<first>{} *
+               (dimension_product_type<LHSRest...>{} *
+                dimension_product_type<dimension_inverse_t<RHSRest>...>{});
+      }
     } else {
-      return dimension_product_type<first>{} *
-             (dimension_product_type<LHSRest...>{} *
-              dimension_product_type<dimension_inverse_t<RHSRest>...>{});
+      if constexpr (sizeof...(LHSRest) == 0) {
+        return dimension_product_type<dimension_inverse_t<RHSRest>...>{};
+      } else if constexpr (sizeof...(RHSRest) == 0) {
+        return dimension_product_type<LHSRest...>{};
+      } else {
+        return dimension_product_type<LHSRest...>{} *
+               dimension_product_type<dimension_inverse_t<RHSRest>...>{};
+      }
     }
   }
+}
+
+constexpr dimension_product auto operator/(dimension_product_type<>,
+                                           dimension_product_type<>) {
+  return dimension_product_type<>{};
+}
+
+template <dimension D, dimension... Ds>
+constexpr dimension_product auto operator/(dimension_product_type<D, Ds...>,
+                                           dimension_product_type<>) {
+  return dimension_product_type<dimension_inverse_t<D>,
+                                dimension_inverse_t<Ds>...>{};
+}
+
+template <dimension D, dimension... Ds>
+constexpr dimension_product auto operator/(dimension_product_type<>,
+                                           dimension_product_type<D, Ds...>) {
+  return dimension_product_type<dimension_inverse_t<D>,
+                                dimension_inverse_t<Ds>...>{};
 }
 } // namespace maxwell
 

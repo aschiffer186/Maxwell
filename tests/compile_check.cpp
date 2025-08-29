@@ -32,6 +32,8 @@ int main() {
   // wavelength w2 = 1_nm;
   using namespace maxwell::si::symbols;
   // constexpr maxwell::si::meter_per_second<> c = 300'000'00 * m / s;
+  // wavelength<maxwell::si::meter_unit> w2 =
+  //     maxwell::si::square_meter<>{} / maxwell::si::meter<>{};
   constexpr maxwell::si::meter<> q = 100.0 * m;
 
   return 0;

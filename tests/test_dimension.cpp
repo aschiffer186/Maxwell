@@ -64,11 +64,7 @@ TEST(TestDimensions, TestDimensionMultiplication) {
   EXPECT_EQ(std::get<0>(prod2_tuple),
             (dimension_type<"A", utility::rational_type<2, 1, 0>{}>{}));
 
-  EXPECT_EQ(std::tuple_size_v<decltype(prod3_tuple)>, 1);
-  EXPECT_EQ(
-      std::get<0>(prod3_tuple),
-      (dimension_type<"A", utility::rational_type<0, 1, 0>{}>{})); // Null
-                                                                   // dimension
+  EXPECT_EQ(std::tuple_size_v<decltype(prod3_tuple)>, 0);
 }
 
 TEST(TestDimension, TestDimensionDivision) {
@@ -91,9 +87,7 @@ TEST(TestDimension, TestDimensionDivision) {
   EXPECT_EQ(std::get<1>(quot1_tuple),
             (dimension_type<"B", utility::rational_type<-2, 1, 0>{}>{}));
 
-  EXPECT_EQ(std::tuple_size_v<decltype(quot2_tuple)>, 1);
-  EXPECT_EQ(std::get<0>(quot3_tuple),
-            (dimension_type<"A", utility::rational_type<0, 1, 0>{}>{}));
+  EXPECT_EQ(std::tuple_size_v<decltype(quot2_tuple)>, 0);
 
   EXPECT_EQ(std::tuple_size_v<decltype(quot3_tuple)>, 1);
   EXPECT_EQ(std::get<0>(quot3_tuple),

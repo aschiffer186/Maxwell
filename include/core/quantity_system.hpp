@@ -24,9 +24,8 @@ template <utility::template_string... Dimensions> struct quantity_system {
   using base_quantity =
       quantity_type<Kind, base_dimension_product<Kind>{}, false>;
 
-  using dimensionless_quantity = quantity_type<
-      "[]", dimension_product_type<dimension_type<"Null", utility::zero>>{},
-      false>;
+  using dimensionless_quantity =
+      quantity_type<"[]", dimension_product_type<>{}, false>;
 
   template <utility::template_string Name, auto Definition>
   struct make_derived {

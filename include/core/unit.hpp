@@ -68,7 +68,7 @@ template <unit LHS, unit RHS> struct unit_product_impl {
 
 template <unit LHS, unit RHS> struct unit_quotient_impl {
   using type = unit_type<LHS::name + utility::template_string{"*"} + RHS::name,
-                         LHS::quantity * RHS::quantity,
+                         LHS::quantity / RHS::quantity,
                          LHS::multiplier / RHS::multiplier>;
 };
 } // namespace _detail
