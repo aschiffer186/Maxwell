@@ -94,7 +94,7 @@ si::meter<> q1{100}; // Same as quantity_value<si::meter_unit, isq::length_quant
 si::mole<long double> q2{25}; // Same as quantity_value<si::meter_unit, isq::amount_quantity, long double> q2{25}
 ```
 
-> [!Note]
+> [!IMPORTANT]
 > The angle brackets (<>) are always necessary even when the default type is used. This is due to how C++ type alias and variable templates are defined.
  
 For larger types, the underlying value of the quantity can be constructed in place, similar to `std::optional` or `std::variant`. 
