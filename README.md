@@ -111,5 +111,9 @@ si::newton_meter<> q1 = 100 * N * m; // q1 represents 100 N-m.
 The definition of the `quantity` prevents mixing incompatible quantities with the same dimenions, but allows for initializing them with exprerssions consisting of the base units. 
 ```c++
 si::newton_meter<> q1 = 100 * N * m; // OK - q1 represents 100 N-m
-si::joule<> q2 
+si::joule<> q2 = q1; // Error - will not compile
+auto q3 = 100.0 * kg * s / (A * C); // q3 represents 100.0 kg * s * A^-1 * C%-1
 ```
+
+> [!WARNING]
+> When using symbols, if an integer literal is used with the `auto` keyword, the underlying quantity will have an integral type.
