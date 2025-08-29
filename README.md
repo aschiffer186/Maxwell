@@ -45,6 +45,7 @@ A quantity value is the product of a numerical value and a unit. Quantity values
 In Maxwell, quantity values are represented by the `quantity_value` class template. This is the most commonly used type in Maxwell.
 
 # `quantity_value` class 
+## Overview
 The `quantity_value` class is the central type used in Maxwell. 
 ```c++
 template<auto Unit, auto Quantity = Unit.quantity, typename UnderlyingType = double>
@@ -64,6 +65,6 @@ int main()
 In most cases, it is not necessary to specify the `Quantity` or `UnderlyingType` template parameters. The `Quantity` template parameter only needs to be specified if a custom derived quantity needs to be used. The `UnderlyingType` parameter needs to be specified whenever the underlying type is not `double`.
 
 > [!WARNING]
-> If 
+> If an integral type is specified for the underlying type, integer division will be performed when dividing quantity values and truncation will be performed when converting from another quantity value.
 
 An instance of `quantity_value` can only be assigned to `quantity_values` of the same kind or a more general kind. If this is violated, a compile-time error is issued. Therefore, if a program using Maxwell is well formed, it is guaranteed the units of the expressions in the program are correct. 
