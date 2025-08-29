@@ -15,8 +15,8 @@ int main() {
 
   // maxwell::si::meter<> area = q1 * q1;
 
-  maxwell::si::newton_meter<> nm =
-      maxwell::si::newton<>{} * maxwell::si::meter<>{};
+  // maxwell::si::newton_meter<> nm =
+  //     maxwell::si::newton<>{} * maxwell::si::meter<>{};
 
   // maxwell::si::newton_meter<> nm2 = maxwell::si::joule<>{};
 

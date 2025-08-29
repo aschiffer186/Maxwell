@@ -173,6 +173,22 @@ operator==(dimension_product_type<LHS, LHSRest...> /*lhs*/,
   }
 }
 
+constexpr auto operator==(dimension_product_type<>, dimension_product_type<>) {
+  return true;
+}
+
+template <dimension D, dimension... Ds>
+constexpr auto operator==(dimension_product_type<D, Ds...>,
+                          dimension_product_type<>) {
+  return false;
+}
+
+template <dimension D, dimension... Ds>
+constexpr auto operator==(dimension_product_type<>,
+                          dimension_product_type<D, Ds...>) {
+  return false;
+}
+
 /// \brief Concept modeling a dimension products that can be converted to each
 /// other.
 ///

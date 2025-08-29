@@ -75,7 +75,7 @@ constexpr quantity auto operator/(quantity auto lhs,
 namespace _detail {
 template <utility::template_string Kind, auto Base, bool IsDerived = true>
   requires quantity<decltype(Base)>
-struct derived_quantity_impl : decltype(Base) {
+struct derived_quantity_impl : std::remove_cvref_t<decltype(Base)> {
   constexpr static dimension_product auto dimensions = Base.dimensions;
   constexpr static auto kind = Kind;
   constexpr static bool derived = IsDerived;
@@ -94,18 +94,6 @@ using make_derived_quantity_t =
 
 /// \cond
 namespace _detail {
-template <quantity LHS, quantity RHS>
-auto product_base(quantity_product_t<LHS, RHS>) -> quantity_product_t<LHS, RHS>;
-
-template <typename T>
-using product_base_t = decltype(product_base(std::declval<T>()));
-
-template <typename, typename = void>
-struct has_product_base : std::false_type {};
-
-template <typename T>
-struct has_product_base<T, std::void_t<T>> : std::true_type {};
-
 template <utility::template_string Derived, auto Base, bool IsDerived>
 auto derived_base(_detail::derived_quantity_impl<Derived, Base, IsDerived>)
     -> _detail::derived_quantity_impl<Derived, Base, IsDerived>;
@@ -119,9 +107,15 @@ struct has_derived_base : std::false_type {};
 template <typename T>
 struct has_derived_base<T, std::void_t<derived_base_t<T>>> : std::true_type {};
 
+template <typename T> struct has_derived_base<const T> : has_derived_base<T> {};
+
 template <quantity From, quantity To>
 consteval bool quantity_convertible_to_impl(From, To) noexcept {
-  if (has_product_base<From>::value && !has_derived_base<From>::value) {
+  // If dimensions size > 1 we know it's a product or a quotient
+  const std::unsigned_integral auto from_dim_size =
+      std::tuple_size_v<decltype(From::dimensions.as_tuple())>;
+
+  if (from_dim_size > 1 && !has_derived_base<From>::value) {
     return From::dimensions == To::dimensions;
   } else if (!From::derived && !To::derived) {
     return From::dimensions == To::dimensions;

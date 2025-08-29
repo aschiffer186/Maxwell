@@ -80,6 +80,31 @@ constexpr struct charge_quantity_type
                               false> {
 } charge_quantity;
 
+constexpr struct potential_quantity_type
+    : make_derived_quantity_t<"Potential", power_quantity / current_quantity,
+                              false> {
+} potential_quantity;
+
+constexpr struct capacitance_quantity_type
+    : make_derived_quantity_t<"Capacitance",
+                              charge_quantity / potential_quantity, false> {
+} capacitance_quantity;
+
+constexpr struct resistance_quantity_type
+    : make_derived_quantity_t<"Resistance",
+                              potential_quantity / current_quantity, false> {
+} resistance_quantity;
+
+constexpr struct conductance_quantity_type
+    : make_derived_quantity_t<"Conductance",
+                              current_quantity / potential_quantity, false> {
+} conductance_quantity;
+
+constexpr struct magnetic_flux_quantity
+    : make_derived_quantity_t<"Magnetic Flux",
+                              potential_quantity * time_quantity, false> {
+} magnetic_flux_quantity;
+
 // --- Other Derived Quantities ---
 constexpr struct area_quantity_type
     : make_derived_quantity_t<"Area", length_quantity * length_quantity,
