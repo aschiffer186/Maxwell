@@ -133,6 +133,9 @@ consteval bool quantity_convertible_to_impl(From, To) noexcept {
 template <auto From, auto To>
 concept quantity_convertible_to =
     _detail::quantity_convertible_to_impl(From, To);
+
+template <typename T, auto Q>
+concept quantity_of = quantity_convertible_to<T::quantity_kind, Q>;
 } // namespace maxwell
 
 #endif

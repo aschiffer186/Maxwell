@@ -9,120 +9,108 @@
 #include "unit.hpp"
 
 namespace maxwell::si {
-constexpr struct meter_unit_type : make_base_unit_t<isq::length_quantity, "m"> {
+constexpr struct meter_unit_type : make_base_unit_t<isq::length, "m"> {
 } meter_unit;
 
-constexpr struct kilogram_unit_type
-    : make_base_unit_t<isq::mass_quantity, "kg"> {
+constexpr struct kilogram_unit_type : make_base_unit_t<isq::mass, "kg"> {
 } kilogram_unit;
 
-constexpr struct second_unit_type : make_base_unit_t<isq::time_quantity, "s"> {
+constexpr struct second_unit_type : make_base_unit_t<isq::time, "s"> {
 } second_unit;
 
-constexpr struct ampere_unit_type
-    : make_base_unit_t<isq::current_quantity, "A"> {
+constexpr struct ampere_unit_type : make_base_unit_t<isq::current, "A"> {
 } ampere_unit;
 
-constexpr struct kelvin_unit_type
-    : make_base_unit_t<isq::temperature_quantity, "K"> {
+constexpr struct kelvin_unit_type : make_base_unit_t<isq::temperature, "K"> {
 } kelvin_unit;
 
-constexpr struct mole_unit_type
-    : make_base_unit_t<isq::amount_quantity, "mol"> {
+constexpr struct mole_unit_type : make_base_unit_t<isq::amount, "mol"> {
 } mole_unit;
 
-constexpr struct candela_unit_type
-    : make_base_unit_t<isq::luminosity_quantity, "cd"> {
+constexpr struct candela_unit_type : make_base_unit_t<isq::luminosity, "cd"> {
 } candela_unit;
 
-constexpr struct number_unit_type
-    : make_base_unit_t<isq::dimensionless_quantity, "[]"> {
+constexpr struct number_unit_type : make_base_unit_t<isq::dimensionless, "[]"> {
 } number_unit;
 
 // --- SI derived unit types ---
 constexpr struct radian_unit_type
-    : make_derived_unit_t<isq::plane_angle_quantity, "rad"> {
+    : make_derived_unit_t<isq::plane_angle, "rad"> {
 } radian_unit;
 
 constexpr struct steradian_unit_type
-    : make_derived_unit_t<isq::solid_angle_quantity, "sr"> {
+    : make_derived_unit_t<isq::solid_angle, "sr"> {
 } steradian_unit;
 
-constexpr struct hertz_unit_type
-    : make_derived_unit_t<isq::frequency_quantity, "Hz"> {
+constexpr struct hertz_unit_type : make_derived_unit_t<isq::frequency, "Hz"> {
 } hertz_unit;
 
-constexpr struct newton_unit_type
-    : make_derived_unit_t<isq::force_quantity, "N"> {
+constexpr struct newton_unit_type : make_derived_unit_t<isq::force, "N"> {
 } newton_unit;
 
-constexpr struct pascal_unit_type
-    : make_derived_unit_t<isq::pressure_quantity, "Pa"> {
+constexpr struct pascal_unit_type : make_derived_unit_t<isq::pressure, "Pa"> {
 } pascal_unit;
 
-constexpr struct joule_unit_type
-    : make_derived_unit_t<isq::work_quantity, "J"> {
+constexpr struct joule_unit_type : make_derived_unit_t<isq::work, "J"> {
 } joule_unit;
 
 constexpr struct newton_meter_unit_type
-    : make_derived_unit_t<isq::torque_quantity, "N·m"> {
+    : make_derived_unit_t<isq::torque, "N·m"> {
 } newton_meter_unit;
 
-constexpr struct watt_unit_type
-    : make_derived_unit_t<isq::power_quantity, "W"> {
+constexpr struct watt_unit_type : make_derived_unit_t<isq::power, "W"> {
 } watt_unit;
 
-constexpr struct coulumb_unit_type
-    : make_derived_unit_t<isq::charge_quantity, "C"> {
+constexpr struct coulumb_unit_type : make_derived_unit_t<isq::charge, "C"> {
 } coulumb_unit;
 
 constexpr struct square_meter_unit_type
-    : make_derived_unit_t<isq::area_quantity, "m^2"> {
+    : make_derived_unit_t<isq::area, "m^2"> {
 } square_meter_unit;
 
 constexpr struct meter_per_second_unit_type
-    : make_derived_unit_t<isq::velocity_quantity, "m/s"> {
+    : make_derived_unit_t<isq::velocity, "m/s"> {
 } meter_per_second_unit;
 
 template <typename T = double>
-using meter = quantity_value<meter_unit, isq::length_quantity, T>;
+using meter = quantity_value<meter_unit, isq::length, T>;
 
 template <typename T = double>
-using ampere = quantity_value<ampere_unit, isq::current_quantity, T>;
+using ampere = quantity_value<ampere_unit, isq::current, T>;
 
 template <typename T = double>
-using second = quantity_value<second_unit, isq::time_quantity, T>;
+using second = quantity_value<second_unit, isq::time, T>;
 
 template <typename T = double>
-using kelvin = quantity_value<kelvin_unit, isq::temperature_quantity, T>;
+using kelvin = quantity_value<kelvin_unit, isq::temperature, T>;
 
 template <typename T = double>
-using mole = quantity_value<mole_unit, isq::amount_quantity, T>;
+using mole = quantity_value<mole_unit, isq::amount, T>;
 
 template <typename T = double>
-using candela = quantity_value<candela_unit, isq::luminosity_quantity, T>;
+using candela = quantity_value<candela_unit, isq::luminosity, T>;
 
 template <typename T = double>
-using number = quantity_value<number_unit, isq::dimensionless_quantity, T>;
+using number = quantity_value<number_unit, isq::dimensionless, T>;
 
 template <typename T = double>
-using newton = quantity_value<newton_unit, isq::force_quantity, T>;
+using newton = quantity_value<newton_unit, isq::force, T>;
 
 template <typename T = double>
-using pascal = quantity_value<pascal_unit, isq::pressure_quantity, T>;
+using pascal = quantity_value<pascal_unit, isq::pressure, T>;
 
 template <typename T = double>
-using joule = quantity_value<joule_unit, isq::work_quantity, T>;
+using joule = quantity_value<joule_unit, isq::work, T>;
 
 template <typename T = double>
-using square_meter = quantity_value<square_meter_unit, isq::area_quantity, T>;
+using square_meter = quantity_value<square_meter_unit, isq::area, T>;
 
 template <typename T = double>
-using newton_meter = quantity_value<newton_meter_unit, isq::torque_quantity, T>;
+using newton_meter = quantity_value<newton_meter_unit, isq::torque, T>;
 
 template <typename T = double>
 using meter_per_second =
-    quantity_value<meter_per_second_unit, isq::velocity_quantity, T>;
+    quantity_value<meter_per_second_unit, isq::velocity, T>;
 
 /// \namespace maxwell::si::symbols
 /// \brief Convenience symbols for creating units

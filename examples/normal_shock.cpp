@@ -2,11 +2,12 @@
 
 using Mach = maxwell::quantity_value<
     maxwell::si::number_unit,
-    maxwell::make_derived_quantity_t<"Mach",
-                                     maxwell::isq::dimensionless_quantity>{}>;
+    maxwell::make_derived_quantity_t<"Mach", maxwell::isq::dimensionless>{}>;
 
-auto normal_shock(Mach M, maxwell::isq::temperature auto T0,
-                  maxwell::isq::pressure auto p0)
+using namespace maxwell;
+
+auto normal_shock(Mach M, quantity_of<isq::temperature> auto T0,
+                  quantity_of<isq::pressure> auto p0)
     -> std::tuple<Mach, maxwell::si::kelvin<>, maxwell::si::pascal<>> {
   constexpr maxwell::si::number<> gamma{1.4};
 
