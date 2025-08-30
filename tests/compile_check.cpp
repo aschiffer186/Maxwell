@@ -1,5 +1,3 @@
-#include "quantity_value.hpp"
-#include "si.hpp"
 #include <Maxwell.hpp>
 #include <iostream>
 

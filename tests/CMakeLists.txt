@@ -6,17 +6,17 @@ include(CTest)
 
 add_executable(test_template_string test_template_string.cpp)
 add_test(NAME TestTemplateString COMMAND test_template_string)
-target_link_libraries(test_template_string PRIVATE Maxwell-Utility GTest::gtest_main)
+target_link_libraries(test_template_string PRIVATE Maxwell GTest::gtest_main)
 gtest_discover_tests(test_template_string)
 
 add_executable(test_compile_time_math test_compile_time_math.cpp)
 add_test(NAME TestCompileTimeMath COMMAND test_compile_time_math)
-target_link_libraries(test_compile_time_math PRIVATE Maxwell-Utility GTest::gtest_main)
+target_link_libraries(test_compile_time_math PRIVATE Maxwell GTest::gtest_main)
 gtest_discover_tests(test_compile_time_math)
 
 add_executable(test_dimension test_dimension.cpp)
 add_test(NAME TestDimension COMMAND test_dimension)
-target_link_libraries(test_dimension PRIVATE Maxwell-Base GTest::gtest_main)
+target_link_libraries(test_dimension PRIVATE Maxwell GTest::gtest_main)
 gtest_discover_tests(test_dimension)
 
 add_executable(test_quantity_value test_quantity_value.cpp) 

@@ -8,9 +8,9 @@
 #include <type_traits> // false_type, remove_cvref_t, true_type
 #include <utility>     // declval
 
-#include "compile_time_math.hpp"
 #include "dimension.hpp"
 #include "quantity.hpp"
+#include "utility/compile_time_math.hpp"
 
 namespace maxwell {
 template <utility::template_string Name, quantity auto Quantity,

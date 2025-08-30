@@ -1,4 +1,4 @@
-#include "dimension.hpp"
+#include "Maxwell.hpp"
 
 #include <gtest/gtest.h>
 #include <tuple>

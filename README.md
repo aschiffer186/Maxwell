@@ -2,15 +2,32 @@
 Maxwell is a strongly typed units library for C++20 and later standards based on the ISQ 80000 units specification. It provides compile-time checking of and conversion between units. 
 
 # Installation 
-TBD
+The easiest way to install Maxwell is by cloning the repo and using the CMake install command. 
+Once you have cloned the repo, run the following commands inside the folder where you cloned the repo
+```
+mkdir build
+cd build
+cmake .. 
+cmake --build . --config Release --target install
+```
 
+Maxwell can then be found using `find_package`: 
+```
+find_package(Maxwell CONFIG REQUIRED)
+```
+
+The following variables are provided: 
+* `Maxwell_DIR`: The location where the Maxwell CMake was installed.
+* `Maxwell_INCLUDE_DIR`: The location where the Maxwell header files were installed.
+
+To use Maxwell in your CMake project, simply add `Maxwell_INCUDE_DIR` to your project's include directories and link against the `Maxwell::Maxwell` target provided.
 
 # Getting Started 
 The simplest way to get started with Maxwell is the include the `Maxwell.hpp` header in your source code. This header provides access to all types in Maxwell. For convenience, you may wish to add a using declaration for Maxwell as well. 
 
 Example: 
 ```c++
-#include <Maxwell.hpp>
+#include <Maxwell/Maxwell.hpp>
 
 using namespace maxwell; 
 

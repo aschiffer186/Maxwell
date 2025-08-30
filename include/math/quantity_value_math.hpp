@@ -1,12 +1,10 @@
-#ifndef QUANTITY_VALUE_MATH_HPP 
+#ifndef QUANTITY_VALUE_MATH_HPP
 #define QUANTITY_VALUE_MATH_HPP
 
 #include <cmath>
 
-#include "isq.hpp"
+#include "quantity_systems/isq.hpp"
 
-namespace maxwell::math {
-    
-}
+namespace maxwell::math {}
 
-#endif 
+#endif

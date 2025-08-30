@@ -1,8 +1,6 @@
-#include "quantity.hpp"
+#include "Maxwell.hpp"
 
 #include <gtest/gtest.h>
-
-#include "quantity_system.hpp"
 
 using namespace maxwell;
 

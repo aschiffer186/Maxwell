@@ -8,9 +8,9 @@
 #include <tuple>       // tuple
 #include <type_traits> // false_type, true_type, remove_cvref_t
 
-#include "compile_time_math.hpp"
-#include "template_string.hpp"
-#include "type_traits.hpp"
+#include "utility/compile_time_math.hpp"
+#include "utility/template_string.hpp"
+#include "utility/type_traits.hpp"
 
 /// \namespace maxwell
 /// \brief Definition of public API of Maxwell.

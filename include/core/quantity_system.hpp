@@ -6,8 +6,8 @@
 
 #include "dimension.hpp"
 #include "quantity.hpp"
-#include "template_string.hpp"
 #include "unit.hpp"
+#include "utility/template_string.hpp"
 
 namespace maxwell {
 template <utility::template_string... Dimensions> struct quantity_system {

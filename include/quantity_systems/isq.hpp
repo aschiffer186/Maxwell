@@ -6,9 +6,9 @@
 
 #include <type_traits> // true_type
 
-#include "quantity.hpp"
-#include "quantity_system.hpp"
-#include "type_traits.hpp"
+#include "core/quantity.hpp"
+#include "core/quantity_system.hpp"
+#include "utility/type_traits.hpp"
 
 namespace maxwell::isq {
 using isq_system = quantity_system<"L", "M", "T", "I", "Θ", "N", "J">;

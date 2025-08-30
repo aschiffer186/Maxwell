@@ -10,8 +10,8 @@
 #include <string>      // string
 #include <string_view> // string_view
 
-#include "dimension.hpp"
-#include "unit.hpp"
+#include "core/dimension.hpp"
+#include "core/unit.hpp"
 
 template <maxwell::dimension D>
 struct std::formatter<D> : std::formatter<std::string_view> {

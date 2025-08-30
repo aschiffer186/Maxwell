@@ -16,10 +16,10 @@
 #include <type_traits> // false_type, is_assignable_v, remove_cvref_t, true_type
 #include <utility>     // forward, in_place_t, move
 
-#include "config.hpp"
 #include "quantity.hpp"
-#include "type_traits.hpp"
 #include "unit.hpp"
+#include "utility/config.hpp"
+#include "utility/type_traits.hpp"
 
 namespace maxwell {
 /// \brief Class template representing the value of a quantity with a particular

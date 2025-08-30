@@ -3,8 +3,8 @@
 
 #include <limits>
 
-#include "config.hpp"
-#include "quantity_value.hpp"
+#include "core/quantity_value.hpp"
+#include "utility/config.hpp"
 
 template <auto U, auto Q, typename T>
 struct std::numeric_limits<maxwell::quantity_value<U, Q, T>> {

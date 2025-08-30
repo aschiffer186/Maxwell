@@ -4,9 +4,9 @@
 #ifndef SI_HPP
 #define SI_HPP
 
+#include "core/quantity_value.hpp"
+#include "core/unit.hpp"
 #include "isq.hpp"
-#include "quantity_value.hpp"
-#include "unit.hpp"
 
 namespace maxwell::si {
 constexpr struct meter_unit_type : make_base_unit_t<isq::length, "m"> {

@@ -1,13 +1,24 @@
-add_subdirectory(core)
-add_subdirectory(formatting)
-add_subdirectory(quantity_systems)
-add_subdirectory(utility)
-add_subdirectory(math)
-
-add_library(Maxwell INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/Maxwell.hpp) 
-target_link_libraries(Maxwell INTERFACE Maxwell-Utility Maxwell-Base Maxwell-Formatting Maxwell-Systems Maxwell-Math)
-target_include_directories(Maxwell INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
-
-add_library(Maxwell_Core INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/Maxwell_Core.hpp)
-target_link_libraries(Maxwell_Core INTERFACE Maxwell-Utility Maxwell-Base Maxwell-Formatting Maxwell-Math)
-target_include_directories(Maxwell INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
+add_library(${PROJECT_NAME} INTERFACE
+    ${CMAKE_CURRENT_SOURCE_DIR}/core/dimension.hpp 
+    ${CMAKE_CURRENT_SOURCE_DIR}/core/quantity_holder.hpp 
+    ${CMAKE_CURRENT_SOURCE_DIR}/core/quantity_value.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/core/quantity.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/core/quantity_system.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/core/unit.hpp 
+    ${CMAKE_CURRENT_SOURCE_DIR}/formatting/formatting.hpp 
+    ${CMAKE_CURRENT_SOURCE_DIR}/math/quantity_limits.hpp 
+    ${CMAKE_CURRENT_SOURCE_DIR}/quantity_systems/isq.hpp 
+    ${CMAKE_CURRENT_SOURCE_DIR}/quantity_systems/si.hpp 
+    ${CMAKE_CURRENT_SOURCE_DIR}/quantity_systems/si_constants.hpp 
+    ${CMAKE_CURRENT_SOURCE_DIR}/utility/compile_time_math.hpp 
+    ${CMAKE_CURRENT_SOURCE_DIR}/utility/config.hpp 
+    ${CMAKE_CURRENT_SOURCE_DIR}/utility/template_string.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/utility/type_traits.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Maxwell.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Maxwell_Core.hpp
+    )
+target_include_directories(Maxwell
+INTERFACE
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+  $<INSTALL_INTERFACE:${CMAKE_INSTALL_DIR}>
+)

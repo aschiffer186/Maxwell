@@ -9,7 +9,7 @@
 #include <utility>     // declval
 
 #include "dimension.hpp"
-#include "template_string.hpp"
+#include "utility/template_string.hpp"
 
 namespace maxwell {
 template <utility::template_string Kind, auto Dim, bool Derived>

@@ -1,10 +1,9 @@
-#include "isq.hpp"
-#include "quantity_value.hpp"
-#include "si.hpp"
-#include "test_types.hpp"
+#include "Maxwell.hpp"
 
 #include <gtest/gtest.h>
 #include <type_traits>
+
+#include "test_types.hpp"
 
 using namespace maxwell;
 

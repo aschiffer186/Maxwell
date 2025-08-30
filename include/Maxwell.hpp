@@ -4,21 +4,21 @@
 #ifndef MAXWELL_HPP
 #define MAXWELL_HPP
 
-#include "compile_time_math.hpp"
-#include "dimension.hpp"
-#include "quantity.hpp"
-#include "quantity_holder.hpp"
-#include "quantity_system.hpp"
-#include "quantity_value.hpp"
-#include "template_string.hpp"
-#include "type_traits.hpp"
-#include "unit.hpp"
+#include "core/dimension.hpp"
+#include "core/quantity.hpp"
+#include "core/quantity_holder.hpp"
+#include "core/quantity_system.hpp"
+#include "core/quantity_value.hpp"
+#include "core/unit.hpp"
+#include "utility/compile_time_math.hpp"
+#include "utility/template_string.hpp"
+#include "utility/type_traits.hpp"
 
-#include "formatting.hpp"
+#include "formatting/formatting.hpp"
 
-#include "isq.hpp"
-#include "si.hpp"
-#include "si_constants.hpp"
+#include "quantity_systems/isq.hpp"
+#include "quantity_systems/si.hpp"
+#include "quantity_systems/si_constants.hpp"
 
-#include "quantity_limits.hpp"
+#include "math/quantity_limits.hpp"
 #endif
