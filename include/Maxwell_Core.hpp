@@ -19,5 +19,6 @@
 #include "formatting/formatting.hpp"
 
 #include "math/quantity_limits.hpp"
+#include "math/quantity_value_math.hpp"
 
 #endif

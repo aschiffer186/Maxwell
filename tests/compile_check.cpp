@@ -37,5 +37,8 @@ int main() {
   // wavelength<maxwell::si::meter_unit> w3 = maxwell::si::meter<>{};
   //   constexpr maxwell::si::meter<> q = 100.0 * m;
 
+  const maxwell::unit auto u =
+      maxwell::si::degree_unit / maxwell::si::second_unit;
+
   return 0;
 }

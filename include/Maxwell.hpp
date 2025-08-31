@@ -21,4 +21,5 @@
 #include "quantity_systems/si_constants.hpp"
 
 #include "math/quantity_limits.hpp"
+#include "math/quantity_value_math.hpp"
 #endif

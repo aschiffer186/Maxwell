@@ -12,8 +12,14 @@
 #endif
 
 #if defined(__cpp_lib_constexpr_cmath) && __cpp_lib_constexpr_cmath >= 202202L
+#define MAXWELL_BASIC_CMATH_CONSTEXPR constexpr
+#else
 #define MAXWELL_BASIC_CMATH_CONSTEXPR
-#elif defined(__cpp_lib_constexpr_cmath) && __cpp_lib_constexpr_cmath >= 202306L
+#endif
+
+#if defined(__cpp_lib_constexpr_cmath) && __cpp_lib_constexpr_cmath >= 202306L
+#define MAXWELL_EXTENDED_CMATH_CONSTEXPR constexpr
+#else
 #define MAXWELL_EXTENDED_CMATH_CONSTEXPR
 #endif
 

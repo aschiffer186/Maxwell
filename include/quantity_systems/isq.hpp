@@ -135,11 +135,11 @@ constexpr struct velocity_quantity_type
 // concept pressure = quantity_convertible_to<Q::quantity_kind,
 // pressure_quantity>;
 
-
-
 } // namespace maxwell::isq
 
 namespace maxwell {
 template <> struct enable_chrono_conversions<isq::time> : std::true_type {};
+
+template <> struct is_angle_like<isq::plane_angle> : std::true_type {};
 } // namespace maxwell
 #endif

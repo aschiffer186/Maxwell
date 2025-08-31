@@ -85,6 +85,10 @@ constexpr struct square_meter_unit_type
     : make_derived_unit_t<isq::area, "m^2"> {
 } square_meter_unit;
 
+constexpr struct cubic_meter_unit_type
+    : make_derived_unit_t<isq::volume, "m^3"> {
+} cubic_meter_unit;
+
 constexpr struct meter_per_second_unit_type
     : make_derived_unit_t<isq::velocity, "m/s"> {
 } meter_per_second_unit;
@@ -117,6 +121,9 @@ template <typename T = double>
 using degree = quantity_value<degree_unit, isq::plane_angle, T>;
 
 template <typename T = double>
+using celsius = quantity_value<celsius_unit, isq::temperature, T>;
+
+template <typename T = double>
 using newton = quantity_value<newton_unit, isq::force, T>;
 
 template <typename T = double>
@@ -127,6 +134,9 @@ using joule = quantity_value<joule_unit, isq::work, T>;
 
 template <typename T = double>
 using square_meter = quantity_value<square_meter_unit, isq::area, T>;
+
+template <typename T = double>
+using cubic_meter = quantity_value<cubic_meter_unit, isq::volume, T>;
 
 template <typename T = double>
 using newton_meter = quantity_value<newton_meter_unit, isq::torque, T>;
@@ -143,6 +153,7 @@ constexpr unit auto kg = kilogram_unit;
 constexpr unit auto s = second_unit;
 constexpr unit auto A = ampere_unit;
 constexpr unit auto K = kelvin_unit;
+constexpr unit auto degC = celsius_unit;
 constexpr unit auto mol = mole_unit;
 constexpr unit auto cd = candela_unit;
 constexpr unit auto one = number_unit;

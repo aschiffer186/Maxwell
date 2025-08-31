@@ -115,20 +115,22 @@ struct _quantity_value_operators {
     return temp;
   }
 
+  template <auto U1, auto Q1, typename T1, auto U2, auto Q2, typename T2>
   friend constexpr quantity_value_like auto&
-  operator+=(quantity_value_like auto& lhs,
-             const quantity_value_like auto& rhs) {
-    static_assert(unit_addable_with<lhs.units, rhs.units>,
+  operator+=(quantity_value<U1, Q1, T1>& lhs,
+             const quantity_value<U2, Q2, T2>& rhs) {
+    static_assert(unit_addable_with<U1, U2>,
                   "Cannot add quantities of different kinds or quantities "
                   "whose units have different reference points.");
     lhs.value_ += rhs.value_;
     return lhs;
   }
 
+  template <auto U1, auto Q1, typename T1, auto U2, auto Q2, typename T2>
   friend constexpr quantity_value_like auto&
-  operator-=(quantity_value_like auto& lhs,
-             const quantity_value_like auto& rhs) {
-    static_assert(unit_subtractable_from<lhs.units, rhs.units>,
+  operator-=(quantity_value<U1, Q1, T1>& lhs,
+             const quantity_value<U2, Q2, T2>& rhs) {
+    static_assert(unit_subtractable_from<U1, U2>,
                   "Cannot subtract quantities of different kinds or quantities "
                   "whose units have different reference points.");
     lhs.value_ -= rhs.value_;
@@ -156,17 +158,21 @@ struct _quantity_value_operators {
     return lhs;
   }
 
+  template <auto U1, auto Q1, typename T1, auto U2, auto Q2, typename T2>
   friend constexpr quantity_value_like auto
-  operator+(quantity_value_like auto lhs, const quantity_value_like auto& rhs) {
-    static_assert(unit_addable_with<lhs.units, rhs.units>,
+  operator+(quantity_value<U1, Q1, T1> lhs,
+            const quantity_value<U2, Q2, T2>& rhs) {
+    static_assert(unit_addable_with<U1, U2>,
                   "Cannot add quantities of different kinds or quantities "
                   "whose units have different reference points.");
     return lhs += rhs;
   }
 
+  template <auto U1, auto Q1, typename T1, auto U2, auto Q2, typename T2>
   friend constexpr quantity_value_like auto
-  operator-(quantity_value_like auto lhs, const quantity_value_like auto& rhs) {
-    static_assert(unit_subtractable_from<lhs.units, rhs.units>,
+  operator-(quantity_value<U1, Q1, T1> lhs,
+            const quantity_value<U2, Q2, T2>& rhs) {
+    static_assert(unit_subtractable_from<U1, U2>,
                   "Cannot subtract quantities of different kinds or quantities "
                   "whose units have different reference points.");
     return lhs -= rhs;
@@ -287,24 +293,26 @@ struct _quantity_value_operators {
         lhs.get_value() % rhs.get_value());
   }
 
-  friend constexpr auto operator<=>(const quantity_value_like auto& lhs,
-                                    const quantity_value_like auto& rhs)
+  template <auto U1, auto Q1, typename T1, auto U2, auto Q2, typename T2>
+  friend constexpr auto operator<=>(const quantity_value<U1, Q1, T1>& lhs,
+                                    const quantity_value<U2, Q2, T2>& rhs)
     requires std::three_way_comparable_with<
         std::remove_cvref_t<decltype(lhs.get_value())>,
         std::remove_cvref_t<decltype(rhs.get_value())>>
   {
-    static_assert(quantity_convertible_to<lhs.quantity_kind, rhs.quantity_kind>,
+    static_assert(unit_comparable_with<U1, U2>,
                   "Cannot compare quantities of different kinds");
     return lhs.in_base_units().get_value() <=> rhs.in_base_units().get_value();
   }
 
-  friend auto operator==(const quantity_value_like auto& lhs,
-                         const quantity_value_like auto& rhs) -> bool
+  template <auto U1, auto Q1, typename T1, auto U2, auto Q2, typename T2>
+  friend auto operator==(const quantity_value<U1, Q1, T1>& lhs,
+                         const quantity_value<U2, Q2, T2>& rhs) -> bool
     requires std::equality_comparable_with<
         std::remove_cvref_t<decltype(lhs.get_value())>,
         std::remove_cvref_t<decltype(rhs.get_value())>>
   {
-    static_assert(quantity_convertible_to<lhs.quantity_kind, rhs.quantity_kind>,
+    static_assert(unit_comparable_with<U1, U2>,
                   "Cannot compare quantities of different kinds");
     return lhs.in_base_units().get_value() == rhs.in_base_units().get_value();
   }

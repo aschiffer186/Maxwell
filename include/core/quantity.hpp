@@ -151,6 +151,11 @@ concept quantity_convertible_to =
 
 template <typename T, auto Q>
 concept quantity_of = quantity_convertible_to<T::quantity_kind, Q>;
+
+template <auto> struct is_angle_like : std::false_type {};
+
+template <auto Q>
+concept angle_like = is_angle_like<Q>::value;
 } // namespace maxwell
 
 #endif
