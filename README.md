@@ -182,3 +182,12 @@ maxwell::si::meter<> w = maxwell::si::meter<>{1} + wavelength{2}; // Error - wil
 > ```c++
 > auto q1 = maxwell::si::meter<>{100.0} * maxwell::si::kilometer<10.0>; // 1,000 m*km 
 > auto q2 = maxwell::us::foot<>{1} + maxwell::us::inch<>{1}; // 13/12 ft.
+
+# `quantity_holder` Class Template
+Maxwell also provides the `quantity_holder` class template to specify units at run-time rather than compile-time. 
+```c++
+template<auto Quantity, typename T>
+class quantity_holder;
+```
+
+Compile-time verification that operations on instances of `quantity_holder` is still performed, but unit conversions will be perfomed at run-time instead of compile-time. V

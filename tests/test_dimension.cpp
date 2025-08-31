@@ -17,7 +17,7 @@ TEST(TestDimensions, TestDimensionEquality) {
   EXPECT_NE(d2, d3);
 }
 
-TEST(TestDimensions, TestDimensionProduct) {
+TEST(TestDimensions, TestDimensionConcept) {
   using test_type = dimension_type<"A", utility::rational_type<1, 1, 0>{}>;
 
   EXPECT_FALSE(dimension<int>);
@@ -67,7 +67,7 @@ TEST(TestDimensions, TestDimensionMultiplication) {
   EXPECT_EQ(std::tuple_size_v<decltype(prod3_tuple)>, 0);
 }
 
-TEST(TestDimension, TestDimensionDivision) {
+TEST(TestDimensions, TestDimensionDivision) {
   constexpr dimension_type<"A", utility::rational_type<1, 1, 0>{}> d1;
   constexpr dimension_type<"B", utility::rational_type<2, 1, 0>{}> d2;
   constexpr dimension_type<"A", utility::rational_type<-1, 1, 0>{}> d3;
@@ -92,4 +92,56 @@ TEST(TestDimension, TestDimensionDivision) {
   EXPECT_EQ(std::tuple_size_v<decltype(quot3_tuple)>, 1);
   EXPECT_EQ(std::get<0>(quot3_tuple),
             (dimension_type<"A", utility::rational_type<2, 1, 0>{}>{}));
+}
+
+TEST(TestDimensions, TestDimensionProductConcept) {
+  using test_type = dimension_product_type<>;
+
+  EXPECT_FALSE(dimension_product<int>);
+  EXPECT_TRUE(dimension_product<test_type>);
+  EXPECT_TRUE(dimension_product<const test_type>);
+  EXPECT_TRUE(dimension_product<test_type&>);
+  EXPECT_TRUE(dimension_product<const test_type&>);
+  EXPECT_TRUE(dimension_product<test_type&&>);
+  EXPECT_TRUE(dimension_product<const test_type&&>);
+}
+
+TEST(TestDimensions, TestDimensionProductEquality) {
+  constexpr dimension_product_type<> d1;
+  constexpr dimension_product_type<> d2;
+  constexpr dimension_product_type<
+      dimension_type<"A", utility::rational_type<1, 1, 0>{}>>
+      d3;
+  constexpr dimension_product_type<
+      dimension_type<"A", utility::rational_type<2, 1, 0>{}>>
+      d4;
+  constexpr dimension_product_type<
+      dimension_type<"B", utility::rational_type<1, 1, 0>{}>>
+      d5;
+  constexpr dimension_product_type<
+      dimension_type<"A", utility::rational_type<1, 1, 0>{}>,
+      dimension_type<"B", utility::rational_type<1, 1, 0>{}>>
+      d6;
+
+  EXPECT_EQ(d1, d1);
+  EXPECT_EQ(d1, d2);
+  EXPECT_NE(d1, d3);
+  EXPECT_NE(d1, d4);
+  EXPECT_NE(d1, d5);
+  EXPECT_NE(d1, d6);
+  EXPECT_EQ(d2, d2);
+  EXPECT_NE(d2, d3);
+  EXPECT_NE(d2, d4);
+  EXPECT_NE(d2, d5);
+  EXPECT_NE(d2, d6);
+  EXPECT_EQ(d3, d3);
+  EXPECT_NE(d3, d4);
+  EXPECT_NE(d3, d5);
+  EXPECT_NE(d3, d6);
+  EXPECT_EQ(d4, d4);
+  EXPECT_NE(d4, d5);
+  EXPECT_NE(d4, d6);
+  EXPECT_EQ(d5, d5);
+  EXPECT_NE(d5, d6);
+  EXPECT_EQ(d6, d6);
 }

@@ -81,15 +81,15 @@ auto operator<<(std::ostream& os, const dimension auto& dim) -> std::ostream& {
   return os;
 }
 
-auto operator<<(std::ostream& os,
-                const dimension_product auto& prod) -> std::ostream& {
-#ifdef MAXWELL_HAS_PRINT
-  std::print(os, "{}", prod);
-#else
-  os << std::format("{}", prod);
-#endif
-  return os;
-}
+// auto operator<<(std::ostream& os,
+//                 const dimension_product auto& prod) -> std::ostream& {
+// #ifdef MAXWELL_HAS_PRINT
+//   std::print(os, "{}", prod);
+// #else
+//   os << std::format("{}", prod);
+// #endif
+//   return os;
+// }
 
 auto operator<<(std::ostream& os, const unit auto& u) -> std::ostream& {
 #ifdef MAXWELL_HAS_PRINT
