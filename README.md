@@ -105,7 +105,9 @@ quantity_value<si::meter_unit> q1 = quantity_value<si::kilometer_unit>{1}; // q1
 quantity_value<us::lb_unit> q2 = quantity_value<si::kilogram_unit>{2}; // q2 represens a mass of 4.40925 pounds
 ```
 
-For convenience, many type aliases are provided to make constructing quantites less verbose. If no underlying type is specified, `double` is assumed.
+For convenience, many type aliases are provided to make constructing quantites less verbose. If no underlying type is specified, `double` is assumed. These aliases are provided in the following namespaces: 
+* `maxwell::si` - SI units 
+* `maxwell::us` - US customary units
 ```c++
 si::meter<> q1{100}; // Same as quantity_value<si::meter_unit, isq::length_quantity, double> q1{100};
 si::mole<long double> q2{25}; // Same as quantity_value<si::meter_unit, isq::amount_quantity, long double> q2{25}
@@ -120,6 +122,15 @@ using vector_quantity = quantity_value<si::meter_unit, isq::length_quantity, std
 vector_quantity q1(std::in_place, {1.0, 2.0, 3.0, 4.0, 5.0, 6.0}, MyCustomAllocator{}); // Constructs the underlying value in place!
 ```
 
+Metric prefixes are provided as type alias templates in the main `Maxwell` namespace. This avoids the need to define prefixes for every single unit. The exception is kilogram which has a dedicated type. 
+
+```c++
+maxwell::nano<maxwell::si::second<>> ns{100}; // 100 ns 
+maxwell::kilo<maxwell::si::meter<>> km{100}; // 100 km
+```
+
+Type aliases are provided for all metric prefixes including quetta, ronna, ronta, and quecto.
+
 For more complicated units or more complicated initialization expressions, abbreviated symbols are provided to ease construction.
 ```c++
 si::newton_meter<> q1 = 100 * N * m; // q1 represents 100 N-m.
@@ -129,8 +140,45 @@ The definition of the `quantity` prevents mixing incompatible quantities with th
 ```c++
 si::newton_meter<> q1 = 100 * N * m; // OK - q1 represents 100 N-m
 si::joule<> q2 = q1; // Error - will not compile
-auto q3 = 100.0 * kg * s / (A * C); // q3 represents 100.0 kg * s * A^-1 * C%-1
+auto q3 = 100.0 * kg * s / (A * C); // q3 represents 100.0 kg * s * A^-1 * C^-1
 ```
 
 > [!WARNING]
 > When using symbols, if an integer literal is used with the `auto` keyword, the underlying quantity will have an integral type.
+
+## Operations on Quantity Values
+All instances of `quantity_value` implement all build-in arithmetic operations (+, -, *, /, %) if the underlying type supports the arithmetic operations. 
+
+Multiplication and division of two instances of `quantity_value` creates a new quantity value whose units are the product or quotient of the two input instances of `quantity_value`. 
+
+```c++
+maxwell::si::meter<> m1{100.0}
+maxwell::si::meter<> m2{100.0};
+
+maxwell::si::square_kilometer<> area = m1 * m2; // 0.01 square kilometers 
+
+maxwell::si::meter<> m3 = area / m1; // 100 meters
+```
+
+Addition and subtraction can ony be performed on instances of `quantity_value` representing the same quantity and that have the same reference point. 
+
+```c++
+maxwell::centi<maxwell::si::meter<>> cm = maxwell::si::meter<>{1} + maxwell::si::meter<2>{1}; // 200 cm 
+maxwell::si::ampere<> A = cm + maxwell::si::ampere<>{2}; // Error - will not compile 
+
+using wavelength = quantity_value<si::meter, wavelength_quantity>;
+maxwell::si::meter<> w = maxwell::si::meter<>{1} + wavelength{2}; // Error - will not compile
+```
+
+> [!NOTE]
+> Arithmetic operations will result in types that are isomorphic, but not necessarily the same, as predefined units. 
+> ```c++
+> si::meter_unit * si::meter_unit == si::square_meter_unit; // Guaranteed to be true 
+> std::is_same_v<si::meter_unit * si::meter_unit, si::square_meter_unit>; // Not guaranteed to be tree
+> ```
+
+> [!NOTE]
+> Using `auto` with arithmetic operations may result in unexpected values. 
+> ```c++
+> auto q1 = maxwell::si::meter<>{100.0} * maxwell::si::kilometer<10.0>; // 1,000 m*km 
+> auto q2 = maxwell::us::foot<>{1} + maxwell::us::inch<>{1}; // 13/12 ft.

@@ -117,6 +117,10 @@ concept dimension_product =
     _detail::is_dimension_product_type<std::remove_cvref_t<T>>::value;
 
 template <dimension... Dimensions> struct dimension_product_type {
+  static_assert((true && ... && (Dimensions::power != utility::zero)),
+                "Dimensions with power 0 should be omitted from the dimension "
+                "product");
+
   /// Tuple representation of the dimension product
   using tuple_type = std::tuple<Dimensions...>;
 
@@ -143,50 +147,17 @@ constexpr dimension_product_type<> dimension_one;
 /// Compares two dimensional products for equality. Two dimensional products are
 /// equal if all dimensions not raised to power 0 are equal.
 ///
-/// \tparam LHS The first dimension of the left-hand side dimensional product.
-/// \tparam LHSDimensions The remaining dimensions of the left-hand side
-/// dimensional product
-/// \tparam RHS The first dimension of the right-hand side
-/// dimensional product.
-/// \tparam RHSDimensions The remaining dimensions of the
-/// right-hand side dimensional product
+/// \tparam LHS The dimensions of the left-hand side dimensional product.
+/// \tparam RHS The dimensions of the right-hand side dimensional product.
+/// \param LHS The left hand side of the equality comparison.
+/// \param RHS The right hand side of the equality comparison.
 /// \return \c true if the dimensional products are equal
-template <dimension LHS, dimension... LHSRest, dimension RHS,
-          dimension... RHSRest>
+template <dimension... LHS, dimension... RHS>
 constexpr auto
-operator==(dimension_product_type<LHS, LHSRest...> /*lhs*/,
-           dimension_product_type<RHS, RHSRest...> /*rhs*/) noexcept -> bool {
-  if constexpr (sizeof...(LHSRest) == sizeof...(RHSRest)) {
-    return utility::similar<dimension_product_type<LHS, LHSRest...>,
-                            dimension_product_type<RHS, RHSRest...>>;
-  } else if constexpr (LHS::power == utility::zero) {
-    return dimension_product_type<LHSRest...>{} ==
-           dimension_product_type<RHS, RHSRest...>{};
-  } else if constexpr (RHS::power == utility::zero) {
-    return dimension_product_type<LHS, LHSRest...>{} ==
-           dimension_product_type<RHSRest...>{};
-  } else if constexpr (utility::similar<LHS, RHS>) {
-    return dimension_product_type<LHSRest...>{} ==
-           dimension_product_type<RHSRest...>{};
-  } else {
-    return false;
-  }
-}
-
-constexpr auto operator==(dimension_product_type<>, dimension_product_type<>) {
-  return true;
-}
-
-template <dimension D, dimension... Ds>
-constexpr auto operator==(dimension_product_type<D, Ds...>,
-                          dimension_product_type<>) {
-  return false;
-}
-
-template <dimension D, dimension... Ds>
-constexpr auto operator==(dimension_product_type<>,
-                          dimension_product_type<D, Ds...>) {
-  return false;
+operator==(dimension_product_type<LHS...> /*lhs*/,
+           dimension_product_type<RHS...> /*rhs*/) noexcept -> bool {
+  return utility::similar<dimension_product_type<LHS...>,
+                          dimension_product_type<RHS...>>;
 }
 
 /// \brief Concept modeling a dimension products that can be converted to each
