@@ -14,13 +14,13 @@
 
 namespace maxwell {
 template <utility::template_string Name, quantity auto Quantity,
-          auto Multiplier>
+          auto Multiplier, auto Reference = 0.0>
 struct unit_type;
 
 template <utility::template_string Name, quantity auto Quantity,
-          auto Multiplier>
-constexpr unit_type<Name, Quantity, Multiplier>
-underlying_unit(const unit_type<Name, Quantity, Multiplier>&);
+          auto Multiplier, auto Reference = 0.0>
+constexpr unit_type<Name, Quantity, Multiplier, Reference>
+underlying_unit(const unit_type<Name, Quantity, Multiplier, Reference>&);
 
 template <typename T>
 using underlying_unit_t = decltype(underlying_unit(std::declval<T>()));
@@ -40,17 +40,18 @@ template <typename T>
 concept unit = _detail::has_underlying_unit<std::remove_cvref_t<T>>::value;
 
 template <utility::template_string Name, quantity auto Quantity,
-          auto Multiplier>
+          auto Multiplier, auto Reference>
 struct unit_type {
   constexpr static auto name = Name;
   constexpr static quantity auto quantity = Quantity;
   constexpr static dimension_product auto dimensions = quantity.dimensions;
   constexpr static auto multiplier = Multiplier;
+  constexpr static auto reference = Reference;
 
   using quantity_rep = std::remove_cvref_t<decltype(quantity)>;
 
   constexpr static auto base_units() {
-    return unit_type<Name, Quantity, utility::one>{};
+    return unit_type<Name, Quantity, utility::one, 0.0>{};
   }
 };
 
@@ -90,6 +91,20 @@ constexpr unit auto operator*(utility::value_type<Value> lhs, RHS) noexcept {
   return unit_type<RHS::name, RHS::quantity, lhs.value * RHS::multiplier>{};
 }
 
+template <auto Value>
+constexpr unit auto operator+(unit auto lhs,
+                              utility::value_type<Value> rhs) noexcept {
+  return unit_type<lhs.name, lhs.quantity, lhs.multiplier,
+                   lhs.reference + rhs.value>{};
+}
+
+template <auto Value>
+constexpr unit auto operator-(unit auto lhs,
+                              utility::value_type<Value> rhs) noexcept {
+  return unit_type<lhs.name, lhs.quantity, lhs.multiplier,
+                   lhs.reference - rhs.value>{};
+}
+
 template <unit LHS, unit RHS> constexpr unit auto operator/(LHS, RHS) noexcept {
   return unit_quotient<LHS, RHS>{};
 }
@@ -127,6 +142,8 @@ constexpr double conversion_factor(From, To) noexcept {
   return static_cast<double>(To::multiplier) /
          static_cast<double>(From::multiplier);
 }
+
+/// To/from, 1 foot = 1/3 / 1 yard = 1/3 yard
 
 constexpr double quetta_prefix{1e30};
 constexpr double ronna_prefix{1e27};
@@ -244,6 +261,15 @@ constexpr unit auto quecto_unit =
 template <auto U>
 concept unitless =
     std::same_as<typename decltype(U)::quantity_rep, decltype(number)>;
+
+template <auto Lhs, auto Rhs>
+concept unit_comparable_with = unit_convertible_to<Lhs, Rhs> && Lhs.reference == Rhs.reference;
+
+template <auto Lhs, auto Rhs> 
+concept unit_addable_with = unit_convertible_to<Lhs, Rhs> && Lhs.reference == Rhs.reference; 
+
+template <auto Lhs, auto Rhs> 
+concept unit_subtractable_from = unit_convertible_to<Lhs, Rhs> && Lhs.reference == Rhs.reference;
 } // namespace maxwell
 
 #endif

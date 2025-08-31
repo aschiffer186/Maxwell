@@ -118,8 +118,9 @@ struct _quantity_value_operators {
   friend constexpr quantity_value_like auto&
   operator+=(quantity_value_like auto& lhs,
              const quantity_value_like auto& rhs) {
-    static_assert(quantity_convertible_to<rhs.quantity_kind, lhs.quantity_kind>,
-                  "Cannot add quantities of different kinds");
+    static_assert(unit_addable_with<lhs.units, rhs.units>,
+                  "Cannot add quantities of different kinds or quantities "
+                  "whose units have different reference points.");
     lhs.value_ += rhs.value_;
     return lhs;
   }
@@ -127,8 +128,9 @@ struct _quantity_value_operators {
   friend constexpr quantity_value_like auto&
   operator-=(quantity_value_like auto& lhs,
              const quantity_value_like auto& rhs) {
-    static_assert(quantity_convertible_to<rhs.quantity_kind, lhs.quantity_kind>,
-                  "Cannot subtract quantities of different kinds");
+    static_assert(unit_subtractable_from<lhs.units, rhs.units>,
+                  "Cannot subtract quantities of different kinds or quantities "
+                  "whose units have different reference points.");
     lhs.value_ -= rhs.value_;
     return lhs;
   }
@@ -139,6 +141,7 @@ struct _quantity_value_operators {
   operator+=(quantity_value<U, Q, T>& lhs, T&& rhs)
     requires unitless<U>
   {
+
     lhs.value_ += std::forward<T>(rhs);
     return lhs;
   }
@@ -155,11 +158,17 @@ struct _quantity_value_operators {
 
   friend constexpr quantity_value_like auto
   operator+(quantity_value_like auto lhs, const quantity_value_like auto& rhs) {
+    static_assert(unit_addable_with<lhs.units, rhs.units>,
+                  "Cannot add quantities of different kinds or quantities "
+                  "whose units have different reference points.");
     return lhs += rhs;
   }
 
   friend constexpr quantity_value_like auto
   operator-(quantity_value_like auto lhs, const quantity_value_like auto& rhs) {
+    static_assert(unit_subtractable_from<lhs.units, rhs.units>,
+                  "Cannot subtract quantities of different kinds or quantities "
+                  "whose units have different reference points.");
     return lhs -= rhs;
   }
 

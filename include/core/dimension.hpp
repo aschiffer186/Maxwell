@@ -313,6 +313,7 @@ operator*(dimension_product_type<LHS, LHSRest...>,
   }
 }
 
+/// \cond
 constexpr dimension_product auto operator*(dimension_product_type<>,
                                            dimension_product_type<>) {
   return dimension_product_type<>{};
@@ -329,6 +330,7 @@ constexpr dimension_product auto operator*(dimension_product_type<>,
                                            dimension_product_type<D, Ds...>) {
   return dimension_product_type<D, Ds...>{};
 }
+/// \endcond
 
 /// \brief Divides two dimensions.
 ///
@@ -471,6 +473,7 @@ operator/(dimension_product_type<LHS, LHSRest...>,
   }
 }
 
+/// \cond
 constexpr dimension_product auto operator/(dimension_product_type<>,
                                            dimension_product_type<>) {
   return dimension_product_type<>{};
@@ -482,6 +485,7 @@ constexpr dimension_product auto operator/(dimension_product_type<D, Ds...>,
   return dimension_product_type<dimension_inverse_t<D>,
                                 dimension_inverse_t<Ds>...>{};
 }
+/// \endcond
 
 template <dimension D, dimension... Ds>
 constexpr dimension_product auto operator/(dimension_product_type<>,
@@ -489,6 +493,7 @@ constexpr dimension_product auto operator/(dimension_product_type<>,
   return dimension_product_type<dimension_inverse_t<D>,
                                 dimension_inverse_t<Ds>...>{};
 }
+/// \endcond
 } // namespace maxwell
 
 #endif

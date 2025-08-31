@@ -348,10 +348,20 @@ constexpr double pow(double base, rational_type<N, D, E>) noexcept {
   return result;
 }
 
+/// \brief Holds a compile-time value for unit synthesis.
+///
+/// Class template \c value_type holds a compile-time constant to aid in
+/// creating new units. This distinguishes overloads of multiplication between
+/// units from multiplication between unit and value to create a \c
+/// quantity_value instance.
+///
+/// \tparam Value The compile-time value. Must be a structural type.
 template <auto Value> struct value_type {
+  /// The compile-time value.
   constexpr static auto value = Value;
 };
 
+/// \cond
 namespace _detail {
 template <typename> struct is_value_type : std::false_type {};
 
@@ -359,7 +369,8 @@ template <auto Value>
 struct is_value_type<value_type<Value>> : std::true_type {};
 
 template <typename T> struct is_value_type<const T> : is_value_type<T> {};
-}; // namespace _detail
+} // namespace _detail
+/// \endcond
 
 } // namespace maxwell::utility
 

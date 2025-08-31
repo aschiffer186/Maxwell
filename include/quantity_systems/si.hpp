@@ -40,14 +40,16 @@ constexpr struct radian_unit_type
     : make_derived_unit_t<isq::plane_angle, "rad"> {
 } radian_unit;
 
-// constexpr auto u =
-//     utility::value_type<std::numbers::pi / 180.0>{} * radian_unit;
-
 /// \cond
 namespace _detail {
 constexpr auto rad_to_deg = utility::value_type<std::numbers::pi / 180.0>{};
-}
+constexpr auto kelvin_to_celsius = utility::value_type<-273.15>{};
+} // namespace _detail
 /// \endcond
+
+constexpr struct celsius_unit_type
+    : make_derived_unit_t<kelvin_unit + _detail::kelvin_to_celsius, "°C"> {
+} celsius_unit;
 
 constexpr struct degree_unit_type
     : make_derived_unit_t<_detail::rad_to_deg * radian_unit, "deg"> {
