@@ -22,6 +22,14 @@ The following variables are provided:
 
 To use Maxwell in your CMake project, simply add `Maxwell_INCUDE_DIR` to your project's include directories and link against the `Maxwell::Maxwell` target provided.
 
+## Building and Running Tests
+To build and run units, pass the `BUILD_TESTS` flag to the CMake configuration step. Then run `ctest`. After changing to your build folder, run the following commands
+```
+cmake -DBUILD_TESTS=On ..
+cmake --build . --config Debug
+ctest -C debug .
+```
+
 # Getting Started 
 The simplest way to get started with Maxwell is the include the `Maxwell.hpp` header in your source code. This header provides access to all types in Maxwell. For convenience, you may wish to add a using declaration for Maxwell as well. 
 
