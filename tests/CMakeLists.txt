@@ -28,3 +28,9 @@ add_executable(test_quantity test_quantity.cpp)
 add_test(NAME TestQuantity COMMAND test_quantity)
 target_link_libraries(test_quantity PRIVATE Maxwell GTest::gtest_main)
 gtest_discover_tests(test_quantity)
+
+
+add_executable(test_units test_units.cpp)
+add_test(NAME TestUnits COMMAND test_units)
+target_link_libraries(test_units PRIVATE Maxwell GTest::gtest_main)
+gtest_discover_tests(test_units)

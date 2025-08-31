@@ -515,6 +515,12 @@ private:
   T value_{};
 }; // namespace maxwell
 
+template <auto Q, auto U, typename T>
+quantity_value(const quantity_value<Q, U, T>&) -> quantity_value<Q, U, T>;
+
+template <auto Q, auto U, typename T>
+quantity_value(quantity_value<Q, U, T>&&) -> quantity_value<Q, U, T>;
+
 template <typename Q>
 using quetta = quantity_value<quetta_unit<Q::units>, Q::quantity_kind,
                               typename Q::value_type>;

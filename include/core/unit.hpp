@@ -139,8 +139,8 @@ concept unit_convertible_to =
 
 template <unit From, unit To>
 constexpr double conversion_factor(From, To) noexcept {
-  return static_cast<double>(To::multiplier) /
-         static_cast<double>(From::multiplier);
+  return static_cast<double>(From::multiplier) /
+         static_cast<double>(To::multiplier);
 }
 
 /// To/from, 1 foot = 1/3 / 1 yard = 1/3 yard
