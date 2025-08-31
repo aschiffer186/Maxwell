@@ -4,6 +4,8 @@
 #ifndef SI_HPP
 #define SI_HPP
 
+#include <numbers>
+
 #include "core/quantity_value.hpp"
 #include "core/unit.hpp"
 #include "isq.hpp"
@@ -37,6 +39,19 @@ constexpr struct number_unit_type : make_base_unit_t<isq::dimensionless, "[]"> {
 constexpr struct radian_unit_type
     : make_derived_unit_t<isq::plane_angle, "rad"> {
 } radian_unit;
+
+// constexpr auto u =
+//     utility::value_type<std::numbers::pi / 180.0>{} * radian_unit;
+
+/// \cond
+namespace _detail {
+constexpr auto rad_to_deg = utility::value_type<std::numbers::pi / 180.0>{};
+}
+/// \endcond
+
+constexpr struct degree_unit_type
+    : make_derived_unit_t<_detail::rad_to_deg * radian_unit, "deg"> {
+} degree_unit;
 
 constexpr struct steradian_unit_type
     : make_derived_unit_t<isq::solid_angle, "sr"> {
@@ -94,6 +109,12 @@ template <typename T = double>
 using number = quantity_value<number_unit, isq::dimensionless, T>;
 
 template <typename T = double>
+using radian = quantity_value<radian_unit, isq::plane_angle, T>;
+
+template <typename T = double>
+using degree = quantity_value<degree_unit, isq::plane_angle, T>;
+
+template <typename T = double>
 using newton = quantity_value<newton_unit, isq::force, T>;
 
 template <typename T = double>
@@ -124,6 +145,7 @@ constexpr unit auto mol = mole_unit;
 constexpr unit auto cd = candela_unit;
 constexpr unit auto one = number_unit;
 constexpr unit auto rad = radian_unit;
+constexpr unit auto deg = degree_unit;
 constexpr unit auto sr = steradian_unit;
 constexpr unit auto Hz = hertz_unit;
 constexpr unit auto N = newton_unit;

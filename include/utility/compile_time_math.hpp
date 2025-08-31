@@ -347,6 +347,20 @@ constexpr double pow(double base, rational_type<N, D, E>) noexcept {
 
   return result;
 }
+
+template <auto Value> struct value_type {
+  constexpr static auto value = Value;
+};
+
+namespace _detail {
+template <typename> struct is_value_type : std::false_type {};
+
+template <auto Value>
+struct is_value_type<value_type<Value>> : std::true_type {};
+
+template <typename T> struct is_value_type<const T> : is_value_type<T> {};
+}; // namespace _detail
+
 } // namespace maxwell::utility
 
 #endif

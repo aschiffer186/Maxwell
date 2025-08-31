@@ -18,6 +18,7 @@
 
 #include "quantity.hpp"
 #include "unit.hpp"
+#include "utility/compile_time_math.hpp"
 #include "utility/config.hpp"
 #include "utility/type_traits.hpp"
 
@@ -207,7 +208,8 @@ struct _quantity_value_operators {
   }
 
   template <typename T>
-    requires(!quantity_value_like<T> && !unit<T>)
+    requires(!quantity_value_like<T> && !unit<T> &&
+             !utility::_detail::is_value_type<T>::value)
   friend constexpr quantity_value_like auto
   operator*(const quantity_value_like auto& lhs, const T& rhs) {
     using lhs_type = std::remove_cvref_t<decltype(lhs)>;
@@ -217,7 +219,8 @@ struct _quantity_value_operators {
   }
 
   template <typename T>
-    requires(!quantity_value_like<T> && !unit<T>)
+    requires(!quantity_value_like<T> && !unit<T> &&
+             !utility::_detail::is_value_type<T>::value)
   friend constexpr quantity_value_like auto
   operator*(const T& lhs, const quantity_value_like auto& rhs) {
     using rhs_type = std::remove_cvref_t<decltype(rhs)>;
@@ -251,7 +254,8 @@ struct _quantity_value_operators {
   }
 
   template <typename T>
-    requires(!quantity_value_like<T> && !unit<T>)
+    requires(!quantity_value_like<T> && !unit<T> &&
+             !utility::_detail::is_value_type<T>::value)
   friend constexpr quantity_value_like auto
   operator/(const T& lhs, const quantity_value_like auto& rhs) {
     using rhs_type = std::remove_cvref_t<decltype(rhs)>;

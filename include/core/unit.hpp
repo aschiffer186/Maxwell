@@ -85,10 +85,9 @@ consteval unit auto operator*(LHS /*lhs*/, RHS /*rhs*/) noexcept {
   return unit_product<LHS, RHS>{};
 }
 
-template <unit RHS>
-constexpr unit auto operator*(utility::rational auto lhs, RHS) noexcept {
-  using LHS = decltype(lhs);
-  return unit_type<RHS::name, RHS::quantity, LHS{} * RHS::multiplier>{};
+template <auto Value, unit RHS>
+constexpr unit auto operator*(utility::value_type<Value> lhs, RHS) noexcept {
+  return unit_type<RHS::name, RHS::quantity, lhs.value * RHS::multiplier>{};
 }
 
 template <unit LHS, unit RHS> constexpr unit auto operator/(LHS, RHS) noexcept {
