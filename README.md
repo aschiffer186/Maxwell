@@ -32,11 +32,14 @@ ctest -C debug .
 ```
 
 ## Building Documentation
-Building documentation can be down using the "build-docs" workflow. From the main Maxwell directory run the following command: 
+Building documentation can be down using the "build-docs" workflow. Note that doxygen and sphinx are required to build the documentation. 
+Sphinx can be installed usingthe requirements.txt file inside the `doc` folder. 
+Doxygen can be installed using your OS's package manager.
+From the main Maxwell directory run the following command: 
 ```
 cmake --workflow --preset build-docs
 ```
-This should build all documentation and place it in the `doc` folder.
+This should build all documentation and place it in the `docs` folder of your build directory.
 
 # Getting Started 
 The simplest way to get started with Maxwell is the include the `Maxwell.hpp` header in your source code. This header provides access to all types in Maxwell. For convenience, you may wish to add a using declaration for Maxwell as well. 

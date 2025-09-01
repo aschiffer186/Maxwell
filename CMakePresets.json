@@ -53,7 +53,7 @@
             "configurePreset": "ninja-with-docs",
             "configuration": "Release",
             "targets": [
-                "docs"
+                "doxygen"
             ]
         }
     ],
