@@ -93,6 +93,10 @@ constexpr struct meter_per_second_unit_type
     : make_derived_unit_t<isq::velocity, "m/s"> {
 } meter_per_second_unit;
 
+constexpr struct meter_per_second_per_second_unit_type
+    : make_derived_unit_t<isq::acceleration, "m/s^2"> {
+} meter_per_second_per_second_unit;
+
 template <typename T = double>
 using meter = quantity_value<meter_unit, isq::length, T>;
 
@@ -144,6 +148,10 @@ using newton_meter = quantity_value<newton_meter_unit, isq::torque, T>;
 template <typename T = double>
 using meter_per_second =
     quantity_value<meter_per_second_unit, isq::velocity, T>;
+
+template <typename T = double>
+using meter_per_second_per_second =
+    quantity_value<meter_per_second_per_second_unit, isq::acceleration, T>;
 
 /// \namespace maxwell::si::symbols
 /// \brief Convenience symbols for creating units

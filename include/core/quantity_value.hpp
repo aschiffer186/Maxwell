@@ -90,6 +90,11 @@ template <typename T>
 concept quantity_value_like = is_quantity_value_v<T>;
 
 struct _quantity_value_operators {
+  friend constexpr quantity_value_like auto
+  operator-(const quantity_value_like auto& q) {
+    return std::remove_cvref_t<decltype(q)>(-q.get_value());
+  }
+
   friend constexpr quantity_value_like auto&
   operator++(quantity_value_like auto& q) {
     ++q.value_;

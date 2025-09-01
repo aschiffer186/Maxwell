@@ -1,5 +1,6 @@
 #include "Maxwell.hpp"
 
+#include <concepts>
 #include <gtest/gtest.h>
 #include <type_traits>
 
@@ -75,4 +76,14 @@ TEST(TestQuantityValue, TestValueConstructor) {
   EXPECT_EQ(q2.get_units(), si::meter_unit);
   EXPECT_EQ(nothrow_tattle::copy_ctor_count, start_copy_ctor_count + 1);
   EXPECT_EQ(nothrow_tattle::move_ctor_count, start_move_ctor_count + 1);
+}
+
+TEST(TestQuantityValue, TestConversionOperator) {
+  using test_type1 = si::meter<>;
+  using test_type2 = si::number<>;
+  using test_type3 = si::radian<>;
+
+  EXPECT_FALSE((std::convertible_to<test_type1, double>));
+  EXPECT_TRUE((std::convertible_to<test_type2, double>));
+  EXPECT_FALSE((std::convertible_to<test_type3, double>));
 }

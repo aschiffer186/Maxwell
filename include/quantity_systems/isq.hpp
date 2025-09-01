@@ -110,6 +110,10 @@ constexpr struct velocity_quantity_type
     : make_derived_quantity_t<"Velocity", length / time, false> {
 } velocity;
 
+constexpr struct acceleration_quantity_type
+    : make_derived_quantity_t<"Acceleration", velocity / time, false> {
+} acceleration;
+
 // --- Convenience Concepts ---
 // template <typename Q>
 // concept length = quantity_convertible_to<Q::quantity_kind, length_quantity>;

@@ -42,13 +42,47 @@
     ],
     "testPresets": [
         {
-            "name": "default",
+            "name": "ninja",
             "configuration": "Debug",
             "configurePreset": "ninja",
-            "displayName": "Run Tests",
+            "displayName": "Run Tests built using Ninja",
             "output": {
                 "outputOnFailure": true
             }
+        }
+    ],
+    "workflowPresets": [
+        {
+            "name": "ninja-debug",
+            "description": "Ninja",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "ninja"
+                },
+                {
+                    "type": "build",
+                    "name": "ninja-debug"
+                },
+                {
+                    "type": "test",
+                    "name": "ninja"
+                }
+            ]
+        },
+        {
+            "name": "ninja-release",
+            "description": "Ninja Release",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "ninja"
+                },
+                {
+                    "type": "build",
+                    "name": "ninja-release"
+                }
+            ]
         }
     ]
 }

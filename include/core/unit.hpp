@@ -259,7 +259,7 @@ constexpr unit auto quecto_unit =
     prefixed_unit_t<quecto_prefix, U, utility::template_string{"q"} + U.name>{};
 
 template <auto U>
-concept unitless = quantity_convertible_to<U.quantity, number> && !_detail::has_derived_base<decltype(U)>::value;
+concept unitless = quantity_convertible_to<U.quantity, number> && !_detail::has_derived_base<decltype(U.quantity)>::value;
 
 template <auto Lhs, auto Rhs>
 concept unit_comparable_with = unit_convertible_to<Lhs, Rhs> && Lhs.reference == Rhs.reference;
