@@ -1,8 +1,9 @@
-add_executable(compile_check compile_check.cpp)
-target_link_libraries(compile_check PRIVATE Maxwell)
-
 find_package(GTest REQUIRED)
 include(CTest)
+
+# Dummy file for clang-tidy
+add_executable(clang-tidy-check clang-tidy-check.cpp)
+target_link_libraries(clang-tidy-check PRIVATE Maxwell)
 
 add_executable(test_template_string test_template_string.cpp)
 add_test(NAME TestTemplateString COMMAND test_template_string)

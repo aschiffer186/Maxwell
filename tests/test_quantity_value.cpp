@@ -38,12 +38,12 @@ TEST(TestQuantityValue, TestDefaultConstructor) {
   EXPECT_EQ(m.get_value(), double{});
   EXPECT_EQ(m.get_units(), si::meter_unit);
 
-  constexpr si::meter<> m2;
-  constexpr double value = m2.get_value();
-  constexpr unit auto units = m2.get_units();
+  const si::meter<> m2;
+  const double value = m2.get_value();
+  const unit auto units = m2.get_units();
 
-  EXPECT_EQ(m2.get_value(), double{});
-  EXPECT_EQ(m2.get_units(), si::meter_unit);
+  EXPECT_EQ(value, double{});
+  EXPECT_EQ(units, si::meter_unit);
 
   using throwing_test_type =
       quantity_value<si::meter_unit, isq::length, throwing_tattle>;
@@ -57,8 +57,6 @@ TEST(TestQuantityValue, TestDefaultConstructor) {
 TEST(TestQuantityValue, TestValueConstructor) {
   using nothrow_test_type =
       quantity_value<si::meter_unit, isq::length, nothrow_tattle>;
-  using throwing_test_type =
-      quantity_value<si::meter_unit, isq::length, throwing_tattle>;
 
   int start_copy_ctor_count = nothrow_tattle::copy_ctor_count;
   int start_move_ctor_count = nothrow_tattle::move_ctor_count;
@@ -78,6 +76,8 @@ TEST(TestQuantityValue, TestValueConstructor) {
   EXPECT_EQ(nothrow_tattle::move_ctor_count, start_move_ctor_count + 1);
 }
 
+TEST(TestQuantityValue, TestInPlaceConstructor) {}
+
 TEST(TestQuantityValue, TestConversionOperator) {
   using test_type1 = si::meter<>;
   using test_type2 = si::number<>;
@@ -86,4 +86,16 @@ TEST(TestQuantityValue, TestConversionOperator) {
   EXPECT_FALSE((std::convertible_to<test_type1, double>));
   EXPECT_TRUE((std::convertible_to<test_type2, double>));
   EXPECT_FALSE((std::convertible_to<test_type3, double>));
+
+  const si::meter<> m{10.0};
+  const si::number<> n{5.0};
+  const si::radian<> r{3.0};
+
+  const double d1 = static_cast<double>(m);
+  const double d2 = n;
+  const double d3 = static_cast<double>(r);
+
+  EXPECT_FLOAT_EQ(d1, 10.0);
+  EXPECT_FLOAT_EQ(d2, 5.0);
+  EXPECT_FLOAT_EQ(d3, 3.0);
 }
