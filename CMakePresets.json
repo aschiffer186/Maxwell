@@ -72,8 +72,8 @@
     ],
     "workflowPresets": [
         {
-            "name": "ninja-debug",
-            "description": "Ninja",
+            "name": "run-tests",
+            "description": "Run Unit Tests",
             "steps": [
                 {
                     "type": "configure",
