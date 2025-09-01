@@ -33,7 +33,7 @@ if (BUILD_DOCS)
     )
 
     set(SPHINX_SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/docs)
-    set(SPHINX_BUILD ${CMAKE_CURRENT_BINARY_DIR}/sphinx)
+    set(SPHINX_BUILD ${CMAKE_CURRENT_BINARY_DIR}/documentation)
 
     add_custom_target(sphinx
                   COMMAND

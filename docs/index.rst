@@ -14,8 +14,10 @@ compile-time, ensuring dimensional correctness in calculations.
    This project is under active development
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
    :caption: Contents:
-   
+
+   installation.rst
    users_guide.rst
+  
 
