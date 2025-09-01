@@ -24,10 +24,12 @@
             }
         },
         {
-            "name": "ninja-with-docs",
-            "inherits": "ninja",
+            "name": "configure-docs",
+            "displayName": "Configure Documentation",
+            "binaryDir": "build/docs",
             "cacheVariables": {
-                "BUILD_DOCS": "On"
+                "BUILD_DOCS": "On",
+                "BUILD_EXAMPLES": "Off"
             }
         }
     ],
@@ -47,12 +49,12 @@
             "description": "Release build using Ninja on Linux with GCC/clang"
         },
         {
-            "name": "docs-ninja",
+            "name": "build-docs",
             "displayName": "Documentation",
             "description": "Build documentation",
-            "configurePreset": "ninja-with-docs",
-            "configuration": "Release",
+            "configurePreset": "configure-docs",
             "targets": [
+                "sphinx",
                 "doxygen"
             ]
         }
@@ -108,11 +110,11 @@
             "steps": [
                 {
                     "type": "configure",
-                    "name": "ninja-with-docs"
+                    "name": "configure-docs"
                 },
                 {
                     "type": "build",
-                    "name": "docs-ninja"
+                    "name": "build-docs"
                 }
             ]
         }

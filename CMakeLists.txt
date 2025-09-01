@@ -19,22 +19,28 @@ if (BUILD_EXAMPLES)
 endif()
 
 if (BUILD_DOCS)
-    include(cmake/FindSphinx.cmake)
-    include(cmake/AddSphinxDocument.cmake)
     find_package(Doxygen REQUIRED)
+    include(cmake/FindSphinx.cmake)
+
+    set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 
     set(DOXYGEN_INPUT ${CMAKE_CURRENT_LIST_DIR}/include)
-    set(DOXYGEN_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/docs)
+    set(DOXYGEN_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/doxygen)
 
     doxygen_add_docs(doxygen 
         ${DOXYGEN_INPUT}
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include
-        )
+    )
 
-    set(SPHINX_SOURCES "")
-    file(GLOB_RECURSE SPHINX_SOURCES docs/*.rst)
+    set(SPHINX_SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/docs)
+    set(SPHINX_BUILD ${CMAKE_CURRENT_BINARY_DIR}/sphinx)
 
-    # add_sphinx_document(docs CONF_FILE ${CMAKE_CURRENT_LIST_DIR}/conf.py ${SPHINX_SOURCES})
+    add_custom_target(sphinx
+                  COMMAND
+                  ${SPHINX_EXECUTABLE} -b html
+                  ${SPHINX_SOURCE} ${SPHINX_BUILD}
+                  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+                  COMMENT "Generating documentation with Sphinx")
 endif()
 
 include (GNUInstallDirs)

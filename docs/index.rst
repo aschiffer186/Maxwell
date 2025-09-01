@@ -10,7 +10,12 @@ Maxwell is a strongly typed units library for C++20 and later standards.
 It enables compile-time checking of units and automatic unit conversions at 
 compile-time, ensuring dimensional correctness in calculations.
 
+.. note::
+   This project is under active development
+
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
+   
+   users_guide.rst
 
