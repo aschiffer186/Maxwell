@@ -116,6 +116,26 @@ TEST(TestQuantityValue, TestChronoConstructor) {
   EXPECT_FLOAT_EQ(q2.get_value(), expected_value.count());
 }
 
+TEST(TestQuantityValue, TestConvertingConstructor) {
+  kilo<si::meter<>> km{1.0};
+  si::meter<> m{km};
+  kilo<si::meter<>> km2{m};
+  nano<si::meter<>> nm{km};
+  si::meter<> m2{nm};
+
+  EXPECT_FLOAT_EQ(m.get_value(), 1000.0);
+  EXPECT_FLOAT_EQ(km2.get_value(), 1.0);
+  EXPECT_FLOAT_EQ(nm.get_value(), 1e9 * 1e3);
+  EXPECT_FLOAT_EQ(m2.get_value(), 1000.0);
+
+  milli<si::radian<>> mr{500.0};
+  si::degree<> deg{mr};
+  milli<si::radian<>> mr2{deg};
+
+  EXPECT_NEAR(deg.get_value(), 28.64788975654116, 1e-5);
+  EXPECT_FLOAT_EQ(mr2.get_value(), 500.0);
+}
+
 TEST(TestQuantityValue, TestConversionOperator) {
   using test_type1 = si::meter<>;
   using test_type2 = si::number<>;

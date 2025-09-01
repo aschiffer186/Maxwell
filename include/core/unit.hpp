@@ -176,7 +176,7 @@ public:
   // clang-format off
 
   using type = unit_type<Name, U.quantity,
-                pow(Prefix, U.quantity.dimensions.dimension_exponent_sum()) *
+                pow(Prefix, U.quantity.dimension_sum()) *
                     U.multiplier>;
   
   // clang-format on 

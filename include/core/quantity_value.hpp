@@ -506,12 +506,35 @@ public:
   }
 
   /// \brief Converting constructor
+  ///
+  /// Constructs an instance of \c quantity_value from another instance of \c
+  /// quantity_value with different units, automatically converting from \c
+  /// FromUnit to \c ToUnit. The conversion factor is calculated at
+  /// compile-time. In this constructor, an lvalue-reference to the numerical
+  /// value of \c other is passed to the conversion function.
+  ///
+  /// This function only participates in overload resolution if the following
+  /// are true:
+  /// 1. <tt>std::is_constructible_from_v<T, Up></tt> is \c true.
+  /// 2. \c unit<decltype(FromUnit)> is \c true.
+  /// 3. \c quantity<decltype(FromQuantity)> is \c true.
+  ///
+  /// The program is ill-formed if \c other represents a quantity that cannot be
+  /// converted to the \c quantity_value being constructed from.
+  ///
+  /// \tparam FromQuantity The quantity of the other \c quantity_value instance.
+  /// \tparam FromUnit The units of the other \c quantity_value instance.
+  /// \tparam Up The type of the numerical value of the other \c quantity_value
+  /// instance.
+  /// \param other The other \c quantity_value instance to convert from.
+  /// \throws Any exceptions thrown by the selected constructor of \c T
   template <auto FromQuantity, auto FromUnit, typename Up = T>
-    requires std::constructible_from<T, Up> && unit<decltype(FromUnit)>
+    requires std::constructible_from<T, Up> && unit<decltype(FromUnit)> &&
+             quantity<decltype(FromQuantity)>
   constexpr quantity_value(
       const quantity_value<FromUnit, FromQuantity, Up>& other)
       : value_(other.get_value() *
-               utility::as_constant<conversion_factor(FromUnit, U)>) {
+               /*utility::as_constant<*/ conversion_factor(FromUnit, U) /*>*/) {
     static_assert(unit_convertible_to<FromUnit, U>,
                   "Units of other cannot be converted to units of value being "
                   "constructed");
@@ -521,8 +544,32 @@ public:
         "quantities can be incompatible even if they have te same units.");
   }
 
+  /// \brief Converting constructor
+  ///
+  /// Constructs an instance of \c quantity_value from another instance of \c
+  /// quantity_value with different units, automatically converting from \c
+  /// FromUnit to \c ToUnit. The conversion factor is calculated at
+  /// compile-time. In this constructor, an rvalue-reference to the numerical
+  /// value of \c other is passed to the conversion function.
+  ///
+  /// This function only participates in overload resolution if the following
+  /// are true:
+  /// 1. <tt>std::is_constructible_from_v<T, Up></tt> is \c true.
+  /// 2. \c unit<decltype(FromUnit)> is \c true.
+  /// 3. \c quantity<decltype(FromQuantity)> is \c true.
+  ///
+  /// The program is ill-formed if \c other represents a quantity that cannot be
+  /// converted to the \c quantity_value being constructed from.
+  ///
+  /// \tparam FromQuantity The quantity of the other \c quantity_value instance.
+  /// \tparam FromUnit The units of the other \c quantity_value instance.
+  /// \tparam Up The type of the numerical value of the other \c quantity_value
+  /// instance.
+  /// \param other The other \c quantity_value instance to convert from.
+  /// \throws Any exceptions thrown by the selected constructor of \c T
   template <auto FromQuantity, auto FromUnit, typename Up = T>
-    requires std::constructible_from<T, Up> && unit<decltype(FromUnit)>
+    requires std::constructible_from<T, Up> && unit<decltype(FromUnit)> &&
+             quantity<decltype(FromQuantity)>
   constexpr quantity_value(
       quantity_value<FromUnit, FromQuantity, Up>&& other) noexcept
       : value_(std::move(other).get_value() *

@@ -18,7 +18,6 @@ template <auto Value> constexpr auto as_constant = Value;
 
 template <typename T, typename U>
 concept similar = std::same_as<std::remove_cvref_t<T>, std::remove_cvref_t<U>>;
-
 } // namespace maxwell::utility
 
 namespace maxwell {

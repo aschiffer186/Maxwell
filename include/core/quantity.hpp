@@ -12,15 +12,58 @@
 #include "utility/template_string.hpp"
 
 namespace maxwell {
+constexpr auto number_kind = utility::template_string{"[]"};
+
+/// \brief Represents a physical quantity.
+///
+/// Class template \c quantity_type represents a physical quantity as defined
+/// in ISQ-80000.
+/// The \c quantity_type class template is the main class involved in the
+/// compile-time verification of units in Maxwell.
+/// When two instances of \c quantity_type do not model \c
+/// quantity_convertible_to, it is not possible to assign them to each other,
+/// compare them, or add or subtract them.
+///
+/// An instance of \c quantity_type can represent a base quantity or a derived
+/// quantity. 
+/// If it is a base quantity, it will have a dimension of one for
+/// exactly one base quantity and zero for all others. 
+/// Derived quantities can be created using the \c make_derived_quantity_t type alias. 
+/// This allows for creating quantities from other quantities using arithmetic operations and for creating derived quantities
+///  with the same dimensions as but incompatible with the base quantity.
+///
+/// \tparam Kind A string representing the kind of the quantity.
+/// \tparam Dim The dimensions of the quantity.
+/// \tparam Derived Whether the quantity is a user-defined derived quantity.
 template <utility::template_string Kind, auto Dim, bool Derived>
   requires dimension_product<decltype(Dim)>
 struct quantity_type {
+  /// The dimensions of the quantity.
   constexpr static dimension_product auto dimensions = Dim;
+  /// The kind of the quantity.
   constexpr static auto kind = Kind;
+  /// A flag indicating if the quantity is a user-defined derived quantity.
   constexpr static bool derived = Derived;
+
+  /// \brief Returns the sum of the exponents of quantity's dimensions.
+  ///
+  /// Returns the sum of the exponents of the quantity's dimensions. Note,
+  /// if this is a derived quantity, this function will never return zero
+  /// even if the quantity has dimensions of number.
+  ///
+  /// \brief Return the sum of the exponents of the quantity's dimensions.
+  constexpr static utility::rational auto dimension_sum() {
+    constexpr utility::rational auto sum_temp =
+        dimensions.dimension_exponent_sum();
+    if constexpr ((sum_temp == utility::zero) && (Kind != number_kind)) {
+      return utility::one;
+    } else {
+      return sum_temp;
+    }
+  }
 };
 
-constexpr quantity_type<"[]", dimension_one, false> number;
+constexpr quantity_type<number_kind, dimension_one, false> number;
 
 template <utility::template_string Kind, auto Dim, bool Derived>
 auto quantity_base(quantity_type<Kind, Dim, Derived>)

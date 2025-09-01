@@ -1,8 +1,25 @@
 #include "Maxwell.hpp"
+#include "core/quantity.hpp"
+#include "quantity_systems/isq.hpp"
 
 #include <gtest/gtest.h>
 
 using namespace maxwell;
+
+TEST(TestQuantity, TestDimensionSum) {
+  const auto sum1 = isq::length.dimension_sum();
+
+  EXPECT_EQ(sum1, utility::one);
+
+  const auto sum2 = isq::area.dimension_sum();
+  EXPECT_EQ(sum2, (utility::rational_type<2, 1, 0>{}));
+
+  const auto sum3 = isq::volume.dimension_sum();
+  EXPECT_EQ(sum3, (utility::rational_type<3, 1, 0>{}));
+
+  const auto sum4 = isq::plane_angle.dimension_sum();
+  EXPECT_EQ(sum4, utility::one);
+}
 
 TEST(TestQuantity, TestQuantityConvertibleTo) {
   using test_system = quantity_system<"A", "B">;
