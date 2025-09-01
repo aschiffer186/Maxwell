@@ -76,7 +76,45 @@ TEST(TestQuantityValue, TestValueConstructor) {
   EXPECT_EQ(nothrow_tattle::move_ctor_count, start_move_ctor_count + 1);
 }
 
-TEST(TestQuantityValue, TestInPlaceConstructor) {}
+TEST(TestQuantityValue, TestInPlaceConstructor) {
+  using test_type = si::meter<nothrow_tattle>;
+
+  int value_ctor_count = nothrow_tattle::value_ctor_count;
+  int move_ctor_count = nothrow_tattle::move_ctor_count;
+  int copy_ctor_count = nothrow_tattle::copy_ctor_count;
+  int il_ctor_count = nothrow_tattle::il_ctor_count;
+
+  test_type q{std::in_place, 1.0, 2.0};
+
+  EXPECT_FLOAT_EQ(q.get_value().value, 3.0);
+  EXPECT_EQ(nothrow_tattle::value_ctor_count, value_ctor_count + 1);
+  EXPECT_EQ(nothrow_tattle::move_ctor_count, move_ctor_count);
+  EXPECT_EQ(nothrow_tattle::copy_ctor_count, copy_ctor_count);
+  EXPECT_EQ(nothrow_tattle::il_ctor_count, il_ctor_count);
+
+  test_type q2{std::in_place, {1.0, 2.0, 3.0}};
+
+  EXPECT_FLOAT_EQ(q2.get_value().value, 6.0);
+  EXPECT_EQ(nothrow_tattle::value_ctor_count, value_ctor_count + 1);
+  EXPECT_EQ(nothrow_tattle::il_ctor_count, il_ctor_count + 1);
+  EXPECT_EQ(nothrow_tattle::move_ctor_count, move_ctor_count);
+  EXPECT_EQ(nothrow_tattle::copy_ctor_count, copy_ctor_count);
+}
+
+TEST(TestQuantityValue, TestChronoConstructor) {
+  using namespace std::chrono_literals;
+
+  milli<si::second<>> q1{1s};
+
+  using from_type = std::chrono::duration<double, std::ratio<27, 36>>;
+  using to_type = std::chrono::duration<double, std::nano>;
+
+  to_type expected_value = from_type(1s);
+  nano<si::second<>> q2{from_type(1s)};
+
+  EXPECT_FLOAT_EQ(q1.get_value(), 1000.0);
+  EXPECT_FLOAT_EQ(q2.get_value(), expected_value.count());
+}
 
 TEST(TestQuantityValue, TestConversionOperator) {
   using test_type1 = si::meter<>;

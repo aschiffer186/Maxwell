@@ -1,6 +1,7 @@
 # Overview
 Maxwell is a strongly typed units library for C++20 and later standards based on the ISQ 80000 units specification. It provides compile-time checking of and conversion between units. 
 
+This README focuses on how to use Maxwell. For a more detailed description, build the Doxygen target.
 # Installation 
 The easiest way to install Maxwell is by cloning the repo and using the CMake install command. 
 Once you have cloned the repo, run the following commands inside the folder where you cloned the repo
@@ -29,6 +30,13 @@ cmake -DBUILD_TESTS=On ..
 cmake --build . --config Debug
 ctest -C debug .
 ```
+
+## Building Documentation
+Building documentation can be down using the "build-docs" workflow. From the main Maxwell directory run the following command: 
+```
+cmake --workflow --preset build-docs
+```
+This should build all documentation and place it in the `doc` folder.
 
 # Getting Started 
 The simplest way to get started with Maxwell is the include the `Maxwell.hpp` header in your source code. This header provides access to all types in Maxwell. For convenience, you may wish to add a using declaration for Maxwell as well. 
@@ -153,6 +161,14 @@ auto q3 = 100.0 * kg * s / (A * C); // q3 represents 100.0 kg * s * A^-1 * C^-1
 
 > [!WARNING]
 > When using symbols, if an integer literal is used with the `auto` keyword, the underlying quantity will have an integral type.
+
+### Constructing from Standard Library Types
+Instancesf of `quantity_value` that represent time can be implicitly converted from instances of `std::chrono::duration`. 
+```c++
+using namespace std::chrono_literals;
+maxwell::milli<maxwell::si::second<>> q{std::chrono::seconds(1)}; // Ok - 1000 millisecond
+maxwell::si::hour<> q2 = 1_m; // Ok - 1/60 hour
+```
 
 ## Operations on Quantity Values
 All instances of `quantity_value` implement all build-in arithmetic operations (+, -, *, /, %) if the underlying type supports the arithmetic operations. 

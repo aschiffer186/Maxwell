@@ -3,5 +3,5 @@ build/*
 .cache/*
 notes/*
 
-html/*
-latex/*
+doc/html/*
+doc/latex/*

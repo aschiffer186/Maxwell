@@ -1,18 +1,27 @@
 #ifndef TEST_TYPES_HPP
 #define TEST_TYPES_HPP
 
+#include <initializer_list>
+#include <numeric>
+
 template <bool Nothrow> struct tattle {
   static inline int copy_ctor_count = 0;
   static inline int move_ctor_count = 0;
   static inline int copy_assign_count = 0;
   static inline int move_assign_count = 0;
   static inline int value_ctor_count = 0;
+  static inline int il_ctor_count = 0;
 
   constexpr tattle() noexcept(Nothrow) {}
 
   explicit constexpr tattle(double v1, double v2) noexcept(Nothrow)
       : value(v1 + v2) {
     ++value_ctor_count;
+  }
+
+  explicit constexpr tattle(std::initializer_list<double> il) noexcept(Nothrow)
+      : value(std::accumulate(il.begin(), il.end(), 0.0)) {
+    ++il_ctor_count;
   }
 
   constexpr tattle(const tattle& other) noexcept(Nothrow) : value(other.value) {

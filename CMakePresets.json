@@ -22,6 +22,13 @@
                 "CMAKE_CXX_FLAGS_RELEASE": "-O2 -DNDEBUG",
                 "BUILD_TESTS": "On"
             }
+        },
+        {
+            "name": "ninja-with-docs",
+            "inherits": "ninja",
+            "cacheVariables": {
+                "BUILD_DOCS": "On"
+            }
         }
     ],
     "buildPresets": [
@@ -38,6 +45,16 @@
             "configurePreset": "ninja",
             "displayName": "Ninja Release",
             "description": "Release build using Ninja on Linux with GCC/clang"
+        },
+        {
+            "name": "docs-ninja",
+            "displayName": "Documentation",
+            "description": "Build documentation",
+            "configurePreset": "ninja-with-docs",
+            "configuration": "Release",
+            "targets": [
+                "docs"
+            ]
         }
     ],
     "testPresets": [
@@ -72,7 +89,7 @@
         },
         {
             "name": "ninja-release",
-            "description": "Ninja Release",
+            "displayName": "Ninja Release",
             "steps": [
                 {
                     "type": "configure",
@@ -81,6 +98,21 @@
                 {
                     "type": "build",
                     "name": "ninja-release"
+                }
+            ]
+        },
+        {
+            "name": "build-docs",
+            "displayName": "Build Docs",
+            "description": "Build documentation",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "ninja-with-docs"
+                },
+                {
+                    "type": "build",
+                    "name": "docs-ninja"
                 }
             ]
         }

@@ -47,15 +47,6 @@ constexpr bool enable_chrono_conversions_v =
 ///
 /// \tparam Q The quantity to find the units of.
 template <typename Q> constexpr auto units_of = Q::units;
-
-/// \brief Trait to return the value type of a quantity
-///
-/// Returns the value type of a quantity.
-/// This helpts prevent formatting functions from being dependent
-/// on quantity headers.
-///
-/// \tparam Q The quantity to find the units of.
-template <typename Q> using value_type_t = Q::value_type;
 } // namespace maxwell
 
 #endif

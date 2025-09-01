@@ -23,40 +23,6 @@
 #include "utility/type_traits.hpp"
 
 namespace maxwell {
-/// \brief Class template representing the value of a quantity with a particular
-/// unit.
-///
-/// Class template \c quantity_value represents the value of a quantity
-/// expressed in a particular unit. Both the quantity and unit of the \c
-/// quantity_value are specified at compile-time and are part of the type of the
-/// \c quantity_value. By making the quantity and unit part of the type of the
-/// \c quantity_value, unit coherence can be verified at compile-time. It is not
-/// permited to mix instances of \c quantity_value representing different
-/// quantities. However, two \c quantity_value instances may have the same unit,
-/// but represent different quantities, e.g. length and wavelength can both be
-/// expressed in nanometers, but may represent different quantities. This allows
-/// for an additional level of type safety. <br>
-///
-/// By making the unit part of the type, unit conversions can be performed
-/// automatically at compile-time rather than run-time. This makes the library
-/// extremely efficient. <br>
-///
-/// Both the units and the quantity of the \c quantity_value are specified as
-/// non-type template parameters (NTTPs).
-/// Using NTTPs allows for more natural definitions of custom units and
-/// definitions.
-///
-/// \warning Using an integral type with \c quantity_value will perform
-/// truncation when converting units and integer division when performing
-/// division.
-///
-/// \pre \c Q is convertible to the quantity of the specified units \c U.
-///       The program is ill-formed if this is violated.
-///
-/// \tparam U The units of the \c quantity_value.
-/// \tparam Q The quantity of the \c quantity_value. Default: the quantity of
-/// the units.
-/// \tparam T The type of the \c quantity_value. Default: \c double.
 template <auto U, auto Q = U.quantity, typename T = double>
   requires unit<decltype(U)> && quantity<decltype(Q)>
 class quantity_value;
@@ -76,6 +42,7 @@ struct std::formatter<maxwell::quantity_value<U, Q, T>>
 };
 
 namespace maxwell {
+/// \cond
 namespace _detail {
 template <typename> struct is_quantity_value : std::false_type {};
 
@@ -88,8 +55,16 @@ constexpr bool is_quantity_value_v =
 
 template <typename T>
 concept quantity_value_like = is_quantity_value_v<T>;
+/// \endcond
 
+/// \brief Provides operator overloads for `quantity_value` instances.
 struct _quantity_value_operators {
+  /// \brief Negaton operator
+  ///
+  /// Negates the value of a `quantity_value` instance.
+  ///
+  /// \param q The quantity value instance to negate
+  /// \return The negated value of the `quantity_value` instance.
   friend constexpr quantity_value_like auto
   operator-(const quantity_value_like auto& q) {
     return std::remove_cvref_t<decltype(q)>(-q.get_value());
@@ -334,8 +309,51 @@ struct quantity_value_output {
     return os;
   }
 };
+
+/// \cond
+template <utility::ratio From, unit To>
+constexpr double chrono_conversion_factor(From, To) {
+  const double from_value =
+      static_cast<double>(From::num) / static_cast<double>(From::den);
+  return from_value / static_cast<double>(To::multiplier);
+}
+/// \endcond
 } // namespace _detail
 
+/// \brief Class template representing the value of a quantity with a particular
+/// unit.
+///
+/// Class template \c quantity_value represents the value of a quantity
+/// expressed in a particular unit. Both the quantity and unit of the \c
+/// quantity_value are specified at compile-time and are part of the type of the
+/// \c quantity_value. By making the quantity and unit part of the type of the
+/// \c quantity_value, unit coherence can be verified at compile-time. It is not
+/// permited to mix instances of \c quantity_value representing different
+/// quantities. However, two \c quantity_value instances may have the same unit,
+/// but represent different quantities, e.g. length and wavelength can both be
+/// expressed in nanometers, but may represent different quantities. This allows
+/// for an additional level of type safety. <br>
+///
+/// By making the unit part of the type, unit conversions can be performed
+/// automatically at compile-time rather than run-time. This makes the library
+/// extremely efficient. <br>
+///
+/// Both the units and the quantity of the \c quantity_value are specified as
+/// non-type template parameters (NTTPs).
+/// Using NTTPs allows for more natural definitions of custom units and
+/// definitions.
+///
+/// \warning Using an integral type with \c quantity_value will perform
+/// truncation when converting units and integer division when performing
+/// division.
+///
+/// \pre \c Q is convertible to the quantity of the specified units \c U.
+///       The program is ill-formed if this is violated.
+///
+/// \tparam U The units of the \c quantity_value.
+/// \tparam Q The quantity of the \c quantity_value. Default: the quantity of
+/// the units.
+/// \tparam T The type of the \c quantity_value. Default: \c double.
 template <auto U, auto Q, typename T>
   requires unit<decltype(U)> && quantity<decltype(Q)>
 class quantity_value : _detail::_quantity_value_operators,
@@ -364,7 +382,11 @@ public:
   /// This constructor only participates in overload resolution if
   /// \c std::is_default_constructible_v<T> is \c true.
   ///
+  /// This constructor is a \c constexpr constructor if the default constructor
+  /// of \c T is a constexpr constructor.
+  ///
   /// \pre \c T is default constructible.
+  /// \throw Any exceptions thrown by the default constructor of \c T.
   constexpr quantity_value()
     requires std::is_default_constructible_v<T>
   = default;
@@ -379,12 +401,16 @@ public:
   ///
   /// This constructor is explicit if either of the following is \c false
   ///   1. <tt>std::convertible_to<Up, T></tt>
-  ///   2.  <tt>unitless<U></tt> is true
+  ///   2. \c unitless<U> is true
+  ///
+  /// This constructor is a \c constexpr constructor if the selected constructor
+  /// of \c T is a constexpr constructor.
   ///
   /// \pre <tt>std::is_constructible_from_v<T, Up></tt> is \c true and
   ///      \c Up is not an instantiation of \c quantity_value.
   ////
   /// \param value The value used to initialize the \c quantity_value.
+  /// \throw Any exceptions thrown by the selected constructor of \c T.
   template <typename Up = T>
     requires std::constructible_from<T, Up> &&
              (!_detail::is_quantity_value_v<Up>)
@@ -392,11 +418,50 @@ public:
       quantity_value(Up&& value)
       : value_(std::forward<Up>(value)) {}
 
+  /// \brief Constructor
+  ///
+  /// Constructs the numerical value of the \c quantity_value in place
+  /// from \c std::forward<Args>(args)...
+  /// This constructor only participates in overload resolution if
+  /// 1. <tt>std::is_constructible_from_v<T, Args...></tt> is \c true.
+  ///
+  /// This constructor is a \c constexpr constructor if the selected constructor
+  /// of \c T is a constexpr constructor.
+  ///
+  /// \pre <tt>std::is_constructible_from_v<T, Args...></tt> is \c true.
+  ///
+  /// \tparam Args The types of the arguments used to construct the numerical
+  /// value of the quantity.
+  /// \param args The arguments used to construct the numerical value of the
+  /// quantity.
+  /// \throw Any exceptions thrown by the selected constructor of \c T.
   template <typename... Args>
     requires std::constructible_from<T, Args...>
   constexpr explicit quantity_value(std::in_place_t, Args&&... args)
       : value_(std::forward<Args>(args)...) {}
 
+  /// \brief Constructor
+  ///
+  /// Constructs the numerical value of the \c quantity_value in place
+  /// from \c std::forward<Args>(args)...
+  /// This constructor only participates in overload resolution if
+  /// 1. <tt>std::is_constructible_from_v<T, std::initializer_list<Up>&,
+  /// Args...></tt> is \c true.
+  ///
+  /// This constructor is a \c constexpr constructor if the selected constructor
+  /// of \c T is a constexpr constructor.
+  ///
+  /// \pre <tt>std::is_constructible_from_v<T, std::initializer_list<Up>&,
+  /// Args...></tt> is \c true.
+  ///
+  /// \tparam Up The type of the values in the initializer list
+  /// \tparam Args The types of the arguments used to construct the numerical
+  /// value of the quantity.
+  /// \param il The initializer list used to construct the numerical value of
+  /// the quantity.
+  /// \param args The arguments used to construct the numerical value of the
+  /// quantity.
+  /// \throw Any exceptions thrown by the selected constructor of \c T.
   template <typename Up, typename... Args>
     requires std::constructible_from<T, std::initializer_list<Up>&, Args...>
   constexpr explicit quantity_value(std::in_place_t,
@@ -404,12 +469,43 @@ public:
                                     Args&&... args)
       : value_(il, std::forward<Args>(args)...) {}
 
+  /// \brief Constructor
+  ///
+  /// Constructs an instance of \c quantity_value from an instance of \c
+  /// std::chrono::duration. Automatically converts the numerical value of the
+  /// \c std::chrono::duration instance to the corresponding value in the units
+  /// of the \c quantity_value instance being constructed.
+  ///
+  /// This constructor only participates in overload resolution if the following
+  /// are true:
+  /// 1. <tt>std::is_constructible_from_v<T, Rep></tt> is \c true.
+  /// 2. \c Period is a valid \c std::ratio.
+  ///
+  /// The program is ill formed if \c enable_chrono_conversions_v<Q>` is \c
+  /// false.
+  ///
+  ///
+  /// \pre \c T is constructible from \c \Rep and \c Period is an instance of \c
+  /// std::ratio and \c Q represents time.
+  ///
+  /// \tparam Rep The representation type of the \c std::chrono::duration
+  /// instance \tparam Period The \c std::ratio type representing the period of
+  /// the \c std::chrono::duration instance
+  /// \param d The duration used to initialize the numerical value of the
+  /// quantity.
+  /// \throws Any exceptions thrown by the selected constructor \c T or
+  /// <tt>std::chrono::duration<Rep, Period>::count()</tt>
   template <typename Rep, typename Period>
-    requires enable_chrono_conversions_v<Q> && std::constructible_from<T, Rep>
-  MAXWELL_CONSTEXPR23 explicit quantity_value(
-      const std::chrono::duration<Rep, Period>& d)
-      : value_(d.count()) {}
+    requires std::constructible_from<T, Rep> && utility::ratio<Period>
+  MAXWELL_CONSTEXPR23
+  quantity_value(const std::chrono::duration<Rep, Period>& d)
+      : value_(_detail::chrono_conversion_factor(Period{}, U) * d.count()) {
+    static_assert(enable_chrono_conversions_v<Q>,
+                  "Attempting to construct a quantity_value that does not "
+                  "represent time from a std::chrono::duration instance");
+  }
 
+  /// \brief Converting constructor
   template <auto FromQuantity, auto FromUnit, typename Up = T>
     requires std::constructible_from<T, Up> && unit<decltype(FromUnit)>
   constexpr quantity_value(

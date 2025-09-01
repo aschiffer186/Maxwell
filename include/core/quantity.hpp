@@ -145,6 +145,19 @@ consteval bool quantity_convertible_to_impl(From, To) noexcept {
 } // namespace _detail
 /// \endcond
 
+/// \brief Concept modeling the convertibility between two quantities.
+///
+/// Concept \c quantity_convertible_to models that a quantity \c From is
+/// convertible to a quantity \c To. \c From is convertible to \c To if
+/// it has the same dimensions as \c To and it is derived from \c To.
+/// Note that the relationship is not symmetric. It is possible for \c From to
+/// be convertible to \c To but not vice versa.
+///
+/// \note
+/// This concept operates on values, not types.
+///
+/// \tparam From The quantity to convert from.
+/// \tparam To The quantity to convert to.
 template <auto From, auto To>
 concept quantity_convertible_to =
     _detail::quantity_convertible_to_impl(From, To);

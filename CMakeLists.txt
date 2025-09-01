@@ -10,11 +10,25 @@ project(Maxwell LANGUAGES CXX VERSION ${MAXWELL_VERSION})
 
 option(BUILD_TESTS "Build unit tests" OFF)
 option(BUILD_EXAMPLES "Build examples" ON)
+option(BUILD_DOCS "Build documentation" OFF)
 
 add_subdirectory(include)
 
 if (BUILD_EXAMPLES)
     add_subdirectory(examples)
+endif()
+
+if (BUILD_DOCS)
+    find_package(Doxygen REQUIRED)
+
+    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/doc/Doxyfile ${CMAKE_CURRENT_SOURCE_DIR}/doc/Doxyfile @ONLY)
+
+    add_custom_target(docs
+        COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/doc/Doxyfile
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/doc
+        COMMENT "Generating API documentation with Doxygen"
+        VERBATIM
+    )
 endif()
 
 include (GNUInstallDirs)
