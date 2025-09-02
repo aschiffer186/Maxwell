@@ -4,6 +4,7 @@ add_library(${PROJECT_NAME} INTERFACE
     ${CMAKE_CURRENT_SOURCE_DIR}/core/quantity_value.hpp
     ${CMAKE_CURRENT_SOURCE_DIR}/core/quantity.hpp
     ${CMAKE_CURRENT_SOURCE_DIR}/core/quantity_system.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/core/scale.hpp
     ${CMAKE_CURRENT_SOURCE_DIR}/core/unit.hpp 
     ${CMAKE_CURRENT_SOURCE_DIR}/formatting/formatting.hpp 
     ${CMAKE_CURRENT_SOURCE_DIR}/math/quantity_limits.hpp 

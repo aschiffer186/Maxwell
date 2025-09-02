@@ -9,23 +9,23 @@ using namespace maxwell;
 using currency_system = quantity_system<"currency">;
 
 constexpr struct dollar_unit_type
-    : make_base_unit_t<currency_system::base_quantity<"currency">{}, "dollar"> {
+    : base_unit<currency_system::base_quantity<"currency">{}, "dollar"> {
 } dollar_unit;
 
 constexpr struct cent_unit_type
-    : make_derived_unit_t<value<100.0> * dollar_unit, "cent"> {
+    : derived_unit<value<100.0> * dollar_unit, "cent"> {
 } cent_unit;
 
 constexpr struct nickel_unit_type
-    : make_derived_unit_t<value<0.2> * cent_unit, "nickel"> {
+    : derived_unit<value<0.2> * cent_unit, "nickel"> {
 } nickel_unit;
 
 constexpr struct dime_unit_type
-    : make_derived_unit_t<value<0.1> * cent_unit, "dime"> {
+    : derived_unit<value<0.1> * cent_unit, "dime"> {
 } dime_unit;
 
 constexpr struct quarter_unit_type
-    : make_derived_unit_t<value<1.0 / 25.0> * cent_unit, "quarter"> {
+    : derived_unit<value<1.0 / 25.0> * cent_unit, "quarter"> {
 } quarter_unit;
 
 using dollar = quantity_value<dollar_unit>;

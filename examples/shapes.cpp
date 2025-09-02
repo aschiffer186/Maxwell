@@ -13,7 +13,7 @@ public:
   // Strongly type radius type, not constructible from length quantity
   template <auto U = si::meter_unit>
   using radius_type =
-      quantity_value<U, make_derived_quantity_t<isq::length, "radius">{}>;
+      quantity_value<U, derived_quantity<isq::length, "radius">{}>;
 
   explicit circle(radius_type<> r) : radius_{r} {}
 
@@ -27,11 +27,11 @@ class rectangle {
 public:
   template <auto U = si::meter_unit>
   using length_type =
-      quantity_value<U, make_derived_quantity_t<isq::length, "length">{}>;
+      quantity_value<U, derived_quantity<isq::length, "length">{}>;
 
   template <auto U = si::meter_unit>
   using width_type =
-      quantity_value<U, make_derived_quantity_t<isq::length, "width">{}>;
+      quantity_value<U, derived_quantity<isq::length, "width">{}>;
 
   explicit rectangle(length_type<> length, width_type<> width)
       : length_(length), width_(width) {}

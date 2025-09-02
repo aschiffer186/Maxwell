@@ -12,44 +12,44 @@
 
 namespace maxwell::si {
 MODULE_EXPORT constexpr struct meter_unit_type
-    : make_base_unit_t<isq::length, "m"> {
+    : base_unit<isq::length, "m"> {
 } meter_unit;
 
 MODULE_EXPORT constexpr struct gram_unit_type
-    : make_base_unit_t<isq::mass, "g"> {
+    : base_unit<isq::mass, "g"> {
 } gram_unit;
 
 MODULE_EXPORT constexpr struct kilogram_unit_type
-    : make_derived_unit_t<kilo_unit<gram_unit>, "kg"> {
+    : derived_unit<kilo_unit<gram_unit>, "kg"> {
 } kilogram_unit;
 
 MODULE_EXPORT constexpr struct second_unit_type
-    : make_base_unit_t<isq::time, "s"> {
+    : base_unit<isq::time, "s"> {
 } second_unit;
 
 MODULE_EXPORT constexpr struct ampere_unit_type
-    : make_base_unit_t<isq::current, "A"> {
+    : base_unit<isq::current, "A"> {
 } ampere_unit;
 
 MODULE_EXPORT constexpr struct kelvin_unit_type
-    : make_base_unit_t<isq::temperature, "K"> {
+    : base_unit<isq::temperature, "K"> {
 } kelvin_unit;
 
 MODULE_EXPORT constexpr struct mole_unit_type
-    : make_base_unit_t<isq::amount, "mol"> {
+    : base_unit<isq::amount, "mol"> {
 } mole_unit;
 
 MODULE_EXPORT constexpr struct candela_unit_type
-    : make_base_unit_t<isq::luminosity, "cd"> {
+    : base_unit<isq::luminosity, "cd"> {
 } candela_unit;
 
 MODULE_EXPORT constexpr struct number_unit_type
-    : make_base_unit_t<isq::dimensionless, "[]"> {
+    : base_unit<isq::dimensionless, "[]"> {
 } number_unit;
 
 // --- SI derived unit types ---
 MODULE_EXPORT constexpr struct radian_unit_type
-    : make_derived_unit_t<isq::plane_angle, "rad"> {
+    : derived_unit<isq::plane_angle, "rad"> {
 } radian_unit;
 
 /// \cond
@@ -60,59 +60,59 @@ constexpr auto kelvin_to_celsius = value<-273.15>;
 /// \endcond
 
 MODULE_EXPORT constexpr struct celsius_unit_type
-    : make_derived_unit_t<kelvin_unit + _detail::kelvin_to_celsius, "°C"> {
+    : derived_unit<kelvin_unit + _detail::kelvin_to_celsius, "°C"> {
 } celsius_unit;
 
 MODULE_EXPORT constexpr struct degree_unit_type
-    : make_derived_unit_t<_detail::rad_to_deg * radian_unit, "deg"> {
+    : derived_unit<_detail::rad_to_deg * radian_unit, "deg"> {
 } degree_unit;
 
 MODULE_EXPORT constexpr struct steradian_unit_type
-    : make_derived_unit_t<isq::solid_angle, "sr"> {
+    : derived_unit<isq::solid_angle, "sr"> {
 } steradian_unit;
 
 MODULE_EXPORT constexpr struct hertz_unit_type
-    : make_derived_unit_t<isq::frequency, "Hz"> {
+    : derived_unit<isq::frequency, "Hz"> {
 } hertz_unit;
 
 MODULE_EXPORT constexpr struct newton_unit_type
-    : make_derived_unit_t<isq::force, "N"> {
+    : derived_unit<isq::force, "N"> {
 } newton_unit;
 
 MODULE_EXPORT constexpr struct pascal_unit_type
-    : make_derived_unit_t<isq::pressure, "Pa"> {
+    : derived_unit<isq::pressure, "Pa"> {
 } pascal_unit;
 
 MODULE_EXPORT constexpr struct joule_unit_type
-    : make_derived_unit_t<isq::work, "J"> {
+    : derived_unit<isq::work, "J"> {
 } joule_unit;
 
 MODULE_EXPORT constexpr struct newton_meter_unit_type
-    : make_derived_unit_t<isq::torque, "N·m"> {
+    : derived_unit<isq::torque, "N·m"> {
 } newton_meter_unit;
 
 MODULE_EXPORT constexpr struct watt_unit_type
-    : make_derived_unit_t<isq::power, "W"> {
+    : derived_unit<isq::power, "W"> {
 } watt_unit;
 
 MODULE_EXPORT constexpr struct coulumb_unit_type
-    : make_derived_unit_t<isq::charge, "C"> {
+    : derived_unit<isq::charge, "C"> {
 } coulumb_unit;
 
 MODULE_EXPORT constexpr struct square_meter_unit_type
-    : make_derived_unit_t<isq::area, "m^2"> {
+    : derived_unit<isq::area, "m^2"> {
 } square_meter_unit;
 
 MODULE_EXPORT constexpr struct cubic_meter_unit_type
-    : make_derived_unit_t<isq::volume, "m^3"> {
+    : derived_unit<isq::volume, "m^3"> {
 } cubic_meter_unit;
 
 MODULE_EXPORT constexpr struct meter_per_second_unit_type
-    : make_derived_unit_t<isq::velocity, "m/s"> {
+    : derived_unit<isq::velocity, "m/s"> {
 } meter_per_second_unit;
 
 MODULE_EXPORT constexpr struct meter_per_second_per_second_unit_type
-    : make_derived_unit_t<isq::acceleration, "m/s^2"> {
+    : derived_unit<isq::acceleration, "m/s^2"> {
 } meter_per_second_per_second_unit;
 
 template <typename T = double>

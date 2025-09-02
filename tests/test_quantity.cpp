@@ -52,9 +52,9 @@ TEST(TestQuantity, TestQuantityConvertibleTo) {
       (quantity_convertible_to<quantity_A / quantity_B, quantity_quot>));
 
   constexpr auto derived_quantity1 =
-      make_derived_quantity_t<quantity_prod, "C">{};
+      derived_quantity<quantity_prod, "C">{};
   constexpr auto super_derived_quantity1 =
-      make_derived_quantity_t<derived_quantity1, "D">{};
+      derived_quantity<derived_quantity1, "D">{};
 
   EXPECT_TRUE((quantity_convertible_to<quantity_prod, derived_quantity1>));
   EXPECT_TRUE((quantity_convertible_to<derived_quantity1, quantity_prod>));
@@ -72,9 +72,9 @@ TEST(TestQuantity, TestQuantityConvertibleTo) {
       (quantity_convertible_to<quantity_prod, super_derived_quantity1>));
 
   constexpr auto derived_quantity2 =
-      make_derived_quantity_t<quantity_quot, "C">{};
+      derived_quantity<quantity_quot, "C">{};
   constexpr auto super_derived_quantity2 =
-      make_derived_quantity_t<derived_quantity2, "D">{};
+      derived_quantity<derived_quantity2, "D">{};
 
   EXPECT_TRUE((quantity_convertible_to<quantity_quot, derived_quantity2>));
   EXPECT_FALSE((quantity_convertible_to<derived_quantity1, quantity_quot>));

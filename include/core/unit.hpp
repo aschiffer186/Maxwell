@@ -111,29 +111,29 @@ template <unit LHS, unit RHS> constexpr unit auto operator/(LHS, RHS) noexcept {
   return unit_quotient<LHS, RHS>{};
 }
 
-template <auto Q, utility::template_string Name> struct make_base_unit {
+template <auto Q, utility::template_string Name> struct base_unit_impl {
   using type = unit_type<Name, Q, 1.0>;
 };
 
 template <auto Q, utility::template_string Name>
-using make_base_unit_t = make_base_unit<Q, Name>::type;
+using base_unit = base_unit_impl<Q, Name>::type;
 
-template <auto Val, utility::template_string Name> struct make_derived_unit;
+template <auto Val, utility::template_string Name> struct derived_unit_impl;
 
 template <auto U, utility::template_string Name>
   requires unit<decltype(U)>
-struct make_derived_unit<U, Name> {
+struct derived_unit_impl<U, Name> {
   using type = unit_type<Name, U.quantity, U.multiplier>;
 };
 
 template <auto Q, utility::template_string Name>
   requires quantity<decltype(Q)>
-struct make_derived_unit<Q, Name> {
+struct derived_unit_impl<Q, Name> {
   using type = unit_type<Name, Q, 1.0>;
 };
 
 template <auto Val, utility::template_string Name>
-using make_derived_unit_t = make_derived_unit<Val, Name>::type;
+using derived_unit = derived_unit_impl<Val, Name>::type;
 
 template <auto FromUnit, auto ToUnit>
 concept unit_convertible_to =
@@ -144,8 +144,6 @@ constexpr double conversion_factor(From, To) noexcept {
   return static_cast<double>(From::multiplier) /
          static_cast<double>(To::multiplier);
 }
-
-/// To/from, 1 foot = 1/3 / 1 yard = 1/3 yard
 
 constexpr double quetta_prefix{1e30};
 constexpr double ronna_prefix{1e27};

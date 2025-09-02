@@ -201,11 +201,17 @@ TEST(TestDimensions, TestDimensionProductMultiplication) {
   EXPECT_EQ(std::tuple_size_v<decltype(prod4_tuple)>, 1);
   EXPECT_EQ(std::get<0>(prod4_tuple), (dimension_type<"A", utility::one>{}));
 
-  const dimension_product_type<dimension_type<"A", utility::rational_type<-1, 1>{}>> dim_prod3; 
-
-  const auto prod5 = dim_prod2 * dim_prod3; 
+  const auto prod5 = dim_prod1 * dim; 
   const auto prod5_tuple = prod5.as_tuple();
 
   EXPECT_EQ(std::tuple_size_v<decltype(prod5_tuple)>, 1);
-  EXPECT_EQ(std::get<0>(prod5_tuple), (dimension_type<"B", utility::one>{}));
+  EXPECT_EQ(std::get<0>(prod5_tuple), (dimension_type<"A", utility::one>{}));
+
+  const dimension_product_type<dimension_type<"A", utility::rational_type<-1, 1>{}>> dim_prod3; 
+
+  const auto prod6 = dim_prod2 * dim_prod3;
+  const auto prod6_tuple = prod6.as_tuple();
+
+  EXPECT_EQ(std::tuple_size_v<decltype(prod6_tuple)>, 1);
+  EXPECT_EQ(std::get<0>(prod6_tuple), (dimension_type<"B", utility::one>{}));
 }

@@ -17,19 +17,19 @@ constexpr auto week_to_day = utility::value_type<1.0 / 7.0>{};
 
 namespace time {
 MODULE_EXPORT constexpr struct minute_unit_type
-    : make_derived_unit_t<_detail::min_to_sec * si::second_unit, "min"> {
+    : derived_unit<_detail::min_to_sec * si::second_unit, "min"> {
 } minute_unit;
 
 MODULE_EXPORT constexpr struct hour_unit_type
-    : make_derived_unit_t<_detail::hour_to_min * minute_unit, "hr"> {
+    : derived_unit<_detail::hour_to_min * minute_unit, "hr"> {
 } hour_unit;
 
 MODULE_EXPORT constexpr struct day_unit_type
-    : make_derived_unit_t<_detail::day_to_hour * hour_unit, "day"> {
+    : derived_unit<_detail::day_to_hour * hour_unit, "day"> {
 } day_unit;
 
 MODULE_EXPORT constexpr struct week_unit_type
-    : make_derived_unit_t<_detail::week_to_day * day_unit, "week"> {
+    : derived_unit<_detail::week_to_day * day_unit, "week"> {
 } week_unit;
 
 MODULE_EXPORT template <typename T = double>

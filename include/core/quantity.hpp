@@ -178,13 +178,13 @@ struct derived_quantity_impl : std::remove_cvref_t<decltype(Base)> {
 /// \endcond
 
 template <auto Base, utility::template_string Derived, bool IsDerived = true>
-struct make_derived_quantity {
+struct derived_quantity_impl {
   using type = _detail::derived_quantity_impl<Base, Derived, IsDerived>;
 };
 
 template <auto Base, utility::template_string Derived, bool IsDerived = true>
-using make_derived_quantity_t =
-    make_derived_quantity<Base, Derived, IsDerived>::type;
+using derived_quantity =
+    derived_quantity_impl<Base, Derived, IsDerived>::type;
 
 /// \cond
 namespace _detail {

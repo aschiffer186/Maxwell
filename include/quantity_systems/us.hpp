@@ -15,11 +15,11 @@ constexpr auto foot_to_yard = value<3>;
 } // namespace _detail
 
 MODULE_EXPORT constexpr struct foot_unit_type
-    : make_derived_unit_t<_detail::meter_to_foot * si::meter_unit, "ft"> {
+    : derived_unit<_detail::meter_to_foot * si::meter_unit, "ft"> {
 } foot_unit;
 
 MODULE_EXPORT constexpr struct inch_unit_type
-    : make_derived_unit_t<_detail::foot_to_inch * foot_unit, "in"> {
+    : derived_unit<_detail::foot_to_inch * foot_unit, "in"> {
 } inch_unit;
 
 template <typename T = double>
