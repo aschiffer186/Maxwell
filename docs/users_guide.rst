@@ -273,15 +273,30 @@ in less verbose error messages.
 .. code-block:: c++ 
 
     // Make a new quantity representing wavelength
-    constexpr quantity auto wavelength = maxwell::make_derived_quantity_t<isq::length, "Wavelength">{}; 
+    constexpr quantity auto wavelength = maxwell::derived_quantityisq::length, "Wavelength">{}; 
 
     // Making a new type 
-    constexpr struct Mach_type : maxwell::make_derived_quantity_t<isq::number, "Mach"> {} Mach;
+    constexpr struct Mach_quantity : maxwell::derived_quantity<isq::number, "Mach"> {} Mach;
 
     // Making a more complex quantity 
-    using density = maxwell::make_derived_quantity_t<isq::mass / isq::volume, "Density">;
+    using density_quantity = maxwell::derived_quantity<isq::mass / isq::volume, "Density">;
+
+    // Make a new units to represent the new quantities
+    constexpr unit auto Mach_unit = maxwell::derived_unit<Mach_quantity, "M">{};
+    constexpr struct density_unit_type : maxwell::derived_unit<density_quantity, "DensityUnit">{} density_unit;
+
+    // Make quantity value aliases
+    using Mach = maxwell::quantity_value<si::number, Mach_quantity>;
+    // Density can be expressed using any metric prefix, so make it a template 
+    template <auto U> 
+    using density = maxwell::quantity_value<U, density_quantity>; 
+    // Example instantiation: density<kilo_unit<density_unit_type>>;
 
 The definition can be moved inline to an alias for :code:`quantity_value` if desired.
+
+.. code-block:: c++  
+
+    using Mach = maxwell::quantity_value<si::number, maxwell::derived_quantity<isq::number, "Mach">>;
 
 .. important::
 
@@ -291,4 +306,6 @@ The definition can be moved inline to an alias for :code:`quantity_value` if des
     .. code-block:: c++ 
 
         constexpr quantity auto my_alias = isq::length; // Represent same quantity.
+
+Notice that no macros were required to defined new quantities, units, or aliases using them!
 
