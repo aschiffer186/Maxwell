@@ -273,13 +273,13 @@ in less verbose error messages.
 .. code-block:: c++ 
 
     // Make a new quantity representing wavelength
-    constexpr quantity auto wavelength = maxwell::make_derived_quantity_t<"Wavelength", isq::length>{}; 
+    constexpr quantity auto wavelength = maxwell::make_derived_quantity_t<isq::length, "Wavelength">{}; 
 
     // Making a new type 
-    constexpr struct Mach_type : maxwell::make_derived_quantity_t<"Mach", isq::number> {} Mach;
+    constexpr struct Mach_type : maxwell::make_derived_quantity_t<isq::number, "Mach"> {} Mach;
 
     // Making a more complex quantity 
-    using density = maxwell::make_derived_quantity_t<"Density", isq::mass / isq::volume>;
+    using density = maxwell::make_derived_quantity_t<isq::mass / isq::volume, "Density">;
 
 The definition can be moved inline to an alias for :code:`quantity_value` if desired.
 
