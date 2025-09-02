@@ -96,7 +96,7 @@ MODULE_EXPORT template <typename T>
 concept ratio = _detail::is_ratio<std::remove_cvref_t<T>>::value;
 
 MODULE_EXPORT template <std::intmax_t Numerator, std::intmax_t Denominator,
-                        std::intmax_t Exponent>
+                        std::intmax_t Exponent = 0>
 struct rational_type {
   static_assert(Denominator != 0, "Attempting to divide by zero");
 
@@ -377,4 +377,7 @@ template <typename T> struct is_value_type<const T> : is_value_type<T> {};
 
 } // namespace maxwell::utility
 
+namespace maxwell {
+template <auto Value> constexpr auto value = utility::value_type<Value>{};
+}
 #endif

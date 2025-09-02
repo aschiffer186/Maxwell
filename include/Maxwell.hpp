@@ -17,8 +17,10 @@
 #include "formatting/formatting.hpp"
 
 #include "quantity_systems/isq.hpp"
+#include "quantity_systems/other.hpp"
 #include "quantity_systems/si.hpp"
 #include "quantity_systems/si_constants.hpp"
+#include "quantity_systems/us.hpp"
 
 #include "math/quantity_limits.hpp"
 #include "math/quantity_value_math.hpp"

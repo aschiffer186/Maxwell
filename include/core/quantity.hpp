@@ -25,11 +25,12 @@ constexpr auto number_kind = utility::template_string{"[]"};
 /// compare them, or add or subtract them.
 ///
 /// An instance of \c quantity_type can represent a base quantity or a derived
-/// quantity. 
+/// quantity.
 /// If it is a base quantity, it will have a dimension of one for
-/// exactly one base quantity and zero for all others. 
-/// Derived quantities can be created using the \c make_derived_quantity_t type alias. 
-/// This allows for creating quantities from other quantities using arithmetic operations and for creating derived quantities
+/// exactly one base quantity and zero for all others.
+/// Derived quantities can be created using the \c make_derived_quantity_t type
+/// alias. This allows for creating quantities from other quantities using
+/// arithmetic operations and for creating derived quantities
 ///  with the same dimensions as but incompatible with the base quantity.
 ///
 /// \tparam Kind A string representing the kind of the quantity.

@@ -133,8 +133,11 @@ This means there is virtually no overhead using Maxwell instead of raw arithmeti
 
 For convenience, many type aliases are provided to make constructing quantites less verbose. If no underlying type is specified, :code:`double` is assumed. 
 These aliases are provided in the following namespaces: 
+
 * :code:`maxwell::si` - SI units 
 * :code:`maxwell::us` - US customary units
+
+For a complete list, see :doc:`predefined-units <predefined_units>`
 
 .. code-block:: c++
 
@@ -146,6 +149,7 @@ These aliases are provided in the following namespaces:
     This is due to how C++ type alias and variable templates are defined.
  
 For larger types, the underlying value of the quantity can be constructed in place, similar to `std::optional` or `std::variant`. 
+
 .. code-block:: c++
 
     using vector_quantity = quantity_value<si::meter_unit, isq::length_quantity, std::vector<double>>;
@@ -233,6 +237,15 @@ Addition and subtraction can only be performed on instances of :code:`quantity_v
         auto q1 = maxwell::si::meter<>{100.0} * maxwell::si::kilometer<10.0>; // 1,000 m*km
         auto q2 = maxwell::us::foot<>{1} + maxwell::us::inch<>{1}; // 13/12 ft.
 
+Instances of :code:`quantity_value` support all comparison operations supported by the underlying type. 
+Like addition and subtraction, two instances of :code:`quantity_value` can only be compared if they represent the same quantity and 
+their units have the same reference point. 
+
+.. warning:: 
+
+    When two instances of :code:`quantity_value` are compared for equality, exact equality is used if the underlying type is a floating-point 
+    type. The standard warnings about floating-point equality apply.
+
 :code:`quantity_holder` Class Template
 ---------------------------------------
 Maxwell also provides the :code:`quantity_holder` class template to specify units at run-time rather than compile-time.
@@ -243,3 +256,38 @@ Maxwell also provides the :code:`quantity_holder` class template to specify unit
     class quantity_holder;
 
 Compile-time verification that operations on instances of :code:`quantity_holder` is still performed, but unit conversions will be performed at run-time instead of compile-time.
+
+Defining Custom Quantities and Units 
+====================================
+
+Although Maxwell provides many predefined quantities and units, it is not possible for the library to provide all quantities and units 
+that may be useful to the user. 
+New quantities and units can be defined units the :code:`make_derived_quantity_t` and :code:`make_derived_unit_t` type aliases. 
+
+All quantities and units in Maxwell are constants, and the :code:`quantity_value` and :code:`quantity_holder` class templates expect constants. 
+This makes it easy to expression new quantities and units using arithmetic expressions involving other quanties and units. 
+
+Although it is only necessary to use the type aliases provided, creating custom types to represent new quantities and units can result 
+in less verbose error messages. 
+
+.. code-block:: c++ 
+    // Make a new quantity representing wavelength
+    constexpr quantity auto wavelength = maxwell::make_derived_quantity_t<"Wavelength", isq::length>{}; 
+
+    // Making a new type 
+    constexpr struct Mach_type : maxwell::make_derived_quantity_t<"Mach", isq::number> {} Mach;
+
+    // Making a more complex quantity 
+    using density = maxwell::make_derived_quantity_t<"Density", isq::mass / isq::volume>;
+
+The definition can be moved inline to an alias for :code:`quantity_value` if desired.
+
+.. important::
+
+    New quantities are not compatible with the quantities they are created from, even if they have the same dimensions. 
+    To simply alias an existing quantity, create a new constant.
+
+    .. code-block:: c++ 
+
+        constexpr quantity auto my_alias = isq::length; // Represent same quantity.
+

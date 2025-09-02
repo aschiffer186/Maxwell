@@ -4,6 +4,7 @@
 #include <gtest/gtest.h>
 #include <type_traits>
 
+#include "quantity_systems/si.hpp"
 #include "test_types.hpp"
 
 using namespace maxwell;
@@ -142,6 +143,20 @@ TEST(TestQuantityValue, TestConvertingConstructor) {
   EXPECT_FLOAT_EQ(deg2.get_value(), .5 * .5 * (180.0 * 180.0) /
                                         (std::numbers::pi * std::numbers::pi));
   EXPECT_FLOAT_EQ(mr4.get_value(), 500.0 * 500.0);
+
+  si::square_meter<> sm{1.0};
+  centi<si::square_meter<>> sq_cm{sm};
+  si::square_meter<> sm2{sm};
+  kilo<si::square_meter<>> sq_km{sq_cm};
+
+  EXPECT_FLOAT_EQ(sq_cm.get_value(), 1e4);
+  EXPECT_FLOAT_EQ(sm2.get_value(), 1.0);
+  EXPECT_FLOAT_EQ(sq_km.get_value(), 1e-6);
+
+  other::minute<> min{1.0};
+  si::second<> s{min};
+
+  EXPECT_FLOAT_EQ(s.get_value(), 60.0);
 }
 
 TEST(TestQuantityValue, TestConversionOperator) {

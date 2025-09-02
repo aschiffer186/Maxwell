@@ -15,8 +15,12 @@ MODULE_EXPORT constexpr struct meter_unit_type
     : make_base_unit_t<isq::length, "m"> {
 } meter_unit;
 
+MODULE_EXPORT constexpr struct gram_unit_type
+    : make_base_unit_t<isq::mass, "g"> {
+} gram_unit;
+
 MODULE_EXPORT constexpr struct kilogram_unit_type
-    : make_base_unit_t<isq::mass, "kg"> {
+    : make_derived_unit_t<kilo_unit<gram_unit>, "kg"> {
 } kilogram_unit;
 
 MODULE_EXPORT constexpr struct second_unit_type

@@ -21,6 +21,9 @@ MODULE_EXPORT constexpr struct foot_unit_type
 MODULE_EXPORT constexpr struct inch_unit_type
     : make_derived_unit_t<_detail::foot_to_inch * foot_unit, "in"> {
 } inch_unit;
+
+template <typename T = double>
+using foot = quantity_value<foot_unit, foot_unit.quantity, T>;
 } // namespace maxwell::us
 
 #endif

@@ -39,5 +39,6 @@ From the main Maxwell directory run the following command:
 ```
 cmake --workflow --preset build-docs
 ```
-This should build all documentation and place it in the `docs` folder of your build directory. Doxygen documentation will be placed into `docs/doxygen`.
+This should build all documentation and place it in the `docs/documentation` folder of your build directory. Doxygen documentation will be placed into `docs/doxygen`.
 
+Documentation in the `docs/documentation` folder is targeted mostly at users of Maxwell. Doxygen documentation is targeted at maintainers of Maxwell.

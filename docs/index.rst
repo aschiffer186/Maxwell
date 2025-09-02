@@ -19,5 +19,6 @@ compile-time, ensuring dimensional correctness in calculations.
 
    installation.rst
    users_guide.rst
+   predefined_units.rst
   
 
