@@ -48,6 +48,7 @@ struct unit_type {
   constexpr static dimension_product auto dimensions = quantity.dimensions;
   constexpr static auto multiplier = Multiplier;
   constexpr static auto reference = Reference;
+  constexpr static Scale scale;
 
   using quantity_rep = std::remove_cvref_t<decltype(quantity)>;
 

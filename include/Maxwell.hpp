@@ -9,7 +9,9 @@
 #include "core/quantity_holder.hpp"
 #include "core/quantity_system.hpp"
 #include "core/quantity_value.hpp"
+#include "core/scale.hpp"
 #include "core/unit.hpp"
+
 #include "utility/compile_time_math.hpp"
 #include "utility/template_string.hpp"
 #include "utility/type_traits.hpp"

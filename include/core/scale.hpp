@@ -7,27 +7,36 @@
 #include "utility/type_traits.hpp"
 
 namespace maxwell {
+struct linear_scale_type;
+struct decibel_scale_type;
+
 MODULE_EXPORT template <typename T, typename V>
-concept scale = requires(T, V v) {
-  { T::to_linear(v) } -> std::same_as<V>;
-  { T::to_non_linear(v) } -> std::same_as<V>;
-};
+concept scale =
+    requires(T, V v, const linear_scale_type& l, const decibel_scale_type& d) {
+      { T::from_scale(v, l) } -> std::same_as<V>;
+      { T::from_scale(v, d) } -> std::same_as<V>;
+    };
 
 MODULE_EXPORT struct linear_scale_type {
-  static constexpr auto to_linear(const auto& value) noexcept { return value; }
+  static constexpr auto from_scale(const auto& value,
+                                   const linear_scale_type&) noexcept {
+    return value;
+  }
 
-  static constexpr auto to_non_linear(const auto& value) noexcept {
+  static constexpr auto from_scale(const auto& value,
+                                   const decibel_scale_type&) noexcept {
     return value;
   }
 };
 
-template <typename T>
-concept linear_scale = utility::similar<T, linear_scale_type>;
-
 MODULE_EXPORT struct decibel_scale_type {
-  static constexpr auto to_linear(const auto& value) noexcept { return value; }
+  static constexpr auto from_scale(const auto& value,
+                                   const linear_scale_type&) noexcept {
+    return value;
+  }
 
-  static constexpr auto to_non_linear(const auto& value) noexcept {
+  static constexpr auto from_scale(const auto& value,
+                                   const decibel_scale_type&) noexcept {
     return value;
   }
 };

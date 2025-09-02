@@ -567,8 +567,10 @@ public:
              quantity<decltype(FromQuantity)>
   constexpr quantity_value(
       const quantity_value<FromUnit, FromQuantity, Up>& other)
-      : value_(other.get_value() *
-               /*utility::as_constant<*/ conversion_factor(FromUnit, U) /*>*/) {
+      : value_(U.scale.from_scale(
+            other.get_value() *
+                utility::as_constant<conversion_factor(FromUnit, U)>,
+            FromUnit.scale)) {
     static_assert(unit_convertible_to<FromUnit, U>,
                   "Units of other cannot be converted to units of value being "
                   "constructed");
@@ -606,8 +608,10 @@ public:
              quantity<decltype(FromQuantity)>
   constexpr quantity_value(
       quantity_value<FromUnit, FromQuantity, Up>&& other) noexcept
-      : value_(std::move(other).get_value() *
-               utility::as_constant<conversion_factor(FromUnit, U)>) {
+      : value_(U.scale.from_scale(
+            std::move(other).get_value() *
+                utility::as_constant<conversion_factor(FromUnit, U)>,
+            FromUnit.scale)) {
     static_assert(unit_convertible_to<FromUnit, U>,
                   "Units of other cannot be converted to units of value being "
                   "constructed");

@@ -167,7 +167,7 @@ MODULE_EXPORT constexpr quantity auto operator/(quantity auto lhs,
 
 /// \cond
 namespace _detail {
-template <utility::template_string Kind, auto Base, bool IsDerived = true>
+template <auto Base, utility::template_string Kind, bool IsDerived = true>
   requires quantity<decltype(Base)>
 struct derived_quantity_impl : std::remove_cvref_t<decltype(Base)> {
   constexpr static dimension_product auto dimensions = Base.dimensions;
@@ -177,20 +177,20 @@ struct derived_quantity_impl : std::remove_cvref_t<decltype(Base)> {
 } // namespace _detail
 /// \endcond
 
-template <utility::template_string Derived, auto Base, bool IsDerived = true>
+template <auto Base, utility::template_string Derived, bool IsDerived = true>
 struct make_derived_quantity {
-  using type = _detail::derived_quantity_impl<Derived, Base, IsDerived>;
+  using type = _detail::derived_quantity_impl<Base, Derived, IsDerived>;
 };
 
-template <utility::template_string Derived, auto Base, bool IsDerived = true>
+template <auto Base, utility::template_string Derived, bool IsDerived = true>
 using make_derived_quantity_t =
-    make_derived_quantity<Derived, Base, IsDerived>::type;
+    make_derived_quantity<Base, Derived, IsDerived>::type;
 
 /// \cond
 namespace _detail {
-template <utility::template_string Derived, auto Base, bool IsDerived>
-auto derived_base(_detail::derived_quantity_impl<Derived, Base, IsDerived>)
-    -> _detail::derived_quantity_impl<Derived, Base, IsDerived>;
+template <auto Base, utility::template_string Derived, bool IsDerived>
+auto derived_base(_detail::derived_quantity_impl<Base, Derived, IsDerived>)
+    -> _detail::derived_quantity_impl<Base, Derived, IsDerived>;
 
 template <typename T>
 using derived_base_t = decltype(derived_base(std::declval<T>()));
