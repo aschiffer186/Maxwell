@@ -1,3 +1,7 @@
+/// \file currency.cpp
+/// \brief Brief example showing how to set up a custom quantity system to
+/// represent the US currency system.
+
 #include "Maxwell.hpp"
 
 using namespace maxwell;

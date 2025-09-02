@@ -36,7 +36,7 @@ constexpr auto number_kind = utility::template_string{"[]"};
 /// \tparam Kind A string representing the kind of the quantity.
 /// \tparam Dim The dimensions of the quantity.
 /// \tparam Derived Whether the quantity is a user-defined derived quantity.
-template <utility::template_string Kind, auto Dim, bool Derived>
+MODULE_EXPORT template <utility::template_string Kind, auto Dim, bool Derived>
   requires dimension_product<decltype(Dim)>
 struct quantity_type {
   /// The dimensions of the quantity.
@@ -64,8 +64,11 @@ struct quantity_type {
   }
 };
 
-constexpr quantity_type<number_kind, dimension_one, false> number;
+/// Constant representing a quantity to represents a number
+MODULE_EXPORT constexpr quantity_type<number_kind, dimension_one, false> number;
 
+/// \cond
+namespace _detail {
 template <utility::template_string Kind, auto Dim, bool Derived>
 auto quantity_base(quantity_type<Kind, Dim, Derived>)
     -> quantity_type<Kind, Dim, Derived>;
@@ -73,8 +76,6 @@ auto quantity_base(quantity_type<Kind, Dim, Derived>)
 template <typename T>
 using quantity_base_t = decltype(quantity_base(std::declval<T>()));
 
-/// \cond
-namespace _detail {
 template <typename, typename = void> struct is_quantity : std::false_type {};
 
 template <typename T>
@@ -82,9 +83,13 @@ struct is_quantity<T, std::void_t<quantity_base_t<T>>> : std::true_type {};
 } // namespace _detail
 /// \endcond
 
-template <typename T>
+/// Concept indicating that a type models an ISO-80000 quantity.
+///
+/// \tparam T The type to check
+MODULE_EXPORT template <typename T>
 concept quantity = _detail::is_quantity<std::remove_cvref_t<T>>::value;
 
+/// \cond
 namespace _detail {
 struct quantity_product_tag {};
 
@@ -112,20 +117,51 @@ template <quantity LHS, quantity RHS>
 struct quantity_quotient : quantity_quotient_impl<LHS, RHS>::type,
                            quantity_quotient_tag {};
 } // namespace _detail
+/// \endcond
 
-template <quantity LHS, quantity RHS>
+/// \brief Computes the type of the product of two quantities.
+///
+/// \tparam LHS The type of the lhs quantity.
+/// \tparam RHS The type of the rhs quantity.
+MODULE_EXPORT template <quantity LHS, quantity RHS>
 using quantity_product_t = _detail::quantity_product<LHS, RHS>;
 
-template <quantity LHS, quantity RHS>
+/// \brief Computes the type of the quotient of two quantities.
+///
+/// \tparam LHS The type of the lhs quantity.
+/// \tparam RHS The type of the rhs quantity.
+MODULE_EXPORT template <quantity LHS, quantity RHS>
 using quantity_quotient_t = _detail::quantity_quotient<LHS, RHS>;
 
-constexpr quantity auto operator*(quantity auto lhs,
-                                  quantity auto rhs) noexcept {
+/// \brief Multiplies two quantities.
+///
+/// Multiplies two quantities. The dimension product of the resulting quantity
+/// is the product of the dimension products of the lhs and rhs quantities.
+/// The name of the product is <tt>lhs.name + "+" + rhs.name</tt>.
+///
+/// \sa dimension_product_type
+///
+/// \param lhs The left hand side of the multiplication.
+/// \param rhs The right hand side of the multiplication.
+/// \return The product of two quantities.
+MODULE_EXPORT constexpr quantity auto operator*(quantity auto lhs,
+                                                quantity auto rhs) noexcept {
   return quantity_product_t<decltype(lhs), decltype(rhs)>{};
 }
 
-constexpr quantity auto operator/(quantity auto lhs,
-                                  quantity auto rhs) noexcept {
+/// \brief Divides two quantities.
+///
+/// Divides two quantities. The dimension product of the resulting quantity
+/// is the quotient of the dimension products of the lhs and rhs quantities.
+/// The name of the quotient is <tt>lhs.name + "-" + rhs.name</tt>.
+///
+/// \sa dimension_product_type
+///
+/// \param lhs The left hand side of the quotient.
+/// \param rhs The right hand side of the quotient.
+/// \return The quotient of two quantities.
+MODULE_EXPORT constexpr quantity auto operator/(quantity auto lhs,
+                                                quantity auto rhs) noexcept {
   return quantity_quotient_t<decltype(lhs), decltype(rhs)>{};
 }
 

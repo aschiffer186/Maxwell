@@ -190,7 +190,7 @@ Instances of :code:`quantity_value` that represent time can be implicitly conver
 
     using namespace std::chrono_literals;
     maxwell::milli<maxwell::si::second<>> q{std::chrono::seconds(1)}; // Ok - 1000 millisecond
-maxwell::si::hour<> q2 = 1_m; // Ok - 1/60 hour
+    maxwell::si::hour<> q2 = 1m; // Ok - 1/60 hour
 
 Operations on Quantity Values
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -271,6 +271,7 @@ Although it is only necessary to use the type aliases provided, creating custom 
 in less verbose error messages. 
 
 .. code-block:: c++ 
+
     // Make a new quantity representing wavelength
     constexpr quantity auto wavelength = maxwell::make_derived_quantity_t<"Wavelength", isq::length>{}; 
 

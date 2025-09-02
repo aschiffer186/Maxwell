@@ -4,23 +4,24 @@
 #ifndef UNIT_HPP
 #define UNIT_HPP
 
-#include <concepts>
 #include <type_traits> // false_type, remove_cvref_t, true_type
 #include <utility>     // declval
 
+#include "core/scale.hpp"
 #include "dimension.hpp"
 #include "quantity.hpp"
 #include "utility/compile_time_math.hpp"
 
 namespace maxwell {
 template <utility::template_string Name, quantity auto Quantity,
-          auto Multiplier, auto Reference = 0.0>
+          auto Multiplier, auto Reference = 0.0,
+          typename Scale = linear_scale_type>
 struct unit_type;
 
 template <utility::template_string Name, quantity auto Quantity,
-          auto Multiplier, auto Reference = 0.0>
-constexpr unit_type<Name, Quantity, Multiplier, Reference>
-underlying_unit(const unit_type<Name, Quantity, Multiplier, Reference>&);
+          auto Multiplier, auto Reference = 0.0, typename Scale>
+constexpr unit_type<Name, Quantity, Multiplier, Reference, Scale>
+underlying_unit(const unit_type<Name, Quantity, Multiplier, Reference, Scale>&);
 
 template <typename T>
 using underlying_unit_t = decltype(underlying_unit(std::declval<T>()));
@@ -40,7 +41,7 @@ template <typename T>
 concept unit = _detail::has_underlying_unit<std::remove_cvref_t<T>>::value;
 
 template <utility::template_string Name, quantity auto Quantity,
-          auto Multiplier, auto Reference>
+          auto Multiplier, auto Reference, typename Scale>
 struct unit_type {
   constexpr static auto name = Name;
   constexpr static quantity auto quantity = Quantity;
@@ -51,7 +52,7 @@ struct unit_type {
   using quantity_rep = std::remove_cvref_t<decltype(quantity)>;
 
   constexpr static auto base_units() {
-    return unit_type<Name, Quantity, utility::one, 0.0>{};
+    return unit_type<Name, Quantity, utility::one>{};
   }
 };
 

@@ -4,6 +4,7 @@
 #include <gtest/gtest.h>
 #include <type_traits>
 
+#include "quantity_systems/other.hpp"
 #include "quantity_systems/si.hpp"
 #include "test_types.hpp"
 
@@ -153,7 +154,7 @@ TEST(TestQuantityValue, TestConvertingConstructor) {
   EXPECT_FLOAT_EQ(sm2.get_value(), 1.0);
   EXPECT_FLOAT_EQ(sq_km.get_value(), 1e-6);
 
-  other::minute<> min{1.0};
+  other::time::minute<> min{1.0};
   si::second<> s{min};
 
   EXPECT_FLOAT_EQ(s.get_value(), 60.0);

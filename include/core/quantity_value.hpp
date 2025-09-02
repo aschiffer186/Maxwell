@@ -59,23 +59,37 @@ concept quantity_value_like = is_quantity_value_v<T>;
 
 /// \brief Provides operator overloads for `quantity_value` instances.
 struct _quantity_value_operators {
-  /// \brief Negaton operator
+  /// \brief Negation operator
   ///
-  /// Negates the value of a `quantity_value` instance.
+  /// Negates the value of a \c quantity_value instance.
   ///
-  /// \param q The quantity value instance to negate
+  /// \param q The quantity value instance to negate.
   /// \return The negated value of the `quantity_value` instance.
   MODULE_EXPORT friend constexpr quantity_value_like auto
   operator-(const quantity_value_like auto& q) {
     return std::remove_cvref_t<decltype(q)>(-q.get_value());
   }
 
+  /// \brief Pre-increment operator
+  ///
+  /// Increments the numerical value of a \c quantity_value instance and returns
+  /// a reference to the modified \c quantity_value.
+  ///
+  /// \param q The quantity value instance to increment.
+  /// \return A reference to the modified \c quantity_value instance.
   MODULE_EXPORT friend constexpr quantity_value_like auto&
   operator++(quantity_value_like auto& q) {
     ++q.value_;
     return q;
   }
 
+  /// \brief Post-increment operator
+  ///
+  /// Increments the numerical value of a \c quantiity_value instance and
+  /// returns a copy of the \c quantity_value before it was modified.
+  ///
+  /// \param q The quantity value instance to increment.
+  /// \return A reference to the modified \c quantity_value instance.
   MODULE_EXPORT friend constexpr quantity_value_like auto
   operator++(quantity_value_like auto& q, int) {
     auto temp{q};
@@ -83,12 +97,26 @@ struct _quantity_value_operators {
     return temp;
   }
 
+  /// \brief Pre-decrement operator
+  ///
+  /// Decrement the numerical value of a \c quantity_value instance and returns
+  /// a reference to the modified \c quantity_value.
+  ///
+  /// \param q The quantity value instance to decrement.
+  /// \return A reference to the modified \c quantity_value instance.
   MODULE_EXPORT friend constexpr quantity_value_like auto&
   operator--(quantity_value_like auto& q) {
     --q.value_;
     return q;
   }
 
+  /// \brief Post-decrement operator
+  ///
+  /// Decrements the numerical value of a \c quantiity_value instance and
+  /// returns a copy of the \c quantity_value before it was modified.
+  ///
+  /// \param q The quantity value instance to decrement.
+  /// \return A reference to the modified \c quantity_value instance.
   MODULE_EXPORT friend constexpr quantity_value_like auto
   operator--(quantity_value_like auto& q, int) {
     auto temp{q};

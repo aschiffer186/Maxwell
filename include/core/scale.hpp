@@ -1,7 +1,7 @@
 #ifndef SCALE_HPP
 #define SCALE_HPP
 
-#include <concepts>
+#include <concepts> // same_a
 
 #include "utility/config.hpp"
 #include "utility/type_traits.hpp"

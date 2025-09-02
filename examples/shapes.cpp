@@ -55,9 +55,8 @@ int main() {
   rectangle::width_type<> width{20.0};
 
   rectangle r{length, width};
-  //   rectangle r2{width, length}; // Error - won't compile because width and
-  //   length
-  // are switched
+  // rectangle r2{width, length}; // Error - won't compile because width and
+  //                                   length are switched
 
   std::cout << "Rectangle length, width: " << r.get_length() << ", "
             << r.get_width();

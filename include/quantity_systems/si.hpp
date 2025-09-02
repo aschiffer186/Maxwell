@@ -54,8 +54,8 @@ MODULE_EXPORT constexpr struct radian_unit_type
 
 /// \cond
 namespace _detail {
-constexpr auto rad_to_deg = utility::value_type<std::numbers::pi / 180.0>{};
-constexpr auto kelvin_to_celsius = utility::value_type<-273.15>{};
+constexpr auto rad_to_deg = value<std::numbers::pi / 180.0>;
+constexpr auto kelvin_to_celsius = value<-273.15>;
 } // namespace _detail
 /// \endcond
 
