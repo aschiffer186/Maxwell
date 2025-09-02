@@ -9,6 +9,7 @@
 #include <type_traits> // false_type, true_type, remove_cvref_t
 
 #include "utility/compile_time_math.hpp"
+#include "utility/config.hpp"
 #include "utility/template_string.hpp"
 #include "utility/type_traits.hpp"
 
@@ -21,7 +22,8 @@ namespace maxwell {
 ///
 /// \tparam Power The power to which the dimension is raised.
 /// \tparam Name A symbol representing the dimension
-template <utility::template_string Name, utility::rational auto Power>
+MODULE_EXPORT template <utility::template_string Name,
+                        utility::rational auto Power>
 struct dimension_type;
 
 /// \cond
@@ -33,7 +35,8 @@ struct is_dimension_type<dimension_type<Name, Power>> : std::true_type {};
 } // namespace _detail
 /// \endcond
 
-template <utility::template_string Name, utility::rational auto Power>
+MODULE_EXPORT template <utility::template_string Name,
+                        utility::rational auto Power>
 struct dimension_type {
   static constexpr utility::rational auto power = Power;
   static constexpr auto name = Name;
@@ -41,7 +44,7 @@ struct dimension_type {
 
 /// \brief Concept modeling if a type is an instantiation of \c dimension_type.
 /// \tparam T The type to check.
-template <typename T>
+MODULE_EXPORT template <typename T>
 concept dimension = _detail::is_dimension_type<std::remove_cvref_t<T>>::value;
 
 /// \brief Equality operator
@@ -55,15 +58,15 @@ concept dimension = _detail::is_dimension_type<std::remove_cvref_t<T>>::value;
 /// \tparam Power2 The power of the right-hand side dimension
 /// \tparam Name2 The name of the right-hand side dimension.
 /// \return \c true if the dimensions are equal.
-constexpr auto operator==(dimension auto lhs,
-                          dimension auto rhs) noexcept -> bool {
+MODULE_EXPORT constexpr auto operator==(dimension auto lhs,
+                                        dimension auto rhs) noexcept -> bool {
   return lhs.name == rhs.name && lhs.power == rhs.power;
 }
 
 /// \brief Computes the inverse of a dimension
 ///
 // Computes the inverse of a dimension i.e. 1 / dimension.
-template <dimension D> struct dimension_inverse {
+MODULE_EXPORT template <dimension D> struct dimension_inverse {
   using inverse_power =
       utility::rational_type<-D::power.numerator, D::power.denominator,
                              D::power.exponent>;
@@ -72,16 +75,17 @@ template <dimension D> struct dimension_inverse {
 
 /// \brief Helper alias for dimension inverse.
 /// \tparam D The dimension to compute the inverse of.
-template <dimension D> using dimension_inverse_t = dimension_inverse<D>::type;
+MODULE_EXPORT template <dimension D>
+using dimension_inverse_t = dimension_inverse<D>::type;
 
 /// \brief Helper alias to create a base dimension.
 /// \tparam Name The name of the base dimenson.
-template <utility::template_string Name>
+MODULE_EXPORT template <utility::template_string Name>
 using base_dimension_type = dimension_type<Name, utility::one>;
 
 /// \brief Helper alias to create a null dimension.
 /// \tparam D The dimension to nullify.
-template <auto D>
+MODULE_EXPORT template <auto D>
 using null_dimension_type = dimension_type<D.name, utility::zero>;
 
 /// \brief Product of dimensions
@@ -98,7 +102,7 @@ using null_dimension_type = dimension_type<D.name, utility::zero>;
 ///
 /// \tparam The dimensions that are multiplied together to form the product.
 ///
-template <dimension... Dimensions> struct dimension_product_type;
+MODULE_EXPORT template <dimension... Dimensions> struct dimension_product_type;
 
 /// \cond
 namespace _detail {
@@ -112,11 +116,11 @@ struct is_dimension_product_type<dimension_product_type<Dimensions...>>
 
 /// \brief Concept modeling if a type is an instantiation of \c
 /// dimension_product_type
-template <typename T>
+MODULE_EXPORT template <typename T>
 concept dimension_product =
     _detail::is_dimension_product_type<std::remove_cvref_t<T>>::value;
 
-template <dimension... Dimensions> struct dimension_product_type {
+MODULE_EXPORT template <dimension... Dimensions> struct dimension_product_type {
   /// Tuple representation of the dimension product
   using tuple_type = std::tuple<Dimensions...>;
 
@@ -136,7 +140,8 @@ template <dimension... Dimensions> struct dimension_product_type {
   }
 };
 
-constexpr dimension_product_type<dimension_type<"[]", utility::one>>
+MODULE_EXPORT constexpr dimension_product_type<
+    dimension_type<"[]", utility::one>>
     dimension_one;
 
 /// \brief Equality operator
@@ -149,7 +154,7 @@ constexpr dimension_product_type<dimension_type<"[]", utility::one>>
 /// \param LHS The left hand side of the equality comparison.
 /// \param RHS The right hand side of the equality comparison.
 /// \return \c true if the dimensional products are equal
-template <dimension... LHS, dimension... RHS>
+MODULE_EXPORT template <dimension... LHS, dimension... RHS>
 constexpr auto
 operator==(dimension_product_type<LHS...> /*lhs*/,
            dimension_product_type<RHS...> /*rhs*/) noexcept -> bool {
@@ -166,7 +171,7 @@ operator==(dimension_product_type<LHS...> /*lhs*/,
 ///
 /// \tparam From The dimension being converted from.
 /// \tparam To The target dimension.
-template <auto From, auto To>
+MODULE_EXPORT template <auto From, auto To>
 concept dimension_convertible_to =
     dimension_product<decltype(From)> && dimension_product<decltype(To)> &&
     (From == To);
@@ -184,7 +189,7 @@ concept dimension_convertible_to =
 /// \param lhs The left-hand side of the multiplication.
 /// \param rhs The right-hand side of the multiplication.
 /// \return The product of the two dimensions as a \c dimension_product_type.
-template <dimension LHS, dimension RHS>
+MODULE_EXPORT template <dimension LHS, dimension RHS>
 constexpr dimension_product auto operator*(LHS /*lhs*/, RHS /*rhs*/) noexcept {
   if constexpr (LHS::name < RHS::name) {
     return dimension_product_type<LHS, RHS>{};
@@ -213,7 +218,7 @@ constexpr dimension_product auto operator*(LHS /*lhs*/, RHS /*rhs*/) noexcept {
 /// \param lhs The left-hand side of the multiplication.
 /// \param rhs The right-hand side of the multiplication.
 /// \return The product of a dimension and a dimensional product.
-template <dimension LHS>
+MODULE_EXPORT template <dimension LHS>
 constexpr dimension_product auto
 operator*(LHS, dimension_product auto rhs) noexcept {
   return dimension_product_type<LHS>{} * rhs;
@@ -232,7 +237,7 @@ operator*(LHS, dimension_product auto rhs) noexcept {
 /// \param lhs The left-hand side of the multiplication.
 /// \param rhs The right-hand side of the multiplication.
 /// \return The product of a dimension and a dimensional product.
-template <dimension RHS>
+MODULE_EXPORT template <dimension RHS>
 constexpr dimension_product auto operator*(dimension_product auto lhs,
                                            RHS) noexcept {
   return lhs * dimension_product_type<RHS>{};
@@ -252,8 +257,8 @@ constexpr dimension_product auto operator*(dimension_product auto lhs,
 /// \param lhs The left-hand side of the multiplication.
 /// \param rhs The right-hand side of the multiplication.
 /// \return The product of two dimensional products.
-template <dimension LHS, dimension... LHSRest, dimension RHS,
-          dimension... RHSRest>
+MODULE_EXPORT template <dimension LHS, dimension... LHSRest, dimension RHS,
+                        dimension... RHSRest>
 constexpr dimension_product auto
 operator*(dimension_product_type<LHS, LHSRest...>,
           dimension_product_type<RHS, RHSRest...>) noexcept {
@@ -312,12 +317,12 @@ operator*(dimension_product_type<LHS, LHSRest...>,
 }
 
 /// \cond
-constexpr dimension_product auto operator*(dimension_product_type<>,
-                                           dimension_product_type<>) {
+MODULE_EXPORT constexpr dimension_product auto
+operator*(dimension_product_type<>, dimension_product_type<>) {
   return dimension_product_type<>{};
 }
 
-template <dimension D, dimension... Ds>
+MODULE_EXPORT template <dimension D, dimension... Ds>
 constexpr dimension_product auto operator*(dimension_product_type<D, Ds...>,
                                            dimension_product_type<>) {
   return dimension_product_type<D, Ds...>{};
@@ -343,7 +348,7 @@ constexpr dimension_product auto operator*(dimension_product_type<>,
 /// \param lhs The left-hand side of the division.
 /// \param rhs The right-hand side of the division.
 /// \return The quotient of the two dimensions as a \c dimension_product_type.
-template <dimension LHS, dimension RHS>
+MODULE_EXPORT template <dimension LHS, dimension RHS>
 constexpr dimension_product auto operator/(LHS /*lhs*/, RHS /*rhs*/) noexcept {
   if constexpr (LHS::name < RHS::name) {
     return dimension_product_type<LHS, dimension_inverse_t<RHS>>{};
@@ -371,7 +376,7 @@ constexpr dimension_product auto operator/(LHS /*lhs*/, RHS /*rhs*/) noexcept {
 /// \param lhs The left-hand side of the division.
 /// \param rhs The right-hand side of the division.
 /// \return The quotient of a dimension and a dimensional product.
-template <dimension LHS>
+MODULE_EXPORT template <dimension LHS>
 constexpr dimension_product auto
 operator/(LHS /*rhs*/, dimension_product auto rhs) noexcept {
   return dimension_product_type<LHS>{} / rhs;
@@ -389,7 +394,7 @@ operator/(LHS /*rhs*/, dimension_product auto rhs) noexcept {
 /// \param lhs The left-hand side of the division.
 /// \param rhs The right-hand side of the division.
 /// \return The quotient of a dimension and a dimensional product.
-template <dimension RHS>
+MODULE_EXPORT template <dimension RHS>
 constexpr dimension_product auto operator/(dimension_product auto lhs,
                                            RHS /*rhs*/) noexcept {
   return lhs / dimension_product_type<RHS>{};
@@ -409,8 +414,8 @@ constexpr dimension_product auto operator/(dimension_product auto lhs,
 /// \param lhs The left-hand side of the division.
 /// \param rhs The right-hand side of the division.
 /// \return The quotient of two dimensional products.
-template <dimension LHS, dimension... LHSRest, dimension RHS,
-          dimension... RHSRest>
+MODULE_EXPORT template <dimension LHS, dimension... LHSRest, dimension RHS,
+                        dimension... RHSRest>
 constexpr dimension_product auto
 operator/(dimension_product_type<LHS, LHSRest...>,
           dimension_product_type<RHS, RHSRest...>) noexcept {
@@ -472,12 +477,12 @@ operator/(dimension_product_type<LHS, LHSRest...>,
 }
 
 /// \cond
-constexpr dimension_product auto operator/(dimension_product_type<>,
-                                           dimension_product_type<>) {
+MODULE_EXPORT constexpr dimension_product auto
+operator/(dimension_product_type<>, dimension_product_type<>) {
   return dimension_product_type<>{};
 }
 
-template <dimension D, dimension... Ds>
+MODULE_EXPORT template <dimension D, dimension... Ds>
 constexpr dimension_product auto operator/(dimension_product_type<D, Ds...>,
                                            dimension_product_type<>) {
   return dimension_product_type<dimension_inverse_t<D>,
@@ -485,7 +490,7 @@ constexpr dimension_product auto operator/(dimension_product_type<D, Ds...>,
 }
 /// \endcond
 
-template <dimension D, dimension... Ds>
+MODULE_EXPORT template <dimension D, dimension... Ds>
 constexpr dimension_product auto operator/(dimension_product_type<>,
                                            dimension_product_type<D, Ds...>) {
   return dimension_product_type<dimension_inverse_t<D>,

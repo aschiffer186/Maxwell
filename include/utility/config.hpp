@@ -29,4 +29,8 @@
 #define MAXWELL_CONSTEXPR23
 #endif
 
+#ifndef MODULE_EXPORT 
+#define MODULE_EXPORT 
+#endif
+
 #endif
