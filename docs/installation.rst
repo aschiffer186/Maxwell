@@ -23,7 +23,7 @@ The package also provides a single target to link against: :code:`Maxwell::Maxwe
 
 Building Tests 
 -------------
-The unit tests for Maxwell and be build and run using cmake 
+The unit tests for Maxwell and be build and run using CMake from the top level Maxwell folder. 
 
 .. code-block:: bash 
 
@@ -32,7 +32,7 @@ The unit tests for Maxwell and be build and run using cmake
 
 Building Documents 
 ------------------
-The documents can be built using CMake. 
+The documents can be built using CMake from the top level Maxwell folder. 
 The documentation requuires Doxygen and Sphinx to be built. 
 Doxygen can be installed using your OS's package manager. 
 Sphinx and other requirements can be installed using pip.
@@ -40,7 +40,7 @@ Sphinx and other requirements can be installed using pip.
 .. code-block:: bash 
 
     cd Maxwell 
-    pip install docs/requirements.txt
+    pip install -r docs/requirements.txt
     cmake --workflow --preset build-docs 
 
 Doxygen documentation will be installed at :code:`<build-directory>/docs/Doxygen.`

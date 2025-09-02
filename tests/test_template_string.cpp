@@ -16,7 +16,7 @@ TEST(TestTemplateString, TestRangeProperties) {
 TEST(TestTemplateString, TestConstructor) {
   const template_string str{"Hello"};
 
-  EXPECT_EQ(str.size(), 5);
+  EXPECT_EQ(str.size(), 6);
 
   const std::array<char, 5> expected{'H', 'e', 'l', 'l', 'o'};
   std::array<char, 5> test;

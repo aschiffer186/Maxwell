@@ -117,10 +117,6 @@ concept dimension_product =
     _detail::is_dimension_product_type<std::remove_cvref_t<T>>::value;
 
 template <dimension... Dimensions> struct dimension_product_type {
-  static_assert((true && ... && (Dimensions::power != utility::zero)),
-                "Dimensions with power 0 should be omitted from the dimension "
-                "product");
-
   /// Tuple representation of the dimension product
   using tuple_type = std::tuple<Dimensions...>;
 
@@ -140,7 +136,8 @@ template <dimension... Dimensions> struct dimension_product_type {
   }
 };
 
-constexpr dimension_product_type<> dimension_one;
+constexpr dimension_product_type<dimension_type<"[]", utility::one>>
+    dimension_one;
 
 /// \brief Equality operator
 ///
@@ -288,7 +285,8 @@ operator*(dimension_product_type<LHS, LHSRest...>,
     }
   } else {
     if constexpr (LHS::power + RHS::power != utility::zero) {
-      using first = dimension_type<LHS::name, LHS::power + RHS::power>;
+      constexpr auto new_power = LHS::power + RHS::power;
+      using first = dimension_type<LHS::name, new_power>;
       if constexpr (sizeof...(LHSRest) == 0) {
         return dimension_product_type<first>{} *
                dimension_product_type<RHSRest...>{};

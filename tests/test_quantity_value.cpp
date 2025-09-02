@@ -134,6 +134,14 @@ TEST(TestQuantityValue, TestConvertingConstructor) {
 
   EXPECT_NEAR(deg.get_value(), 28.64788975654116, 1e-5);
   EXPECT_FLOAT_EQ(mr2.get_value(), 500.0);
+
+  const quantity_value mr3 = mr * mr;
+  const quantity_value<si::degree_unit * si::degree_unit> deg2{mr3};
+  const quantity_value mr4{mr3};
+
+  EXPECT_FLOAT_EQ(deg2.get_value(), .5 * .5 * (180.0 * 180.0) /
+                                        (std::numbers::pi * std::numbers::pi));
+  EXPECT_FLOAT_EQ(mr4.get_value(), 500.0 * 500.0);
 }
 
 TEST(TestQuantityValue, TestConversionOperator) {

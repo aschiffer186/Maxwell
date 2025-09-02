@@ -23,7 +23,7 @@ namespace maxwell::utility {
 /// \tparam Length The length of the string literal excluding the null
 /// terminator.
 template <std::size_t Length> struct template_string {
-  std::array<char, Length + 1> _data;
+  std::array<char, Length> _data;
 
   /// \brief Constructor
   ///
@@ -32,7 +32,7 @@ template <std::size_t Length> struct template_string {
   ///
   /// \post <tt>std::ranges::equal(str, *this)</tt>
   /// \param str The character array used to initialize \c *this.
-  constexpr template_string(const char (&str)[Length + 1]) {
+  constexpr template_string(const char (&str)[Length]) {
     std::ranges::copy(str, _data.begin());
   }
 
@@ -67,7 +67,7 @@ template <std::size_t Length> struct template_string {
 };
 
 template <std::size_t N>
-template_string(const char (&)[N]) -> template_string<(N - 1)>;
+template_string(const char (&)[N]) -> template_string<(N)>;
 
 /// \brief Three way comparison operator of \c template_string
 ///
@@ -111,13 +111,12 @@ constexpr auto operator==(const template_string<N1>& lhs,
 /// \param rhs The right hand side of the concatenation
 /// \return The concatenation of \c lhs and \c rhs.
 template <std::size_t L, std::size_t R>
-constexpr auto
-operator+(const template_string<L>& lhs,
-          const template_string<R>& rhs) -> template_string<L + R> {
-  char data[L + R + 1];
+constexpr auto operator+(const template_string<L>& lhs,
+                         const template_string<R>& rhs) {
+  char data[L + R - 1];
   auto it = std::ranges::copy(lhs, data);
   std::ranges::copy(rhs, it.out);
-  data[L + R] = '\0';
+  data[L + R - 2] = '\0';
   return template_string(data);
 }
 } // namespace maxwell::utility
