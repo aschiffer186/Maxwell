@@ -10,7 +10,8 @@
 #include "utility/template_string.hpp"
 
 namespace maxwell {
-template <utility::template_string... Dimensions> struct quantity_system {
+MODULE_EXPORT template <utility::template_string... Dimensions>
+struct quantity_system {
   template <utility::template_string Name>
     requires((Name == Dimensions) || ...)
   using base_dimension = base_dimension_type<Name>;

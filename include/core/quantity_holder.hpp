@@ -11,7 +11,7 @@
 #include "quantity_value.hpp"
 
 namespace maxwell {
-template <auto Q, typename T = double>
+MODULE_EXPORT template <auto Q, typename T = double>
   requires quantity<decltype(Q)>
 class quantity_holder;
 
@@ -28,7 +28,7 @@ constexpr bool is_quantity_holder_v =
 } // namespace _detail
 /// \endcond
 
-template <auto Q, typename T>
+MODULE_EXPORT template <auto Q, typename T>
   requires quantity<decltype(Q)>
 class quantity_holder {
 public:
@@ -82,7 +82,8 @@ private:
 };
 } // namespace maxwell
 
-template <auto Q, typename T> struct std::hash<maxwell::quantity_holder<Q, T>> {
+MODULE_EXPORT template <auto Q, typename T>
+struct std::hash<maxwell::quantity_holder<Q, T>> {
   auto
   operator()(const maxwell::quantity_holder<Q, T>& q) noexcept -> std::size_t {
     std::size_t hash_code = std::hash<T>{}(q.value_);

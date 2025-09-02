@@ -7,6 +7,8 @@
 #include <concepts>
 #include <type_traits>
 
+#include "config.hpp"
+
 /// \namespace maxwell::utility
 /// \brief Namespace for uility classes.
 namespace maxwell::utility {
@@ -14,9 +16,9 @@ namespace maxwell::utility {
 ///
 /// Forces an expression to be treated as a constant expression.
 /// \tparam Value The value of the expression to treat as a constant expression.
-template <auto Value> constexpr auto as_constant = Value;
+MODULE_EXPORT template <auto Value> constexpr auto as_constant = Value;
 
-template <typename T, typename U>
+MODULE_EXPORT template <typename T, typename U>
 concept similar = std::same_as<std::remove_cvref_t<T>, std::remove_cvref_t<U>>;
 } // namespace maxwell::utility
 
@@ -31,10 +33,11 @@ namespace maxwell {
 /// to enable to conversions.
 ///
 /// \tparam Q The quantity to enable
-template <auto Q> struct enable_chrono_conversions : std::false_type {};
+MODULE_EXPORT template <auto Q>
+struct enable_chrono_conversions : std::false_type {};
 
 /// \brief Helper variable template for \c enable_chrono_conversions.
-template <auto Q>
+MODULE_EXPORT template <auto Q>
 constexpr bool enable_chrono_conversions_v =
     enable_chrono_conversions<Q>::value;
 
@@ -45,7 +48,7 @@ constexpr bool enable_chrono_conversions_v =
 /// on quantity headers.
 ///
 /// \tparam Q The quantity to find the units of.
-template <typename Q> constexpr auto units_of = Q::units;
+MODULE_EXPORT template <typename Q> constexpr auto units_of = Q::units;
 } // namespace maxwell
 
 #endif

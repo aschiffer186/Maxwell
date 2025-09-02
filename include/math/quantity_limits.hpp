@@ -6,7 +6,7 @@
 #include "core/quantity_value.hpp"
 #include "utility/config.hpp"
 
-template <auto U, auto Q, typename T>
+MODULE_EXPORT template <auto U, auto Q, typename T>
 struct std::numeric_limits<maxwell::quantity_value<U, Q, T>> {
 private:
   using base_t = std::numeric_limits<T>;

@@ -12,6 +12,8 @@
 #include <ratio>       // ratio
 #include <type_traits> // false_type, remove_cvref_t, true_type
 
+#include "config.hpp"
+
 /// \namespace maxwell::utility
 /// \brief Namespace for uility classes.
 namespace maxwell::utility {
@@ -25,8 +27,8 @@ namespace maxwell::utility {
 /// \param base The base of the exponentiation.
 /// \param pow The power of the exponentiation.
 /// \return \f$base^{pow}\f$
-constexpr auto pos_pow(std::intmax_t base,
-                       std::intmax_t pow) noexcept -> std::intmax_t {
+MODULE_EXPORT constexpr auto
+pos_pow(std::intmax_t base, std::intmax_t pow) noexcept -> std::intmax_t {
   assert(pow >= 0);
   if (pow == 0) {
     return 1;
@@ -44,7 +46,8 @@ constexpr auto pos_pow(std::intmax_t base,
 ///
 /// \param pow The exponent to which 10 is raised.
 /// \return \f$10^{pow}\f$
-constexpr auto pos_pow_10(std::intmax_t pow) noexcept -> std::intmax_t {
+MODULE_EXPORT constexpr auto
+pos_pow_10(std::intmax_t pow) noexcept -> std::intmax_t {
   return pos_pow(10, pow);
 }
 
@@ -60,8 +63,8 @@ constexpr auto pos_pow_10(std::intmax_t pow) noexcept -> std::intmax_t {
 /// \tparam Numerator The numerator of the rational number.
 /// \tparam Denominator The denominator of the rational number.
 /// \tparam Exponent The exponent of the rational number.
-template <std::intmax_t Numerator, std::intmax_t Denominator,
-          std::intmax_t Exponent>
+MODULE_EXPORT template <std::intmax_t Numerator, std::intmax_t Denominator,
+                        std::intmax_t Exponent>
 struct rational_type;
 
 /// \cond
@@ -83,17 +86,17 @@ struct is_ratio<std::ratio<N, D>> : std::true_type {};
 /// \brief Concept indicating a type is an instantiation of \c rational_type.
 ///
 /// \tparam T The type to check.
-template <typename T>
+MODULE_EXPORT template <typename T>
 concept rational = _detail::is_rational_type<std::remove_cvref_t<T>>::value;
 
 /// \brief Concept indicating a type is an instantiation of \c std::ratio.
 ///
 /// \tparam T The type to check
-template <typename T>
+MODULE_EXPORT template <typename T>
 concept ratio = _detail::is_ratio<std::remove_cvref_t<T>>::value;
 
-template <std::intmax_t Numerator, std::intmax_t Denominator,
-          std::intmax_t Exponent>
+MODULE_EXPORT template <std::intmax_t Numerator, std::intmax_t Denominator,
+                        std::intmax_t Exponent>
 struct rational_type {
   static_assert(Denominator != 0, "Attempting to divide by zero");
 
@@ -118,11 +121,11 @@ struct rational_type {
 };
 
 /// Constant representing the rational number zero.
-constexpr rational_type<0, 1, 0> zero;
+MODULE_EXPORT constexpr rational_type<0, 1, 0> zero;
 /// Constant representing the rational number one.
-constexpr rational_type<1, 1, 0> one;
+MODULE_EXPORT constexpr rational_type<1, 1, 0> one;
 
-template <std::intmax_t Num, std::intmax_t Den, std::intmax_t Exp>
+MODULE_EXPORT template <std::intmax_t Num, std::intmax_t Den, std::intmax_t Exp>
 constexpr rational auto reduce(rational_type<Num, Den, Exp> /*r*/) noexcept {
   static_assert(Den != 0, "Attempting to divide by zero");
   if constexpr (Num == 0) {
@@ -150,8 +153,8 @@ constexpr rational auto reduce(rational_type<Num, Den, Exp> /*r*/) noexcept {
 /// \tparam D2 The denominator of the right-hand side of the multiplication.
 /// \tparam E2 The exponent of the right-hand side of the multiplication.
 /// \return The product of two rational numbers.
-template <std::intmax_t N1, std::intmax_t D1, std::intmax_t E1,
-          std::intmax_t N2, std::intmax_t D2, std::intmax_t E2>
+MODULE_EXPORT template <std::intmax_t N1, std::intmax_t D1, std::intmax_t E1,
+                        std::intmax_t N2, std::intmax_t D2, std::intmax_t E2>
 constexpr rational auto operator*(rational_type<N1, D1, E1> lhs,
                                   rational_type<N2, D2, E2> rhs) noexcept {
   if constexpr (std::gcd(N1, D1) != 1) {
@@ -177,8 +180,8 @@ constexpr rational auto operator*(rational_type<N1, D1, E1> lhs,
 /// \tparam D2 The denominator of the right-hand side of the division.
 /// \tparam E2 The exponent of the right-hand side of the division.
 /// \return The quotient of two rational numbers.
-template <std::intmax_t N1, std::intmax_t D1, std::intmax_t E1,
-          std::intmax_t N2, std::intmax_t D2, std::intmax_t E2>
+MODULE_EXPORT template <std::intmax_t N1, std::intmax_t D1, std::intmax_t E1,
+                        std::intmax_t N2, std::intmax_t D2, std::intmax_t E2>
 constexpr rational auto operator/(rational_type<N1, D1, E1> lhs,
                                   rational_type<N2, D2, E2> rhs) noexcept {
   static_assert(D1 != 0, "Attempting to divide by zero");
@@ -208,8 +211,8 @@ constexpr rational auto operator/(rational_type<N1, D1, E1> lhs,
 /// \tparam D2 The denominator of the right-hand side of the addition.
 /// \tparam E2 The exponent of the right-hand side of the addition.
 /// \return The sum of two rational numbers.
-template <std::intmax_t N1, std::intmax_t D1, std::intmax_t E1,
-          std::intmax_t N2, std::intmax_t D2, std::intmax_t E2>
+MODULE_EXPORT template <std::intmax_t N1, std::intmax_t D1, std::intmax_t E1,
+                        std::intmax_t N2, std::intmax_t D2, std::intmax_t E2>
 constexpr rational auto operator+(rational_type<N1, D1, E1> /*lhs*/,
                                   rational_type<N2, D2, E2> /*rhs*/) noexcept {
   constexpr std::intmax_t common_pow = E1;
@@ -241,8 +244,8 @@ constexpr rational auto operator+(rational_type<N1, D1, E1> /*lhs*/,
 /// \tparam D2 The denominator of the right-hand side of the subtraction.
 /// \tparam E2 The exponent of the right-hand side of the subtraction.
 /// \return The difference of two rational numbers.
-template <std::intmax_t N1, std::intmax_t D1, std::intmax_t E1,
-          std::intmax_t N2, std::intmax_t D2, std::intmax_t E2>
+MODULE_EXPORT template <std::intmax_t N1, std::intmax_t D1, std::intmax_t E1,
+                        std::intmax_t N2, std::intmax_t D2, std::intmax_t E2>
 constexpr rational auto operator-(rational_type<N1, D1, E1> /*lhs*/,
                                   rational_type<N2, D2, E2> /*rhs*/) noexcept {
   constexpr std::intmax_t common_pow = E1;
@@ -271,7 +274,7 @@ constexpr rational auto operator-(rational_type<N1, D1, E1> /*lhs*/,
 /// \tparam D The denominator
 /// \return A \c rational_type instance equivalent to the \c std::ratio
 /// type.
-template <std::intmax_t N, std::intmax_t D>
+MODULE_EXPORT template <std::intmax_t N, std::intmax_t D>
 constexpr rational auto from_ratio(std::ratio<N, D> /*rat*/) noexcept {
   static_assert(D != 0, "Attempting to divide by zero");
   return rational_type<N, D, 0>{};
@@ -293,8 +296,8 @@ constexpr rational auto from_ratio(std::ratio<N, D> /*rat*/) noexcept {
 /// \param rhs The right hand side of the comparison.
 /// \return A \c std::strong_ordering value indicating the result of the
 /// comparison.
-template <std::intmax_t N1, std::intmax_t D1, std::intmax_t E1,
-          std::intmax_t N2, std::intmax_t D2, std::intmax_t E2>
+MODULE_EXPORT template <std::intmax_t N1, std::intmax_t D1, std::intmax_t E1,
+                        std::intmax_t N2, std::intmax_t D2, std::intmax_t E2>
 constexpr auto
 operator<=>(rational_type<N1, D1, E1> /*lhs*/,
             rational_type<N2, D2, E2> /*rhs*/) -> std::strong_ordering {
@@ -313,8 +316,8 @@ operator<=>(rational_type<N1, D1, E1> /*lhs*/,
   }
 }
 
-template <std::intmax_t N1, std::intmax_t D1, std::intmax_t E1,
-          std::intmax_t N2, std::intmax_t D2, std::intmax_t E2>
+MODULE_EXPORT template <std::intmax_t N1, std::intmax_t D1, std::intmax_t E1,
+                        std::intmax_t N2, std::intmax_t D2, std::intmax_t E2>
 constexpr auto operator==(rational_type<N1, D1, E1> lhs,
                           rational_type<N2, D2, E2> rhs) -> bool {
   return (lhs <=> rhs) == std::strong_ordering::equal;
@@ -328,7 +331,7 @@ constexpr auto operator==(rational_type<N1, D1, E1> lhs,
 /// \tparam E The exponent of the rational power.
 /// \param base The base to be raised to the rational power.
 /// \return The value of base raised to the rational power
-template <std::intmax_t N, std::intmax_t D, std::intmax_t E>
+MODULE_EXPORT template <std::intmax_t N, std::intmax_t D, std::intmax_t E>
 constexpr double pow(double base, rational_type<N, D, E>) noexcept {
   assert(N % D == 0 && "For now only integer powers are supported");
   assert(E == 0 && "For now only exponent 0 is supported");
@@ -356,7 +359,7 @@ constexpr double pow(double base, rational_type<N, D, E>) noexcept {
 /// quantity_value instance.
 ///
 /// \tparam Value The compile-time value. Must be a structural type.
-template <auto Value> struct value_type {
+MODULE_EXPORT template <auto Value> struct value_type {
   /// The compile-time value.
   constexpr static auto value = Value;
 };

@@ -12,6 +12,8 @@
 #include <functional> // hash
 #include <iterator>   // contiguous_iterator
 
+#include "config.hpp"
+
 /// \namespace maxwell::utility
 /// \brief Namespace for uility classes.
 namespace maxwell::utility {
@@ -22,7 +24,7 @@ namespace maxwell::utility {
 ///
 /// \tparam Length The length of the string literal excluding the null
 /// terminator.
-template <std::size_t Length> struct template_string {
+MODULE_EXPORT template <std::size_t Length> struct template_string {
   std::array<char, Length> _data;
 
   /// \brief Constructor
@@ -66,7 +68,7 @@ template <std::size_t Length> struct template_string {
   constexpr std::unsigned_integral auto size() const noexcept { return Length; }
 };
 
-template <std::size_t N>
+MODULE_EXPORT template <std::size_t N>
 template_string(const char (&)[N]) -> template_string<(N)>;
 
 /// \brief Three way comparison operator of \c template_string
@@ -79,7 +81,7 @@ template_string(const char (&)[N]) -> template_string<(N)>;
 /// \param lhs The left hand side of the comparison.
 /// \param rhs The right hand side of the comparison.
 /// \return The order between the fist non-equivalent pair of elements.
-template <std::size_t N1, std::size_t N2>
+MODULE_EXPORT template <std::size_t N1, std::size_t N2>
 constexpr auto operator<=>(const template_string<N1>& lhs,
                            const template_string<N2>& rhs) {
   return std::lexicographical_compare_three_way(lhs.begin(), lhs.end(),
@@ -95,7 +97,7 @@ constexpr auto operator<=>(const template_string<N1>& lhs,
 /// \param lhs The left hand side of the comparison.
 /// \param rhs The right hand side of the comparison.
 /// \return \c true if the strings are equal.
-template <std::size_t N1, std::size_t N2>
+MODULE_EXPORT template <std::size_t N1, std::size_t N2>
 constexpr auto operator==(const template_string<N1>& lhs,
                           const template_string<N2>& rhs) -> bool {
   return (lhs <=> rhs) == std::strong_ordering::equal;
@@ -110,7 +112,7 @@ constexpr auto operator==(const template_string<N1>& lhs,
 /// \param lhs The left hand side of the concatenation
 /// \param rhs The right hand side of the concatenation
 /// \return The concatenation of \c lhs and \c rhs.
-template <std::size_t L, std::size_t R>
+MODULE_EXPORT template <std::size_t L, std::size_t R>
 constexpr auto operator+(const template_string<L>& lhs,
                          const template_string<R>& rhs) {
   char data[L + R - 1];
@@ -121,7 +123,7 @@ constexpr auto operator+(const template_string<L>& lhs,
 }
 } // namespace maxwell::utility
 
-template <std::size_t N>
+MODULE_EXPORT template <std::size_t N>
 struct std::hash<maxwell::utility::template_string<N>> {
   std::size_t
   operator()(const maxwell::utility::template_string<N>& str) noexcept {

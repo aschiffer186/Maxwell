@@ -17,3 +17,9 @@ module;
 #include <tuple>
 #include <type_traits>
 export module Maxwell;
+
+#define MODULE_EXPORT export
+
+#include "utility/config.hpp"
+#include "utility/template_string.hpp"
+#include "utility/type_traits.hpp"

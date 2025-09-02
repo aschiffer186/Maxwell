@@ -65,37 +65,39 @@ struct _quantity_value_operators {
   ///
   /// \param q The quantity value instance to negate
   /// \return The negated value of the `quantity_value` instance.
-  friend constexpr quantity_value_like auto
+  MODULE_EXPORT friend constexpr quantity_value_like auto
   operator-(const quantity_value_like auto& q) {
     return std::remove_cvref_t<decltype(q)>(-q.get_value());
   }
 
-  friend constexpr quantity_value_like auto&
+  MODULE_EXPORT friend constexpr quantity_value_like auto&
   operator++(quantity_value_like auto& q) {
     ++q.value_;
     return q;
   }
 
-  friend constexpr quantity_value_like auto
+  MODULE_EXPORT friend constexpr quantity_value_like auto
   operator++(quantity_value_like auto& q, int) {
     auto temp{q};
     ++q;
     return temp;
   }
 
-  friend constexpr quantity_value_like auto&
+  MODULE_EXPORT friend constexpr quantity_value_like auto&
   operator--(quantity_value_like auto& q) {
     --q.value_;
     return q;
   }
 
-  friend quantity_value_like auto operator--(quantity_value_like auto& q, int) {
+  MODULE_EXPORT friend constexpr quantity_value_like auto
+  operator--(quantity_value_like auto& q, int) {
     auto temp{q};
     --q;
     return temp;
   }
 
-  template <auto U1, auto Q1, typename T1, auto U2, auto Q2, typename T2>
+  MODULE_EXPORT template <auto U1, auto Q1, typename T1, auto U2, auto Q2,
+                          typename T2>
   friend constexpr quantity_value_like auto&
   operator+=(quantity_value<U1, Q1, T1>& lhs,
              const quantity_value<U2, Q2, T2>& rhs) {
@@ -107,7 +109,7 @@ struct _quantity_value_operators {
   }
 
   template <auto U1, auto Q1, typename T1, auto U2, auto Q2, typename T2>
-  friend constexpr quantity_value_like auto&
+  MODULE_EXPORT friend constexpr quantity_value_like auto&
   operator-=(quantity_value<U1, Q1, T1>& lhs,
              const quantity_value<U2, Q2, T2>& rhs) {
     static_assert(unit_subtractable_from<U1, U2>,
@@ -117,7 +119,7 @@ struct _quantity_value_operators {
     return lhs;
   }
 
-  template <auto U, auto Q, typename T, typename T2>
+  MODULE_EXPORT template <auto U, auto Q, typename T, typename T2>
     requires(!quantity_value_like<T2>)
   friend constexpr quantity_value_like auto&
   operator+=(quantity_value<U, Q, T>& lhs, T&& rhs)
@@ -128,7 +130,7 @@ struct _quantity_value_operators {
     return lhs;
   }
 
-  template <auto U, auto Q, typename T, typename T2>
+  MODULE_EXPORT template <auto U, auto Q, typename T, typename T2>
     requires(!quantity_value_like<T2>)
   friend constexpr quantity_value_like auto&
   operator-=(quantity_value<U, Q, T>& lhs, T2&& rhs)
@@ -138,7 +140,8 @@ struct _quantity_value_operators {
     return lhs;
   }
 
-  template <auto U1, auto Q1, typename T1, auto U2, auto Q2, typename T2>
+  MODULE_EXPORT template <auto U1, auto Q1, typename T1, auto U2, auto Q2,
+                          typename T2>
   friend constexpr quantity_value_like auto
   operator+(quantity_value<U1, Q1, T1> lhs,
             const quantity_value<U2, Q2, T2>& rhs) {
@@ -148,7 +151,8 @@ struct _quantity_value_operators {
     return lhs += rhs;
   }
 
-  template <auto U1, auto Q1, typename T1, auto U2, auto Q2, typename T2>
+  MODULE_EXPORT template <auto U1, auto Q1, typename T1, auto U2, auto Q2,
+                          typename T2>
   friend constexpr quantity_value_like auto
   operator-(quantity_value<U1, Q1, T1> lhs,
             const quantity_value<U2, Q2, T2>& rhs) {
@@ -158,28 +162,28 @@ struct _quantity_value_operators {
     return lhs -= rhs;
   }
 
-  template <typename T>
+  MODULE_EXPORT template <typename T>
     requires(!quantity_value_like<T>)
   friend constexpr quantity_value_like auto&
   operator+(quantity_value_like auto& lhs, T&& rhs) {
     return lhs += std::forward<rhs>(rhs);
   }
 
-  template <typename T>
+  MODULE_EXPORT template <typename T>
     requires(!quantity_value_like<T>)
   friend constexpr quantity_value_like auto&
   operator+(T&& lhs, quantity_value_like auto& rhs) {
     return rhs += std::forward<T>(lhs);
   }
 
-  template <typename T>
+  MODULE_EXPORT template <typename T>
     requires(!quantity_value_like<T>)
   friend constexpr quantity_value_like auto&
   operator-(quantity_value_like auto& lhs, T&& rhs) {
     return lhs -= std::forward<T>(rhs);
   }
 
-  template <typename T>
+  MODULE_EXPORT template <typename T>
     requires(!quantity_value_like<T>)
   friend constexpr quantity_value_like auto&
   operator-(T&& lhs, quantity_value_like auto& rhs)
@@ -188,7 +192,7 @@ struct _quantity_value_operators {
     return rhs -= std::forward<T>(lhs);
   }
 
-  friend constexpr quantity_value_like auto
+  MODULE_EXPORT friend constexpr quantity_value_like auto
   operator*(const quantity_value_like auto& lhs,
             const quantity_value_like auto& rhs) {
     using lhs_type = std::remove_cvref_t<decltype(lhs)>;
@@ -202,7 +206,7 @@ struct _quantity_value_operators {
         lhs.get_value() * rhs.get_value());
   }
 
-  template <typename T>
+  MODULE_EXPORT template <typename T>
     requires(!quantity_value_like<T> && !unit<T> &&
              !utility::_detail::is_value_type<T>::value)
   friend constexpr quantity_value_like auto
@@ -213,7 +217,7 @@ struct _quantity_value_operators {
                           product_type>(lhs.get_value() * rhs);
   }
 
-  template <typename T>
+  MODULE_EXPORT template <typename T>
     requires(!quantity_value_like<T> && !unit<T> &&
              !utility::_detail::is_value_type<T>::value)
   friend constexpr quantity_value_like auto
@@ -224,7 +228,7 @@ struct _quantity_value_operators {
                           product_type>(lhs * rhs.get_value());
   }
 
-  friend constexpr quantity_value_like auto
+  MODULE_EXPORT friend constexpr quantity_value_like auto
   operator/(const quantity_value_like auto& lhs,
             const quantity_value_like auto& rhs) {
     using lhs_type = std::remove_cvref_t<decltype(lhs)>;
@@ -238,7 +242,7 @@ struct _quantity_value_operators {
         lhs.get_value() / rhs.get_value());
   }
 
-  template <typename T>
+  MODULE_EXPORT template <typename T>
     requires(!quantity_value_like<T> && !unit<T>)
   friend constexpr quantity_value_like auto
   operator/(const quantity_value_like auto& lhs, const T& rhs) {
@@ -248,7 +252,7 @@ struct _quantity_value_operators {
                           product_type>(lhs.get_value() / rhs);
   }
 
-  template <typename T>
+  MODULE_EXPORT template <typename T>
     requires(!quantity_value_like<T> && !unit<T> &&
              !utility::_detail::is_value_type<T>::value)
   friend constexpr quantity_value_like auto
@@ -259,7 +263,7 @@ struct _quantity_value_operators {
                           product_type>(lhs / rhs.get_value());
   }
 
-  friend constexpr quantity_value_like auto
+  MODULE_EXPORT friend constexpr quantity_value_like auto
   operator%(const quantity_value_like auto& lhs,
             const quantity_value_like auto& rhs) {
     using lhs_type = std::remove_cvref_t<decltype(lhs)>;
@@ -273,7 +277,8 @@ struct _quantity_value_operators {
         lhs.get_value() % rhs.get_value());
   }
 
-  template <auto U1, auto Q1, typename T1, auto U2, auto Q2, typename T2>
+  MODULE_EXPORT template <auto U1, auto Q1, typename T1, auto U2, auto Q2,
+                          typename T2>
   friend constexpr auto operator<=>(const quantity_value<U1, Q1, T1>& lhs,
                                     const quantity_value<U2, Q2, T2>& rhs)
     requires std::three_way_comparable_with<
@@ -285,7 +290,8 @@ struct _quantity_value_operators {
     return lhs.in_base_units().get_value() <=> rhs.in_base_units().get_value();
   }
 
-  template <auto U1, auto Q1, typename T1, auto U2, auto Q2, typename T2>
+  MODULE_EXPORT template <auto U1, auto Q1, typename T1, auto U2, auto Q2,
+                          typename T2>
   friend auto operator==(const quantity_value<U1, Q1, T1>& lhs,
                          const quantity_value<U2, Q2, T2>& rhs) -> bool
     requires std::equality_comparable_with<
