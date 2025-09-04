@@ -158,6 +158,11 @@ TEST(TestQuantityValue, TestConvertingConstructor) {
   si::second<> s{min};
 
   EXPECT_FLOAT_EQ(s.get_value(), 60.0);
+
+  si::kelvin<> k{300.0};
+  si::celsius<> c{k};
+
+  EXPECT_FLOAT_EQ(c.get_value(), 26.85);
 }
 
 TEST(TestQuantityValue, TestConversionOperator) {

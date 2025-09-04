@@ -66,13 +66,15 @@ namespace _detail {
 template <unit LHS, unit RHS> struct unit_product_impl {
   using type = unit_type<LHS::name + utility::template_string{"*"} + RHS::name,
                          LHS::quantity * RHS::quantity,
-                         LHS::multiplier * RHS::multiplier>;
+                         LHS::multiplier * RHS::multiplier, 
+                         LHS::reference * RHS::multiplier + RHS::reference>;
 };
 
 template <unit LHS, unit RHS> struct unit_quotient_impl {
   using type = unit_type<LHS::name + utility::template_string{"*"} + RHS::name,
                          LHS::quantity / RHS::quantity,
-                         LHS::multiplier / RHS::multiplier>;
+                         LHS::multiplier / RHS::multiplier,
+                         LHS::reference - RHS::reference / RHS::multiplier>;
 };
 } // namespace _detail
 /// \endcond
@@ -123,7 +125,7 @@ template <auto Val, utility::template_string Name> struct derived_unit_impl;
 template <auto U, utility::template_string Name>
   requires unit<decltype(U)>
 struct derived_unit_impl<U, Name> {
-  using type = unit_type<Name, U.quantity, U.multiplier>;
+  using type = unit_type<Name, U.quantity, U.multiplier, U.reference>;
 };
 
 template <auto Q, utility::template_string Name>
@@ -143,6 +145,15 @@ template <unit From, unit To>
 constexpr double conversion_factor(From, To) noexcept {
   return static_cast<double>(From::multiplier) /
          static_cast<double>(To::multiplier);
+}
+
+template <unit From, unit To> 
+constexpr double conversion_offset(From, To) noexcept {
+  if (From::multiplier == 1.0) {
+    return static_cast<double>(To::reference - From::reference); 
+  } else { 
+    return To::reference - From::reference / From::multiplier;
+  }
 }
 
 constexpr double quetta_prefix{1e30};
