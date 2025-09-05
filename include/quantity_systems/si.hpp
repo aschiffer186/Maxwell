@@ -54,7 +54,7 @@ MODULE_EXPORT constexpr struct radian_unit_type
 
 /// \cond
 namespace _detail {
-constexpr auto rad_to_deg = value<std::numbers::pi / 180.0>;
+constexpr auto rad_to_deg = value<180.0 / std::numbers::pi>;
 constexpr auto kelvin_to_celsius = value<-273.15>;
 } // namespace _detail
 /// \endcond
@@ -62,6 +62,7 @@ constexpr auto kelvin_to_celsius = value<-273.15>;
 MODULE_EXPORT constexpr struct celsius_unit_type
     : derived_unit<kelvin_unit + _detail::kelvin_to_celsius, "°C"> {
 } celsius_unit;
+
 
 MODULE_EXPORT constexpr struct degree_unit_type
     : derived_unit<_detail::rad_to_deg * radian_unit, "deg"> {

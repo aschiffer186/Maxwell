@@ -141,14 +141,16 @@ template <auto FromUnit, auto ToUnit>
 concept unit_convertible_to =
     dimension_convertible_to<FromUnit.dimensions, ToUnit.dimensions>;
 
+// 1 km in cm = 1 m / 1e-3 km *  100 cm / 1 m 
+
 template <unit From, unit To>
-constexpr double conversion_factor(From, To) noexcept {
-  return static_cast<double>(From::multiplier) /
-         static_cast<double>(To::multiplier);
+constexpr auto conversion_factor(From, To) noexcept -> double {
+  return static_cast<double>(To::multiplier) /
+         static_cast<double>(From::multiplier);
 }
 
 template <unit From, unit To> 
-constexpr double conversion_offset(From, To) noexcept {
+constexpr auto conversion_offset(From, To) noexcept -> double{
   if (From::multiplier == 1.0) {
     return static_cast<double>(To::reference - From::reference); 
   } else { 
@@ -156,30 +158,32 @@ constexpr double conversion_offset(From, To) noexcept {
   }
 }
 
-constexpr double quetta_prefix{1e30};
-constexpr double ronna_prefix{1e27};
-constexpr double yotta_prefix{1e24};
-constexpr double zetta_prefix{1e21};
-constexpr double exa_prefix{1e18};
-constexpr double peta_prefix{1e15};
-constexpr double tera_prefix{1e12};
-constexpr double giga_prefix{1e9};
-constexpr double mega_prefix{1e6};
-constexpr double kilo_prefix{1e3};
-constexpr double hecto_prefix{1e2};
-constexpr double deca_prefix{1e1};
-constexpr double deci_prefix{1e-1};
-constexpr double centi_prefix{1e-2};
-constexpr double milli_prefix{1e-3};
-constexpr double micro_prefix{1e-6};
-constexpr double nano_prefix{1e-9};
-constexpr double pico_prefix{1e-12};
-constexpr double femto_prefix{1e-15};
-constexpr double atto_prefix{1e-18};
-constexpr double zepto_prefix{1e-21};
-constexpr double yocto_prefix{1e-24};
-constexpr double ronto_prefix{1e-27};
-constexpr double quecto_prefix{1e-30};
+// 1 m -> km = 1e-3 km / 1 m
+
+constexpr double base_to_quetta_prefix{1e-30};
+constexpr double base_to_ronna_prefix{1e-27};
+constexpr double base_to_yotta_prefix{1e-24};
+constexpr double base_to_zetta_prefix{1e-21};
+constexpr double base_to_exa_prefix{1e-18};
+constexpr double base_to_peta_prefix{1e-15};
+constexpr double base_to_tera_prefix{1e-12};
+constexpr double base_to_giga_prefix{1e-9};
+constexpr double base_to_mega_prefix{1e-6};
+constexpr double base_to_kilo_prefix{1e-3};
+constexpr double base_to_hecto_prefix{1e-2};
+constexpr double base_to_deca_prefix{1e-1};
+constexpr double base_to_deci_prefix{1e1};
+constexpr double base_to_centi_prefix{1e2};
+constexpr double base_to_milli_prefix{1e3};
+constexpr double base_to_micro_prefix{1e6};
+constexpr double base_to_nano_prefix{1e9};
+constexpr double base_to_pico_prefix{1e12};
+constexpr double base_to_femto_prefix{1e15};
+constexpr double base_to_atto_prefix{1e18};
+constexpr double base_to_zepto_prefix{1e21};
+constexpr double base_to_yocto_prefix{1e24};
+constexpr double base_to_ronto_prefix{1e27};
+constexpr double base_to_quecto_prefix{1e30};
 
 template <auto Prefix, auto U, utility::template_string Name>
 struct prefixed_unit {
@@ -198,76 +202,76 @@ using prefixed_unit_t = prefixed_unit<Prefix, U, Name>::type;
 
 template <auto U>
 constexpr unit auto quetta_unit =
-    prefixed_unit_t<quetta_prefix, U, utility::template_string{"Q"} + U.name>{};
+    prefixed_unit_t<base_to_quetta_prefix, U, utility::template_string{"Q"} + U.name>{};
 template <auto U>
 constexpr unit auto ronna_unit =
-    prefixed_unit_t<ronna_prefix, U, utility::template_string{"R"} + U.name>{};
+    prefixed_unit_t<base_to_ronna_prefix, U, utility::template_string{"R"} + U.name>{};
 template <auto U>
 constexpr unit auto yotta_unit =
-    prefixed_unit_t<yotta_prefix, U, utility::template_string{"Y"} + U.name>{};
+    prefixed_unit_t<base_to_yotta_prefix, U, utility::template_string{"Y"} + U.name>{};
 template <auto U>
 constexpr unit auto zetta_unit =
-    prefixed_unit_t<zetta_prefix, U, utility::template_string{"Z"} + U.name>{};
+    prefixed_unit_t<base_to_zetta_prefix, U, utility::template_string{"Z"} + U.name>{};
 template <auto U>
 constexpr unit auto exa_unit =
-    prefixed_unit_t<exa_prefix, U, utility::template_string{"E"} + U.name>{};
+    prefixed_unit_t<base_to_exa_prefix, U, utility::template_string{"E"} + U.name>{};
 template <auto U>
 constexpr unit auto peta_unit =
-    prefixed_unit_t<peta_prefix, U, utility::template_string{"P"} + U.name>{};
+    prefixed_unit_t<base_to_peta_prefix, U, utility::template_string{"P"} + U.name>{};
 template <auto U>
 constexpr unit auto tera_unit =
-    prefixed_unit_t<tera_prefix, U, utility::template_string{"T"} + U.name>{};
+    prefixed_unit_t<base_to_tera_prefix, U, utility::template_string{"T"} + U.name>{};
 template <auto U>
 constexpr unit auto giga_unit =
-    prefixed_unit_t<giga_prefix, U, utility::template_string{"G"} + U.name>{};
+    prefixed_unit_t<base_to_giga_prefix, U, utility::template_string{"G"} + U.name>{};
 template <auto U>
 constexpr unit auto mega_unit =
-    prefixed_unit_t<mega_prefix, U, utility::template_string{"M"} + U.name>{};
+    prefixed_unit_t<base_to_mega_prefix, U, utility::template_string{"M"} + U.name>{};
 template <auto U>
 constexpr unit auto kilo_unit =
-    prefixed_unit_t<kilo_prefix, U, utility::template_string{"k"} + U.name>{};
+    prefixed_unit_t<base_to_kilo_prefix, U, utility::template_string{"k"} + U.name>{};
 template <auto U>
 constexpr unit auto hecto_unit =
-    prefixed_unit_t<hecto_prefix, U, utility::template_string{"h"} + U.name>{};
+    prefixed_unit_t<base_to_hecto_prefix, U, utility::template_string{"h"} + U.name>{};
 template <auto U>
 constexpr unit auto deca_unit =
-    prefixed_unit_t<deca_prefix, U, utility::template_string{"da"} + U.name>{};
+    prefixed_unit_t<base_to_deca_prefix, U, utility::template_string{"da"} + U.name>{};
 template <auto U>
 constexpr unit auto deci_unit =
-    prefixed_unit_t<deci_prefix, U, utility::template_string{"d"} + U.name>{};
+    prefixed_unit_t<base_to_deci_prefix, U, utility::template_string{"d"} + U.name>{};
 template <auto U>
 constexpr unit auto centi_unit =
-    prefixed_unit_t<centi_prefix, U, utility::template_string{"c"} + U.name>{};
+    prefixed_unit_t<base_to_centi_prefix, U, utility::template_string{"c"} + U.name>{};
 template <auto U>
 constexpr unit auto milli_unit =
-    prefixed_unit_t<milli_prefix, U, utility::template_string{"m"} + U.name>{};
+    prefixed_unit_t<base_to_milli_prefix, U, utility::template_string{"m"} + U.name>{};
 template <auto U>
 constexpr unit auto micro_unit =
-    prefixed_unit_t<micro_prefix, U, utility::template_string{"μ"} + U.name>{};
+    prefixed_unit_t<base_to_micro_prefix, U, utility::template_string{"μ"} + U.name>{};
 template <auto U>
 constexpr unit auto nano_unit =
-    prefixed_unit_t<nano_prefix, U, utility::template_string{"n"} + U.name>{};
+    prefixed_unit_t<base_to_nano_prefix, U, utility::template_string{"n"} + U.name>{};
 template <auto U>
 constexpr unit auto pico_unit =
-    prefixed_unit_t<pico_prefix, U, utility::template_string{"p"} + U.name>{};
+    prefixed_unit_t<base_to_pico_prefix, U, utility::template_string{"p"} + U.name>{};
 template <auto U>
 constexpr unit auto femto_unit =
-    prefixed_unit_t<femto_prefix, U, utility::template_string{"f"} + U.name>{};
+    prefixed_unit_t<base_to_femto_prefix, U, utility::template_string{"f"} + U.name>{};
 template <auto U>
 constexpr unit auto atto_unit =
-    prefixed_unit_t<atto_prefix, U, utility::template_string{"a"} + U.name>{};
+    prefixed_unit_t<base_to_atto_prefix, U, utility::template_string{"a"} + U.name>{};
 template <auto U>
 constexpr unit auto zepto_unit =
-    prefixed_unit_t<zepto_prefix, U, utility::template_string{"z"} + U.name>{};
+    prefixed_unit_t<base_to_zepto_prefix, U, utility::template_string{"z"} + U.name>{};
 template <auto U>
 constexpr unit auto yocto_unit =
-    prefixed_unit_t<yocto_prefix, U, utility::template_string{"y"} + U.name>{};
+    prefixed_unit_t<base_to_yocto_prefix, U, utility::template_string{"y"} + U.name>{};
 template <auto U>
 constexpr unit auto ronto_unit =
-    prefixed_unit_t<ronto_prefix, U, utility::template_string{"r"} + U.name>{};
+    prefixed_unit_t<base_to_ronto_prefix, U, utility::template_string{"r"} + U.name>{};
 template <auto U>
 constexpr unit auto quecto_unit =
-    prefixed_unit_t<quecto_prefix, U, utility::template_string{"q"} + U.name>{};
+    prefixed_unit_t<base_to_quecto_prefix, U, utility::template_string{"q"} + U.name>{};
 
 template <auto U>
 concept unitless = quantity_convertible_to<U.quantity, number> && !_detail::has_derived_base<decltype(U.quantity)>::value;

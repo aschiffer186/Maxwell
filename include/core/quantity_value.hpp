@@ -349,7 +349,8 @@ template <utility::ratio From, unit To>
 constexpr double chrono_conversion_factor(From, To) {
   const double from_value =
       static_cast<double>(From::num) / static_cast<double>(From::den);
-  return from_value / static_cast<double>(To::multiplier);
+  double ret_val =  from_value * To::multiplier;
+  return ret_val;
 }
 /// \endcond
 } // namespace _detail
@@ -533,7 +534,7 @@ public:
     requires std::constructible_from<T, Rep> && utility::ratio<Period>
   MAXWELL_CONSTEXPR23
   quantity_value(const std::chrono::duration<Rep, Period>& d)
-      : value_(_detail::chrono_conversion_factor(Period{}, U) * d.count()) {
+      : value_(utility::as_constant<_detail::chrono_conversion_factor(Period{}, U)> * d.count()) {
     static_assert(enable_chrono_conversions_v<Q>,
                   "Attempting to construct a quantity_value that does not "
                   "represent time from a std::chrono::duration instance");
@@ -569,7 +570,7 @@ public:
       const quantity_value<FromUnit, FromQuantity, Up>& other)
       : value_(U.scale.from_scale(
             other.get_value() *
-                utility::as_constant<conversion_factor(FromUnit, U)> + conversion_offset(FromUnit, U),
+                utility::as_constant<conversion_factor(FromUnit, U)> + utility::as_constant<conversion_offset(FromUnit, U)>,
             FromUnit.scale) ){
     static_assert(unit_convertible_to<FromUnit, U>,
                   "Units of other cannot be converted to units of value being "
@@ -610,7 +611,7 @@ public:
       quantity_value<FromUnit, FromQuantity, Up>&& other) noexcept
       : value_(U.scale.from_scale(
             std::move(other).get_value() *
-                utility::as_constant<conversion_factor(FromUnit, U)> + conversion_offset(FromUnit, U),
+                utility::as_constant<conversion_factor(FromUnit, U)> + utility::as_constant<conversion_offset(FromUnit, U)>,
             FromUnit.scale)) {
     static_assert(unit_convertible_to<FromUnit, U>,
                   "Units of other cannot be converted to units of value being "

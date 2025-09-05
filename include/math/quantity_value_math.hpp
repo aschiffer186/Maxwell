@@ -10,38 +10,38 @@
 
 namespace maxwell::math {
 MODULE_EXPORT template <auto U, auto Q, typename T>
-MAXWELL_BASIC_CMATH_CONSTEXPR quantity_value<U, Q, T>
-abs(quantity_value<U, Q, T>& x) {
+MAXWELL_BASIC_CMATH_CONSTEXPR auto
+abs(quantity_value<U, Q, T>& x) -> quantity_value<U, Q, T> {
   return quantity_value<U, Q, T>(std::abs(x.get_value()));
 }
 
-MODULE_EXPORT MAXWELL_EXTENDED_CMATH_CONSTEXPR double
-sin(quantity_of<isq::plane_angle> auto x) {
+MODULE_EXPORT MAXWELL_EXTENDED_CMATH_CONSTEXPR auto
+sin(quantity_of<isq::plane_angle> auto x) -> double {
   return std::sin(si::radian<>{x}.get_value());
 }
 
-MODULE_EXPORT MAXWELL_EXTENDED_CMATH_CONSTEXPR double
-cos(quantity_of<isq::plane_angle> auto x) {
+MODULE_EXPORT MAXWELL_EXTENDED_CMATH_CONSTEXPR auto
+cos(quantity_of<isq::plane_angle> auto x) -> double {
   return std::cos(si::radian<>{x}.get_value());
 }
 
-MODULE_EXPORT MAXWELL_EXTENDED_CMATH_CONSTEXPR double
-tan(quantity_of<isq::plane_angle> auto x) {
+MODULE_EXPORT MAXWELL_EXTENDED_CMATH_CONSTEXPR auto
+tan(quantity_of<isq::plane_angle> auto x) -> double {
   return std::tan(si::radian<>{x}.get_value());
 }
 
-MODULE_EXPORT MAXWELL_EXTENDED_CMATH_CONSTEXPR double
-sec(quantity_of<isq::plane_angle> auto x) {
+MODULE_EXPORT MAXWELL_EXTENDED_CMATH_CONSTEXPR auto
+sec(quantity_of<isq::plane_angle> auto x) -> double {
   return 1.0 / std::cos(si::radian<>{x}.get_value());
 }
 
-MODULE_EXPORT MAXWELL_EXTENDED_CMATH_CONSTEXPR double
-csc(quantity_of<isq::plane_angle> auto x) {
+MODULE_EXPORT MAXWELL_EXTENDED_CMATH_CONSTEXPR auto
+csc(quantity_of<isq::plane_angle> auto x) -> double {
   return 1.0 / std::sin(si::radian<>{x}.get_value());
 }
 
-MODULE_EXPORT MAXWELL_EXTENDED_CMATH_CONSTEXPR double
-cot(quantity_of<isq::plane_angle> auto x) {
+MODULE_EXPORT MAXWELL_EXTENDED_CMATH_CONSTEXPR auto
+cot(quantity_of<isq::plane_angle> auto x) -> double {
   return 1.0 / std::tan(si::radian<>{x}.get_value());
 }
 } // namespace maxwell::math

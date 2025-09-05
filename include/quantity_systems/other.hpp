@@ -9,27 +9,27 @@
 
 namespace maxwell::other {
 namespace _detail {
-constexpr auto min_to_sec = utility::value_type<60.0>{};
-constexpr auto hour_to_min = utility::value_type<1.0 / 60.0>{};
-constexpr auto day_to_hour = utility::value_type<1.0 / 24.0>{};
-constexpr auto week_to_day = utility::value_type<1.0 / 7.0>{};
+constexpr auto sec_to_min = utility::value_type<1.0 / 60.0>{};
+constexpr auto min_to_hour = utility::value_type<1.0 / 60.0>{};
+constexpr auto hour_to_day = utility::value_type<1.0 / 24.0>{};
+constexpr auto day_to_week = utility::value_type<1.0 / 7.0>{};
 } // namespace _detail
 
 namespace time {
 MODULE_EXPORT constexpr struct minute_unit_type
-    : derived_unit<_detail::min_to_sec * si::second_unit, "min"> {
+    : derived_unit<_detail::sec_to_min * si::second_unit, "min"> {
 } minute_unit;
 
 MODULE_EXPORT constexpr struct hour_unit_type
-    : derived_unit<_detail::hour_to_min * minute_unit, "hr"> {
+    : derived_unit<_detail::min_to_hour * minute_unit, "hr"> {
 } hour_unit;
 
 MODULE_EXPORT constexpr struct day_unit_type
-    : derived_unit<_detail::day_to_hour * hour_unit, "day"> {
+    : derived_unit<_detail::hour_to_day * hour_unit, "day"> {
 } day_unit;
 
 MODULE_EXPORT constexpr struct week_unit_type
-    : derived_unit<_detail::week_to_day * day_unit, "week"> {
+    : derived_unit<_detail::day_to_week * day_unit, "week"> {
 } week_unit;
 
 MODULE_EXPORT template <typename T = double>

@@ -4,8 +4,10 @@
 #include <gtest/gtest.h>
 #include <type_traits>
 
+#include "core/unit.hpp"
 #include "quantity_systems/other.hpp"
 #include "quantity_systems/si.hpp"
+#include "quantity_systems/us.hpp"
 #include "test_types.hpp"
 
 using namespace maxwell;
@@ -108,7 +110,7 @@ TEST(TestQuantityValue, TestChronoConstructor) {
 
   milli<si::second<>> q1{1s};
 
-  using from_type = std::chrono::duration<double, std::ratio<27, 36>>;
+  using from_type = std::chrono::duration<double, std::ratio<3600>>;
   using to_type = std::chrono::duration<double, std::nano>;
 
   to_type expected_value = from_type(1s);
@@ -162,7 +164,16 @@ TEST(TestQuantityValue, TestConvertingConstructor) {
   si::kelvin<> k{300.0};
   si::celsius<> c{k};
 
+  // constexpr double c3 = conversion_factor(si::kelvin_unit, si::celsius_unit);
+  // constexpr double c2 = conversion_offset(si::kelvin_unit, si::celsius_unit);
+
   EXPECT_FLOAT_EQ(c.get_value(), 26.85);
+
+  // us::fahrenheit<> f{k};
+  // us::fahrenheit<> f2{c};
+
+  // EXPECT_FLOAT_EQ(f.get_value(), 80.33);
+  // EXPECT_FLOAT_EQ(f2.get_value(), 80.33);
 }
 
 TEST(TestQuantityValue, TestConversionOperator) {

@@ -204,7 +204,7 @@ struct has_derived_base<T, std::void_t<derived_base_t<T>>> : std::true_type {};
 template <typename T> struct has_derived_base<const T> : has_derived_base<T> {};
 
 template <quantity From, quantity To>
-consteval bool quantity_convertible_to_impl(From, To) noexcept {
+consteval auto quantity_convertible_to_impl(From, To) noexcept -> bool {
   // If dimensions size > 1 we know it's a product or a quotient
   if (std::derived_from<From, _detail::quantity_product_tag> &&
       !has_derived_base<From>::value) {
