@@ -155,9 +155,9 @@ MODULE_EXPORT constexpr dimension_product_type<
 /// \param RHS The right hand side of the equality comparison.
 /// \return \c true if the dimensional products are equal
 MODULE_EXPORT template <dimension... LHS, dimension... RHS>
-constexpr auto
-operator==(dimension_product_type<LHS...> /*lhs*/,
-           dimension_product_type<RHS...> /*rhs*/) noexcept -> bool {
+constexpr auto operator==(dimension_product_type<LHS...> /*lhs*/,
+                          dimension_product_type<RHS...> /*rhs*/) noexcept
+    -> bool {
   return utility::similar<dimension_product_type<LHS...>,
                           dimension_product_type<RHS...>>;
 }
@@ -437,8 +437,8 @@ operator/(dimension_product_type<LHS, LHSRest...>,
     }
   } else if constexpr (RHS::name < LHS::name) {
     if constexpr (sizeof...(LHSRest) == 0) {
-      return dimension_product_type<dimension_inverse_t<RHS>>{} *
-             (dimension_product_type<LHS>{} *
+      return (dimension_product_type<dimension_inverse_t<RHS>>{} *
+              dimension_product_type<LHS>{} *
               dimension_product_type<dimension_inverse_t<RHSRest>...>{});
     } else if constexpr (sizeof...(RHSRest) == 0) {
       return dimension_product_type<dimension_inverse_t<RHS>, LHS,
@@ -485,8 +485,7 @@ operator/(dimension_product_type<>, dimension_product_type<>) {
 MODULE_EXPORT template <dimension D, dimension... Ds>
 constexpr dimension_product auto operator/(dimension_product_type<D, Ds...>,
                                            dimension_product_type<>) {
-  return dimension_product_type<dimension_inverse_t<D>,
-                                dimension_inverse_t<Ds>...>{};
+  return dimension_product_type<D, Ds...>{};
 }
 /// \endcond
 

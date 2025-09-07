@@ -128,7 +128,7 @@ TEST(TestDimensions, TestDimensionProductConcept) {
 
 TEST(TestDimensions, TestDimensionProductEquality) {
   constexpr dimension_product_type<> d1;
-  constexpr dimension_product_type<> d2;
+  dimension_product_type<> d2;
   constexpr dimension_product_type<
       dimension_type<"A", utility::rational_type<1, 1, 0>{}>>
       d3;
@@ -201,17 +201,128 @@ TEST(TestDimensions, TestDimensionProductMultiplication) {
   EXPECT_EQ(std::tuple_size_v<decltype(prod4_tuple)>, 1);
   EXPECT_EQ(std::get<0>(prod4_tuple), (dimension_type<"A", utility::one>{}));
 
-  const auto prod5 = dim_prod1 * dim; 
+  const auto prod5 = dim_prod1 * dim;
   const auto prod5_tuple = prod5.as_tuple();
 
   EXPECT_EQ(std::tuple_size_v<decltype(prod5_tuple)>, 1);
   EXPECT_EQ(std::get<0>(prod5_tuple), (dimension_type<"A", utility::one>{}));
 
-  const dimension_product_type<dimension_type<"A", utility::rational_type<-1, 1>{}>> dim_prod3; 
+  const dimension_product_type<
+      dimension_type<"A", utility::rational_type<-1, 1>{}>>
+      dim_prod3;
 
   const auto prod6 = dim_prod2 * dim_prod3;
   const auto prod6_tuple = prod6.as_tuple();
 
   EXPECT_EQ(std::tuple_size_v<decltype(prod6_tuple)>, 1);
   EXPECT_EQ(std::get<0>(prod6_tuple), (dimension_type<"B", utility::one>{}));
+
+  const dimension_product_type<
+      dimension_type<"A", utility::rational_type<1, 1>{}>,
+      dimension_type<"C", utility::rational_type<1, 1>{}>>
+      dim_prod4;
+  const dimension_product_type<
+      dimension_type<"B", utility::rational_type<1, 1>{}>,
+      dimension_type<"D", utility::rational_type<1, 1>{}>>
+      dim_prod5;
+
+  const auto prod7 = dim_prod4 * dim_prod5;
+  const auto prod7_tuple = prod7.as_tuple();
+
+  EXPECT_EQ(std::tuple_size_v<decltype(prod7_tuple)>, 4);
+  EXPECT_EQ(std::get<0>(prod7_tuple), (dimension_type<"A", utility::one>{}));
+  EXPECT_EQ(std::get<1>(prod7_tuple), (dimension_type<"B", utility::one>{}));
+  EXPECT_EQ(std::get<2>(prod7_tuple), (dimension_type<"C", utility::one>{}));
+  EXPECT_EQ(std::get<3>(prod7_tuple), (dimension_type<"D", utility::one>{}));
+
+  const dimension_product_type<dimension_type<"A", utility::one>,
+                               dimension_type<"E", utility::one>>
+      dim_prod6;
+
+  const auto prod8 = prod7 * dim_prod6;
+  const auto prod8_tuple = prod8.as_tuple();
+
+  EXPECT_EQ(std::tuple_size_v<decltype(prod8_tuple)>, 5);
+  EXPECT_EQ(std::get<0>(prod8_tuple),
+            (dimension_type<"A", utility::rational_type<2, 1>{}>{}));
+  EXPECT_EQ(std::get<1>(prod8_tuple), (dimension_type<"B", utility::one>{}));
+  EXPECT_EQ(std::get<2>(prod8_tuple), (dimension_type<"C", utility::one>{}));
+  EXPECT_EQ(std::get<3>(prod8_tuple), (dimension_type<"D", utility::one>{}));
+  EXPECT_EQ(std::get<4>(prod8_tuple), (dimension_type<"E", utility::one>{}));
+
+  const dimension_product_type<dimension_type<"A", utility::zero>> dim_prod7;
+  const auto prod9 = dim_prod7 * dim_prod7;
+
+  const auto prod9_tuple = prod9.as_tuple();
+  EXPECT_EQ(std::tuple_size_v<decltype(prod9_tuple)>, 0);
+}
+
+TEST(TestDimensions, TestDimensionProductDivision) {
+  const dimension_product_type<> dim_prod1;
+
+  const auto quot1 = dim_prod1 / dim_prod1;
+  const auto quot1_tuple = quot1.as_tuple();
+
+  EXPECT_EQ(std::tuple_size_v<decltype(quot1_tuple)>, 0);
+
+  const dimension_type<"A", utility::one> dim;
+  const dimension_product_type<dimension_type<"A", utility::one>,
+                               dimension_type<"B", utility::one>>
+      dim_prod2;
+
+  const auto quot2 = dim / dim_prod2;
+  const auto quot2_tuple = quot2.as_tuple();
+
+  EXPECT_EQ(std::tuple_size_v<decltype(quot2_tuple)>, 1);
+  EXPECT_EQ(std::get<0>(quot2_tuple),
+            (dimension_type<"B", utility::rational_type<-1, 1>{}>{}));
+
+  const auto quot3 = dim_prod2 / dim;
+  const auto quot3_tuple = quot3.as_tuple();
+
+  EXPECT_EQ(std::tuple_size_v<decltype(quot3_tuple)>, 1);
+  EXPECT_EQ(std::get<0>(quot3_tuple),
+            (dimension_type<"B", utility::rational_type<1, 1>{}>{}));
+
+  const auto quot4 = dim / dim_prod1;
+  const auto quot4_tuple = quot4.as_tuple();
+
+  EXPECT_EQ(std::tuple_size_v<decltype(quot4_tuple)>, 1);
+  EXPECT_EQ(std::get<0>(quot4_tuple), (dimension_type<"A", utility::one>{}));
+
+  const auto quot5 = dim_prod1 / dim;
+  const auto quot5_tuple = quot5.as_tuple();
+
+  EXPECT_EQ(std::tuple_size_v<decltype(quot5_tuple)>, 1);
+  EXPECT_EQ(std::get<0>(quot5_tuple),
+            (dimension_type<"A", utility::rational_type<-1, 1>{}>{}));
+
+  const dimension_product_type<dimension_type<"A", utility::one>,
+                               dimension_type<"B", utility::one>>
+      dim_prod3;
+
+  const auto quot6 = dim_prod2 / dim_prod3;
+  const auto quot6_tuple = quot6.as_tuple();
+
+  EXPECT_EQ(std::tuple_size_v<decltype(quot6_tuple)>, 0);
+
+  const dimension_product_type<
+      dimension_type<"A", utility::rational_type<1, 1>{}>,
+      dimension_type<"C", utility::rational_type<1, 1>{}>>
+      dim_prod4;
+  const dimension_product_type<
+      dimension_type<"B", utility::rational_type<1, 1>{}>,
+      dimension_type<"D", utility::rational_type<1, 1>{}>>
+      dim_prod5;
+
+  const auto quot7 = dim_prod4 / dim_prod5;
+  const auto quot7_tuple = quot7.as_tuple();
+
+  EXPECT_EQ(std::tuple_size_v<decltype(quot7_tuple)>, 4);
+  EXPECT_EQ(std::get<0>(quot7_tuple), (dimension_type<"A", utility::one>{}));
+  EXPECT_EQ(std::get<1>(quot7_tuple),
+            (dimension_type<"B", utility::rational_type<-1, 1>{}>{}));
+  EXPECT_EQ(std::get<2>(quot7_tuple), (dimension_type<"C", utility::one>{}));
+  EXPECT_EQ(std::get<3>(quot7_tuple),
+            (dimension_type<"D", utility::rational_type<-1, 1>{}>{}));
 }

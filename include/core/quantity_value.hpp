@@ -349,7 +349,7 @@ template <utility::ratio From, unit To>
 constexpr double chrono_conversion_factor(From, To) {
   const double from_value =
       static_cast<double>(From::num) / static_cast<double>(From::den);
-  double ret_val =  from_value * To::multiplier;
+  double ret_val = from_value * To::multiplier;
   return ret_val;
 }
 /// \endcond
@@ -534,7 +534,9 @@ public:
     requires std::constructible_from<T, Rep> && utility::ratio<Period>
   MAXWELL_CONSTEXPR23
   quantity_value(const std::chrono::duration<Rep, Period>& d)
-      : value_(utility::as_constant<_detail::chrono_conversion_factor(Period{}, U)> * d.count()) {
+      : value_(utility::as_constant<_detail::chrono_conversion_factor(Period{},
+                                                                      U)> *
+               d.count()) {
     static_assert(enable_chrono_conversions_v<Q>,
                   "Attempting to construct a quantity_value that does not "
                   "represent time from a std::chrono::duration instance");
@@ -570,8 +572,9 @@ public:
       const quantity_value<FromUnit, FromQuantity, Up>& other)
       : value_(U.scale.from_scale(
             other.get_value() *
-                utility::as_constant<conversion_factor(FromUnit, U)> + utility::as_constant<conversion_offset(FromUnit, U)>,
-            FromUnit.scale) ){
+                    utility::as_constant<conversion_factor(FromUnit, U)> +
+                utility::as_constant<conversion_offset(FromUnit, U)>,
+            FromUnit.scale)) {
     static_assert(unit_convertible_to<FromUnit, U>,
                   "Units of other cannot be converted to units of value being "
                   "constructed");
@@ -611,7 +614,8 @@ public:
       quantity_value<FromUnit, FromQuantity, Up>&& other) noexcept
       : value_(U.scale.from_scale(
             std::move(other).get_value() *
-                utility::as_constant<conversion_factor(FromUnit, U)> + utility::as_constant<conversion_offset(FromUnit, U)>,
+                    utility::as_constant<conversion_factor(FromUnit, U)> +
+                utility::as_constant<conversion_offset(FromUnit, U)>,
             FromUnit.scale)) {
     static_assert(unit_convertible_to<FromUnit, U>,
                   "Units of other cannot be converted to units of value being "
@@ -644,9 +648,9 @@ public:
 
   template <typename Rep, typename Period>
     requires std::constructible_from<T, Rep> && std::swappable<T> &&
-                 enable_chrono_conversions_v<Q>
-  constexpr auto
-  operator=(const std::chrono::duration<Rep, Period>& d) -> quantity_value& {
+             enable_chrono_conversions_v<Q>
+  constexpr auto operator=(const std::chrono::duration<Rep, Period>& d)
+      -> quantity_value& {
     using std::swap;
     quantity_value temp(d);
     swap(temp.value_, value_);
@@ -709,6 +713,8 @@ private:
 
   T value_{};
 }; // namespace maxwell
+
+// --- Class Template Argument Deduction Guides ---
 
 template <auto Q, auto U, typename T>
 quantity_value(const quantity_value<Q, U, T>&) -> quantity_value<Q, U, T>;

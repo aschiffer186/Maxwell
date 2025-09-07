@@ -13,6 +13,7 @@ constexpr auto sec_to_min = utility::value_type<1.0 / 60.0>{};
 constexpr auto min_to_hour = utility::value_type<1.0 / 60.0>{};
 constexpr auto hour_to_day = utility::value_type<1.0 / 24.0>{};
 constexpr auto day_to_week = utility::value_type<1.0 / 7.0>{};
+constexpr auto week_to_year = utility::value_type<1.0 / 52.1429>{};
 } // namespace _detail
 
 namespace time {
@@ -32,8 +33,25 @@ MODULE_EXPORT constexpr struct week_unit_type
     : derived_unit<_detail::day_to_week * day_unit, "week"> {
 } week_unit;
 
+MODULE_EXPORT constexpr struct year_unit_type
+    : derived_unit<_detail::week_to_year * week_unit, "year"> {
+} year_unit;
+
 MODULE_EXPORT template <typename T = double>
 using minute = quantity_value<minute_unit, minute_unit.quantity, T>;
+
+MODULE_EXPORT template <typename T = double>
+using hour = quantity_value<hour_unit, hour_unit.quantity, T>;
+
+MODULE_EXPORT template <typename T = double>
+using day = quantity_value<day_unit, day_unit.quantity, T>;
+
+MODULE_EXPORT template <typename T = double>
+using week = quantity_value<week_unit, week_unit.quantity, T>;
+
+MODULE_EXPORT template <typename T = double>
+using year = quantity_value<year_unit, year_unit.quantity, T>;
+
 } // namespace time
 
 namespace angle {}

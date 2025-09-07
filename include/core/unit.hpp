@@ -99,14 +99,14 @@ template <auto Value>
 constexpr unit auto operator+(unit auto lhs,
                               utility::value_type<Value> rhs) noexcept {
   return unit_type<lhs.name, lhs.quantity, lhs.multiplier,
-                   lhs.reference + rhs.value>{};
+                   lhs.multiplier * lhs.reference + rhs.value>{};
 }
 
 template <auto Value>
 constexpr unit auto operator-(unit auto lhs,
                               utility::value_type<Value> rhs) noexcept {
   return unit_type<lhs.name, lhs.quantity, lhs.multiplier,
-                   lhs.reference - rhs.value>{};
+                   lhs.multiplier *lhs.reference - rhs.value>{};
 }
 
 template <unit LHS, unit RHS> constexpr unit auto operator/(LHS, RHS) noexcept {
@@ -151,10 +151,10 @@ constexpr auto conversion_factor(From, To) noexcept -> double {
 
 template <unit From, unit To> 
 constexpr auto conversion_offset(From, To) noexcept -> double{
-  if (From::multiplier == 1.0) {
-    return static_cast<double>(To::reference - From::reference); 
-  } else { 
-    return To::reference - From::reference / From::multiplier;
+  if (To::multiplier == 1.0) {
+    return static_cast<double>(To::reference - From::reference);
+  } else {
+    return From::reference - To::reference / To::multiplier;
   }
 }
 

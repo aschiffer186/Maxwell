@@ -165,15 +165,17 @@ TEST(TestQuantityValue, TestConvertingConstructor) {
   si::celsius<> c{k};
 
   // constexpr double c3 = conversion_factor(si::kelvin_unit, si::celsius_unit);
-  // constexpr double c2 = conversion_offset(si::kelvin_unit, si::celsius_unit);
 
   EXPECT_FLOAT_EQ(c.get_value(), 26.85);
 
-  // us::fahrenheit<> f{k};
-  // us::fahrenheit<> f2{c};
+  us::fahrenheit<> f{k};
+  us::fahrenheit<> f2{c};
 
-  // EXPECT_FLOAT_EQ(f.get_value(), 80.33);
-  // EXPECT_FLOAT_EQ(f2.get_value(), 80.33);
+  [[maybe_unused]] const double c1 = conversion_factor(si::kelvin_unit, us::fahrenheit_unit);
+  [[maybe_unused]] const double c2 = conversion_offset(si::kelvin_unit, us::fahrenheit_unit);
+
+  EXPECT_FLOAT_EQ(f.get_value(), 80.33);
+  EXPECT_FLOAT_EQ(f2.get_value(), 80.33);
 }
 
 TEST(TestQuantityValue, TestConversionOperator) {
