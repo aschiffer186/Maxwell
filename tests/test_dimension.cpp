@@ -126,6 +126,47 @@ TEST(TestDimensions, TestDimensionProductConcept) {
   EXPECT_TRUE(dimension_product<const test_type&&>);
 }
 
+TEST(TestDimensions, TestDimensionProductSquareRoot) {
+  constexpr dimension_product_type<
+      dimension_type<"A", utility::rational_type<2, 1, 0>{}>,
+      dimension_type<"B", utility::rational_type<4, 1, 0>{}>>
+      dim_prod;
+
+  constexpr dimension_product auto sqrt = dim_prod.sqrt();
+  const auto sqrt_tuple = sqrt.as_tuple();
+
+  EXPECT_EQ(std::tuple_size_v<decltype(sqrt_tuple)>, 2);
+  EXPECT_EQ(std::get<0>(sqrt_tuple), (dimension_type<"A", utility::one>{}));
+  EXPECT_EQ(std::get<1>(sqrt_tuple),
+            (dimension_type<"B", utility::rational_type<2, 1>{}>{}));
+}
+
+TEST(TestDimensions, TestDimensionProductPower) {
+  constexpr dimension_product_type<
+      dimension_type<"A", utility::rational_type<1, 2>{}>,
+      dimension_type<"B", utility::rational_type<3, 2>{}>>
+      dim_prod;
+
+  constexpr dimension_product auto pow2 =
+      dim_prod.template pow<utility::rational_type<2, 1>{}>();
+  const auto pow2_tuple = pow2.as_tuple();
+
+  EXPECT_EQ(std::tuple_size_v<decltype(pow2_tuple)>, 2);
+  EXPECT_EQ(std::get<0>(pow2_tuple), (dimension_type<"A", utility::one>{}));
+  EXPECT_EQ(std::get<1>(pow2_tuple),
+            (dimension_type<"B", utility::rational_type<3, 1>{}>{}));
+
+  constexpr dimension_product auto pow3 =
+      dim_prod.template pow<utility::rational_type<3, 1>{}>();
+  const auto pow3_tuple = pow3.as_tuple();
+
+  EXPECT_EQ(std::tuple_size_v<decltype(pow3_tuple)>, 2);
+  EXPECT_EQ(std::get<0>(pow3_tuple),
+            (dimension_type<"A", utility::rational_type<3, 2>{}>{}));
+  EXPECT_EQ(std::get<1>(pow3_tuple),
+            (dimension_type<"B", utility::rational_type<9, 2>{}>{}));
+}
+
 TEST(TestDimensions, TestDimensionProductEquality) {
   constexpr dimension_product_type<> d1;
   dimension_product_type<> d2;

@@ -138,6 +138,35 @@ MODULE_EXPORT template <dimension... Dimensions> struct dimension_product_type {
   constexpr static utility::rational auto dimension_exponent_sum() {
     return (Dimensions::power + ... + utility::zero);
   }
+
+  /// \brief Computes the square root of the dimension product.
+  ///
+  /// Computes the square root of the dimension product and returns a new
+  /// dimension product representing the result.
+  ///
+  /// \return A new dimension product representing the square root of the
+  /// dimension product.
+  constexpr static dimension_product auto sqrt() {
+    return dimension_product_type<dimension_type<
+        Dimensions::name,
+        Dimensions::power / utility::rational_type<2, 1>{}>...>{};
+  }
+
+  /// \brief Computes the dimension product raised to a given power.
+  ///
+  /// Computes the dimension product raised to a given power and returns a new
+  /// dimension product representing the result. Note, because the dimension
+  /// exponents of the dimension product must be known at compile-time, the
+  /// exponent must be specified as a template parameter.
+  ///
+  /// \tparam Pow The power to which the dimension product is raised.
+  /// \return A new dimension product representing the dimension product raised
+  template <auto Pow>
+    requires utility::rational<decltype(Pow)>
+  constexpr static dimension_product auto pow() {
+    return dimension_product_type<
+        dimension_type<Dimensions::name, Dimensions::power * Pow>...>{};
+  }
 };
 
 MODULE_EXPORT constexpr dimension_product_type<

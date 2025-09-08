@@ -53,6 +53,25 @@ TEST(TestQuantity, TestDimensionSum) {
   EXPECT_EQ(sum5, (utility::rational_type<2, 1, 0>{}));
 }
 
+TEST(TestQuantity, TestQuantiyFactories) {
+  constexpr auto derived1 =
+      derived_quantity<isq::length / isq::time, "Speed">{};
+  constexpr quantity auto sub = sub_quantity<derived1, "CarSpeed">{};
+
+  EXPECT_FALSE(derived1.derived);
+  EXPECT_TRUE(sub.derived);
+
+  const auto derived_tupl = derived1.dimensions.as_tuple();
+
+  EXPECT_EQ(std::get<0>(derived_tupl),
+            (dimension_type<"L", utility::rational_type<1, 1, 0>{}>{}));
+  EXPECT_EQ(std::get<1>(derived_tupl),
+            (dimension_type<"T", utility::rational_type<-1, 1, 0>{}>{}));
+  EXPECT_EQ(std::tuple_size<decltype(derived_tupl)>::value, 2);
+
+  EXPECT_EQ(sub.dimensions, derived1.dimensions);
+}
+
 TEST(TestQuantity, TestQuantityConvertibleTo) {
   using test_system = quantity_system<"A", "B">;
 
