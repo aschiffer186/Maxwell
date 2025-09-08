@@ -1,10 +1,38 @@
 #include "Maxwell.hpp"
-#include "core/quantity.hpp"
-#include "quantity_systems/isq.hpp"
 
 #include <gtest/gtest.h>
+#include <type_traits>
 
 using namespace maxwell;
+
+TEST(TestQuantity, TestQuantityConcept) {
+  EXPECT_TRUE((quantity<decltype(isq::length)>));
+  EXPECT_TRUE((quantity<std::remove_cv_t<decltype(isq::area)>>));
+  EXPECT_TRUE((quantity<std::add_lvalue_reference_t<decltype(isq::volume)>>));
+  EXPECT_TRUE(
+      (quantity<std::add_rvalue_reference_t<decltype(isq::plane_angle)>>));
+  EXPECT_TRUE((quantity<std::add_lvalue_reference_t<
+                   std::remove_cv_t<decltype(isq::solid_angle)>>>));
+
+  EXPECT_FALSE((quantity<int>));
+  EXPECT_FALSE((quantity<double>));
+  EXPECT_FALSE((quantity<std::string>));
+}
+
+TEST(TestQuantity, TestQuantityProduct) {
+  const auto product1 = isq::length * isq::length;
+  EXPECT_EQ(product1.dimensions, isq::area.dimensions);
+  EXPECT_EQ(product1.kind, utility::template_string("L*L"));
+}
+
+TEST(TestQuantity, TestQuantityQuotient) {
+  const auto quotient1 = isq::length / isq::time;
+  EXPECT_EQ(quotient1.dimensions,
+            (dimension_product_type<
+                dimension_type<"L", utility::rational_type<1, 1, 0>{}>,
+                dimension_type<"T", utility::rational_type<-1, 1, 0>{}>>{}));
+  EXPECT_EQ(quotient1.kind, utility::template_string("L/T"));
+}
 
 TEST(TestQuantity, TestDimensionSum) {
   const auto sum1 = isq::length.dimension_sum();
@@ -51,10 +79,9 @@ TEST(TestQuantity, TestQuantityConvertibleTo) {
   EXPECT_TRUE(
       (quantity_convertible_to<quantity_A / quantity_B, quantity_quot>));
 
-  constexpr auto derived_quantity1 =
-      derived_quantity<quantity_prod, "C">{};
+  constexpr auto derived_quantity1 = sub_quantity<quantity_prod, "C">{};
   constexpr auto super_derived_quantity1 =
-      derived_quantity<derived_quantity1, "D">{};
+      sub_quantity<derived_quantity1, "D">{};
 
   EXPECT_TRUE((quantity_convertible_to<quantity_prod, derived_quantity1>));
   EXPECT_TRUE((quantity_convertible_to<derived_quantity1, quantity_prod>));
@@ -71,10 +98,9 @@ TEST(TestQuantity, TestQuantityConvertibleTo) {
   EXPECT_TRUE(
       (quantity_convertible_to<quantity_prod, super_derived_quantity1>));
 
-  constexpr auto derived_quantity2 =
-      derived_quantity<quantity_quot, "C">{};
+  constexpr auto derived_quantity2 = sub_quantity<quantity_quot, "C">{};
   constexpr auto super_derived_quantity2 =
-      derived_quantity<derived_quantity2, "D">{};
+      sub_quantity<derived_quantity2, "D">{};
 
   EXPECT_TRUE((quantity_convertible_to<quantity_quot, derived_quantity2>));
   EXPECT_FALSE((quantity_convertible_to<derived_quantity1, quantity_quot>));

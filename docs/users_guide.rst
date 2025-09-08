@@ -262,7 +262,13 @@ Defining Custom Quantities and Units
 
 Although Maxwell provides many predefined quantities and units, it is not possible for the library to provide all quantities and units 
 that may be useful to the user. 
-New quantities and units can be defined units the :code:`make_derived_quantity_t` and :code:`make_derived_unit_t` type aliases. 
+New quantities and units can be defined using the :code:`derived_quantity`, :code:`sub_quantity` and :code:`make_derived_unit_t` type aliases. 
+
+The :code:`derived_quantity` type alias is used to define a new quantity with dimensions not already defined in a pre-existing quantity from the base quantities 
+of a system. For example, the :code:`derived_quantity` type alias can be used to define velocity as length divided by time.
+
+The :code:`sub_quantity` type alias is used to define a new quantity that has the same dimensions as an existing quantity, but is a different kind of quantity. 
+For example, the :code:`sub_quantity` type alias can be used to define height as a sub_quantity of length.
 
 All quantities and units in Maxwell are constants, and the :code:`quantity_value` and :code:`quantity_holder` class templates expect constants. 
 This makes it easy to expression new quantities and units using arithmetic expressions involving other quanties and units. 
@@ -273,10 +279,10 @@ in less verbose error messages.
 .. code-block:: c++ 
 
     // Make a new quantity representing wavelength
-    constexpr quantity auto wavelength = maxwell::derived_quantityisq::length, "Wavelength">{}; 
+    constexpr quantity auto wavelength = maxwell::sub_quantity<isq::length, "Wavelength">{}; 
 
     // Making a new type 
-    constexpr struct Mach_quantity : maxwell::derived_quantity<isq::number, "Mach"> {} Mach;
+    constexpr struct Mach_quantity : maxwell::sub_quantity<isq::number, "Mach"> {} Mach;
 
     // Making a more complex quantity 
     using density_quantity = maxwell::derived_quantity<isq::mass / isq::volume, "Density">;

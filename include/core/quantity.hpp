@@ -64,7 +64,7 @@ struct quantity_type {
   }
 };
 
-/// Constant representing a quantity to represents a number
+/// Constant representing a quantity to represents a number.
 MODULE_EXPORT constexpr quantity_type<number_kind, dimension_one, false> number;
 
 /// \cond
@@ -108,7 +108,7 @@ struct quantity_product : quantity_product_impl<LHS, RHS>::type,
 
 template <quantity LHS, quantity RHS> struct quantity_quotient_impl {
   using type =
-      quantity_type<LHS::kind + utility::template_string{"*"} + RHS::kind,
+      quantity_type<LHS::kind + utility::template_string{"/"} + RHS::kind,
                     LHS::dimensions / RHS::dimensions,
                     LHS::derived || RHS::derived>;
 };
@@ -182,9 +182,37 @@ struct derived_quantity_impl {
   using type = _detail::derived_quantity_impl<Base, Derived, IsDerived>;
 };
 
-template <auto Base, utility::template_string Derived, bool IsDerived = true>
+/// \brief Creates a new quantity
+///
+/// Create a new quantity with the dimensions of the base quantity and the
+/// specified name. The new quantity should be defined in terms of arithmetic
+/// expressions of other quantities. This type alias should be used when no
+/// quantities of the specified dimension exists yet.
+///
+/// \pre \c Definition models \c quantity.
+///
+/// \tparam Definition An expression representing the dimensions of the
+/// quantity. Should be an arithmetic expression involving quantities.
+/// \tparam DerivedName The name of the new quantity.
+template <auto Definition, utility::template_string DerivedName>
+  requires quantity<decltype(Definition)>
 using derived_quantity =
-    derived_quantity_impl<Base, Derived, IsDerived>::type;
+    derived_quantity_impl<Definition, DerivedName, false>::type;
+
+/// \brief Creates a new quantity not convertible to the base quantity.
+///
+/// Creates a new quantity with the same dimensions as the specified quantity,
+/// but is not convertible to it. This type alias should be used when you want
+/// to "specialize" an already existing quantity, e.g. creating a quantity
+/// representing height from a quantity representing length.
+///
+/// \pre \c Base models \c quantity.
+///
+/// \tparam Base The base quantity to derive from.
+/// \tparam Derived The name of the new quantity.
+template <auto Base, utility::template_string Derived>
+  requires quantity<decltype(Base)>
+using sub_quantity = derived_quantity_impl<Base, Derived, true>::type;
 
 /// \cond
 namespace _detail {
@@ -242,8 +270,17 @@ template <auto From, auto To>
 concept quantity_convertible_to =
     _detail::quantity_convertible_to_impl(From, To);
 
+/// \brief Concept modeling that a type is convertible to a specific quantity.
+///
+/// Concept \c quantity_of models that a type \c T is convertible to a specific
+/// quantity \c Q. This concept allows for writing more generic code in terms
+/// of quantities rather than specific units.
+///
+/// \tparam T The type to check.
+/// \tparam Q The quantity being converted to
 template <typename T, auto Q>
-concept quantity_of = quantity_convertible_to<T::quantity_kind, Q>;
+concept quantity_of =
+    quantity<decltype(Q)> && quantity_convertible_to<T::quantity_kind, Q>;
 
 template <auto> struct is_angle_like : std::false_type {};
 

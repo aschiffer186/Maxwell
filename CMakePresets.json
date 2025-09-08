@@ -49,6 +49,15 @@
             "description": "Release build using Ninja on Linux with GCC/clang"
         },
         {
+            "name": "install",
+            "configuration": "Release",
+            "configurePreset": "ninja",
+            "displayName": "Install",
+            "targets": [
+                "install"
+            ]
+        },
+        {
             "name": "build-docs",
             "displayName": "Documentation",
             "description": "Build documentation",
@@ -100,6 +109,28 @@
                 {
                     "type": "build",
                     "name": "ninja-release"
+                }
+            ]
+        },
+        {
+            "name": "install",
+            "displayName": "Install",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "ninja"
+                },
+                {
+                    "name": "ninja-release",
+                    "type": "build"
+                },
+                {
+                    "type": "test",
+                    "name": "ninja"
+                },
+                {
+                    "type": "build",
+                    "name": "install"
                 }
             ]
         },

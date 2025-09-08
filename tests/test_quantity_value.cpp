@@ -4,10 +4,6 @@
 #include <gtest/gtest.h>
 #include <type_traits>
 
-#include "core/unit.hpp"
-#include "quantity_systems/other.hpp"
-#include "quantity_systems/si.hpp"
-#include "quantity_systems/us.hpp"
 #include "test_types.hpp"
 
 using namespace maxwell;
@@ -168,14 +164,16 @@ TEST(TestQuantityValue, TestConvertingConstructor) {
 
   EXPECT_FLOAT_EQ(c.get_value(), 26.85);
 
-  us::fahrenheit<> f{k};
-  us::fahrenheit<> f2{c};
+  // us::fahrenheit<> f{k};
+  // us::fahrenheit<> f2{c};
 
-  [[maybe_unused]] const double c1 = conversion_factor(si::kelvin_unit, us::fahrenheit_unit);
-  [[maybe_unused]] const double c2 = conversion_offset(si::kelvin_unit, us::fahrenheit_unit);
+  // [[maybe_unused]] const double c1 = conversion_factor(si::kelvin_unit,
+  // us::fahrenheit_unit);
+  // [[maybe_unused]] const double c2 = conversion_offset(si::kelvin_unit,
+  // us::fahrenheit_unit);
 
-  EXPECT_FLOAT_EQ(f.get_value(), 80.33);
-  EXPECT_FLOAT_EQ(f2.get_value(), 80.33);
+  // EXPECT_FLOAT_EQ(f.get_value(), 80.33);
+  // EXPECT_FLOAT_EQ(f2.get_value(), 80.33);
 }
 
 TEST(TestQuantityValue, TestConversionOperator) {

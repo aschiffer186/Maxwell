@@ -4,13 +4,14 @@
 #ifndef TEMPLATE_STRING_HPP
 #define TEMPLATE_STRING_HPP
 
-#include <algorithm>  // ranges::copy, lexicographical_compare_three_way
-#include <array>      // array
-#include <compare>    // strong_ordering
-#include <concepts>   // unsigned_integral
-#include <cstddef>    // size_t
-#include <functional> // hash
-#include <iterator>   // contiguous_iterator
+#include <algorithm>   // ranges::copy, lexicographical_compare_three_way
+#include <array>       // array
+#include <compare>     // strong_ordering
+#include <concepts>    // unsigned_integral
+#include <cstddef>     // size_t
+#include <functional>  // hash
+#include <iterator>    // contiguous_iterator
+#include <string_view> // string_view
 
 #include "config.hpp"
 

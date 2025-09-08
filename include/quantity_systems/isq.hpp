@@ -62,84 +62,84 @@ MODULE_EXPORT constexpr struct dimensionless_quantity_type
 
 /// Quantity representing quantity of plane angle.
 MODULE_EXPORT constexpr struct plane_angle_quantity_type
-    : derived_quantity<dimensionless, "Plane Angle"> {
+    : sub_quantity<dimensionless, "Plane Angle"> {
 } plane_angle;
 
 /// Quantity representing quantity of solid angle.
 MODULE_EXPORT constexpr struct solid_angle_quantity_type
-    : derived_quantity<dimensionless, "Solid Angle"> {
+    : sub_quantity<dimensionless, "Solid Angle"> {
 } solid_angle;
 
 /// Quantity representing quantity of frequency.
 MODULE_EXPORT constexpr struct frequency_quantity_type
-    : derived_quantity<dimensionless / time, "Frequency", false> {
+    : derived_quantity<dimensionless / time, "Frequency"> {
 } frequency;
 
 /// Quantity representing quantity of force.
 MODULE_EXPORT constexpr struct force_quantity_type
-    : derived_quantity<mass * length / (time * time), "Force", false> {
+    : derived_quantity<mass * length / (time * time), "Force"> {
 } force;
 
 /// Quantity representing quantity of pressure.
 MODULE_EXPORT constexpr struct pressure_quantity_type
-    : derived_quantity<force / (length * length), "Pressure", false> {
+    : derived_quantity<force / (length * length), "Pressure"> {
 } pressure;
 
 /// Quantity represeting quantity of work.
 MODULE_EXPORT constexpr struct work_quantity_type
-    : derived_quantity<force * length, "Work", false> {
+    : derived_quantity<force * length, "Work"> {
 } work;
 
 /// Quantity representing quantity of power.
 MODULE_EXPORT constexpr struct power_quantity_type
-    : derived_quantity<work / time, "Power", false> {
+    : derived_quantity<work / time, "Power"> {
 } power;
 
 /// Quantity representing quantity of electrical charge.
 MODULE_EXPORT constexpr struct charge_quantity_type
-    : derived_quantity<current * time, "Charge", false> {
+    : derived_quantity<current * time, "Charge"> {
 } charge;
 
 /// Quantity representing quantity of electrical power.
 MODULE_EXPORT constexpr struct potential_quantity_type
-    : derived_quantity<power / current, "Potential", false> {
+    : derived_quantity<power / current, "Potential"> {
 } potential;
 
 MODULE_EXPORT constexpr struct capacitance_quantity_type
-    : derived_quantity<charge / potential, "Capacitance", false> {
+    : derived_quantity<charge / potential, "Capacitance"> {
 } capacitance;
 
 MODULE_EXPORT constexpr struct resistance_quantity_type
-    : derived_quantity<potential / current, "Resistance", false> {
+    : derived_quantity<potential / current, "Resistance"> {
 } resistance;
 
 MODULE_EXPORT constexpr struct conductance_quantity_type
-    : derived_quantity<current / potential, "Conductance", false> {
+    : derived_quantity<current / potential, "Conductance"> {
 } conductance;
 
 MODULE_EXPORT constexpr struct magnetic_flux_quantity
-    : derived_quantity<time * potential, "Magnetic Flux", false> {
+    : derived_quantity<time * potential, "Magnetic Flux"> {
 } magnetic_flux;
 
 // --- Other Derived Quantities ---
 MODULE_EXPORT constexpr struct area_quantity_type
-    : derived_quantity<length * length, "Area", false> {
+    : derived_quantity<length * length, "Area"> {
 } area;
 
 MODULE_EXPORT constexpr struct volume_quantity_type
-    : derived_quantity<area * length, "Volume", false> {
+    : derived_quantity<area * length, "Volume"> {
 } volume;
 
 MODULE_EXPORT constexpr struct torque_quantity_type
-    : derived_quantity<work, "Torque"> {
+    : sub_quantity<work, "Torque"> {
 } torque;
 
 MODULE_EXPORT constexpr struct velocity_quantity_type
-    : derived_quantity<length / time, "Velocity", false> {
+    : derived_quantity<length / time, "Velocity"> {
 } velocity;
 
 MODULE_EXPORT constexpr struct acceleration_quantity_type
-    : derived_quantity<velocity / time, "Acceleration", false> {
+    : derived_quantity<velocity / time, "Acceleration"> {
 } acceleration;
 } // namespace maxwell::isq
 
