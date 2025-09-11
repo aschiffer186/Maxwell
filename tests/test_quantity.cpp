@@ -29,8 +29,8 @@ TEST(TestQuantity, TestQuantityQuotient) {
   const auto quotient1 = isq::length / isq::time;
   EXPECT_EQ(quotient1.dimensions,
             (dimension_product_type<
-                dimension_type<"L", utility::rational_type<1, 1, 0>{}>,
-                dimension_type<"T", utility::rational_type<-1, 1, 0>{}>>{}));
+                dimension_type<"L", utility::rational_type<1, 1>{}>,
+                dimension_type<"T", utility::rational_type<-1, 1>{}>>{}));
   EXPECT_EQ(quotient1.kind, utility::template_string("L/T"));
 }
 
@@ -40,17 +40,17 @@ TEST(TestQuantity, TestDimensionSum) {
   EXPECT_EQ(sum1, utility::one);
 
   const auto sum2 = isq::area.dimension_sum();
-  EXPECT_EQ(sum2, (utility::rational_type<2, 1, 0>{}));
+  EXPECT_EQ(sum2, (utility::rational_type<2, 1>{}));
 
   const auto sum3 = isq::volume.dimension_sum();
-  EXPECT_EQ(sum3, (utility::rational_type<3, 1, 0>{}));
+  EXPECT_EQ(sum3, (utility::rational_type<3, 1>{}));
 
   const auto sum4 = isq::plane_angle.dimension_sum();
   EXPECT_EQ(sum4, utility::one);
 
   const auto square = isq::plane_angle * isq::plane_angle;
   const auto sum5 = square.dimension_sum();
-  EXPECT_EQ(sum5, (utility::rational_type<2, 1, 0>{}));
+  EXPECT_EQ(sum5, (utility::rational_type<2, 1>{}));
 }
 
 TEST(TestQuantity, TestQuantiyFactories) {
@@ -64,12 +64,46 @@ TEST(TestQuantity, TestQuantiyFactories) {
   const auto derived_tupl = derived1.dimensions.as_tuple();
 
   EXPECT_EQ(std::get<0>(derived_tupl),
-            (dimension_type<"L", utility::rational_type<1, 1, 0>{}>{}));
+            (dimension_type<"L", utility::rational_type<1, 1>{}>{}));
   EXPECT_EQ(std::get<1>(derived_tupl),
-            (dimension_type<"T", utility::rational_type<-1, 1, 0>{}>{}));
+            (dimension_type<"T", utility::rational_type<-1, 1>{}>{}));
   EXPECT_EQ(std::tuple_size<decltype(derived_tupl)>::value, 2);
 
   EXPECT_EQ(sub.dimensions, derived1.dimensions);
+}
+
+TEST(TestQuantity, TestQuantitySqrt) {
+  const auto sqrt1 = sqrt(isq::area);
+  EXPECT_EQ(sqrt1.dimensions, isq::length.dimensions);
+  EXPECT_EQ(sqrt1.kind, utility::template_string("sqrt(Area)"));
+
+  const auto sqrt2 = sqrt(isq::volume);
+  EXPECT_EQ(sqrt2.dimensions,
+            (dimension_product_type<
+                dimension_type<"L", utility::rational_type<3, 2>{}>>{}));
+  EXPECT_EQ(sqrt2.kind, utility::template_string("sqrt(Volume)"));
+}
+
+TEST(TestQuantity, TestQuantityPow) {
+  const auto pow1 = pow<utility::rational_type<2, 1>{}>(isq::length);
+  EXPECT_EQ(pow1.dimensions, isq::area.dimensions);
+  EXPECT_EQ(pow1.kind, utility::template_string("pow(L, )"));
+
+  const auto pow2 = pow<utility::rational_type<3, 1>{}>(isq::length);
+  EXPECT_EQ(pow2.dimensions, isq::volume.dimensions);
+  EXPECT_EQ(pow2.kind, utility::template_string("pow(L, )"));
+
+  const auto pow3 = pow<utility::rational_type<3, 2>{}>(isq::length);
+  EXPECT_EQ(pow3.dimensions,
+            (dimension_product_type<
+                dimension_type<"L", utility::rational_type<3, 2>{}>>{}));
+  EXPECT_EQ(pow3.kind, utility::template_string("pow(L, )"));
+
+  const auto pow4 = pow<utility::rational_type<-1, 1>{}>(isq::time);
+  EXPECT_EQ(pow4.dimensions,
+            (dimension_product_type<
+                dimension_type<"T", utility::rational_type<-1, 1>{}>>{}));
+  EXPECT_EQ(pow4.kind, utility::template_string("pow(T, )"));
 }
 
 TEST(TestQuantity, TestQuantityConvertibleTo) {

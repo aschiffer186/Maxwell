@@ -9,9 +9,9 @@
 using namespace maxwell;
 
 TEST(TestDimensions, TestDimensionEquality) {
-  constexpr dimension_type<"A", utility::rational_type<1, 1, 0>{}> d1;
-  constexpr dimension_type<"A", utility::rational_type<2, 1, 0>{}> d2;
-  constexpr dimension_type<"B", utility::rational_type<1, 1, 0>{}> d3;
+  constexpr dimension_type<"A", utility::rational_type<1, 1>{}> d1;
+  constexpr dimension_type<"A", utility::rational_type<2, 1>{}> d2;
+  constexpr dimension_type<"B", utility::rational_type<1, 1>{}> d3;
 
   EXPECT_EQ(d1, d1);
   EXPECT_NE(d1, d2);
@@ -21,7 +21,7 @@ TEST(TestDimensions, TestDimensionEquality) {
 }
 
 TEST(TestDimensions, TestDimensionConcept) {
-  using test_type = dimension_type<"A", utility::rational_type<1, 1, 0>{}>;
+  using test_type = dimension_type<"A", utility::rational_type<1, 1>{}>;
 
   EXPECT_FALSE(dimension<int>);
   EXPECT_TRUE(dimension<test_type>);
@@ -33,11 +33,11 @@ TEST(TestDimensions, TestDimensionConcept) {
 }
 
 TEST(TestDimensions, TestDimensionInverse) {
-  using test_type = dimension_type<"A", utility::rational_type<1, 1, 0>{}>;
+  using test_type = dimension_type<"A", utility::rational_type<1, 1>{}>;
   using inverse = dimension_inverse_t<test_type>;
 
   EXPECT_EQ(inverse::name, utility::template_string{"A"});
-  EXPECT_EQ(inverse::power, (utility::rational_type<-1, 1, 0>{}));
+  EXPECT_EQ(inverse::power, (utility::rational_type<-1, 1>{}));
 
   using inverse_inverse = dimension_inverse_t<inverse>;
 
@@ -45,9 +45,9 @@ TEST(TestDimensions, TestDimensionInverse) {
 }
 
 TEST(TestDimensions, TestDimensionMultiplication) {
-  constexpr dimension_type<"A", utility::rational_type<1, 1, 0>{}> d1;
-  constexpr dimension_type<"B", utility::rational_type<2, 1, 0>{}> d2;
-  constexpr dimension_type<"A", utility::rational_type<-1, 1, 0>{}> d3;
+  constexpr dimension_type<"A", utility::rational_type<1, 1>{}> d1;
+  constexpr dimension_type<"B", utility::rational_type<2, 1>{}> d2;
+  constexpr dimension_type<"A", utility::rational_type<-1, 1>{}> d3;
 
   constexpr dimension_product auto prod1 = d1 * d2;
   constexpr dimension_product auto prod2 = d1 * d1;
@@ -59,13 +59,13 @@ TEST(TestDimensions, TestDimensionMultiplication) {
 
   EXPECT_EQ(std::tuple_size_v<decltype(prod1_tuple)>, 2);
   EXPECT_EQ(std::get<0>(prod1_tuple),
-            (dimension_type<"A", utility::rational_type<1, 1, 0>{}>{}));
+            (dimension_type<"A", utility::rational_type<1, 1>{}>{}));
   EXPECT_EQ(std::get<1>(prod1_tuple),
-            (dimension_type<"B", utility::rational_type<2, 1, 0>{}>{}));
+            (dimension_type<"B", utility::rational_type<2, 1>{}>{}));
 
   EXPECT_EQ(std::tuple_size_v<decltype(prod2_tuple)>, 1);
   EXPECT_EQ(std::get<0>(prod2_tuple),
-            (dimension_type<"A", utility::rational_type<2, 1, 0>{}>{}));
+            (dimension_type<"A", utility::rational_type<2, 1>{}>{}));
 
   EXPECT_EQ(std::tuple_size_v<decltype(prod3_tuple)>, 0);
 
@@ -79,9 +79,9 @@ TEST(TestDimensions, TestDimensionMultiplication) {
 }
 
 TEST(TestDimensions, TestDimensionDivision) {
-  constexpr dimension_type<"A", utility::rational_type<1, 1, 0>{}> d1;
-  constexpr dimension_type<"B", utility::rational_type<2, 1, 0>{}> d2;
-  constexpr dimension_type<"A", utility::rational_type<-1, 1, 0>{}> d3;
+  constexpr dimension_type<"A", utility::rational_type<1, 1>{}> d1;
+  constexpr dimension_type<"B", utility::rational_type<2, 1>{}> d2;
+  constexpr dimension_type<"A", utility::rational_type<-1, 1>{}> d3;
 
   constexpr dimension_product auto quot1 = d1 / d2;
   constexpr dimension_product auto quot2 = d1 / d1;
@@ -94,15 +94,15 @@ TEST(TestDimensions, TestDimensionDivision) {
   EXPECT_EQ(std::tuple_size_v<decltype(quot1_tuple)>, 2);
 
   EXPECT_EQ(std::get<0>(quot1_tuple),
-            (dimension_type<"A", utility::rational_type<1, 1, 0>{}>{}));
+            (dimension_type<"A", utility::rational_type<1, 1>{}>{}));
   EXPECT_EQ(std::get<1>(quot1_tuple),
-            (dimension_type<"B", utility::rational_type<-2, 1, 0>{}>{}));
+            (dimension_type<"B", utility::rational_type<-2, 1>{}>{}));
 
   EXPECT_EQ(std::tuple_size_v<decltype(quot2_tuple)>, 0);
 
   EXPECT_EQ(std::tuple_size_v<decltype(quot3_tuple)>, 1);
   EXPECT_EQ(std::get<0>(quot3_tuple),
-            (dimension_type<"A", utility::rational_type<2, 1, 0>{}>{}));
+            (dimension_type<"A", utility::rational_type<2, 1>{}>{}));
 
   constexpr dimension_type<number_kind, utility::rational_type<2, 1>{}> d4;
 
@@ -128,8 +128,8 @@ TEST(TestDimensions, TestDimensionProductConcept) {
 
 TEST(TestDimensions, TestDimensionProductSquareRoot) {
   constexpr dimension_product_type<
-      dimension_type<"A", utility::rational_type<2, 1, 0>{}>,
-      dimension_type<"B", utility::rational_type<4, 1, 0>{}>>
+      dimension_type<"A", utility::rational_type<2, 1>{}>,
+      dimension_type<"B", utility::rational_type<3, 1>{}>>
       dim_prod;
 
   constexpr dimension_product auto sqrt = dim_prod.sqrt();
@@ -138,7 +138,7 @@ TEST(TestDimensions, TestDimensionProductSquareRoot) {
   EXPECT_EQ(std::tuple_size_v<decltype(sqrt_tuple)>, 2);
   EXPECT_EQ(std::get<0>(sqrt_tuple), (dimension_type<"A", utility::one>{}));
   EXPECT_EQ(std::get<1>(sqrt_tuple),
-            (dimension_type<"B", utility::rational_type<2, 1>{}>{}));
+            (dimension_type<"B", utility::rational_type<3, 2>{}>{}));
 }
 
 TEST(TestDimensions, TestDimensionProductPower) {
@@ -171,17 +171,17 @@ TEST(TestDimensions, TestDimensionProductEquality) {
   constexpr dimension_product_type<> d1;
   dimension_product_type<> d2;
   constexpr dimension_product_type<
-      dimension_type<"A", utility::rational_type<1, 1, 0>{}>>
+      dimension_type<"A", utility::rational_type<1, 1>{}>>
       d3;
   constexpr dimension_product_type<
-      dimension_type<"A", utility::rational_type<2, 1, 0>{}>>
+      dimension_type<"A", utility::rational_type<2, 1>{}>>
       d4;
   constexpr dimension_product_type<
-      dimension_type<"B", utility::rational_type<1, 1, 0>{}>>
+      dimension_type<"B", utility::rational_type<1, 1>{}>>
       d5;
   constexpr dimension_product_type<
-      dimension_type<"A", utility::rational_type<1, 1, 0>{}>,
-      dimension_type<"B", utility::rational_type<1, 1, 0>{}>>
+      dimension_type<"A", utility::rational_type<1, 1>{}>,
+      dimension_type<"B", utility::rational_type<1, 1>{}>>
       d6;
 
   EXPECT_EQ(d1, d1);

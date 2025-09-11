@@ -68,8 +68,7 @@ MODULE_EXPORT constexpr auto operator==(dimension auto lhs,
 // Computes the inverse of a dimension i.e. 1 / dimension.
 MODULE_EXPORT template <dimension D> struct dimension_inverse {
   using inverse_power =
-      utility::rational_type<-D::power.numerator, D::power.denominator,
-                             D::power.exponent>;
+      utility::rational_type<-D::power.numerator, D::power.denominator>;
   using type = dimension_type<D::name, inverse_power{}>;
 };
 

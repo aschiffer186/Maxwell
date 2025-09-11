@@ -167,6 +167,59 @@ MODULE_EXPORT constexpr quantity auto operator/(quantity auto lhs,
 
 /// \cond
 namespace _detail {
+template <quantity Q> struct quantity_sqrt_impl {
+  using dim_sqrt = decltype(Q::dimensions.sqrt());
+  using type = quantity_type<utility::template_string{"sqrt("} + Q::kind +
+                                 utility::template_string{")"},
+                             dim_sqrt{}, Q::derived>;
+};
+
+struct quantity_sqrt_tag {};
+
+template <quantity Q>
+struct quantity_sqrt : quantity_sqrt_impl<Q>::type, quantity_sqrt_tag {};
+
+template <quantity Q, auto R>
+  requires utility::rational<decltype(R)>
+struct quantity_pow_impl {
+  using dim_pow = decltype(Q::dimensions.template pow<R>());
+  using type = quantity_type<utility::template_string{"pow("} + Q::kind +
+                                 utility::template_string{", "} +
+                                 utility::template_string{")"},
+                             dim_pow{}, Q::derived>;
+};
+
+struct quantity_pow_tag {};
+
+template <quantity Q, auto R>
+  requires utility::rational<decltype(R)>
+struct quantity_pow : _detail::quantity_pow_impl<Q, R>::type,
+                      quantity_pow_tag {};
+} // namespace _detail
+/// \endcond
+
+template <quantity Q> using quantity_sqrt_t = _detail::quantity_sqrt<Q>;
+
+MODULE_EXPORT constexpr quantity auto sqrt(quantity auto q) noexcept {
+  return quantity_sqrt_t<decltype(q)>{};
+}
+
+template <quantity Q, auto R>
+using quantity_pow_t = _detail::quantity_pow<Q, R>;
+
+MODULE_EXPORT template <auto R>
+  requires utility::rational<decltype(R)>
+constexpr quantity auto pow(quantity auto q) noexcept {
+  return quantity_pow_t<decltype(q), R>{};
+}
+
+MODULE_EXPORT template <std::intmax_t N>
+constexpr quantity auto pow(quantity auto q) noexcept {
+  return quantity_pow_t<decltype(q), utility::rational_type<N, 1>{}>();
+}
+
+/// \cond
+namespace _detail {
 template <auto Base, utility::template_string Kind, bool IsDerived = true>
   requires quantity<decltype(Base)>
 struct derived_quantity_impl : std::remove_cvref_t<decltype(Base)> {
@@ -240,6 +293,11 @@ consteval auto quantity_convertible_to_impl(From, To) noexcept -> bool {
   } else if (std::derived_from<From, _detail::quantity_quotient_tag> &&
              !has_derived_base<From>::value) {
     return From::dimensions == To::dimensions;
+  } else if (std::derived_from<From, _detail::quantity_sqrt_tag> &&
+             !has_derived_base<From>::value) {
+  } else if (!std::derived_from<From, _detail::quantity_pow_tag> &&
+             !has_derived_base<From>::value) {
+    return From::dimensions == To::dimensions;
   } else if (!From::derived && !To::derived) {
     return From::dimensions == To::dimensions;
   } else if (!From::derived && To::derived) {
@@ -272,9 +330,9 @@ concept quantity_convertible_to =
 
 /// \brief Concept modeling that a type is convertible to a specific quantity.
 ///
-/// Concept \c quantity_of models that a type \c T is convertible to a specific
-/// quantity \c Q. This concept allows for writing more generic code in terms
-/// of quantities rather than specific units.
+/// Concept \c quantity_of models that a type \c T is convertible to a
+/// specific quantity \c Q. This concept allows for writing more generic code
+/// in terms of quantities rather than specific units.
 ///
 /// \tparam T The type to check.
 /// \tparam Q The quantity being converted to

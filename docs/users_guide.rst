@@ -244,7 +244,7 @@ their units have the same reference point.
 .. warning:: 
 
     When two instances of :code:`quantity_value` are compared for equality, exact equality is used if the underlying type is a floating-point 
-    type. The standard warnings about floating-point equality apply.
+    type. The standard warnings about floating-point equality apply.``
 
 :code:`quantity_holder` Class Template
 ---------------------------------------
