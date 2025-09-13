@@ -89,6 +89,19 @@ struct is_quantity<T, std::void_t<quantity_base_t<T>>> : std::true_type {};
 MODULE_EXPORT template <typename T>
 concept quantity = _detail::is_quantity<std::remove_cvref_t<T>>::value;
 
+/// \brief Equality comparison operator.
+///
+/// \warning This function is primary intended for library testing and
+/// development. It may not behave as expected in user-facing code.
+///
+/// \param lhs The left-hand side quantity.
+/// \param rhs The right-hand side quantity.
+/// \return \c true if the quantities are equal, \c false otherwise.
+constexpr auto operator==(quantity auto lhs, quantity auto rhs) noexcept
+    -> bool {
+  return lhs.dimensions == rhs.dimensions && lhs.derived == rhs.derived;
+}
+
 /// \cond
 namespace _detail {
 struct quantity_product_tag {};

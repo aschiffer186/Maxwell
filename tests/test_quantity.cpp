@@ -70,6 +70,7 @@ TEST(TestQuantity, TestQuantiyFactories) {
   EXPECT_EQ(std::tuple_size<decltype(derived_tupl)>::value, 2);
 
   EXPECT_EQ(sub.dimensions, derived1.dimensions);
+  EXPECT_EQ(sub.kind, utility::template_string("CarSpeed"));
 }
 
 TEST(TestQuantity, TestQuantitySqrt) {
