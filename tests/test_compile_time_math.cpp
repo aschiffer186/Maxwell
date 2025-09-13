@@ -54,4 +54,17 @@ TEST(TestUtilities, TestPow) {
   EXPECT_DOUBLE_EQ(maxwell::utility::pow(27.0, maxwell::rational<1, 3>), 3.0);
   EXPECT_DOUBLE_EQ(maxwell::utility::pow(-8.0, maxwell::rational<-1, 3>), -0.5);
   EXPECT_DOUBLE_EQ(maxwell::utility::pow(1e3, maxwell::rational<3, 1>), 1e9);
+  EXPECT_DOUBLE_EQ(maxwell::utility::pow(1e9, maxwell::rational<1, 3>), 1e3);
+}
+
+TEST(TestUtilities, TestLog10) {
+  EXPECT_FLOAT_EQ(maxwell::utility::log10(1.0), 0.0);
+  EXPECT_FLOAT_EQ(maxwell::utility::log10(10.0), 1.0);
+  EXPECT_FLOAT_EQ(maxwell::utility::log10(100.0), 2.0);
+  EXPECT_FLOAT_EQ(maxwell::utility::log10(1000.0), 3.0);
+  EXPECT_FLOAT_EQ(maxwell::utility::log10(0.1), -1.0);
+  EXPECT_FLOAT_EQ(maxwell::utility::log10(0.01), -2.0);
+  EXPECT_FLOAT_EQ(maxwell::utility::log10(0.001), -3.0);
+  EXPECT_NEAR(maxwell::utility::log10(5.0), 0.69897, 1e-4);
+  EXPECT_NEAR(maxwell::utility::log10(50.0), 1.69897, 1e-4);
 }

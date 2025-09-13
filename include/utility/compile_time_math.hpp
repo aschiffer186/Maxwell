@@ -288,6 +288,8 @@ constexpr auto operator==(rational_type<N1, D1> lhs, rational_type<N2, D2> rhs)
   return (lhs <=> rhs) == std::strong_ordering::equal;
 }
 
+constexpr double ln(double x) noexcept;
+
 /// \brief Computes base raised to a rational power.
 ///
 /// Computes the value of a real number rasied to a rational power.
@@ -334,7 +336,7 @@ constexpr double nth_root(double x, std::intmax_t n) noexcept {
 }
 } // namespace _detail
 
-/// rief Computes base raised to a rational power.
+/// \brief Computes base raised to a rational power.
 ///
 /// Supports arbitrary rational powers N/D at compile time.
 MODULE_EXPORT template <std::intmax_t N, std::intmax_t D>
@@ -428,6 +430,8 @@ constexpr double sqrt(double x) noexcept {
   return _detail::sqrt_impl(x, x, 0.0);
 }
 
+// Forward declaration of ln so compile-time checks can reference it.
+
 // Compile-time examples / smoke tests
 namespace _compile_time_checks {
 constexpr double absd(double x) noexcept { return x < 0.0 ? -x : x; }
@@ -447,11 +451,74 @@ static_assert(approx_equal(maxwell::utility::pow<-1, 3>(
                            -0.5));
 } // namespace _compile_time_checks
 
-// template <typename T> constexpr T ln(T x) {
-// #ifndef __GNUC__
-// #endif
-//   return x
-// }
+// constexpr natural logarithm for double using range reduction and
+// atanh-series: ln(y) = 2 * (z + z^3/3 + z^5/5 + ...), where z = (y-1)/(y+1)
+// Range reduction: repeatedly take sqrt to bring y close to 1 and then
+// multiply the result by 2^k where k is the number of sqrt operations.
+constexpr double ln(double x) noexcept {
+  assert(x > 0.0 && "ln domain error: x must be positive");
+  if (x == 1.0)
+    return 0.0;
+
+  // Handle subnormal / tiny values by scaling up using powers of two via
+  // frexp-like loop We'll use repeated sqrt reduction: write x = y^(2^k) =>
+  // ln(x) = 2^k * ln(y)
+  int k = 0;
+  double y = x;
+  // Reduce until y is in (0.5, 2.0) to ensure good convergence of series
+  // around 1.
+  while (y > 2.0) {
+    y = _detail::nth_root(y, 2); // sqrt
+    ++k;
+    if (k > 60)
+      break; // avoid infinite loops
+  }
+
+  while (y < 0.5) {
+    y = _detail::nth_root(y, 2); // inverse of sqrt step
+    --k;
+    if (k < -60)
+      break;
+  }
+
+  // Now y should be in a reasonable range; shift to form suitable for atanh
+  // series
+  const double z = (y - 1.0) / (y + 1.0);
+
+  // Sum series 2 * sum_{n=0..} z^{2n+1} / (2n+1)
+  constexpr int MAX_ITERS = 300;
+  constexpr double EPS = 1e-16;
+
+  double term = z; // z^(2n+1) initially n=0
+  double sum = term;
+  for (int n = 1; n < MAX_ITERS; ++n) {
+    term *= z * z; // increase power by 2
+    const double add = term / (2 * n + 1);
+    sum += add;
+    if (!(add != add)) { /* no-op to keep constexpr-friendly */
+    }
+    if ((add < 0.0 ? -add : add) < EPS)
+      break;
+  }
+
+  double result = 2.0 * sum;
+  // Multiply back by 2^k: ln(x) = 2^k * ln(y)
+  if (k > 0) {
+    for (int i = 0; i < k; ++i)
+      result *= 2.0;
+  } else if (k < 0) {
+    for (int i = 0; i < -k; ++i)
+      result *= 2.0;
+  }
+
+  return result;
+}
+
+constexpr double log10(double x) noexcept {
+  constexpr double ln10_inv = 1.0 / 2.30258509299;
+  const double ln_value = ln(x);
+  return ln_value * ln10_inv;
+}
 } // namespace maxwell::utility
 
 namespace maxwell {
