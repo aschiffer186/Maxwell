@@ -1,5 +1,6 @@
 /// \file quantity_limits.hpp
-/// \brief Provides specialization of \c std::numeric_limits for instantiations of \c quantity_value
+/// \brief Provides specialization of \c std::numeric_limits for instantiations
+/// of \c quantity_value
 
 #ifndef QUANTITY_LIMITS_HPP
 #define QUANTITY_LIMITS_HPP
@@ -9,10 +10,12 @@
 #include "core/quantity_value.hpp"
 #include "utility/config.hpp"
 
-/// \brief Specialization of \c std::numeric_limits for instantiations of \c quantity_value
+/// \brief Specialization of \c std::numeric_limits for instantiations of \c
+/// quantity_value
 ///
-/// Specialization of \c std::numeric_limits for \c quantity_value types. The values of this
-/// class are the same as the values of \c std::numeric_limits<T> but wrapped in the
+/// Specialization of \c std::numeric_limits for \c quantity_value types. The
+/// values of this class are the same as the values of \c std::numeric_limits<T>
+/// but wrapped in the
 /// \c quantity_value type for type safety.
 ///
 /// \tparam U The units of the \c quantity_value
@@ -82,10 +85,10 @@ public:
   static constexpr bool tinyness_before = base_t::tinyness_before;
 
   /// \brief Returns the minimum value the \c quantity_value can represent
-  /// 
-  /// Returns the minimum value the \c quantity_value can represent. Equivalent to 
-  /// <tt>quantity_value<U, Q, T>(std::numeric_limits<T>::min())</tt>.
-  /// 
+  ///
+  /// Returns the minimum value the \c quantity_value can represent. Equivalent
+  /// to <tt>quantity_value<U, Q, T>(std::numeric_limits<T>::min())</tt>.
+  ///
   /// \note If \c T is a floating-point type, this is different from \c min().
   ///
   /// \return The minimum value the \c quantity_value can represent.
@@ -94,23 +97,22 @@ public:
   }
 
   /// \brief Returns the lowest value the \c quantity_value can represent
-  /// 
-  /// Returns the lowest value the \c quantity_value can represent. Equivalent to 
-  /// <tt>quantity_value<U, Q, T>(std::numeric_limits<T>::lowest())</tt>.
-  /// 
+  ///
+  /// Returns the lowest value the \c quantity_value can represent. Equivalent
+  /// to <tt>quantity_value<U, Q, T>(std::numeric_limits<T>::lowest())</tt>.
+  ///
   /// \note If \c T is a floating-point type, this is different from \c min().
   ///
   /// \return The lowest value the \c quantity_value can represent.
-  static constexpr auto lowest() noexcept
-      -> maxwell::quantity_value<U, Q, T> {
+  static constexpr auto lowest() noexcept -> maxwell::quantity_value<U, Q, T> {
     return self_t{base_t::lowest()};
   }
 
   /// \brief Returns the maximum value the \c quantity_value can represent
-  /// 
-  /// Returns the maximum value the \c quantity_value can represent. Equivalent to 
-  /// <tt>quantity_value<U, Q, T>(std::numeric_limits<T>::max())</tt>.
-  /// 
+  ///
+  /// Returns the maximum value the \c quantity_value can represent. Equivalent
+  /// to <tt>quantity_value<U, Q, T>(std::numeric_limits<T>::max())</tt>.
+  ///
   ///
   /// \return The maximum value the \c quantity_value can represent.
   static constexpr auto max() noexcept -> maxwell::quantity_value<U, Q, T> {
@@ -118,10 +120,10 @@ public:
   }
 
   /// \brief Returns the machine epsilon for the \c quantity_value
-  /// 
+  ///
   /// Returns the machine epsilon for the \c quantity_value. Equivalent to
   /// <tt>quantity_value<U, Q, T>(std::numeric_limits<T>::epsilon())</tt>.
-  /// 
+  ///
   /// \return The machine epsilon for the \c quantity_value.
   static constexpr auto epsilon() noexcept -> maxwell::quantity_value<U, Q, T> {
     return self_t{base_t::epsilon()};
@@ -129,27 +131,65 @@ public:
 
   /// \brief Returns the largest rounding error for the \c quantity_value.
   ///
-  /// Returns the largest rounding error possible in units in the last place (ULPs). 
-  /// Equivalent to <tt>quantity_value<U, Q, T>(std::numeric_limits<T>::round_error())</tt>.
+  /// Returns the largest rounding error possible in units in the last place
+  /// (ULPs). Equivalent to <tt>quantity_value<U, Q,
+  /// T>(std::numeric_limits<T>::round_error())</tt>.
   ///
   /// \return The rounding error for the \c quantity_value.
-  static constexpr auto round_error() noexcept -> maxwell::quantity_value<U, Q, T> {
+  static constexpr auto round_error() noexcept
+      -> maxwell::quantity_value<U, Q, T> {
     return self_t{base_t::round_error()};
   }
 
-  static constexpr auto infinity() noexcept -> maxwell::quantity_value<U, Q, T> {
+  /// \brief Returns a representation of positive infinity for the \c
+  /// quantity_value.
+  ///
+  /// Returns a representation of positive infinity for the \c quantity_value.
+  /// Equivalent to <tt>quantity_value<U, Q,
+  /// T>(std::numeric_limits<T>::infinity())</tt>.
+  ///
+  /// \return A representation of positive infinity for the \c quantity_value.
+  static constexpr auto infinity() noexcept
+      -> maxwell::quantity_value<U, Q, T> {
     return self_t{base_t::infinity()};
   }
 
-  static constexpr auto quiet_NaN() noexcept -> maxwell::quantity_value<U, Q, T> {
+  /// \brief Returns a quiet NaN (not-a-number) representation for the \c
+  /// quantity_value.
+  ///
+  /// Returns a quiet NaN (not-a-number) representation for the \c
+  /// quantity_value. Equivalent to <tt>quantity_value<U, Q,
+  /// T>(std::numeric_limits<T>::quiet_NaN())</tt>.
+  ///
+  /// \return A quiet NaN representation for the \c quantity_value.
+  static constexpr auto quiet_NaN() noexcept
+      -> maxwell::quantity_value<U, Q, T> {
     return self_t{base_t::quiet_NaN()};
   }
 
-  static constexpr auto signal_NaN() noexcept -> maxwell::quantity_value<U, Q, T> {
+  /// \brief Returns a signaling NaN (not-a-number) representation for the \c
+  /// quantity_value.
+  ///
+  /// Returns a signaling NaN (not-a-number) representation for the \c
+  /// quantity_value. Equivalent to <tt>quantity_value<U, Q,
+  /// T>(std::numeric_limits<T>::signaling_NaN())</tt>.
+  ///
+  /// \return A signaling NaN representation for the \c quantity_value.
+  static constexpr auto signal_NaN() noexcept
+      -> maxwell::quantity_value<U, Q, T> {
     return self_t{base_t::signal_NaN()};
   }
 
-  static constexpr auto denorm_min() noexcept -> maxwell::quantity_value<U, Q, T> {
+  /// \brief Returns the smallest positive subnormal value for the \c
+  /// quantity_value.
+  ///
+  /// Returns the smallest positive subnormal value for the \c quantity_value.
+  /// Equivalent to <tt>quantity_value<U, Q,
+  /// T>(std::numeric_limits<T>::denorm_min())</tt>.
+  ///
+  /// \return The smallest positive subnormal value for the \c quantity_value.
+  static constexpr auto denorm_min() noexcept
+      -> maxwell::quantity_value<U, Q, T> {
     return self_t{base_t::denorm_min()};
   }
 };

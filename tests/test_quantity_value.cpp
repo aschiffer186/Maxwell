@@ -197,3 +197,24 @@ TEST(TestQuantityValue, TestConversionOperator) {
   EXPECT_FLOAT_EQ(d2, 5.0);
   EXPECT_FLOAT_EQ(d3, 3.0);
 }
+
+TEST(TestQuantityVary, TestAbbreviatedConstruction) {
+  using namespace maxwell::si::symbols;
+
+  const quantity_value q1 = 1.0 * m;
+  EXPECT_FLOAT_EQ(q1.get_value(), 1.0);
+  EXPECT_EQ(q1.get_units(), si::meter_unit);
+
+  const quantity_value q2 = 1.0 * kilo_unit<m>;
+  EXPECT_FLOAT_EQ(q2.get_value(), 1.0);
+  EXPECT_EQ(q2.get_units(), kilo_unit<si::meter_unit>);
+
+  const quantity_value q3 = 1.0 * m / s;
+  EXPECT_FLOAT_EQ(q3.get_value(), 1.0);
+  EXPECT_EQ(q3.get_units(), si::meter_unit / si::second_unit);
+
+  const quantity_value q4 = 1.0 * J / (kg * K);
+  EXPECT_FLOAT_EQ(q4.get_value(), 1.0);
+  EXPECT_EQ(q4.get_units(),
+            si::joule_unit / (si::kilogram_unit * si::kelvin_unit));
+}

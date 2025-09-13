@@ -7,6 +7,7 @@
 #include <cassert>     // assert
 #include <compare>     // strong_ordering
 #include <cstdint>     // intmax_t
+#include <limits>      // numeric_limits
 #include <numeric>     // gcd
 #include <ratio>       // ratio
 #include <type_traits> // false_type, remove_cvref_t, true_type
@@ -295,23 +296,99 @@ constexpr auto operator==(rational_type<N1, D1> lhs, rational_type<N2, D2> rhs)
 /// \tparam E The exponent of the rational power.
 /// \param base The base to be raised to the rational power.
 /// \return The value of base raised to the rational power
+namespace _detail {
+// Integer exponentiation for doubles (positive exponent) using binary exp.
+constexpr double pow_double_pos(double base, std::intmax_t exp) noexcept {
+  double result = 1.0;
+  while (exp > 0) {
+    if (exp & 1)
+      result *= base;
+    base *= base;
+    exp >>= 1;
+  }
+  return result;
+}
+
+// Newton iteration for nth root: returns x^(1/n) for x > 0 and n > 0.
+constexpr double nth_root_impl(double x, std::intmax_t n, double curr,
+                               double prev) noexcept {
+  if (curr == prev)
+    return curr;
+  const double t = pow_double_pos(curr, n - 1);
+  const double next =
+      (static_cast<double>(n - 1) * curr + x / t) / static_cast<double>(n);
+  return nth_root_impl(x, n, next, curr);
+}
+
+constexpr double nth_root(double x, std::intmax_t n) noexcept {
+  assert(n > 0);
+  if (x == 0.0)
+    return 0.0;
+  if (n == 1)
+    return x;
+  // Initial guess: use x/n which often works; for small x keep x.
+  double init = x;
+  if (x > 1.0)
+    init = x / static_cast<double>(n);
+  return nth_root_impl(x, n, init, 0.0);
+}
+} // namespace _detail
+
+/// rief Computes base raised to a rational power.
+///
+/// Supports arbitrary rational powers N/D at compile time.
 MODULE_EXPORT template <std::intmax_t N, std::intmax_t D>
 constexpr double pow(double base, rational_type<N, D>) noexcept {
-  assert(N % D == 0 && "For now only integer powers are supported");
-  const int exp = N / D;
-  double result = 1.0;
+  static_assert(D != 0, "Denominator must not be zero");
 
-  int pos_exp = (exp < 0) ? -exp : exp;
+  // Reduce the rational exponent at compile time.
+  constexpr std::intmax_t g = std::gcd(N, D);
+  constexpr std::intmax_t num = N / g;
+  constexpr std::intmax_t den = D / g;
 
-  for (int i = 0; i < pos_exp; ++i) {
-    result *= base;
+  // Handle special cases with zero base.
+  if (base == 0.0) {
+    // 0^0 is undefined; force a runtime assert to catch misuse.
+    if (num == 0) {
+      assert(false && "0^0 is undefined");
+      return 1.0;
+    }
+    // 0^(negative) -> division by zero
+    if (num < 0) {
+      assert(false && "zero base with negative exponent (division by zero)");
+      return std::numeric_limits<double>::infinity();
+    }
+    return 0.0;
   }
 
-  if (exp < 0) {
-    return 1.0 / result;
+  const bool neg_base = (base < 0.0);
+  const double abs_base = neg_base ? -base : base;
+
+  // If base < 0 and denominator even, result is non-real.
+  if (neg_base && (den % 2 == 0)) {
+    assert(false && "negative base with even denominator -> non-real result");
+    return 0.0;
   }
 
-  return result;
+  // Compute the den-th root of the absolute base.
+  double root = 0.0;
+  if (abs_base == 1.0) {
+    root = 1.0; // exactly 1 for all roots
+  } else {
+    root = _detail::nth_root(abs_base, den);
+  }
+
+  const std::intmax_t abs_num = (num < 0) ? -num : num;
+  double abs_pow = _detail::pow_double_pos(root, abs_num);
+
+  if (num < 0)
+    abs_pow = 1.0 / abs_pow;
+
+  // Restore sign for odd numerator when base was negative.
+  if (neg_base && (num % 2 != 0))
+    abs_pow = -abs_pow;
+
+  return abs_pow;
 }
 
 /// \brief Holds a compile-time value for unit synthesis.
@@ -335,8 +412,40 @@ template <auto Value>
 struct is_value_type<value_type<Value>> : std::true_type {};
 
 template <typename T> struct is_value_type<const T> : is_value_type<T> {};
+
+constexpr double sqrt_impl(double x, double curr, double prev) noexcept {
+  if (curr == prev) {
+    return curr;
+  }
+  return sqrt_impl(x, 0.5 * (curr + x / curr), curr);
+}
 } // namespace _detail
 /// \endcond
+
+constexpr double sqrt(double x) noexcept {
+  assert(x >= 0.0);
+  assert(!(x != x));
+  return _detail::sqrt_impl(x, x, 0.0);
+}
+
+// Compile-time examples / smoke tests
+namespace _compile_time_checks {
+constexpr double absd(double x) noexcept { return x < 0.0 ? -x : x; }
+constexpr bool approx_equal(double a, double b, double eps = 1e-12) noexcept {
+  return absd(a - b) <= eps;
+}
+
+static_assert(maxwell::utility::pow<2, 1>(
+                  2.0, maxwell::utility::rational_type<2, 1>{}) == 4.0);
+// square root of 9 is approximately 3
+static_assert(approx_equal(
+    maxwell::utility::pow<1, 2>(9.0, maxwell::utility::rational_type<1, 2>{}),
+    3.0));
+// cube root inverse: (-8)^(-1/3) == -0.5
+static_assert(approx_equal(maxwell::utility::pow<-1, 3>(
+                               -8.0, maxwell::utility::rational_type<-1, 3>{}),
+                           -0.5));
+} // namespace _compile_time_checks
 
 // template <typename T> constexpr T ln(T x) {
 // #ifndef __GNUC__
@@ -346,6 +455,9 @@ template <typename T> struct is_value_type<const T> : is_value_type<T> {};
 } // namespace maxwell::utility
 
 namespace maxwell {
-template <auto Value> constexpr auto value = utility::value_type<Value>{};
-}
+template <double Value> constexpr auto value = utility::value_type<Value>{};
+
+template <std::intmax_t N, std::intmax_t D>
+constexpr utility::rational auto rational = utility::rational_type<N, D>{};
+} // namespace maxwell
 #endif

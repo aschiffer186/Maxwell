@@ -23,338 +23,6 @@
 #include "utility/type_traits.hpp"
 
 namespace maxwell {
-template <auto U, auto Q = U.quantity, typename T = double>
-  requires unit<decltype(U)> && quantity<decltype(Q)>
-class quantity_value;
-} // namespace maxwell
-
-template <auto U, auto Q, typename T>
-struct std::formatter<maxwell::quantity_value<U, Q, T>>
-    : formatter<string_view> {
-  auto constexpr parse(std::format_parse_context& ctx) { return ctx.begin(); }
-
-  auto constexpr format(const maxwell::quantity_value<U, Q, T>& q,
-                        format_context& ctx) const {
-    string str;
-    format_to(back_inserter(str), "{} {}", q.get_value(), q.get_units());
-    return formatter<string_view>::format(str, ctx);
-  }
-};
-
-namespace maxwell {
-/// \cond
-namespace _detail {
-template <typename> struct is_quantity_value : std::false_type {};
-
-template <auto U, auto Q, typename T>
-struct is_quantity_value<quantity_value<U, Q, T>> : std::true_type {};
-
-template <typename T>
-constexpr bool is_quantity_value_v =
-    is_quantity_value<std::remove_cvref_t<T>>::value;
-
-template <typename T>
-concept quantity_value_like = is_quantity_value_v<T>;
-/// \endcond
-
-/// \brief Provides operator overloads for `quantity_value` instances.
-struct _quantity_value_operators {
-  /// \brief Negation operator
-  ///
-  /// Negates the value of a \c quantity_value instance.
-  ///
-  /// \param q The quantity value instance to negate.
-  /// \return The negated value of the `quantity_value` instance.
-  MODULE_EXPORT friend constexpr quantity_value_like auto
-  operator-(const quantity_value_like auto& q) {
-    return std::remove_cvref_t<decltype(q)>(-q.get_value());
-  }
-
-  /// \brief Pre-increment operator
-  ///
-  /// Increments the numerical value of a \c quantity_value instance and returns
-  /// a reference to the modified \c quantity_value.
-  ///
-  /// \param q The quantity value instance to increment.
-  /// \return A reference to the modified \c quantity_value instance.
-  MODULE_EXPORT friend constexpr quantity_value_like auto&
-  operator++(quantity_value_like auto& q) {
-    ++q.value_;
-    return q;
-  }
-
-  /// \brief Post-increment operator
-  ///
-  /// Increments the numerical value of a \c quantiity_value instance and
-  /// returns a copy of the \c quantity_value before it was modified.
-  ///
-  /// \param q The quantity value instance to increment.
-  /// \return A reference to the modified \c quantity_value instance.
-  MODULE_EXPORT friend constexpr quantity_value_like auto
-  operator++(quantity_value_like auto& q, int) {
-    auto temp{q};
-    ++q;
-    return temp;
-  }
-
-  /// \brief Pre-decrement operator
-  ///
-  /// Decrement the numerical value of a \c quantity_value instance and returns
-  /// a reference to the modified \c quantity_value.
-  ///
-  /// \param q The quantity value instance to decrement.
-  /// \return A reference to the modified \c quantity_value instance.
-  MODULE_EXPORT friend constexpr quantity_value_like auto&
-  operator--(quantity_value_like auto& q) {
-    --q.value_;
-    return q;
-  }
-
-  /// \brief Post-decrement operator
-  ///
-  /// Decrements the numerical value of a \c quantiity_value instance and
-  /// returns a copy of the \c quantity_value before it was modified.
-  ///
-  /// \param q The quantity value instance to decrement.
-  /// \return A reference to the modified \c quantity_value instance.
-  MODULE_EXPORT friend constexpr quantity_value_like auto
-  operator--(quantity_value_like auto& q, int) {
-    auto temp{q};
-    --q;
-    return temp;
-  }
-
-  MODULE_EXPORT template <auto U1, auto Q1, typename T1, auto U2, auto Q2,
-                          typename T2>
-  friend constexpr quantity_value_like auto&
-  operator+=(quantity_value<U1, Q1, T1>& lhs,
-             const quantity_value<U2, Q2, T2>& rhs) {
-    static_assert(unit_addable_with<U1, U2>,
-                  "Cannot add quantities of different kinds or quantities "
-                  "whose units have different reference points.");
-    lhs.value_ += rhs.value_;
-    return lhs;
-  }
-
-  template <auto U1, auto Q1, typename T1, auto U2, auto Q2, typename T2>
-  MODULE_EXPORT friend constexpr quantity_value_like auto&
-  operator-=(quantity_value<U1, Q1, T1>& lhs,
-             const quantity_value<U2, Q2, T2>& rhs) {
-    static_assert(unit_subtractable_from<U1, U2>,
-                  "Cannot subtract quantities of different kinds or quantities "
-                  "whose units have different reference points.");
-    lhs.value_ -= rhs.value_;
-    return lhs;
-  }
-
-  MODULE_EXPORT template <auto U, auto Q, typename T, typename T2>
-    requires(!quantity_value_like<T2>)
-  friend constexpr quantity_value_like auto&
-  operator+=(quantity_value<U, Q, T>& lhs, T&& rhs)
-    requires unitless<U>
-  {
-
-    lhs.value_ += std::forward<T>(rhs);
-    return lhs;
-  }
-
-  MODULE_EXPORT template <auto U, auto Q, typename T, typename T2>
-    requires(!quantity_value_like<T2>)
-  friend constexpr quantity_value_like auto&
-  operator-=(quantity_value<U, Q, T>& lhs, T2&& rhs)
-    requires unitless<U>
-  {
-    lhs.value_ -= std::forward<T>(rhs);
-    return lhs;
-  }
-
-  MODULE_EXPORT template <auto U1, auto Q1, typename T1, auto U2, auto Q2,
-                          typename T2>
-  friend constexpr quantity_value_like auto
-  operator+(quantity_value<U1, Q1, T1> lhs,
-            const quantity_value<U2, Q2, T2>& rhs) {
-    static_assert(unit_addable_with<U1, U2>,
-                  "Cannot add quantities of different kinds or quantities "
-                  "whose units have different reference points.");
-    return lhs += rhs;
-  }
-
-  MODULE_EXPORT template <auto U1, auto Q1, typename T1, auto U2, auto Q2,
-                          typename T2>
-  friend constexpr quantity_value_like auto
-  operator-(quantity_value<U1, Q1, T1> lhs,
-            const quantity_value<U2, Q2, T2>& rhs) {
-    static_assert(unit_subtractable_from<U1, U2>,
-                  "Cannot subtract quantities of different kinds or quantities "
-                  "whose units have different reference points.");
-    return lhs -= rhs;
-  }
-
-  MODULE_EXPORT template <typename T>
-    requires(!quantity_value_like<T>)
-  friend constexpr quantity_value_like auto&
-  operator+(quantity_value_like auto& lhs, T&& rhs) {
-    return lhs += std::forward<rhs>(rhs);
-  }
-
-  MODULE_EXPORT template <typename T>
-    requires(!quantity_value_like<T>)
-  friend constexpr quantity_value_like auto&
-  operator+(T&& lhs, quantity_value_like auto& rhs) {
-    return rhs += std::forward<T>(lhs);
-  }
-
-  MODULE_EXPORT template <typename T>
-    requires(!quantity_value_like<T>)
-  friend constexpr quantity_value_like auto&
-  operator-(quantity_value_like auto& lhs, T&& rhs) {
-    return lhs -= std::forward<T>(rhs);
-  }
-
-  MODULE_EXPORT template <typename T>
-    requires(!quantity_value_like<T>)
-  friend constexpr quantity_value_like auto&
-  operator-(T&& lhs, quantity_value_like auto& rhs)
-    requires unitless<decltype(rhs)::units>
-  {
-    return rhs -= std::forward<T>(lhs);
-  }
-
-  MODULE_EXPORT friend constexpr quantity_value_like auto
-  operator*(const quantity_value_like auto& lhs,
-            const quantity_value_like auto& rhs) {
-    using lhs_type = std::remove_cvref_t<decltype(lhs)>;
-    using rhs_type = std::remove_cvref_t<decltype(rhs)>;
-    using result_type =
-        std::remove_cvref_t<decltype(lhs.get_value() * rhs.get_value())>;
-    constexpr unit auto result_units = lhs_type::units * rhs_type::units;
-    constexpr quantity auto result_quantity =
-        lhs_type::quantity_kind * rhs_type::quantity_kind;
-    return quantity_value<result_units, result_quantity, result_type>(
-        lhs.get_value() * rhs.get_value());
-  }
-
-  MODULE_EXPORT template <typename T>
-    requires(!quantity_value_like<T> && !unit<T> &&
-             !utility::_detail::is_value_type<T>::value)
-  friend constexpr quantity_value_like auto
-  operator*(const quantity_value_like auto& lhs, const T& rhs) {
-    using lhs_type = std::remove_cvref_t<decltype(lhs)>;
-    using product_type = std::remove_cvref_t<decltype(lhs.get_value() * rhs)>;
-    return quantity_value<lhs_type::units, lhs_type::quantity_kind,
-                          product_type>(lhs.get_value() * rhs);
-  }
-
-  MODULE_EXPORT template <typename T>
-    requires(!quantity_value_like<T> && !unit<T> &&
-             !utility::_detail::is_value_type<T>::value)
-  friend constexpr quantity_value_like auto
-  operator*(const T& lhs, const quantity_value_like auto& rhs) {
-    using rhs_type = std::remove_cvref_t<decltype(rhs)>;
-    using product_type = std::remove_cvref_t<decltype(lhs * rhs.get_value())>;
-    return quantity_value<rhs_type::units, rhs_type::quantity_kind,
-                          product_type>(lhs * rhs.get_value());
-  }
-
-  MODULE_EXPORT friend constexpr quantity_value_like auto
-  operator/(const quantity_value_like auto& lhs,
-            const quantity_value_like auto& rhs) {
-    using lhs_type = std::remove_cvref_t<decltype(lhs)>;
-    using rhs_type = std::remove_cvref_t<decltype(rhs)>;
-    using result_type =
-        std::remove_cvref_t<decltype(lhs.get_value() / rhs.get_value())>;
-    constexpr unit auto result_units = lhs_type::units / rhs_type::units;
-    constexpr quantity auto result_quantity =
-        lhs_type::quantity_kind / rhs_type::quantity_kind;
-    return quantity_value<result_units, result_quantity, result_type>(
-        lhs.get_value() / rhs.get_value());
-  }
-
-  MODULE_EXPORT template <typename T>
-    requires(!quantity_value_like<T> && !unit<T>)
-  friend constexpr quantity_value_like auto
-  operator/(const quantity_value_like auto& lhs, const T& rhs) {
-    using lhs_type = std::remove_cvref_t<decltype(lhs)>;
-    using product_type = std::remove_cvref_t<decltype(lhs.get_value() / rhs)>;
-    return quantity_value<lhs_type::units, lhs_type::quantity_kind,
-                          product_type>(lhs.get_value() / rhs);
-  }
-
-  MODULE_EXPORT template <typename T>
-    requires(!quantity_value_like<T> && !unit<T> &&
-             !utility::_detail::is_value_type<T>::value)
-  friend constexpr quantity_value_like auto
-  operator/(const T& lhs, const quantity_value_like auto& rhs) {
-    using rhs_type = std::remove_cvref_t<decltype(rhs)>;
-    using product_type = std::remove_cvref_t<decltype(lhs / rhs.get_value())>;
-    return quantity_value<rhs_type::units, rhs_type::quantity_kind,
-                          product_type>(lhs / rhs.get_value());
-  }
-
-  MODULE_EXPORT friend constexpr quantity_value_like auto
-  operator%(const quantity_value_like auto& lhs,
-            const quantity_value_like auto& rhs) {
-    using lhs_type = std::remove_cvref_t<decltype(lhs)>;
-    using rhs_type = std::remove_cvref_t<decltype(rhs)>;
-    using result_type =
-        std::remove_cvref_t<decltype(lhs.get_value() % rhs.get_value())>;
-    constexpr unit auto result_units = lhs_type::units / rhs_type::units;
-    constexpr quantity auto result_quantity =
-        lhs_type::quantity_kind / rhs_type::quantity_kind;
-    return quantity_value<result_units, result_quantity, result_type>(
-        lhs.get_value() % rhs.get_value());
-  }
-
-  MODULE_EXPORT template <auto U1, auto Q1, typename T1, auto U2, auto Q2,
-                          typename T2>
-  friend constexpr auto operator<=>(const quantity_value<U1, Q1, T1>& lhs,
-                                    const quantity_value<U2, Q2, T2>& rhs)
-    requires std::three_way_comparable_with<
-        std::remove_cvref_t<decltype(lhs.get_value())>,
-        std::remove_cvref_t<decltype(rhs.get_value())>>
-  {
-    static_assert(unit_comparable_with<U1, U2>,
-                  "Cannot compare quantities of different kinds");
-    return lhs.in_base_units().get_value() <=> rhs.in_base_units().get_value();
-  }
-
-  MODULE_EXPORT template <auto U1, auto Q1, typename T1, auto U2, auto Q2,
-                          typename T2>
-  friend auto operator==(const quantity_value<U1, Q1, T1>& lhs,
-                         const quantity_value<U2, Q2, T2>& rhs) -> bool
-    requires std::equality_comparable_with<
-        std::remove_cvref_t<decltype(lhs.get_value())>,
-        std::remove_cvref_t<decltype(rhs.get_value())>>
-  {
-    static_assert(unit_comparable_with<U1, U2>,
-                  "Cannot compare quantities of different kinds");
-    return lhs.in_base_units().get_value() == rhs.in_base_units().get_value();
-  }
-};
-
-struct quantity_value_output {
-  friend std::ostream& operator<<(std::ostream& os,
-                                  const quantity_value_like auto& q) {
-#ifdef MAXWELL_HAS_PRINT
-    std::print(os, q);
-#else
-    os << std::format("{}", q);
-#endif
-    return os;
-  }
-};
-
-/// \cond
-template <utility::ratio From, unit To>
-constexpr double chrono_conversion_factor(From, To) {
-  const double from_value =
-      static_cast<double>(From::num) / static_cast<double>(From::den);
-  double ret_val = from_value * To::multiplier;
-  return ret_val;
-}
-/// \endcond
-} // namespace _detail
-
 /// \brief Class template representing the value of a quantity with a particular
 /// unit.
 ///
@@ -389,10 +57,329 @@ constexpr double chrono_conversion_factor(From, To) {
 /// \tparam Q The quantity of the \c quantity_value. Default: the quantity of
 /// the units.
 /// \tparam T The type of the \c quantity_value. Default: \c double.
+template <auto U, auto Q = U.quantity, typename T = double>
+  requires unit<decltype(U)> && quantity<decltype(Q)>
+class quantity_value;
+} // namespace maxwell
+
+template <auto U, auto Q, typename T>
+struct std::formatter<maxwell::quantity_value<U, Q, T>>
+    : formatter<string_view> {
+  auto constexpr parse(std::format_parse_context& ctx) { return ctx.begin(); }
+
+  auto constexpr format(const maxwell::quantity_value<U, Q, T>& q,
+                        format_context& ctx) const {
+    string str;
+    format_to(back_inserter(str), "{} {}", q.get_value(), q.get_units());
+    return formatter<string_view>::format(str, ctx);
+  }
+};
+
+namespace maxwell {
+/// \cond
+namespace _detail {
+template <typename> struct is_quantity_value : std::false_type {};
+
+template <auto U, auto Q, typename T>
+struct is_quantity_value<quantity_value<U, Q, T>> : std::true_type {};
+
+template <typename T>
+constexpr bool is_quantity_value_v =
+    is_quantity_value<std::remove_cvref_t<T>>::value;
+
+template <typename T>
+concept quantity_value_like = is_quantity_value_v<T>;
+/// \endcond
+
+/// \brief Provides operator overloads for \c quantity_value instances.
+///
+/// \tparam Derived The \c quantity_value type to provide arithmetic operators
+/// for.
+template <quantity_value_like Derived> class _quantity_value_operators {
+  /// \brief Negation operator
+  ///
+  /// Negates the value of a \c quantity_value instance.
+  ///
+  /// \param q The quantity value instance to negate.
+  /// \return The negated value of the `quantity_value` instance.
+  MODULE_EXPORT friend constexpr auto operator-(const Derived& q) -> Derived {
+    return std::remove_cvref_t<decltype(q)>(-q.get_value());
+  }
+
+  /// \brief Pre-increment operator
+  ///
+  /// Increments the numerical value of a \c quantity_value instance and returns
+  /// a reference to the modified \c quantity_value.
+  ///
+  /// \param q The quantity value instance to increment.
+  /// \return A reference to the modified \c quantity_value instance.
+  MODULE_EXPORT friend constexpr auto operator++(Derived& q) -> Derived& {
+    ++q.value_;
+    return q;
+  }
+
+  /// \brief Post-increment operator
+  ///
+  /// Increments the numerical value of a \c quantiity_value instance and
+  /// returns a copy of the \c quantity_value before it was modified.
+  ///
+  /// \param q The quantity value instance to increment.
+  /// \return A reference to the modified \c quantity_value instance.
+  MODULE_EXPORT friend constexpr auto operator++(Derived& q, int) -> Derived {
+    auto temp{q};
+    ++q;
+    return temp;
+  }
+
+  /// \brief Pre-decrement operator
+  ///
+  /// Decrement the numerical value of a \c quantity_value instance and returns
+  /// a reference to the modified \c quantity_value.
+  ///
+  /// \param q The quantity value instance to decrement.
+  /// \return A reference to the modified \c quantity_value instance.
+  MODULE_EXPORT friend constexpr auto operator--(Derived& q) -> Derived& {
+    --q.value_;
+    return q;
+  }
+
+  /// \brief Post-decrement operator
+  ///
+  /// Decrements the numerical value of a \c quantiity_value instance and
+  /// returns a copy of the \c quantity_value before it was modified.
+  ///
+  /// \param q The quantity value instance to decrement.
+  /// \return A reference to the modified \c quantity_value instance.
+  MODULE_EXPORT friend constexpr auto operator--(Derived& q, int) -> Derived {
+    auto temp{q};
+    --q;
+    return temp;
+  }
+
+  MODULE_EXPORT template <auto U2, auto Q2, typename T2>
+  friend constexpr auto operator+=(Derived& lhs,
+                                   const quantity_value<U2, Q2, T2>& rhs)
+      -> Derived& {
+    static_assert(unit_addable_with<Derived::unit, U2>,
+                  "Cannot add quantities of different kinds or quantities "
+                  "whose units have different reference points.");
+    lhs.value_ += rhs.value_;
+    return lhs;
+  }
+
+  template <auto U2, auto Q2, typename T2>
+  MODULE_EXPORT friend constexpr auto
+  operator-=(Derived& lhs, const quantity_value<U2, Q2, T2>& rhs) -> Derived& {
+    static_assert(unit_subtractable_from<Derived::unit, U2>,
+                  "Cannot subtract quantities of different kinds or quantities "
+                  "whose units have different reference points.");
+    lhs.value_ -= rhs.value_;
+    return lhs;
+  }
+
+  MODULE_EXPORT template <typename T2>
+    requires(!quantity_value_like<T2>)
+  friend constexpr auto operator+=(Derived& lhs, T2&& rhs) -> Derived
+    requires unitless<Derived::unit>
+  {
+    lhs.value_ += std::forward<T2>(rhs);
+    return lhs;
+  }
+
+  MODULE_EXPORT template <auto U, auto Q, typename T, typename T2>
+    requires(!quantity_value_like<T2>)
+  friend constexpr auto operator-=(Derived& lhs, T2&& rhs) -> Derived&
+    requires unitless<Derived::unit>
+  {
+    lhs.value_ -= std::forward<T>(rhs);
+    return lhs;
+  }
+
+  MODULE_EXPORT template <auto U2, auto Q2, typename T2>
+  friend constexpr quantity_value_like auto
+  operator+(Derived lhs, const quantity_value<U2, Q2, T2>& rhs) {
+    static_assert(unit_addable_with<Derived::unit, U2>,
+                  "Cannot add quantities of different kinds or quantities "
+                  "whose units have different reference points.");
+    return lhs += rhs;
+  }
+  MODULE_EXPORT template <auto U2, auto Q2, typename T2>
+  friend constexpr quantity_value_like auto
+  operator-(Derived lhs, const quantity_value<U2, Q2, T2>& rhs) {
+    static_assert(unit_subtractable_from<Derived::unit, U2>,
+                  "Cannot subtract quantities of different kinds or quantities "
+                  "whose units have different reference points.");
+    return lhs -= rhs;
+  }
+
+  MODULE_EXPORT template <typename T>
+    requires(!quantity_value_like<T>)
+  friend constexpr quantity_value_like auto operator+(Derived lhs, T&& rhs) {
+    using result_number_type =
+        std::remove_cvref_t<decltype(lhs.get_value() + std::forward<T>(rhs))>;
+    return quantity_value<Derived::units, Derived::quantity_kind,
+                          result_number_type>(lhs.get_value() +
+                                              std::forward<T>(rhs));
+  }
+
+  MODULE_EXPORT template <typename T>
+    requires(!quantity_value_like<T>)
+  friend constexpr quantity_value_like auto operator+(T&& lhs, Derived rhs) {
+    using result_number_type =
+        std::remove_cvref_t<decltype(std::forward<T>(lhs) + rhs.get_value())>;
+    return quantity_value<Derived::units, Derived::quantity_kind,
+                          result_number_type>(std::forward<T>(lhs) +
+                                              rhs.get_value());
+  }
+
+  MODULE_EXPORT template <typename T>
+    requires(!quantity_value_like<T>)
+  friend constexpr quantity_value_like auto operator-(Derived lhs, T&& rhs) {
+    return lhs -= std::forward<T>(rhs);
+  }
+
+  MODULE_EXPORT template <typename T>
+    requires(!quantity_value_like<T>)
+  friend constexpr quantity_value_like auto operator-(T&& lhs, Derived rhs)
+    requires unitless<decltype(rhs)::units>
+  {
+    return rhs -= std::forward<T>(lhs);
+  }
+
+  MODULE_EXPORT friend constexpr quantity_value_like auto
+  operator*(const Derived& lhs, const quantity_value_like auto& rhs) {
+    using lhs_type = std::remove_cvref_t<decltype(lhs)>;
+    using rhs_type = std::remove_cvref_t<decltype(rhs)>;
+    using result_type =
+        std::remove_cvref_t<decltype(lhs.get_value() * rhs.get_value())>;
+    constexpr unit auto result_units = lhs_type::units * rhs_type::units;
+    constexpr quantity auto result_quantity =
+        lhs_type::quantity_kind * rhs_type::quantity_kind;
+    return quantity_value<result_units, result_quantity, result_type>(
+        lhs.get_value() * rhs.get_value());
+  }
+
+  MODULE_EXPORT template <typename T>
+    requires(!quantity_value_like<T> && !unit<T> &&
+             !utility::_detail::is_value_type<T>::value)
+  friend constexpr quantity_value_like auto operator*(const Derived& lhs,
+                                                      const T& rhs) {
+    using lhs_type = std::remove_cvref_t<decltype(lhs)>;
+    using product_type = std::remove_cvref_t<decltype(lhs.get_value() * rhs)>;
+    return quantity_value<lhs_type::units, lhs_type::quantity_kind,
+                          product_type>(lhs.get_value() * rhs);
+  }
+
+  MODULE_EXPORT template <typename T>
+    requires(!quantity_value_like<T> && !unit<T> &&
+             !utility::_detail::is_value_type<T>::value)
+  friend constexpr quantity_value_like auto operator*(const T& lhs,
+                                                      const Derived& rhs) {
+    using rhs_type = std::remove_cvref_t<decltype(rhs)>;
+    using product_type = std::remove_cvref_t<decltype(lhs * rhs.get_value())>;
+    return quantity_value<rhs_type::units, rhs_type::quantity_kind,
+                          product_type>(lhs * rhs.get_value());
+  }
+
+  MODULE_EXPORT friend constexpr quantity_value_like auto
+  operator/(const Derived& lhs, const quantity_value_like auto& rhs) {
+    using lhs_type = std::remove_cvref_t<decltype(lhs)>;
+    using rhs_type = std::remove_cvref_t<decltype(rhs)>;
+    using result_type =
+        std::remove_cvref_t<decltype(lhs.get_value() / rhs.get_value())>;
+    constexpr unit auto result_units = lhs_type::units / rhs_type::units;
+    constexpr quantity auto result_quantity =
+        lhs_type::quantity_kind / rhs_type::quantity_kind;
+    return quantity_value<result_units, result_quantity, result_type>(
+        lhs.get_value() / rhs.get_value());
+  }
+
+  MODULE_EXPORT template <typename T>
+    requires(!quantity_value_like<T> && !unit<T>)
+  friend constexpr quantity_value_like auto operator/(const Derived& lhs,
+                                                      const T& rhs) {
+    using lhs_type = std::remove_cvref_t<decltype(lhs)>;
+    using product_type = std::remove_cvref_t<decltype(lhs.get_value() / rhs)>;
+    return quantity_value<lhs_type::units, lhs_type::quantity_kind,
+                          product_type>(lhs.get_value() / rhs);
+  }
+
+  MODULE_EXPORT template <typename T>
+    requires(!quantity_value_like<T> && !unit<T> &&
+             !utility::_detail::is_value_type<T>::value)
+  friend constexpr quantity_value_like auto operator/(const T& lhs,
+                                                      const Derived& rhs) {
+    using rhs_type = std::remove_cvref_t<decltype(rhs)>;
+    using product_type = std::remove_cvref_t<decltype(lhs / rhs.get_value())>;
+    return quantity_value<rhs_type::units, rhs_type::quantity_kind,
+                          product_type>(lhs / rhs.get_value());
+  }
+
+  MODULE_EXPORT friend constexpr quantity_value_like auto
+  operator%(const Derived& lhs, const quantity_value_like auto& rhs) {
+    using lhs_type = std::remove_cvref_t<decltype(lhs)>;
+    using rhs_type = std::remove_cvref_t<decltype(rhs)>;
+    using result_type =
+        std::remove_cvref_t<decltype(lhs.get_value() % rhs.get_value())>;
+    constexpr unit auto result_units = lhs_type::units / rhs_type::units;
+    constexpr quantity auto result_quantity =
+        lhs_type::quantity_kind / rhs_type::quantity_kind;
+    return quantity_value<result_units, result_quantity, result_type>(
+        lhs.get_value() % rhs.get_value());
+  }
+
+  MODULE_EXPORT template <auto U2, auto Q2, typename T2>
+  friend constexpr auto operator<=>(const Derived& lhs,
+                                    const quantity_value<U2, Q2, T2>& rhs)
+    requires std::three_way_comparable_with<
+        std::remove_cvref_t<decltype(lhs.get_value())>,
+        std::remove_cvref_t<decltype(rhs.get_value())>>
+  {
+    static_assert(unit_comparable_with<Derived::units, U2>,
+                  "Cannot compare quantities of different kinds");
+    return lhs.in_base_units().get_value() <=> rhs.in_base_units().get_value();
+  }
+
+  MODULE_EXPORT template <auto U2, auto Q2, typename T2>
+  friend auto operator==(const Derived& lhs,
+                         const quantity_value<U2, Q2, T2>& rhs) -> bool
+    requires std::equality_comparable_with<
+        std::remove_cvref_t<decltype(lhs.get_value())>,
+        std::remove_cvref_t<decltype(rhs.get_value())>>
+  {
+    static_assert(unit_comparable_with<Derived::units, U2>,
+                  "Cannot compare quantities of different kinds");
+    return lhs.in_base_units().get_value() == rhs.in_base_units().get_value();
+  }
+};
+
+template <typename Derived> struct quantity_value_output {
+  friend std::ostream& operator<<(std::ostream& os, const Derived& q) {
+#ifdef MAXWELL_HAS_PRINT
+    std::print(os, q);
+#else
+    os << std::format("{}", q);
+#endif
+    return os;
+  }
+};
+
+/// \cond
+template <utility::ratio From, unit To>
+constexpr double chrono_conversion_factor(From, To) {
+  const double from_value =
+      static_cast<double>(From::num) / static_cast<double>(From::den);
+  double ret_val = from_value * To::multiplier;
+  return ret_val;
+}
+/// \endcond
+} // namespace _detail
+
 template <auto U, auto Q, typename T>
   requires unit<decltype(U)> && quantity<decltype(Q)>
-class quantity_value : _detail::_quantity_value_operators,
-                       _detail::quantity_value_output {
+class quantity_value
+    : _detail::_quantity_value_operators<quantity_value<U, Q, T>>,
+      _detail::quantity_value_output<quantity_value<U, Q, T>> {
   static_assert(
       quantity_convertible_to<Q, U.quantity>,
       "Attempting to instantiate quantity value with incompatible units");
@@ -709,7 +696,7 @@ public:
   }
 
 private:
-  friend _detail::_quantity_value_operators;
+  friend class _detail::_quantity_value_operators<quantity_value<U, Q, T>>;
 
   T value_{};
 }; // namespace maxwell
@@ -809,12 +796,37 @@ quantity_cast(const quantity_value<FromUnits, FromQuantity, T>& value)
   return quantity_value<ToUnits, ToQuantity, T>(value.get_value() * multiplier);
 }
 
+/// \brief Creates a \c quantity_value from a number and a unit
+///
+/// Creates a quantity_value from the specified numer and unit. The resulting
+/// \c quantity_value has the specified number and units.
+///
+/// \tparam T The type of the numerical value of the quantity.
+/// \tparam U The units of the quantity
+/// \param value The numerical value of the quantity
+/// \param U The units of the quantity.
+/// \return A \c quantity_value with the specified value and units.
 template <typename T, unit U>
   requires(!_detail::is_quantity_value_v<T> && !unit<T>)
 constexpr auto operator*(T&& value, U) -> quantity_value<U{}, U::quantity, T> {
   return quantity_value<U{}, U::quantity, T>(std::forward<T>(value));
 }
 
+/// \brief Multiplies the units of a \c quantity_value by another unit
+///
+/// Multiplies the units of a \c quantity_value by another unit, returning a
+/// new \c quantity_value with the resulting units. Does not change the
+/// numerical value of the \c quantity_value.
+///
+/// \tparam U1 The units of the left-hand side \c quantity_value.
+/// \tparam Q1 The quantity of the left-hand side \c quantity_value.
+/// \tparam T The type of the numerical value of the left-hand side \c
+/// quantity_value.
+/// \tparam U2 The units of the right-hand side unit.
+/// \param value The left-hand side \c quantity_value.
+/// \param U2 The right-hand side unit.
+/// \return A new \c quantity_value with the resulting units and the same
+/// numerical value.
 template <auto U1, auto Q1, typename T, unit U2>
 constexpr auto operator*(const quantity_value<U1, Q1, T>& value, U2) {
   constexpr unit auto new_units = U1 * U2{};
@@ -822,6 +834,21 @@ constexpr auto operator*(const quantity_value<U1, Q1, T>& value, U2) {
   return quantity_value<new_units, new_quantity, T>(value.get_value());
 }
 
+/// \brief Multiplies the units of a \c quantity_value by another unit
+///
+/// Multiplies the units of a \c quantity_value by another unit, returning a
+/// new \c quantity_value with the resulting units. The numerical value is moved
+/// into the new \c quantity_value.
+///
+/// \tparam U1 The units of the left-hand side \c quantity_value.
+/// \tparam Q1 The quantity of the left-hand side \c quantity_value.
+/// \tparam T The type of the numerical value of the left-hand side \c
+/// quantity_value.
+/// \tparam U2 The units of the right-hand side unit.
+/// \param value The left-hand side \c quantity_value.
+/// \param U2 The right-hand side unit.
+/// \return A new \c quantity_value with the resulting units and the same
+/// numerical value.
 template <auto U1, auto Q1, typename T, unit U2>
 constexpr auto operator*(quantity_value<U1, Q1, T>&& value, U2) {
   constexpr unit auto new_units = U1 * U2{};

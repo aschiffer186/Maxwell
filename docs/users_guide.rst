@@ -246,6 +246,25 @@ their units have the same reference point.
     When two instances of :code:`quantity_value` are compared for equality, exact equality is used if the underlying type is a floating-point 
     type. The standard warnings about floating-point equality apply.``
 
+Additionally, all functions provided by the :code:`<cmath>` header are overloaded to support instances of :code:`quantity_value` where appropriate. 
+Trigonometric functions can take angles of any type; they will automatically convert the angle to radians if necessary. 
+
+.. code-block:: c++
+
+    using namespace maxwell::math;
+
+    double s = sin(si:degree<>(90)); // s == 1.0 
+     
+For inverse trigonmetic functions, functions are provided to return angles in radians and in degrees. Functions that returned angles in degrees are suffixed 
+with :code:`d`. 
+
+.. code-block:: c++
+
+    si::radian<> a1 = asin(1.0); // a1 == pi/2 radians
+    si::degree<> a2 = asind(1.0); // a2 == 90 d`egrees
+
+Special mathematical functions, e.g. :code:`exp` or :code:`log` are only provided for dimensionless quantities. 
+
 :code:`quantity_holder` Class Template
 ---------------------------------------
 Maxwell also provides the :code:`quantity_holder` class template to specify units at run-time rather than compile-time.

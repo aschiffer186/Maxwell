@@ -21,7 +21,7 @@ struct unit_type;
 template <utility::template_string Name, quantity auto Quantity,
           auto Multiplier, auto Reference = 0.0, typename Scale>
 constexpr unit_type<Name, Quantity, Multiplier, Reference, Scale>
-underlying_unit(const unit_type<Name, Quantity, Multiplier, Reference, Scale>&);
+    underlying_unit(unit_type<Name, Quantity, Multiplier, Reference, Scale>);
 
 template <typename T>
 using underlying_unit_t = decltype(underlying_unit(std::declval<T>()));
@@ -66,7 +66,7 @@ namespace _detail {
 template <unit LHS, unit RHS> struct unit_product_impl {
   using type = unit_type<LHS::name + utility::template_string{"*"} + RHS::name,
                          LHS::quantity * RHS::quantity,
-                         LHS::multiplier * RHS::multiplier, 
+                         LHS::multiplier * RHS::multiplier,
                          LHS::reference * RHS::multiplier + RHS::reference>;
 };
 
@@ -75,6 +75,23 @@ template <unit LHS, unit RHS> struct unit_quotient_impl {
                          LHS::quantity / RHS::quantity,
                          LHS::multiplier / RHS::multiplier,
                          LHS::reference - RHS::reference / RHS::multiplier>;
+};
+
+template <unit U> struct unit_sqrt_impl {
+  using type =
+      unit_type<utility::template_string{"sqrt("} + U::name +
+                    utility::template_string{"}"},
+                sqrt(U::quantity), utility::sqrt(U::multiplier), U::reference>;
+};
+
+template <unit U, auto R>
+  requires utility::rational<decltype(R)>
+struct unit_pow_impl {
+  using type = unit_type<utility::template_string{"pow("} + U::name +
+                             utility::template_string{", "} +
+                             utility::template_string{")"},
+                         pow<R>(U::quantity), utility::pow(U::multiplier, R),
+                         utility::pow(U::reference, R)>;
 };
 } // namespace _detail
 /// \endcond
@@ -85,6 +102,12 @@ struct unit_product : _detail::unit_product_impl<LHS, RHS>::type {};
 template <unit LHS, unit RHS>
 struct unit_quotient : _detail::unit_quotient_impl<LHS, RHS>::type {};
 
+template <unit U> struct unit_sqrt : _detail::unit_sqrt_impl<U>::type {};
+
+template <unit U, auto R>
+  requires utility::rational<decltype(R)>
+struct unit_pow : _detail::unit_pow_impl<U, R>::type {};
+
 template <unit LHS, unit RHS>
 consteval unit auto operator*(LHS /*lhs*/, RHS /*rhs*/) noexcept {
   return unit_product<LHS, RHS>{};
@@ -93,6 +116,22 @@ consteval unit auto operator*(LHS /*lhs*/, RHS /*rhs*/) noexcept {
 template <auto Value, unit RHS>
 constexpr unit auto operator*(utility::value_type<Value> lhs, RHS) noexcept {
   return unit_type<RHS::name, RHS::quantity, lhs.value * RHS::multiplier>{};
+}
+
+template <unit U> constexpr unit auto sqrt(U /*unit*/) noexcept {
+  return unit_sqrt<U>{};
+}
+
+template <unit U, auto R>
+  requires utility::rational<decltype(R)>
+constexpr unit auto pow(U /*unit*/) noexcept {
+  return unit_pow<U, R>{};
+}
+
+template <unit U, std::intmax_t R>
+  requires utility::rational<decltype(R)>
+constexpr unit auto pow(U /*unit*/) noexcept {
+  return unit_pow<U, utility::rational_type<R, 1>{}>{};
 }
 
 template <auto Value>
@@ -106,7 +145,7 @@ template <auto Value>
 constexpr unit auto operator-(unit auto lhs,
                               utility::value_type<Value> rhs) noexcept {
   return unit_type<lhs.name, lhs.quantity, lhs.multiplier,
-                   lhs.multiplier *lhs.reference - rhs.value>{};
+                   lhs.multiplier * lhs.reference - rhs.value>{};
 }
 
 template <unit LHS, unit RHS> constexpr unit auto operator/(LHS, RHS) noexcept {
@@ -141,7 +180,7 @@ template <auto FromUnit, auto ToUnit>
 concept unit_convertible_to =
     dimension_convertible_to<FromUnit.dimensions, ToUnit.dimensions>;
 
-// 1 km in cm = 1 m / 1e-3 km *  100 cm / 1 m 
+// 1 km in cm = 1 m / 1e-3 km *  100 cm / 1 m
 
 template <unit From, unit To>
 constexpr auto conversion_factor(From, To) noexcept -> double {
@@ -149,8 +188,8 @@ constexpr auto conversion_factor(From, To) noexcept -> double {
          static_cast<double>(From::multiplier);
 }
 
-template <unit From, unit To> 
-constexpr auto conversion_offset(From, To) noexcept -> double{
+template <unit From, unit To>
+constexpr auto conversion_offset(From, To) noexcept -> double {
   if (To::multiplier == 1.0) {
     return static_cast<double>(To::reference - From::reference);
   } else {

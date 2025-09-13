@@ -142,9 +142,8 @@ TEST(TestDimensions, TestDimensionProductSquareRoot) {
 }
 
 TEST(TestDimensions, TestDimensionProductPower) {
-  constexpr dimension_product_type<
-      dimension_type<"A", utility::rational_type<1, 2>{}>,
-      dimension_type<"B", utility::rational_type<3, 2>{}>>
+  constexpr dimension_product_type<dimension_type<"A", rational<1, 2>>,
+                                   dimension_type<"B", rational<3, 2>>>
       dim_prod;
 
   constexpr dimension_product auto pow2 =
