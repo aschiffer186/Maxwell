@@ -116,6 +116,18 @@ template <quantity LHS, quantity RHS> struct quantity_product_impl {
 };
 
 template <quantity LHS, quantity RHS>
+  requires(LHS::dimensions == dimension_one && RHS::dimensions != dimension_one)
+struct quantity_product_impl<LHS, RHS> {
+  using type = RHS;
+};
+
+template <quantity LHS, quantity RHS>
+  requires(RHS::dimensions == dimension_one && LHS::dimensions != dimension_one)
+struct quantity_product_impl<LHS, RHS> {
+  using type = LHS;
+};
+
+template <quantity LHS, quantity RHS>
 struct quantity_product : quantity_product_impl<LHS, RHS>::type,
                           quantity_product_tag {};
 
@@ -124,6 +136,21 @@ template <quantity LHS, quantity RHS> struct quantity_quotient_impl {
       quantity_type<LHS::kind + utility::template_string{"/"} + RHS::kind,
                     LHS::dimensions / RHS::dimensions,
                     LHS::derived || RHS::derived>;
+};
+
+template <quantity LHS, quantity RHS>
+  requires(LHS::dimensions != dimension_one && RHS::dimensions == dimension_one)
+struct quantity_quotient_impl<LHS, RHS> {
+  using type = LHS;
+};
+
+template <quantity LHS, quantity RHS>
+  requires(LHS::dimensions == dimension_one && RHS::dimensions != dimension_one)
+struct quantity_quotient_impl<LHS, RHS> {
+  constexpr static auto new_dimensions =
+      dimension_product_inverse(RHS::dimensions);
+  using type = quantity_type<utility::template_string{"1/"} + RHS::kind,
+                             new_dimensions, RHS::derived>;
 };
 
 template <quantity LHS, quantity RHS>

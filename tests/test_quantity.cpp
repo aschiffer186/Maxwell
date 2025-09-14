@@ -1,4 +1,6 @@
 #include "Maxwell.hpp"
+#include "quantity_systems/isq.hpp"
+#include "utility/type_traits.hpp"
 
 #include <gtest/gtest.h>
 #include <type_traits>
@@ -23,6 +25,11 @@ TEST(TestQuantity, TestQuantityProduct) {
   const auto product1 = isq::length * isq::length;
   EXPECT_EQ(product1.dimensions, isq::area.dimensions);
   EXPECT_EQ(product1.kind, utility::template_string("L*L"));
+
+  const auto product2 = isq::length * isq::plane_angle;
+  EXPECT_EQ(product2.dimensions, isq::length.dimensions);
+  const auto product3 = isq::plane_angle * isq::length;
+  EXPECT_EQ(product3.dimensions, isq::length.dimensions);
 }
 
 TEST(TestQuantity, TestQuantityQuotient) {
@@ -32,6 +39,15 @@ TEST(TestQuantity, TestQuantityQuotient) {
                 dimension_type<"L", utility::rational_type<1, 1>{}>,
                 dimension_type<"T", utility::rational_type<-1, 1>{}>>{}));
   EXPECT_EQ(quotient1.kind, utility::template_string("L/T"));
+
+  const auto quotient2 = isq::length / isq::dimensionless;
+  EXPECT_EQ(quotient2.dimensions, isq::length.dimensions);
+
+  const auto quotient3 = isq::dimensionless / isq::time;
+  const auto expected_dim = dimension_product_type<
+      dimension_type<"T", utility::rational_type<-1, 1>{}>>{};
+  EXPECT_EQ(quotient3.dimensions, expected_dim);
+  EXPECT_FALSE(quotient3.derived);
 }
 
 TEST(TestQuantity, TestDimensionSum) {

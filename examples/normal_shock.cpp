@@ -1,3 +1,4 @@
+#include "quantity_systems/isq.hpp"
 #include <Maxwell.hpp>
 
 // using Mach = maxwell::quantity_value<
@@ -6,12 +7,16 @@
 
 using namespace maxwell;
 
+// using Mach =
+//     quantity_value<si::number_unit, sub_quantity<isq::dimensionless,
+//     "Mach">{}>;
+
 // auto normal_shock(Mach M, quantity_of<isq::temperature> auto T0,
 //                   quantity_of<isq::pressure> auto p0)
 //     -> std::tuple<Mach, maxwell::si::kelvin<>, maxwell::si::pascal<>> {
 //   constexpr maxwell::si::number<> gamma{1.4};
 
-//   // const Mach M1_num = (gamma - 1) * M * M;
+//   // const Mach M1_num = (gamma - 1.0) * M * M;
 // }
 
 int main() {

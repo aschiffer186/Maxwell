@@ -1,6 +1,4 @@
 #include "Maxwell.hpp"
-#include "core/dimension.hpp"
-#include "quantity_systems/isq.hpp"
 
 #include <gtest/gtest.h>
 

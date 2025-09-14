@@ -204,6 +204,27 @@ concept dimension_convertible_to =
     dimension_product<decltype(From)> && dimension_product<decltype(To)> &&
     (From == To);
 
+/// \cond
+namespace _detail {
+template <dimension... Dims> struct dimension_product_inverese {
+  using type = dimension_product_type<dimension_inverse_t<Dims>...>;
+};
+}; // namespace _detail
+/// \cond
+
+/// \brief Computes the inverse of a dimension produt.
+///
+/// Computes the inverse of a dimension product. The inverse of a dimension
+/// product is the product of the recipical of each dimension in the product.
+///
+/// \tparam Dims The dimensions of the dimension product to compute the inverse
+/// \param dim The dimension product to compute the inverse of.
+template <dimension... Dims>
+constexpr dimension_product auto
+dimension_product_inverse(dimension_product_type<Dims...> /*dim*/) {
+  return typename _detail::dimension_product_inverese<Dims...>::type{};
+}
+
 /// \brief Multiplies two dimensions.
 ///
 /// Computes the product of dimensions.

@@ -180,25 +180,25 @@ template <quantity_value_like Derived> class _quantity_value_operators {
   MODULE_EXPORT template <typename T2>
     requires(!quantity_value_like<T2>)
   friend constexpr auto operator+=(Derived& lhs, T2&& rhs) -> Derived
-    requires unitless<Derived::unit>
+    requires unitless<Derived::units>
   {
     lhs.value_ += std::forward<T2>(rhs);
     return lhs;
   }
 
-  MODULE_EXPORT template <auto U, auto Q, typename T, typename T2>
+  MODULE_EXPORT template <typename T2>
     requires(!quantity_value_like<T2>)
   friend constexpr auto operator-=(Derived& lhs, T2&& rhs) -> Derived&
-    requires unitless<Derived::unit>
+    requires unitless<Derived::units>
   {
-    lhs.value_ -= std::forward<T>(rhs);
+    lhs.value_ -= std::forward<T2>(rhs);
     return lhs;
   }
 
   MODULE_EXPORT template <auto U2, auto Q2, typename T2>
   friend constexpr quantity_value_like auto
   operator+(Derived lhs, const quantity_value<U2, Q2, T2>& rhs) {
-    static_assert(unit_addable_with<Derived::unit, U2>,
+    static_assert(unit_addable_with<Derived::units, U2>,
                   "Cannot add quantities of different kinds or quantities "
                   "whose units have different reference points.");
     return lhs += rhs;
@@ -206,7 +206,7 @@ template <quantity_value_like Derived> class _quantity_value_operators {
   MODULE_EXPORT template <auto U2, auto Q2, typename T2>
   friend constexpr quantity_value_like auto
   operator-(Derived lhs, const quantity_value<U2, Q2, T2>& rhs) {
-    static_assert(unit_subtractable_from<Derived::unit, U2>,
+    static_assert(unit_subtractable_from<Derived::units, U2>,
                   "Cannot subtract quantities of different kinds or quantities "
                   "whose units have different reference points.");
     return lhs -= rhs;
