@@ -219,7 +219,7 @@ template <dimension... Dims> struct dimension_product_inverese {
 ///
 /// \tparam Dims The dimensions of the dimension product to compute the inverse
 /// \param dim The dimension product to compute the inverse of.
-template <dimension... Dims>
+MODULE_EXPORT template <dimension... Dims>
 constexpr dimension_product auto
 dimension_product_inverse(dimension_product_type<Dims...> /*dim*/) {
   return typename _detail::dimension_product_inverese<Dims...>::type{};

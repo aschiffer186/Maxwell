@@ -52,7 +52,19 @@ TEST(TestUnits, TestUnitProduct) {
   EXPECT_EQ(u5.quantity, radian_unit.quantity);
   EXPECT_EQ(u5.multiplier, 180.0 / std::numbers::pi);
   EXPECT_EQ(u5.reference, 0.0);
+
+  const unit auto u6 = meter_unit * radian_unit;
+  EXPECT_EQ(u6.quantity, isq::length);
+  EXPECT_EQ(u6.multiplier, 1.0);
+  EXPECT_EQ(u6.reference, 0.0);
+
+  const unit auto u7 = meter_unit * degree_unit;
+  EXPECT_EQ(u7.quantity, isq::length);
+  EXPECT_EQ(u7.multiplier, 180.0 / std::numbers::pi);
+  EXPECT_EQ(u7.reference, 0.0);
 }
+
+TEST(TestUnits, TestUnitQuotient) {}
 
 TEST(TestUnits, TestUnitConversionFactor) {
   double factor = conversion_factor(meter_unit, kilo_unit<meter_unit>);

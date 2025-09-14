@@ -147,9 +147,6 @@ struct unit_pow_impl {
                          pow<R>(U::quantity), utility::pow(U::multiplier, R),
                          utility::pow(U::reference, R)>;
 };
-} // namespace _detail
-/// \endcond
-
 template <unit LHS, unit RHS>
 struct unit_product : _detail::unit_product_impl<LHS, RHS>::type {};
 
@@ -161,31 +158,94 @@ template <unit U> struct unit_sqrt : _detail::unit_sqrt_impl<U>::type {};
 template <unit U, auto R>
   requires utility::rational<decltype(R)>
 struct unit_pow : _detail::unit_pow_impl<U, R>::type {};
+} // namespace _detail
+/// \endcond
 
+/// \brief Multiplies two units.
+///
+/// Computes the product of two units. The resulting unit has a quantity that is
+/// the product of the quantities of the two units, a multiplier that is the
+/// product of the multipliers of the two units, and a reference that is
+/// computed based on the references and multipliers of the two units.
+///
+/// \tparam LHS The type of the left-hand side unit.
+/// \tparam RHS The type of the right-hand side unit.
+/// \param lhs The left-hand side unit.
+/// \param rhs The right-hand side unit.
+/// \return The product of the two units.
 MODULE_EXPORT template <unit LHS, unit RHS>
 consteval unit auto operator*(LHS /*lhs*/, RHS /*rhs*/) noexcept {
-  return unit_product<LHS, RHS>{};
+  return _detail::unit_product<LHS, RHS>{};
 }
 
+/// \brief Multiplies a unit by a numeric value.
+///
+/// Computes the product of a unit and a numeric value. The resulting unit has
+/// the same quantity as the unit, a multiplier that is the product of the
+/// multiplier of the unit and the numeric value, and the same reference as the
+/// unit.
+///
+/// \tparam Value The numeric value.
+/// \tparam RHS The type of the right-hand side unit.
+/// \param lhs The numeric value.
+/// \param rhs The right-hand side unit.
+/// \return The product of the numeric value and the unit.
 MODULE_EXPORT template <auto Value, unit RHS>
 constexpr unit auto operator*(utility::value_type<Value> lhs, RHS) noexcept {
-  return unit_type<RHS::name, RHS::quantity, lhs.value * RHS::multiplier>{};
+  return unit_type<RHS::name, RHS::quantity, lhs.value * RHS::multiplier,
+                   RHS::reference>{};
 }
 
+/// \brief Computes the square root of a unit.
+///
+/// Computes the square root of a unit. The resulting unit has a quantity that
+/// is the square root of the quantity of the unit, a multiplier that is the
+/// square root of the multiplier of the unit, and the same reference as the
+/// unit.
+///
+/// \tparam U The type of the unit.
+/// \param unit The unit to compute the square root of.
+/// \return The square root of the unit.
 MODULE_EXPORT template <unit U> constexpr unit auto sqrt(U /*unit*/) noexcept {
-  return unit_sqrt<U>{};
+  return _detail::unit_sqrt<U>{};
 }
 
+/// \brief Raises a unit to a rational power.
+///
+/// Raises a unit to a rational power. The resulting unit has a quantity that
+/// is the quantity of the unit raised to the power, a multiplier that is the
+/// multiplier of the unit raised to the power, and the reference of the unit
+/// raised to the power.
+///
+/// \note The exponent must be known at compile time.
+///
+/// \tparam U The type of the unit.
+/// \tparam R The exponent to raise the unit to.
+/// \param unit The unit to raise to the power.
+/// \return The unit raised to the power.
 MODULE_EXPORT template <unit U, auto R>
   requires utility::rational<decltype(R)>
 constexpr unit auto pow(U /*unit*/) noexcept {
-  return unit_pow<U, R>{};
+  return _detail::unit_pow<U, R>{};
 }
 
+/// \brief Raises a unit to an integral power.
+///
+/// Raises a unit to an integral power. The resulting unit has a quantity that
+/// is the quantity of the unit raised to the power, a multiplier that is the
+/// multiplier of the unit raised to the power, and the reference of the unit
+/// raised to the power.
+///
+/// \note The exponent must be known at compile time.
+///
+/// \tparam U The type of the unit.
+/// \tparam R The exponent to raise the unit to.
+/// \param unit The unit to raise to the power.
+/// \return The unit raised to the power.
 MODULE_EXPORT template <unit U, std::intmax_t R>
   requires utility::rational<decltype(R)>
 constexpr unit auto pow(U /*unit*/) noexcept {
-  return unit_pow<U, utility::rational_type<R, 1>{}>{};
+  return _detail::unit_pow<U, utility::rational_type<R, 1>{}>{};
 }
 
 MODULE_EXPORT template <auto Value>
@@ -204,15 +264,14 @@ constexpr unit auto operator-(unit auto lhs,
 
 MODULE_EXPORT template <unit LHS, unit RHS>
 constexpr unit auto operator/(LHS, RHS) noexcept {
-  return unit_quotient<LHS, RHS>{};
+  return _detail::unit_quotient<LHS, RHS>{};
 }
 
+/// \cond
+namespace _detail {
 template <auto Q, utility::template_string Name> struct base_unit_impl {
   using type = unit_type<Name, Q, 1.0>;
 };
-
-MODULE_EXPORT template <auto Q, utility::template_string Name>
-using base_unit = base_unit_impl<Q, Name>::type;
 
 template <auto Val, utility::template_string Name> struct derived_unit_impl;
 
@@ -227,9 +286,14 @@ template <auto Q, utility::template_string Name>
 struct derived_unit_impl<Q, Name> {
   using type = unit_type<Name, Q, 1.0>;
 };
+} // namespace _detail
+/// \endcond
+
+MODULE_EXPORT template <auto Q, utility::template_string Name>
+using base_unit = _detail::base_unit_impl<Q, Name>::type;
 
 MODULE_EXPORT template <auto Val, utility::template_string Name>
-using derived_unit = derived_unit_impl<Val, Name>::type;
+using derived_unit = _detail::derived_unit_impl<Val, Name>::type;
 
 MODULE_EXPORT template <auto FromUnit, auto ToUnit>
 concept unit_convertible_to =

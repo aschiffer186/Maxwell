@@ -522,8 +522,10 @@ constexpr double log10(double x) noexcept {
 } // namespace maxwell::utility
 
 namespace maxwell {
+/// Convience type alias for creating a \c value_type instance.
 template <double Value> constexpr auto value = utility::value_type<Value>{};
 
+/// Convience type alias for creating a \c rational_type instance.
 template <std::intmax_t N, std::intmax_t D>
 constexpr utility::rational auto rational = utility::rational_type<N, D>{};
 } // namespace maxwell
