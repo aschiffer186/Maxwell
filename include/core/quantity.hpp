@@ -36,7 +36,8 @@ constexpr auto number_kind = utility::template_string{"[]"};
 /// \tparam Kind A string representing the kind of the quantity.
 /// \tparam Dim The dimensions of the quantity.
 /// \tparam Derived Whether the quantity is a user-defined derived quantity.
-MODULE_EXPORT template <utility::template_string Kind, auto Dim, bool Derived>
+MODULE_EXPORT template <utility::template_string Kind, auto Dim, bool Derived,
+                        bool Arithmetic = false>
   requires dimension_product<decltype(Dim)>
 struct quantity_type {
   /// The dimensions of the quantity.
@@ -46,6 +47,7 @@ struct quantity_type {
   /// A flag indicating if the quantity is a user-defined derived quantity.
   constexpr static bool derived = Derived;
 
+  constexpr static bool arithmetic = Arithmetic;
   /// \brief Returns the sum of the exponents of quantity's dimensions.
   ///
   /// Returns the sum of the exponents of the quantity's dimensions. Note,
@@ -63,9 +65,10 @@ MODULE_EXPORT constexpr quantity_type<number_kind, dimension_one, false> number;
 
 /// \cond
 namespace _detail {
-template <utility::template_string Kind, auto Dim, bool Derived>
-auto quantity_base(quantity_type<Kind, Dim, Derived>)
-    -> quantity_type<Kind, Dim, Derived>;
+template <utility::template_string Kind, auto Dim, bool Derived,
+          bool Arithmetic>
+auto quantity_base(const quantity_type<Kind, Dim, Derived, Arithmetic>&)
+    -> quantity_type<Kind, Dim, Derived, Arithmetic>;
 
 template <typename T>
 using quantity_base_t = decltype(quantity_base(std::declval<T>()));
@@ -74,6 +77,10 @@ template <typename, typename = void> struct is_quantity : std::false_type {};
 
 template <typename T>
 struct is_quantity<T, std::void_t<quantity_base_t<T>>> : std::true_type {};
+
+struct quantity_product_tag {};
+
+struct quantity_quotient_tag {};
 } // namespace _detail
 /// \endcond
 
@@ -81,7 +88,9 @@ struct is_quantity<T, std::void_t<quantity_base_t<T>>> : std::true_type {};
 ///
 /// \tparam T The type to check
 MODULE_EXPORT template <typename T>
-concept quantity = _detail::is_quantity<std::remove_cvref_t<T>>::value;
+concept quantity = (!std::same_as<T, _detail::quantity_product_tag>) &&
+                   (!std::same_as<T, _detail::quantity_quotient_tag>) &&
+                   _detail::is_quantity<std::remove_cvref_t<T>>::value;
 
 /// \brief Equality comparison operator.
 ///
@@ -98,15 +107,12 @@ constexpr auto operator==(quantity auto lhs, quantity auto rhs) noexcept
 
 /// \cond
 namespace _detail {
-struct quantity_product_tag {};
-
-struct quantity_quotient_tag {};
 
 template <quantity LHS, quantity RHS> struct quantity_product_impl {
   using type =
       quantity_type<LHS::kind + utility::template_string{"*"} + RHS::kind,
                     LHS::dimensions * RHS::dimensions,
-                    LHS::derived || RHS::derived>;
+                    LHS::derived || RHS::derived, true>;
 };
 
 template <quantity LHS, quantity RHS>
@@ -124,18 +130,17 @@ struct quantity_product_impl<LHS, RHS> {
 template <quantity LHS, quantity RHS>
   requires(LHS::dimensions == dimension_one && RHS::dimensions == dimension_one)
 struct quantity_product_impl<LHS, RHS> {
-  using type = std::conditional_t<std::derived_from<LHS, RHS>, RHS, LHS>;
+  using type = std::conditional_t<std::derived_from<LHS, RHS>, LHS, RHS>;
 };
 
 template <quantity LHS, quantity RHS>
-struct quantity_product : quantity_product_impl<LHS, RHS>::type,
-                          quantity_product_tag {};
+struct quantity_product : quantity_product_impl<LHS, RHS>::type {};
 
 template <quantity LHS, quantity RHS> struct quantity_quotient_impl {
   using type =
       quantity_type<LHS::kind + utility::template_string{"/"} + RHS::kind,
                     LHS::dimensions / RHS::dimensions,
-                    LHS::derived || RHS::derived>;
+                    LHS::derived || RHS::derived, true>;
 };
 
 template <quantity LHS, quantity RHS>
@@ -150,7 +155,7 @@ struct quantity_quotient_impl<LHS, RHS> {
   constexpr static auto new_dimensions =
       dimension_product_inverse(RHS::dimensions);
   using type = quantity_type<utility::template_string{"1/"} + RHS::kind,
-                             new_dimensions, RHS::derived>;
+                             new_dimensions, RHS::derived, true>;
 };
 
 template <quantity LHS, quantity RHS>
@@ -160,8 +165,7 @@ struct quantity_quotient_impl<LHS, RHS> {
 };
 
 template <quantity LHS, quantity RHS>
-struct quantity_quotient : quantity_quotient_impl<LHS, RHS>::type,
-                           quantity_quotient_tag {};
+struct quantity_quotient : quantity_quotient_impl<LHS, RHS>::type {};
 } // namespace _detail
 /// \endcond
 
@@ -218,13 +222,12 @@ template <quantity Q> struct quantity_sqrt_impl {
   using dim_sqrt = decltype(Q::dimensions.sqrt());
   using type = quantity_type<utility::template_string{"sqrt("} + Q::kind +
                                  utility::template_string{")"},
-                             dim_sqrt{}, Q::derived>;
+                             dim_sqrt{}, Q::derived, true>;
 };
 
 struct quantity_sqrt_tag {};
 
-template <quantity Q>
-struct quantity_sqrt : quantity_sqrt_impl<Q>::type, quantity_sqrt_tag {};
+template <quantity Q> struct quantity_sqrt : quantity_sqrt_impl<Q>::type {};
 
 template <quantity Q, auto R>
   requires utility::rational<decltype(R)>
@@ -233,15 +236,14 @@ struct quantity_pow_impl {
   using type = quantity_type<utility::template_string{"pow("} + Q::kind +
                                  utility::template_string{", "} +
                                  utility::template_string{")"},
-                             dim_pow{}, Q::derived>;
+                             dim_pow{}, Q::derived, true>;
 };
 
 struct quantity_pow_tag {};
 
 template <quantity Q, auto R>
   requires utility::rational<decltype(R)>
-struct quantity_pow : _detail::quantity_pow_impl<Q, R>::type,
-                      quantity_pow_tag {};
+struct quantity_pow : _detail::quantity_pow_impl<Q, R>::type {};
 } // namespace _detail
 /// \endcond
 
@@ -334,16 +336,7 @@ template <typename T> struct has_derived_base<const T> : has_derived_base<T> {};
 template <quantity From, quantity To>
 consteval auto quantity_convertible_to_impl(From, To) noexcept -> bool {
   // If dimensions size > 1 we know it's a product or a quotient
-  if (std::derived_from<From, _detail::quantity_product_tag> &&
-      !has_derived_base<From>::value) {
-    return From::dimensions == To::dimensions;
-  } else if (std::derived_from<From, _detail::quantity_quotient_tag> &&
-             !has_derived_base<From>::value) {
-    return From::dimensions == To::dimensions;
-  } else if (std::derived_from<From, _detail::quantity_sqrt_tag> &&
-             !has_derived_base<From>::value) {
-  } else if (!std::derived_from<From, _detail::quantity_pow_tag> &&
-             !has_derived_base<From>::value) {
+  if (From::arithmetic && !has_derived_base<From>::value) {
     return From::dimensions == To::dimensions;
   } else if (!From::derived && !To::derived) {
     return From::dimensions == To::dimensions;

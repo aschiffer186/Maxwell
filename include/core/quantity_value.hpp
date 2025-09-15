@@ -170,10 +170,10 @@ template <quantity_value_like Derived> class _quantity_value_operators {
   template <auto U2, auto Q2, typename T2>
   MODULE_EXPORT friend constexpr auto
   operator-=(Derived& lhs, const quantity_value<U2, Q2, T2>& rhs) -> Derived& {
-    static_assert(unit_subtractable_from<Derived::unit, U2>,
+    static_assert(unit_subtractable_from<Derived::units, U2>,
                   "Cannot subtract quantities of different kinds or quantities "
                   "whose units have different reference points.");
-    lhs.value_ -= rhs.value_;
+    lhs.value_ -= rhs.get_value();
     return lhs;
   }
 
