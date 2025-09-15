@@ -46,7 +46,7 @@ struct quantity_type {
   constexpr static auto kind = Kind;
   /// A flag indicating if the quantity is a user-defined derived quantity.
   constexpr static bool derived = Derived;
-
+  /// A flag indicating the quantity is part of an arithmetic expression.
   constexpr static bool arithmetic = Arithmetic;
   /// \brief Returns the sum of the exponents of quantity's dimensions.
   ///

@@ -20,6 +20,16 @@ auto normal_shock(Mach M,
   const Mach M2_num = (gamma - 1) * M * M + 2.0;
   const Mach M2_den = 2.0 * gamma * M * M - (gamma - 1);
   const Mach M2 = std::sqrt(M2_num / M2_den);
+
+  const double p2_num = 2.0 * gamma * M * M - (gamma - 1);
+  const double p2_den = gamma + 1.0;
+  const maxwell::si::pascal<> p2 = p0 * (p2_num / p2_den);
+
+  const double T2_num = p2_num * ((gamma - 1) * M * M + 2.0);
+  const double T2_den = p2_den * (2.0 * gamma * M * M - (gamma - 1));
+  const maxwell::si::kelvin<> T2 = T0 * (T2_num / T2_den);
+
+  return {M2, T2, p2};
 }
 
 int main() {
