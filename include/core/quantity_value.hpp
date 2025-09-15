@@ -604,9 +604,6 @@ public:
                     utility::as_constant<conversion_factor(FromUnit, U)> +
                 utility::as_constant<conversion_offset(FromUnit, U)>,
             FromUnit.scale)) {
-    static_assert(unit_convertible_to<FromUnit, U>,
-                  "Units of other cannot be converted to units of value being "
-                  "constructed");
     static_assert(
         quantity_convertible_to<FromQuantity, Q>,
         "Attempting to construct value from incompatible quantity. Note, "

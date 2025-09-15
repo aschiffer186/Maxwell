@@ -36,17 +36,22 @@ namespace maxwell {
 /// the quantity.
 /// \tparam Reference The reference value of the unit. Defaults to 0.0.
 /// \tparam Scale The scale type of the unit. Defaults to \c linear_scale_type
-MODULE_EXPORT template <utility::template_string Name, quantity auto Quantity,
-                        double Multiplier, auto Reference = 0.0,
-                        typename Scale = linear_scale_type>
+MODULE_EXPORT template <
+    utility::template_string Name, quantity auto Quantity, double Multiplier,
+    auto Reference = 0.0, typename Scale = linear_scale_type,
+    dimension_product auto DimForMultiplier =
+        std::conditional_t<Quantity.dimensions == dimension_one,
+                           decltype(dimension_one), dimension_product_type<>>{}>
 struct unit_type;
 
 /// \cond
 namespace _detail {
 template <utility::template_string Name, quantity auto Quantity,
-          double Multiplier, auto Reference = 0.0, typename Scale>
+          double Multiplier, auto Reference = 0.0, typename Scale,
+          auto DimForMultiplier>
 constexpr unit_type<Name, Quantity, Multiplier, Reference, Scale>
-    underlying_unit(unit_type<Name, Quantity, Multiplier, Reference, Scale>);
+    underlying_unit(unit_type<Name, Quantity, Multiplier, Reference, Scale,
+                              DimForMultiplier>);
 
 template <typename T>
 using underlying_unit_t = decltype(underlying_unit(std::declval<T>()));
@@ -70,7 +75,8 @@ MODULE_EXPORT template <typename T>
 concept unit = _detail::has_underlying_unit<std::remove_cvref_t<T>>::value;
 
 template <utility::template_string Name, quantity auto Quantity,
-          double Multiplier, auto Reference, typename Scale>
+          double Multiplier, auto Reference, typename Scale,
+          dimension_product auto DimForMultiplier>
 struct unit_type {
   /// The name of the unit
   constexpr static auto name = Name;
@@ -78,12 +84,16 @@ struct unit_type {
   constexpr static quantity auto quantity = Quantity;
   /// The dimensions of the unit
   constexpr static dimension_product auto dimensions = quantity.dimensions;
+  /// Dimension product used for helping to calculate multiplier
+  constexpr static dimension_product auto dim_for_multiplier = DimForMultiplier;
   /// The multiplier of the unit relative to the base unit of the quantity.
   constexpr static auto multiplier = Multiplier;
   /// The reference value of the unit.
   constexpr static auto reference = Reference;
   /// The scale type of the unit.
   constexpr static Scale scale;
+
+  using scale_type = Scale;
   /// The representation type of the quantity the unit is a reference for.
   using quantity_rep = std::remove_cvref_t<decltype(quantity)>;
 
@@ -96,6 +106,21 @@ struct unit_type {
   /// \return The base unit for the unit.
   constexpr static auto base_units() {
     return unit_type<Name, Quantity, 1.0>{};
+  }
+
+  /// \brief Returns the sum of the exponents of the unit's dimensions.
+  ///
+  /// Returns the sum of the exponents of the unit's dimensions. Note,
+  /// if this is a derived units, this function will never return zero
+  /// even if the quantity has dimensions of number.
+  ///
+  /// \brief Return the sum of the exponents of the quantity's units.
+  constexpr static utility::rational auto dimension_sum() {
+    if constexpr (DimForMultiplier == dimension_product_type<>{}) {
+      return quantity.dimension_sum();
+    } else {
+      return DimForMultiplier.dimension_exponent_sum();
+    }
   }
 };
 
@@ -121,14 +146,18 @@ template <unit LHS, unit RHS> struct unit_product_impl {
   using type = unit_type<LHS::name + utility::template_string{"*"} + RHS::name,
                          LHS::quantity * RHS::quantity,
                          LHS::multiplier * RHS::multiplier,
-                         LHS::reference * RHS::multiplier + RHS::reference>;
+                         LHS::reference * RHS::multiplier + RHS::reference,
+                         typename LHS::scale_type,
+                         LHS::dim_for_multiplier * RHS::dim_for_multiplier>;
 };
 
 template <unit LHS, unit RHS> struct unit_quotient_impl {
   using type = unit_type<LHS::name + utility::template_string{"*"} + RHS::name,
                          LHS::quantity / RHS::quantity,
                          LHS::multiplier / RHS::multiplier,
-                         LHS::reference - RHS::reference / RHS::multiplier>;
+                         LHS::reference - RHS::reference / RHS::multiplier,
+                         typename LHS::scale_type,
+                         LHS::dim_for_multiplier / RHS::dim_for_multiplier>;
 };
 
 template <unit U> struct unit_sqrt_impl {
@@ -349,7 +378,7 @@ public:
   // clang-format off
 
   using type = unit_type<Name, U.quantity,
-                pow(Prefix, U.quantity.dimension_sum()) *
+                pow(Prefix, U.dimension_sum()) *
                     U.multiplier>;
   
   // clang-format on 

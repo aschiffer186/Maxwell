@@ -1,3 +1,4 @@
+#include "core/quantity.hpp"
 #include "quantity_systems/isq.hpp"
 #include <Maxwell.hpp>
 
@@ -15,8 +16,7 @@ using namespace maxwell;
 //                   quantity_of<isq::pressure> auto p0)
 //     -> std::tuple<Mach, maxwell::si::kelvin<>, maxwell::si::pascal<>> {
 //   constexpr maxwell::si::number<> gamma{1.4};
-
-//   // const Mach M1_num = (gamma - 1.0) * M * M;
+//   const Mach M1_num = M * M;
 // }
 
 int main() {

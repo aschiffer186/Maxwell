@@ -54,13 +54,7 @@ struct quantity_type {
   ///
   /// \brief Return the sum of the exponents of the quantity's dimensions.
   constexpr static utility::rational auto dimension_sum() {
-    constexpr utility::rational auto sum_temp =
-        dimensions.dimension_exponent_sum();
-    if constexpr ((sum_temp == utility::zero) && (Kind != number_kind)) {
-      return utility::one;
-    } else {
-      return sum_temp;
-    }
+    return dimensions.dimension_exponent_sum();
   }
 };
 
@@ -128,6 +122,12 @@ struct quantity_product_impl<LHS, RHS> {
 };
 
 template <quantity LHS, quantity RHS>
+  requires(LHS::dimensions == dimension_one && RHS::dimensions == dimension_one)
+struct quantity_product_impl<LHS, RHS> {
+  using type = std::conditional_t<std::derived_from<LHS, RHS>, RHS, LHS>;
+};
+
+template <quantity LHS, quantity RHS>
 struct quantity_product : quantity_product_impl<LHS, RHS>::type,
                           quantity_product_tag {};
 
@@ -151,6 +151,12 @@ struct quantity_quotient_impl<LHS, RHS> {
       dimension_product_inverse(RHS::dimensions);
   using type = quantity_type<utility::template_string{"1/"} + RHS::kind,
                              new_dimensions, RHS::derived>;
+};
+
+template <quantity LHS, quantity RHS>
+  requires(LHS::dimensions == dimension_one && RHS::dimensions == dimension_one)
+struct quantity_quotient_impl<LHS, RHS> {
+  using type = std::conditional_t<std::derived_from<LHS, RHS>, LHS, RHS>;
 };
 
 template <quantity LHS, quantity RHS>
@@ -184,9 +190,10 @@ using quantity_quotient_t = _detail::quantity_quotient<LHS, RHS>;
 /// \param lhs The left hand side of the multiplication.
 /// \param rhs The right hand side of the multiplication.
 /// \return The product of two quantities.
-MODULE_EXPORT constexpr quantity auto operator*(quantity auto lhs,
-                                                quantity auto rhs) noexcept {
-  return quantity_product_t<decltype(lhs), decltype(rhs)>{};
+template <quantity LHS, quantity RHS>
+MODULE_EXPORT constexpr quantity auto operator*(LHS /*lhs*/,
+                                                RHS /*rhs*/) noexcept {
+  return quantity_product_t<LHS, RHS>{};
 }
 
 /// \brief Divides two quantities.
@@ -343,7 +350,8 @@ consteval auto quantity_convertible_to_impl(From, To) noexcept -> bool {
   } else if (!From::derived && To::derived) {
     return false;
   } else if (From::derived && !To::derived) {
-    return std::derived_from<From, To> && From::dimensions == To::dimensions;
+    return utility::similar<quantity_base_t<From>, quantity_base_t<To>> &&
+           From::dimensions == To::dimensions;
   } else {
     return std::derived_from<From, To> && From::dimensions == To::dimensions;
   }

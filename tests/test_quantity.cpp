@@ -66,7 +66,7 @@ TEST(TestQuantity, TestDimensionSum) {
 
   const auto square = isq::plane_angle * isq::plane_angle;
   const auto sum5 = square.dimension_sum();
-  EXPECT_EQ(sum5, (utility::rational_type<2, 1>{}));
+  EXPECT_EQ(sum5, (utility::rational_type<1, 1>{}));
 }
 
 TEST(TestQuantity, TestQuantiyFactories) {
