@@ -85,9 +85,15 @@ MODULE_EXPORT constexpr struct pressure_quantity_type
     : derived_quantity<force / (length * length), "Pressure"> {
 } pressure;
 
+namespace _detail {
+constexpr struct work_base_quantity_type
+    : derived_quantity<force * length, "W"> {
+} work_base;
+} // namespace _detail
+
 /// Quantity represeting quantity of work.
 MODULE_EXPORT constexpr struct work_quantity_type
-    : derived_quantity<force * length, "Work"> {
+    : sub_quantity<_detail::work_base, "Work"> {
 } work;
 
 /// Quantity representing quantity of power.
@@ -131,7 +137,7 @@ MODULE_EXPORT constexpr struct volume_quantity_type
 } volume;
 
 MODULE_EXPORT constexpr struct torque_quantity_type
-    : sub_quantity<work, "Torque"> {
+    : sub_quantity<_detail::work_base, "Torque"> {
 } torque;
 
 MODULE_EXPORT constexpr struct velocity_quantity_type

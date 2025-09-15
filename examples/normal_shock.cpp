@@ -33,7 +33,7 @@ auto normal_shock(Mach M,
 }
 
 int main() {
-  // Mach M{2.0};
+  // Mach M{2.0};`
   // maxwell::si::kelvin<> T0{300.0};
   // maxwell::si::pascal<> p0{101325.0};
 
