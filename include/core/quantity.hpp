@@ -100,8 +100,9 @@ concept quantity = (!std::same_as<T, _detail::quantity_product_tag>) &&
 /// \param lhs The left-hand side quantity.
 /// \param rhs The right-hand side quantity.
 /// \return \c true if the quantities are equal, \c false otherwise.
-constexpr auto operator==(quantity auto lhs, quantity auto rhs) noexcept
-    -> bool {
+[[deprecated("The use of operator== is deprecated in user facing code; use "
+             "convertible_to concepts")]] constexpr auto
+operator==(quantity auto lhs, quantity auto rhs) noexcept -> bool {
   return lhs.dimensions == rhs.dimensions && lhs.derived == rhs.derived;
 }
 

@@ -168,9 +168,7 @@ MODULE_EXPORT template <dimension... Dimensions> struct dimension_product_type {
   }
 };
 
-MODULE_EXPORT constexpr dimension_product_type<
-    dimension_type<"[]", utility::one>>
-    dimension_one;
+MODULE_EXPORT constexpr dimension_product_type<> dimension_one{};
 
 /// \brief Equality operator
 ///

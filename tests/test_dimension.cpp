@@ -73,9 +73,7 @@ TEST(TestDimensions, TestDimensionMultiplication) {
 
   const auto prod4_tuple = prod4.as_tuple();
 
-  EXPECT_EQ(std::tuple_size_v<decltype(prod4_tuple)>, 1);
-  EXPECT_EQ(std::get<0>(prod4_tuple),
-            (dimension_type<number_kind, utility::rational_type<2, 1>{}>{}));
+  EXPECT_EQ(std::tuple_size_v<decltype(prod4_tuple)>, 0);
 }
 
 TEST(TestDimensions, TestDimensionDivision) {

@@ -1,4 +1,6 @@
 #include "Maxwell.hpp"
+#include "quantity_systems/isq.hpp"
+#include "quantity_systems/si.hpp"
 
 #include <gtest/gtest.h>
 
@@ -64,7 +66,55 @@ TEST(TestUnits, TestUnitProduct) {
   EXPECT_EQ(u7.reference, 0.0);
 }
 
-TEST(TestUnits, TestUnitQuotient) {}
+TEST(TestUnits, TestUnitQuotient) {
+  const auto u1 = meter_unit / second_unit;
+
+  EXPECT_EQ(u1.quantity, meter_unit.quantity / second_unit.quantity);
+  EXPECT_EQ(u1.multiplier, 1.0);
+  EXPECT_EQ(u1.reference, 0.0);
+
+  const auto u2 = kilo_unit<meter_unit> / second_unit;
+  EXPECT_EQ(u2.quantity, meter_unit.quantity / second_unit.quantity);
+  EXPECT_EQ(u2.multiplier, 1e-3);
+  EXPECT_EQ(u2.reference, 0.0);
+
+  const auto u3 = meter_unit / kilo_unit<second_unit>;
+  EXPECT_EQ(u3.quantity, meter_unit.quantity / second_unit.quantity);
+  EXPECT_EQ(u3.multiplier, 1e3);
+  EXPECT_EQ(u3.reference, 0.0);
+
+  const auto u4 = meter_unit / meter_unit;
+  EXPECT_EQ(u4.quantity.dimensions, dimension_product_type<>{});
+  EXPECT_EQ(u4.multiplier, 1.0);
+  EXPECT_EQ(u4.reference, 0.0);
+  EXPECT_TRUE(unitless<u4>);
+}
+
+TEST(TestUnits, TestUnitSqrt) {
+  const auto u1 = kilo_unit<square_meter_unit>;
+  const auto u2 = sqrt(u1);
+
+  EXPECT_EQ(u2.quantity.dimensions, meter_unit.quantity.dimensions);
+  EXPECT_EQ(u2.multiplier, 1e-3);
+}
+
+TEST(TestUnits, TestUnitPow) {
+  const auto u1 = deca_unit<meter_unit>;
+  const auto u2 = pow<4>(u1);
+
+  const auto actual_dimensions = u2.quantity.dimensions;
+  const auto expected_dimensions = pow<4>(isq::length).dimensions;
+
+  EXPECT_EQ(actual_dimensions, expected_dimensions);
+  EXPECT_FLOAT_EQ(u2.multiplier, 1e-4);
+
+  const auto u3 = pow<-2>(u1);
+
+  const auto actual_dimensions2 = u3.quantity.dimensions;
+  const auto expected_dimensions2 = pow<-2>(isq::length).dimensions;
+  EXPECT_EQ(actual_dimensions2, expected_dimensions2);
+  EXPECT_FLOAT_EQ(u3.multiplier, 1e2);
+}
 
 TEST(TestUnits, TestUnitConversionFactor) {
   double factor = conversion_factor(meter_unit, kilo_unit<meter_unit>);

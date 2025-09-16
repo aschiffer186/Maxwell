@@ -39,9 +39,10 @@ namespace maxwell {
 MODULE_EXPORT template <
     utility::template_string Name, quantity auto Quantity, double Multiplier,
     auto Reference = 0.0, typename Scale = linear_scale_type,
-    dimension_product auto DimForMultiplier =
-        std::conditional_t<Quantity.dimensions == dimension_one,
-                           decltype(dimension_one), dimension_product_type<>>{}>
+    dimension_product auto DimForMultiplier = std::conditional_t<
+        Quantity.dimensions == dimension_one,
+        dimension_product_type<dimension_type<"[]", utility::one>>,
+        dimension_product_type<>>{}>
 struct unit_type;
 
 /// \cond
@@ -135,7 +136,9 @@ struct unit_type {
 /// \param lhs The left-hand side unit.
 /// \param rhs The right-hand side unit.
 /// \return \c true if the units are equal, \c false otherwise.
-constexpr bool operator==(unit auto lhs, unit auto rhs) noexcept {
+[[deprecated("The use of operator== is deprecated in user facing code; use "
+             "convertible_to concets")]] constexpr bool
+operator==(unit auto lhs, unit auto rhs) noexcept {
   return lhs.quantity == rhs.quantity && lhs.multiplier == rhs.multiplier &&
          lhs.reference == rhs.reference;
 }
@@ -170,11 +173,10 @@ template <unit U> struct unit_sqrt_impl {
 template <unit U, auto R>
   requires utility::rational<decltype(R)>
 struct unit_pow_impl {
-  using type = unit_type<utility::template_string{"pow("} + U::name +
-                             utility::template_string{", "} +
-                             utility::template_string{")"},
-                         pow<R>(U::quantity), utility::pow(U::multiplier, R),
-                         utility::pow(U::reference, R)>;
+  using type = unit_type<
+      utility::template_string{"pow("} + U::name +
+          utility::template_string{", "} + utility::template_string{")"},
+      pow<R>(U::quantity), utility::pow(U::multiplier, R), U::reference>;
 };
 template <unit LHS, unit RHS>
 struct unit_product : _detail::unit_product_impl<LHS, RHS>::type {};
@@ -252,7 +254,7 @@ MODULE_EXPORT template <unit U> constexpr unit auto sqrt(U /*unit*/) noexcept {
 /// \tparam R The exponent to raise the unit to.
 /// \param unit The unit to raise to the power.
 /// \return The unit raised to the power.
-MODULE_EXPORT template <unit U, auto R>
+MODULE_EXPORT template <auto R, unit U>
   requires utility::rational<decltype(R)>
 constexpr unit auto pow(U /*unit*/) noexcept {
   return _detail::unit_pow<U, R>{};
@@ -271,8 +273,7 @@ constexpr unit auto pow(U /*unit*/) noexcept {
 /// \tparam R The exponent to raise the unit to.
 /// \param unit The unit to raise to the power.
 /// \return The unit raised to the power.
-MODULE_EXPORT template <unit U, std::intmax_t R>
-  requires utility::rational<decltype(R)>
+MODULE_EXPORT template <std::intmax_t R, unit U>
 constexpr unit auto pow(U /*unit*/) noexcept {
   return _detail::unit_pow<U, utility::rational_type<R, 1>{}>{};
 }
@@ -461,7 +462,7 @@ constexpr unit auto quecto_unit =
     prefixed_unit_t<base_to_quecto_prefix, U, utility::template_string{"q"} + U.name>{};
 
 MODULE_EXPORT template <auto U>
-concept unitless = quantity_convertible_to<U.quantity, number> && !_detail::has_derived_base<decltype(U.quantity)>::value;
+concept unitless = quantity_convertible_to<U.quantity, number> && !U.quantity.derived;
 
 MODULE_EXPORT template <auto Lhs, auto Rhs>
 concept unit_comparable_with = unit_convertible_to<Lhs, Rhs> && Lhs.reference == Rhs.reference;
