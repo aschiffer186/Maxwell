@@ -152,6 +152,10 @@ MODULE_EXPORT constexpr struct cubic_meter_unit_type
     : derived_unit<isq::volume, "m^3"> {
 } cubic_meter_unit;
 
+MODULE_EXPORT constexpr struct liter_unit_type
+    : derived_unit<value<0.001> * cubic_meter_unit, "L"> {
+} liter_unit;
+
 MODULE_EXPORT constexpr struct meter_per_second_unit_type
     : derived_unit<isq::velocity, "m/s"> {
 } meter_per_second_unit;
@@ -252,6 +256,9 @@ template <typename T = double>
 MODULE_EXPORT using cubic_meter =
     quantity_value<cubic_meter_unit, isq::volume, T>;
 
+MODULE_EXPORT template <typename T = double>
+using liter = quantity_value<liter_unit, isq::volume, T>;
+
 template <typename T = double>
 MODULE_EXPORT using newton_meter =
     quantity_value<newton_meter_unit, isq::torque, T>;
@@ -300,6 +307,8 @@ MODULE_EXPORT constexpr unit auto Gy = gray_unit;
 MODULE_EXPORT constexpr unit auto Sv = sievert_unit;
 MODULE_EXPORT constexpr unit auto kat = katal_unit;
 MODULE_EXPORT constexpr unit auto m2 = square_meter_unit;
+MODULE_EXPORT constexpr unit auto m3 = cubic_meter_unit;
+MODULE_EXPORT constexpr unit auto L = liter_unit;
 MODULE_EXPORT constexpr unit auto m_s = meter_per_second_unit;
 } // namespace symbols
 } // namespace maxwell::si

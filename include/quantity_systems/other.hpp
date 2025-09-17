@@ -52,9 +52,29 @@ using week = quantity_value<week_unit, week_unit.quantity, T>;
 MODULE_EXPORT template <typename T = double>
 using year = quantity_value<year_unit, year_unit.quantity, T>;
 
+namespace symbols {
+MODULE_EXPORT constexpr unit auto min = minute_unit;
+MODULE_EXPORT constexpr unit auto hr = hour_unit;
+MODULE_EXPORT constexpr unit auto day = day_unit;
+MODULE_EXPORT constexpr unit auto week = week_unit;
+MODULE_EXPORT constexpr unit auto year = year_unit;
+} // namespace symbols
 } // namespace time
 
-namespace angle {}
+namespace angle {
+MODULE_EXPORT constexpr struct arcminute_unit_type
+    : derived_unit<value<60.0> * si::degree_unit, "arcmin"> {
+} arcminute_unit;
+
+MODULE_EXPORT constexpr struct arcsecond_unit_type
+    : derived_unit<value<60.0> * arcminute_unit, "arcs"> {
+} arcsecond_unit;
+
+namespace symbols {
+MODULE_EXPORT constexpr unit auto min = arcminute_unit;
+MODULE_EXPORT constexpr unit auto s = arcsecond_unit;
+} // namespace symbols
+} // namespace angle
 } // namespace maxwell::other
 
 #endif
