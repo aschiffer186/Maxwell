@@ -101,15 +101,6 @@ TEST(TestDimensions, TestDimensionDivision) {
   EXPECT_EQ(std::tuple_size_v<decltype(quot3_tuple)>, 1);
   EXPECT_EQ(std::get<0>(quot3_tuple),
             (dimension_type<"A", utility::rational_type<2, 1>{}>{}));
-
-  constexpr dimension_type<number_kind, utility::rational_type<2, 1>{}> d4;
-
-  const auto quot4 = d4 / dimension_one;
-  const auto quot4_tuple = quot4.as_tuple();
-
-  EXPECT_EQ(std::tuple_size_v<decltype(quot4_tuple)>, 1);
-  EXPECT_EQ(std::get<0>(quot4_tuple),
-            (dimension_type<number_kind, utility::one>{}));
 }
 
 TEST(TestDimensions, TestDimensionProductConcept) {

@@ -96,6 +96,11 @@ TEST(TestUnits, TestUnitSqrt) {
 
   EXPECT_EQ(u2.quantity.dimensions, meter_unit.quantity.dimensions);
   EXPECT_EQ(u2.multiplier, 1e-3);
+
+  const auto u3 = sqrt(degree_unit);
+  EXPECT_EQ(u3.quantity.dimensions, radian_unit.quantity.dimensions);
+  EXPECT_FLOAT_EQ(u3.multiplier, std::sqrt(180.0 / std::numbers::pi));
+  EXPECT_EQ(u3.reference, 0.0);
 }
 
 TEST(TestUnits, TestUnitPow) {
@@ -114,6 +119,13 @@ TEST(TestUnits, TestUnitPow) {
   const auto expected_dimensions2 = pow<-2>(isq::length).dimensions;
   EXPECT_EQ(actual_dimensions2, expected_dimensions2);
   EXPECT_FLOAT_EQ(u3.multiplier, 1e2);
+
+  const auto u4 = kilo_unit<square_meter_unit>;
+  const auto u5 = pow<rational<1, 2>>(u4);
+
+  EXPECT_EQ(u5.quantity.dimensions, meter_unit.quantity.dimensions);
+  EXPECT_FLOAT_EQ(u5.multiplier, 1e-3);
+  EXPECT_EQ(u5.reference, 0.0);
 }
 
 TEST(TestUnits, TestUnitConversionFactor) {
@@ -134,4 +146,11 @@ TEST(TestUnits, TestUnitConversionFactor) {
 
   factor = conversion_factor(degree_unit, radian_unit);
   EXPECT_FLOAT_EQ(factor, std::numbers::pi / 180.0);
+
+  factor = conversion_factor(meter_unit / second_unit,
+                             kilo_unit<meter_unit> / other::time::hour_unit);
+  EXPECT_FLOAT_EQ(factor, 3.6);
+
+  factor = conversion_factor(sqrt(radian_unit), sqrt(degree_unit));
+  EXPECT_FLOAT_EQ(factor, std::sqrt(180.0 / std::numbers::pi));
 }

@@ -70,9 +70,15 @@ MODULE_EXPORT constexpr struct solid_angle_quantity_type
     : sub_quantity<dimensionless, "Solid Angle"> {
 } solid_angle;
 
+namespace _detail {
+constexpr struct frequency_base_quantity_type
+    : derived_quantity<dimensionless / time, "F"> {
+} frequency_base;
+} // namespace _detail
+
 /// Quantity representing quantity of frequency.
 MODULE_EXPORT constexpr struct frequency_quantity_type
-    : derived_quantity<dimensionless / time, "Frequency"> {
+    : sub_quantity<_detail::frequency_base, "Frequency"> {
 } frequency;
 
 /// Quantity representing quantity of force.
@@ -127,13 +133,52 @@ MODULE_EXPORT constexpr struct magnetic_flux_quantity
     : derived_quantity<time * potential, "Magnetic Flux"> {
 } magnetic_flux;
 
-// --- Other Derived Quantities ---
 MODULE_EXPORT constexpr struct area_quantity_type
-    : derived_quantity<length * length, "Area"> {
+    : derived_quantity<pow<2>(length), "Area"> {
 } area;
 
+MODULE_EXPORT constexpr struct magnetic_flux_density_quantity
+    : derived_quantity<magnetic_flux / area, "Magnetic Flux Density"> {
+} magnetic_flux_density;
+
+MODULE_EXPORT constexpr struct inductance_quantity_type
+    : derived_quantity<magnetic_flux / current, "Inductance"> {
+} inductance;
+
+MODULE_EXPORT constexpr struct luminous_flux_quantity_type
+    : derived_quantity<luminosity * solid_angle, "Luminous Flux"> {
+} luminous_flux;
+
+MODULE_EXPORT constexpr struct illuminance_quantity_type
+    : derived_quantity<luminous_flux / area, "Illuminance"> {
+} illuminance;
+
+MODULE_EXPORT constexpr struct radioactivity_quantity_type
+    : sub_quantity<_detail::frequency_base, "Radioactivity"> {
+} radioactivity;
+
+namespace _detail {
+MODULE_EXPORT constexpr struct dose_base_quantity_type
+    : derived_quantity<area / (time * time), "Dose"> {
+} dose_base;
+} // namespace _detail
+
+MODULE_EXPORT constexpr struct dose_quantity_type
+    : sub_quantity<_detail::dose_base, "Dose"> {
+} dose;
+
+MODULE_EXPORT constexpr struct dose_equivalent_quantity_type
+    : sub_quantity<_detail::dose_base, "Dose Equivalent"> {
+} dose_equivalent;
+
+MODULE_EXPORT constexpr struct catalytic_activity_quantity_type
+    : derived_quantity<amount / time, "Catalytic Activity"> {
+} catalytic_activity;
+
+// --- Other Derived Quantities ---
+
 MODULE_EXPORT constexpr struct volume_quantity_type
-    : derived_quantity<area * length, "Volume"> {
+    : derived_quantity<pow<3>(length), "Volume"> {
 } volume;
 
 MODULE_EXPORT constexpr struct torque_quantity_type

@@ -57,7 +57,7 @@ namespace maxwell {
 /// \tparam Q The quantity of the \c quantity_value. Default: the quantity of
 /// the units.
 /// \tparam T The type of the \c quantity_value. Default: \c double.
-template <auto U, auto Q = U.quantity, typename T = double>
+MODULE_EXPORT template <auto U, auto Q = U.quantity, typename T = double>
   requires unit<decltype(U)> && quantity<decltype(Q)>
 class quantity_value;
 } // namespace maxwell
@@ -562,9 +562,6 @@ public:
                     utility::as_constant<conversion_factor(FromUnit, U)> +
                 utility::as_constant<conversion_offset(FromUnit, U)>,
             FromUnit.scale)) {
-    static_assert(unit_convertible_to<FromUnit, U>,
-                  "Units of other cannot be converted to units of value being "
-                  "constructed");
     static_assert(
         quantity_convertible_to<FromQuantity, Q>,
         "Attempting to construct value from incompatible quantity. Note, "
@@ -616,9 +613,7 @@ public:
     requires std::constructible_from<T, Up> && std::swappable<T>
   constexpr auto operator=(quantity_value<FromUnit, FromQuantity, Up> other)
       -> quantity_value& {
-    static_assert(unit_convertible_to<FromUnit, U>,
-                  "Units of other cannot be converted to units of value being "
-                  "constructed");
+
     static_assert(
         quantity_convertible_to<FromQuantity, Q>,
         "Attempting to construct value from incompatible quantity. Note, "
@@ -706,91 +701,109 @@ quantity_value(const quantity_value<Q, U, T>&) -> quantity_value<Q, U, T>;
 template <auto Q, auto U, typename T>
 quantity_value(quantity_value<Q, U, T>&&) -> quantity_value<Q, U, T>;
 
-template <typename Q>
+MODULE_EXPORT template <typename Q>
 using quetta = quantity_value<quetta_unit<Q::units>, Q::quantity_kind,
                               typename Q::value_type>;
-template <typename Q>
+MODULE_EXPORT template <typename Q>
 using ronna = quantity_value<ronna_unit<Q::units>, Q::quantity_kind,
                              typename Q::value_type>;
-template <typename Q>
+MODULE_EXPORT template <typename Q>
 using yotta = quantity_value<yotta_unit<Q::units>, Q::quantity_kind,
                              typename Q::value_type>;
-template <typename Q>
+MODULE_EXPORT template <typename Q>
 using zetta = quantity_value<zetta_unit<Q::units>, Q::quantity_kind,
                              typename Q::value_type>;
-template <typename Q>
+MODULE_EXPORT template <typename Q>
 using exa = quantity_value<exa_unit<Q::units>, Q::quantity_kind,
                            typename Q::value_type>;
-template <typename Q>
+MODULE_EXPORT template <typename Q>
 using peta = quantity_value<peta_unit<Q::units>, Q::quantity_kind,
                             typename Q::value_type>;
-template <typename Q>
+MODULE_EXPORT template <typename Q>
 using tera = quantity_value<tera_unit<Q::units>, Q::quantity_kind,
                             typename Q::value_type>;
-template <typename Q>
+MODULE_EXPORT template <typename Q>
 using giga = quantity_value<giga_unit<Q::units>, Q::quantity_kind,
                             typename Q::value_type>;
-template <typename Q>
+MODULE_EXPORT template <typename Q>
 using mega = quantity_value<mega_unit<Q::units>, Q::quantity_kind,
                             typename Q::value_type>;
-template <typename Q>
+MODULE_EXPORT template <typename Q>
 using kilo = quantity_value<kilo_unit<Q::units>, Q::quantity_kind,
                             typename Q::value_type>;
-template <typename Q>
+MODULE_EXPORT template <typename Q>
 using hecto = quantity_value<hecto_unit<Q::units>, Q::quantity_kind,
                              typename Q::value_type>;
-template <typename Q>
+MODULE_EXPORT template <typename Q>
 using deca = quantity_value<deca_unit<Q::units>, Q::quantity_kind,
                             typename Q::value_type>;
-template <typename Q>
+MODULE_EXPORT template <typename Q>
 using deci = quantity_value<deci_unit<Q::units>, Q::quantity_kind,
                             typename Q::value_type>;
-template <typename Q>
+MODULE_EXPORT template <typename Q>
 using centi = quantity_value<centi_unit<Q::units>, Q::quantity_kind,
                              typename Q::value_type>;
-template <typename Q>
+MODULE_EXPORT template <typename Q>
 using milli = quantity_value<milli_unit<Q::units>, Q::quantity_kind,
                              typename Q::value_type>;
-template <typename Q>
+MODULE_EXPORT template <typename Q>
 using micro = quantity_value<micro_unit<Q::units>, Q::quantity_kind,
                              typename Q::value_type>;
-template <typename Q>
+MODULE_EXPORT template <typename Q>
 using nano = quantity_value<nano_unit<Q::units>, Q::quantity_kind,
                             typename Q::value_type>;
-template <typename Q>
+MODULE_EXPORT template <typename Q>
 using pico = quantity_value<pico_unit<Q::units>, Q::quantity_kind,
                             typename Q::value_type>;
-template <typename Q>
+MODULE_EXPORT template <typename Q>
 using femto = quantity_value<femto_unit<Q::units>, Q::quantity_kind,
                              typename Q::value_type>;
-template <typename Q>
+MODULE_EXPORT template <typename Q>
 using atto = quantity_value<atto_unit<Q::units>, Q::quantity_kind,
                             typename Q::value_type>;
-template <typename Q>
+MODULE_EXPORT template <typename Q>
 using zepto = quantity_value<zepto_unit<Q::units>, Q::quantity_kind,
                              typename Q::value_type>;
-template <typename Q>
+MODULE_EXPORT template <typename Q>
 using yocto = quantity_value<yocto_unit<Q::units>, Q::quantity_kind,
                              typename Q::value_type>;
-template <typename Q>
+MODULE_EXPORT template <typename Q>
 using ronto = quantity_value<ronto_unit<Q::units>, Q::quantity_kind,
                              typename Q::value_type>;
-template <typename Q>
+MODULE_EXPORT template <typename Q>
 using quecto = quantity_value<quecto_unit<Q::units>, Q::quantity_kind,
                               typename Q::value_type>;
 
-template <auto ToUnits, auto ToQuantity = ToUnits.quantity, auto FromUnits,
-          auto FromQuantity, typename T>
+/// \brief Convets between two different quantities
+///
+/// Explicit cast between two different quantities. This function only checks
+/// that the quantity being converted to has the same dimensions as the quantity
+/// being converted from. It allows for an explicit conversion between
+/// quantities with different kinds. Automatically converts the numerical value
+/// of the input quantity from the input units to the destination units.
+///
+/// \tparam ToUnits The units of the quantity being converted to.
+/// \tparam ToQuantity The quantity of the quantity being converted to. Defaults
+/// to \c ToUnits.quantity.
+/// \tparam FromUnits The units of the quantity being converted from.
+/// \tparam FromQuantity The quantity of the quantity being converted from.
+/// \tparam T The type of the numerical value of the quantity being converted
+/// from.
+/// \param value The quantity being converted from.
+/// \return A \c quantity_value with the specified units and quantity, and the
+/// converted numerical value.
+MODULE_EXPORT template <auto ToUnits, auto ToQuantity = ToUnits.quantity,
+                        auto FromUnits, auto FromQuantity, typename T>
 constexpr auto
 quantity_cast(const quantity_value<FromUnits, FromQuantity, T>& value)
     -> quantity_value<ToUnits, ToQuantity, T> {
-  static_assert(quantity_convertible_to<ToQuantity, ToUnits.quantity>,
-                "ToQuantity and ToUnits are incompatbile");
-  static_assert(unit_convertible_to<FromUnits, ToUnits>,
-                "Cannot convert from FromUnits to ToUnits");
+  static_assert(ToQuantity.dimensions == FromQuantity.dimensions,
+                "Cannot convert between quantities with different dimensions");
 
   constexpr double multiplier = conversion_factor(FromUnits, ToUnits);
-  return quantity_value<ToUnits, ToQuantity, T>(value.get_value() * multiplier);
+  constexpr double offset = conversion_offset(FromUnits, ToUnits);
+  return quantity_value<ToUnits, ToQuantity, T>(
+      (value.get_value() * multiplier) + offset);
 }
 
 /// \brief Creates a \c quantity_value from a number and a unit

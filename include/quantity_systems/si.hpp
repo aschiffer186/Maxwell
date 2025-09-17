@@ -9,34 +9,30 @@
 #include "core/quantity_value.hpp"
 #include "core/unit.hpp"
 #include "isq.hpp"
+#include "utility/config.hpp"
 
 namespace maxwell::si {
-MODULE_EXPORT constexpr struct meter_unit_type
-    : base_unit<isq::length, "m"> {
+MODULE_EXPORT constexpr struct meter_unit_type : base_unit<isq::length, "m"> {
 } meter_unit;
 
-MODULE_EXPORT constexpr struct gram_unit_type
-    : base_unit<isq::mass, "g"> {
+MODULE_EXPORT constexpr struct gram_unit_type : base_unit<isq::mass, "g"> {
 } gram_unit;
 
 MODULE_EXPORT constexpr struct kilogram_unit_type
     : derived_unit<kilo_unit<gram_unit>, "kg"> {
 } kilogram_unit;
 
-MODULE_EXPORT constexpr struct second_unit_type
-    : base_unit<isq::time, "s"> {
+MODULE_EXPORT constexpr struct second_unit_type : base_unit<isq::time, "s"> {
 } second_unit;
 
-MODULE_EXPORT constexpr struct ampere_unit_type
-    : base_unit<isq::current, "A"> {
+MODULE_EXPORT constexpr struct ampere_unit_type : base_unit<isq::current, "A"> {
 } ampere_unit;
 
 MODULE_EXPORT constexpr struct kelvin_unit_type
     : base_unit<isq::temperature, "K"> {
 } kelvin_unit;
 
-MODULE_EXPORT constexpr struct mole_unit_type
-    : base_unit<isq::amount, "mol"> {
+MODULE_EXPORT constexpr struct mole_unit_type : base_unit<isq::amount, "mol"> {
 } mole_unit;
 
 MODULE_EXPORT constexpr struct candela_unit_type
@@ -63,7 +59,6 @@ MODULE_EXPORT constexpr struct celsius_unit_type
     : derived_unit<kelvin_unit + _detail::kelvin_to_celsius, "°C"> {
 } celsius_unit;
 
-
 MODULE_EXPORT constexpr struct degree_unit_type
     : derived_unit<_detail::rad_to_deg * radian_unit, "deg"> {
 } degree_unit;
@@ -84,21 +79,70 @@ MODULE_EXPORT constexpr struct pascal_unit_type
     : derived_unit<isq::pressure, "Pa"> {
 } pascal_unit;
 
-MODULE_EXPORT constexpr struct joule_unit_type
-    : derived_unit<isq::work, "J"> {
+MODULE_EXPORT constexpr struct joule_unit_type : derived_unit<isq::work, "J"> {
 } joule_unit;
 
 MODULE_EXPORT constexpr struct newton_meter_unit_type
     : derived_unit<isq::torque, "N·m"> {
 } newton_meter_unit;
 
-MODULE_EXPORT constexpr struct watt_unit_type
-    : derived_unit<isq::power, "W"> {
+MODULE_EXPORT constexpr struct watt_unit_type : derived_unit<isq::power, "W"> {
 } watt_unit;
 
-MODULE_EXPORT constexpr struct coulumb_unit_type
+MODULE_EXPORT constexpr struct coulomb_unit_type
     : derived_unit<isq::charge, "C"> {
-} coulumb_unit;
+} coulomb_unit;
+
+MODULE_EXPORT constexpr struct volt_unit_type
+    : derived_unit<isq::potential, "V"> {
+} volt_unit;
+
+MODULE_EXPORT constexpr struct ohm_unit_type
+    : derived_unit<isq::resistance, "Ω"> {
+} ohm_unit;
+
+MODULE_EXPORT constexpr struct siemens_unit_type
+    : derived_unit<isq::conductance, "S"> {
+} siemens_unit;
+
+MODULE_EXPORT constexpr struct farad_unit_type
+    : derived_unit<isq::capacitance, "F"> {
+} farad_unit;
+
+MODULE_EXPORT constexpr struct weber_unit_type
+    : derived_unit<isq::magnetic_flux, "Wb"> {
+} weber_unit;
+
+MODULE_EXPORT constexpr struct tesla_unit_type
+    : derived_unit<isq::magnetic_flux_density, "T"> {
+} tesla_unit;
+
+MODULE_EXPORT constexpr struct henry_unit_type
+    : derived_unit<isq::inductance, "H"> {
+} henry_unit;
+
+MODULE_EXPORT constexpr struct lumen_unit_type
+    : derived_unit<isq::luminous_flux, "lm"> {
+} lumen_unit;
+
+MODULE_EXPORT constexpr struct lux_unit_type
+    : derived_unit<isq::illuminance, "lx"> {
+} lux_unit;
+
+MODULE_EXPORT constexpr struct becquerel_unit_type
+    : derived_unit<isq::radioactivity, "Bq"> {
+} becquerel_unit;
+
+MODULE_EXPORT constexpr struct gray_unit_type : derived_unit<isq::dose, "Gy"> {
+} gray_unit;
+
+MODULE_EXPORT constexpr struct sievert_unit_type
+    : derived_unit<isq::dose_equivalent, "Sv"> {
+} sievert_unit;
+
+MODULE_EXPORT constexpr struct katal_unit_type
+    : derived_unit<isq::catalytic_activity, "kat"> {
+} katal_unit;
 
 MODULE_EXPORT constexpr struct square_meter_unit_type
     : derived_unit<isq::area, "m^2"> {
@@ -155,6 +199,51 @@ MODULE_EXPORT using pascal = quantity_value<pascal_unit, isq::pressure, T>;
 template <typename T = double>
 MODULE_EXPORT using joule = quantity_value<joule_unit, isq::work, T>;
 
+MODULE_EXPORT template <typename T = double>
+using watt = quantity_value<watt_unit, isq::power, T>;
+
+MODULE_EXPORT template <typename T = double>
+using coulomb = quantity_value<coulomb_unit, isq::charge, T>;
+
+MODULE_EXPORT template <typename T = double>
+using volt = quantity_value<volt_unit, isq::potential, T>;
+
+MODULE_EXPORT template <typename T = double>
+using ohm = quantity_value<ohm_unit, isq::resistance, T>;
+
+MODULE_EXPORT template <typename T = double>
+using siemens = quantity_value<siemens_unit, isq::conductance, T>;
+
+MODULE_EXPORT template <typename T = double>
+using farad = quantity_value<farad_unit, isq::capacitance, T>;
+
+MODULE_EXPORT template <typename T = double>
+using weber = quantity_value<weber_unit, isq::magnetic_flux, T>;
+
+MODULE_EXPORT template <typename T = double>
+using tesla = quantity_value<tesla_unit, isq::magnetic_flux_density, T>;
+
+MODULE_EXPORT template <typename T = double>
+using henry = quantity_value<henry_unit, isq::inductance, T>;
+
+MODULE_EXPORT template <typename T = double>
+using lumen = quantity_value<lumen_unit, isq::luminous_flux, T>;
+
+MODULE_EXPORT template <typename T = double>
+using lux = quantity_value<lux_unit, isq::illuminance, T>;
+
+MODULE_EXPORT template <typename T = double>
+using becquerel = quantity_value<becquerel_unit, isq::radioactivity, T>;
+
+MODULE_EXPORT template <typename T = double>
+using gray = quantity_value<gray_unit, isq::dose, T>;
+
+MODULE_EXPORT template <typename T = double>
+using sievert = quantity_value<sievert_unit, isq::dose_equivalent, T>;
+
+MODULE_EXPORT template <typename T = double>
+using katal = quantity_value<katal_unit, isq::catalytic_activity, T>;
+
 template <typename T = double>
 MODULE_EXPORT using square_meter =
     quantity_value<square_meter_unit, isq::area, T>;
@@ -196,7 +285,20 @@ MODULE_EXPORT constexpr unit auto Pa = pascal_unit;
 MODULE_EXPORT constexpr unit auto J = joule_unit;
 MODULE_EXPORT constexpr unit auto N_m = newton_meter_unit;
 MODULE_EXPORT constexpr unit auto W = watt_unit;
-MODULE_EXPORT constexpr unit auto C = coulumb_unit;
+MODULE_EXPORT constexpr unit auto C = coulomb_unit;
+MODULE_EXPORT constexpr unit auto V = volt_unit;
+MODULE_EXPORT constexpr unit auto O = ohm_unit;
+MODULE_EXPORT constexpr unit auto S = siemens_unit;
+MODULE_EXPORT constexpr unit auto F = farad_unit;
+MODULE_EXPORT constexpr unit auto Wb = weber_unit;
+MODULE_EXPORT constexpr unit auto T = tesla_unit;
+MODULE_EXPORT constexpr unit auto H = henry_unit;
+MODULE_EXPORT constexpr unit auto lm = lumen_unit;
+MODULE_EXPORT constexpr unit auto lx = lux_unit;
+MODULE_EXPORT constexpr unit auto Bq = becquerel_unit;
+MODULE_EXPORT constexpr unit auto Gy = gray_unit;
+MODULE_EXPORT constexpr unit auto Sv = sievert_unit;
+MODULE_EXPORT constexpr unit auto kat = katal_unit;
 MODULE_EXPORT constexpr unit auto m2 = square_meter_unit;
 MODULE_EXPORT constexpr unit auto m_s = meter_per_second_unit;
 } // namespace symbols

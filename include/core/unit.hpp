@@ -278,6 +278,15 @@ constexpr unit auto pow(U /*unit*/) noexcept {
   return _detail::unit_pow<U, utility::rational_type<R, 1>{}>{};
 }
 
+/// \brief Changes the reference of a unit.
+///
+/// Changes the reference of a unit by adding the specified numerical value to
+/// the current reference of the unit.
+///
+/// \tparam Value The numerical value to add to the reference.
+/// \param lhs The left-hand side unit.
+/// \param rhs The numerical value to add to the reference.
+/// \return A new unit with the updated reference.
 MODULE_EXPORT template <auto Value>
 constexpr unit auto operator+(unit auto lhs,
                               utility::value_type<Value> rhs) noexcept {
@@ -285,6 +294,15 @@ constexpr unit auto operator+(unit auto lhs,
                    lhs.multiplier * lhs.reference + rhs.value>{};
 }
 
+/// \brief Changes the reference of a unit.
+///
+/// Changes the reference of a unit by subtracting the specified numerical value
+/// from the current reference of the unit.
+///
+/// \tparam Value The numerical value to subtract from the reference.
+/// \param lhs The left-hand side unit.
+/// \param rhs The numerical value to subtract from the reference.
+/// \return A new unit with the updated reference.
 MODULE_EXPORT template <auto Value>
 constexpr unit auto operator-(unit auto lhs,
                               utility::value_type<Value> rhs) noexcept {
@@ -292,6 +310,18 @@ constexpr unit auto operator-(unit auto lhs,
                    lhs.multiplier * lhs.reference - rhs.value>{};
 }
 
+/// \brief Divides two units.
+///
+/// Computes the quotient of two units. The resulting unit has a quantity that
+/// is the quotient of the quantities of the two units, a multiplier that is the
+/// quotient of the multipliers of the two units, and a reference that is
+/// computed based on the references and multipliers of the two units.
+///
+/// \tparam LHS The type of the left-hand side unit.
+/// \tparam RHS The type of the right-hand side unit.
+/// \param lhs The left-hand side unit.
+/// \param rhs The right-hand side unit.
+/// \return The quotient of the two units.
 MODULE_EXPORT template <unit LHS, unit RHS>
 constexpr unit auto operator/(LHS, RHS) noexcept {
   return _detail::unit_quotient<LHS, RHS>{};
@@ -319,17 +349,28 @@ struct derived_unit_impl<Q, Name> {
 } // namespace _detail
 /// \endcond
 
+/// \brief Creates a new base unit.
+///
+/// Creates a named base unit that serves as a reference for the quantity.
+/// Derived units can be created from the base unit using prefixes or
+/// arithmetic operations.
+///
+/// \tparam Q The quantity the base unit is a reference for.
+/// \tparam Name The name of the base unit.
 MODULE_EXPORT template <auto Q, utility::template_string Name>
 using base_unit = _detail::base_unit_impl<Q, Name>::type;
 
+/// \brief Creates a new derived unit.
+///
+/// Creates a named derived unit from either an existing unit or a quantity.
+/// The derived unit will have the same quantity, multiplier, and reference as
+/// the existing unit if a unit is provided. If a quantity is provided, the
+/// derived unit will have a multiplier of 1.0 and a reference of 0.0.
+///
+/// \tparam Val The existing unit or quantity to derive the new unit from.
+/// \tparam Name The name of the derived unit.
 MODULE_EXPORT template <auto Val, utility::template_string Name>
 using derived_unit = _detail::derived_unit_impl<Val, Name>::type;
-
-MODULE_EXPORT template <auto FromUnit, auto ToUnit>
-concept unit_convertible_to =
-    dimension_convertible_to<FromUnit.dimensions, ToUnit.dimensions>;
-
-// 1 km in cm = 1 m / 1e-3 km *  100 cm / 1 m
 
 MODULE_EXPORT template <unit From, unit To>
 constexpr auto conversion_factor(From, To) noexcept -> double {
@@ -345,8 +386,6 @@ constexpr auto conversion_offset(From, To) noexcept -> double {
     return From::reference - To::reference / To::multiplier;
   }
 }
-
-// 1 m -> km = 1e-3 km / 1 m
 
 MODULE_EXPORT constexpr double base_to_quetta_prefix{1e-30};
 MODULE_EXPORT constexpr double base_to_ronna_prefix{1e-27};
@@ -464,14 +503,14 @@ constexpr unit auto quecto_unit =
 MODULE_EXPORT template <auto U>
 concept unitless = quantity_convertible_to<U.quantity, number> && !U.quantity.derived;
 
-MODULE_EXPORT template <auto Lhs, auto Rhs>
-concept unit_comparable_with = unit_convertible_to<Lhs, Rhs> && Lhs.reference == Rhs.reference;
+MODULE_EXPORT template <auto LHS, auto RHS>
+concept unit_comparable_with = quantity_convertible_to<LHS.quantity, RHS.quantity> && LHS.reference == RHS.reference;
 
-MODULE_EXPORT template <auto Lhs, auto Rhs> 
-concept unit_addable_with = unit_convertible_to<Lhs, Rhs> && Lhs.reference == Rhs.reference; 
+MODULE_EXPORT template <auto LHS, auto RHS>
+concept unit_addable_with = quantity_convertible_to<LHS.quantity, RHS.quantity> && LHS.reference == RHS.reference;
 
-MODULE_EXPORT template <auto Lhs, auto Rhs> 
-concept unit_subtractable_from = unit_convertible_to<Lhs, Rhs> && Lhs.reference == Rhs.reference;
+MODULE_EXPORT template <auto LHS, auto RHS>
+concept unit_subtractable_from = quantity_convertible_to<LHS.quantity, RHS.quantity> && LHS.reference == RHS.reference;
 } // namespace maxwell
 
 #endif
