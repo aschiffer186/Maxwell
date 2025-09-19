@@ -507,10 +507,10 @@ MODULE_EXPORT template <auto LHS, auto RHS>
 concept unit_comparable_with = quantity_convertible_to<LHS.quantity, RHS.quantity> && LHS.reference == RHS.reference;
 
 MODULE_EXPORT template <auto LHS, auto RHS>
-concept unit_addable_with = quantity_convertible_to<LHS.quantity, RHS.quantity> && LHS.reference == RHS.reference;
+concept unit_addable_with = quantity_convertible_to<LHS.quantity, RHS.quantity> && quantity_convertible_to<RHS.quantity, LHS.quantity> && LHS.reference == RHS.reference;
 
 MODULE_EXPORT template <auto LHS, auto RHS>
-concept unit_subtractable_from = quantity_convertible_to<LHS.quantity, RHS.quantity> && LHS.reference == RHS.reference;
+concept unit_subtractable_from = quantity_convertible_to<LHS.quantity, RHS.quantity> && quantity_convertible_to<RHS.quantity, LHS.quantity> && LHS.reference == RHS.reference;
 } // namespace maxwell
 
 #endif

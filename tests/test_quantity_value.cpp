@@ -74,6 +74,10 @@ TEST(TestQuantityValue, TestValueConstructor) {
   EXPECT_EQ(q2.get_units(), si::meter_unit);
   EXPECT_EQ(nothrow_tattle::copy_ctor_count, start_copy_ctor_count + 1);
   EXPECT_EQ(nothrow_tattle::move_ctor_count, start_move_ctor_count + 1);
+
+  EXPECT_TRUE((std::convertible_to<double, si::number<>>));
+  EXPECT_FALSE((std::convertible_to<double, si::meter<>>));
+  EXPECT_FALSE((std::convertible_to<double, si::radian<>>));
 }
 
 TEST(TestQuantityValue, TestInPlaceConstructor) {
@@ -159,21 +163,23 @@ TEST(TestQuantityValue, TestConvertingConstructor) {
 
   si::kelvin<> k{300.0};
   si::celsius<> c{k};
+  si::kelvin<> k2{c};
 
   // constexpr double c3 = conversion_factor(si::kelvin_unit, si::celsius_unit);
 
   EXPECT_FLOAT_EQ(c.get_value(), 26.85);
+  EXPECT_FLOAT_EQ(k2.get_value(), 300.0);
 
-  // us::fahrenheit<> f{k};
-  // us::fahrenheit<> f2{c};
+  us::fahrenheit<> f{k};
+  us::fahrenheit<> f2{c};
 
-  // [[maybe_unused]] const double c1 = conversion_factor(si::kelvin_unit,
-  // us::fahrenheit_unit);
-  // [[maybe_unused]] const double c2 = conversion_offset(si::kelvin_unit,
-  // us::fahrenheit_unit);
+  [[maybe_unused]] constexpr double c1 =
+      conversion_factor(si::celsius_unit, us::fahrenheit_unit);
+  [[maybe_unused]] const double c2 =
+      conversion_offset(si::celsius_unit, us::fahrenheit_unit);
 
-  // EXPECT_FLOAT_EQ(f.get_value(), 80.33);
-  // EXPECT_FLOAT_EQ(f2.get_value(), 80.33);
+  EXPECT_FLOAT_EQ(f.get_value(), 80.33);
+  EXPECT_FLOAT_EQ(f2.get_value(), 80.33);
 }
 
 TEST(TestQuantityValue, TestConversionOperator) {

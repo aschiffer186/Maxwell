@@ -165,6 +165,10 @@ struct quantity_quotient_impl<LHS, RHS> {
   using type = std::conditional_t<std::derived_from<LHS, RHS>, LHS, RHS>;
 };
 
+template <quantity Q> struct quantity_quotient_impl<Q, Q> {
+  using type = std::remove_cvref_t<decltype(number)>;
+};
+
 template <quantity LHS, quantity RHS>
 struct quantity_quotient : quantity_quotient_impl<LHS, RHS>::type {};
 } // namespace _detail

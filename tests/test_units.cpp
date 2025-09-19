@@ -1,4 +1,5 @@
 #include "Maxwell.hpp"
+#include "core/unit.hpp"
 #include "quantity_systems/isq.hpp"
 #include "quantity_systems/si.hpp"
 
@@ -153,4 +154,42 @@ TEST(TestUnits, TestUnitConversionFactor) {
 
   factor = conversion_factor(sqrt(radian_unit), sqrt(degree_unit));
   EXPECT_FLOAT_EQ(factor, std::sqrt(180.0 / std::numbers::pi));
+}
+
+TEST(TestUnits, TestUnitConversionOffset) {
+  double offset = conversion_offset(si::celsius_unit, si::kelvin_unit);
+  EXPECT_FLOAT_EQ(offset, 273.15);
+
+  offset = conversion_offset(si::kelvin_unit, si::celsius_unit);
+  EXPECT_FLOAT_EQ(offset, -273.15);
+
+  offset = conversion_offset(si::celsius_unit, us::fahrenheit_unit);
+  EXPECT_FLOAT_EQ(offset, 32.0);
+
+  offset = conversion_offset(us::fahrenheit_unit, si::celsius_unit);
+  EXPECT_FLOAT_EQ(offset, -32.0 / 1.8);
+}
+
+TEST(TestUnits, TestUnitless) {
+  EXPECT_FALSE(unitless<si::meter_unit>);
+  EXPECT_TRUE(unitless<si::number_unit>);
+  EXPECT_TRUE(unitless<si::meter_unit / si::meter_unit>);
+  EXPECT_FALSE(unitless<si::radian_unit>);
+  EXPECT_TRUE(unitless<si::radian_unit / si::radian_unit>);
+}
+
+TEST(TestUnits, TestUnitAddableSubtractableWith) {
+  EXPECT_TRUE((unit_addable_with<meter_unit, meter_unit>));
+  EXPECT_TRUE((unit_addable_with<kilo_unit<meter_unit>, meter_unit>));
+  EXPECT_TRUE((unit_addable_with<meter_unit, kilo_unit<meter_unit>>));
+  EXPECT_FALSE((unit_addable_with<meter_unit, second_unit>));
+  EXPECT_FALSE((unit_addable_with<kelvin_unit, celsius_unit>));
+  EXPECT_FALSE((unit_addable_with<radian_unit, number_unit>));
+
+  EXPECT_TRUE((unit_subtractable_from<meter_unit, meter_unit>));
+  EXPECT_TRUE((unit_subtractable_from<kilo_unit<meter_unit>, meter_unit>));
+  EXPECT_TRUE((unit_subtractable_from<meter_unit, kilo_unit<meter_unit>>));
+  EXPECT_FALSE((unit_subtractable_from<meter_unit, second_unit>));
+  EXPECT_FALSE((unit_subtractable_from<kelvin_unit, celsius_unit>));
+  EXPECT_FALSE((unit_subtractable_from<radian_unit, number_unit>));
 }
