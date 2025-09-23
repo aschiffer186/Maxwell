@@ -380,10 +380,15 @@ constexpr auto conversion_factor(From, To) noexcept -> double {
 
 MODULE_EXPORT template <unit From, unit To>
 constexpr auto conversion_offset(From, To) noexcept -> double {
-  if (To::multiplier == 1.0) {
+  if (To::multiplier == 1.0 && From::multiplier == 1.0) {
     return static_cast<double>(To::reference - From::reference);
+  } else if (From::multiplier == 1.0) {
+    return To::reference - To::multiplier * From::reference;
   } else {
-    return From::reference - To::reference / To::multiplier;
+    return (From::multiplier / To::multiplier) * To::reference -
+           (From::reference -
+            To::multiplier * To::reference / From::multiplier) *
+               (From::multiplier / To::multiplier);
   }
 }
 

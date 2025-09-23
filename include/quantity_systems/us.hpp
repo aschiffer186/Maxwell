@@ -10,7 +10,7 @@
 
 namespace maxwell::us {
 namespace _detail {
-constexpr auto meter_to_foot = value<1.0 / 3.2804>;
+constexpr auto meter_to_foot = value<3.2804>;
 constexpr auto foot_to_inch = value<12.0>;
 constexpr auto foot_to_yard = value<1.0 / 3.0>;
 constexpr auto foot_to_mile = value<1.0 / 5'280.0>;

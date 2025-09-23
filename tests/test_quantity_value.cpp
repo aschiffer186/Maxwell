@@ -4,6 +4,7 @@
 #include <gtest/gtest.h>
 #include <type_traits>
 
+#include "quantity_systems/si.hpp"
 #include "test_types.hpp"
 
 using namespace maxwell;
@@ -173,13 +174,12 @@ TEST(TestQuantityValue, TestConvertingConstructor) {
   us::fahrenheit<> f{k};
   us::fahrenheit<> f2{c};
 
-  [[maybe_unused]] constexpr double c1 =
-      conversion_factor(si::celsius_unit, us::fahrenheit_unit);
-  [[maybe_unused]] const double c2 =
-      conversion_offset(si::celsius_unit, us::fahrenheit_unit);
-
   EXPECT_FLOAT_EQ(f.get_value(), 80.33);
   EXPECT_FLOAT_EQ(f2.get_value(), 80.33);
+
+  si::celsius<> c2{f};
+
+  EXPECT_FLOAT_EQ(c2.get_value(), 26.85);
 }
 
 TEST(TestQuantityValue, TestConversionOperator) {
@@ -202,6 +202,77 @@ TEST(TestQuantityValue, TestConversionOperator) {
   EXPECT_FLOAT_EQ(d1, 10.0);
   EXPECT_FLOAT_EQ(d2, 5.0);
   EXPECT_FLOAT_EQ(d3, 3.0);
+}
+
+TEST(TestQuantityValue, TestNegation) {
+  si::meter<> m1{10.0};
+  auto m2 = -m1;
+
+  EXPECT_EQ(m2.get_value(), -10.0);
+  EXPECT_EQ(m2.get_units(), si::meter_unit);
+}
+
+TEST(TestQuantityValue, TestIncrement) {
+  si::meter<> m1{10.0};
+  auto m2 = ++m1;
+
+  EXPECT_EQ(m2.get_value(), 11.0);
+  EXPECT_EQ(m1.get_value(), 11.0);
+  EXPECT_EQ(m2.get_units(), si::meter_unit);
+
+  auto m3 = m2++;
+  EXPECT_EQ(m3.get_value(), 11.0);
+  EXPECT_EQ(m2.get_value(), 12.0);
+  EXPECT_EQ(m3.get_units(), si::meter_unit);
+}
+
+TEST(TestQuantityValue, TestDecrement) {
+  si::meter<> m1{10.0};
+  auto m2 = --m1;
+
+  EXPECT_EQ(m2.get_value(), 9.0);
+  EXPECT_EQ(m1.get_value(), 9.0);
+  EXPECT_EQ(m2.get_units(), si::meter_unit);
+
+  auto m3 = m2--;
+  EXPECT_EQ(m3.get_value(), 9.0);
+  EXPECT_EQ(m2.get_value(), 8.0);
+  EXPECT_EQ(m3.get_units(), si::meter_unit);
+}
+
+TEST(TestQuantityValue, TestSum) {
+  si::meter<> m1{10.0};
+  auto m2 = m1 += si::meter<>{5.0};
+
+  EXPECT_EQ(m1.get_value(), 15.0);
+  EXPECT_EQ(m2.get_value(), 15.0);
+  EXPECT_EQ(m1.get_units(), si::meter_unit);
+
+  m1 += kilo<si::meter<>>{1};
+  EXPECT_EQ(m1.get_value(), 1015.0);
+  EXPECT_EQ(m1.get_units(), si::meter_unit);
+
+  m1 += us::foot<>{1.0};
+  EXPECT_NEAR(m1.get_value(), 1015.3048, 1e-4);
+  EXPECT_EQ(m1.get_units(), si::meter_unit);
+
+  si::number<> n1{5.0};
+  n1 += 2.0;
+
+  EXPECT_EQ(n1.get_value(), 7.0);
+  EXPECT_EQ(n1.get_units(), si::number_unit);
+
+  const si::meter<> m3 = m2 + m2;
+  EXPECT_EQ(m3.get_value(), 30.0);
+  EXPECT_EQ(m3.get_units(), si::meter_unit);
+
+  const us::foot<> ft = m3 + kilo<si::meter<>>{1.0} + us::inch<>{12.0};
+  EXPECT_NEAR(ft.get_value(), 3379.812, 1e-4);
+  EXPECT_EQ(ft.get_units(), us::foot_unit);
+
+  const auto n2 = n1 + 3.0;
+  EXPECT_EQ(n2.get_value(), 10.0);
+  EXPECT_EQ(n2.get_units(), si::number_unit);
 }
 
 TEST(TestQuantityVary, TestAbbreviatedConstruction) {

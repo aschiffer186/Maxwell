@@ -156,18 +156,58 @@ template <quantity_value_like Derived> class _quantity_value_operators {
     return temp;
   }
 
+  /// \brief Addition assignment operator
+  ///
+  /// Adds the numerical value of another \c quantity_value instance to this
+  /// instance and returns a reference to the modified \c quantity_value.
+  /// Automatically converts the units of the other instance to the units of
+  /// this instance if necessary.
+  ///
+  /// The program is ill-formed if the quantities of the two instances are not
+  /// the same or if the units of the two instances have different reference
+  /// points.
+  ///
+  /// \tparam U2 The units of the other \c quantity_value instance.
+  /// \tparam Q2 The quantity of the other \c quantity_value instance.
+  /// \tparam T2 The type of the other \c quantity_value instance.
+  /// \param lhs The \c quantity_value instance to modify.
+  /// \param rhs The other \c quantity_value instance to add.
+  /// \return A reference to the modified \c quantity_value instance.
   MODULE_EXPORT template <auto U2, auto Q2, typename T2>
+    requires requires(typename Derived::value_type lhs, T2 rhs) { lhs += rhs; }
   friend constexpr auto operator+=(Derived& lhs,
                                    const quantity_value<U2, Q2, T2>& rhs)
       -> Derived& {
-    static_assert(unit_addable_with<Derived::unit, U2>,
+    static_assert(unit_addable_with<Derived::units, U2>,
                   "Cannot add quantities of different kinds or quantities "
                   "whose units have different reference points.");
-    lhs.value_ += rhs.value_;
+    if constexpr (U2.multiplier == Derived::units.multiplier) {
+      lhs.value_ += rhs.get_value();
+    } else {
+      lhs.value_ += Derived(rhs).get_value();
+    }
     return lhs;
   }
 
+  /// \brief Subtraction assignment operator
+  ///
+  /// Subtracts the numerical value of another \c quantity_value instance from
+  /// this instance and returns a reference to the modified \c quantity_value.
+  /// Automatically converts the units of the other instance to the units of
+  /// this instance if necessary.
+  ///
+  /// The program is ill-formed if the quantities of the two instances are not
+  /// the same or if the units of the two instances have different reference
+  /// points.
+  ///
+  /// \tparam U2 The units of the other \c quantity_value instance.
+  /// \tparam Q2 The quantity of the other \c quantity_value instance.
+  /// \tparam T2 The type of the other \c quantity_value instance.
+  /// \param lhs The \c quantity_value instance to modify.
+  /// \param rhs The other \c quantity_value instance to subtract.
+  /// \return A reference to the modified \c quantity_value instance.
   template <auto U2, auto Q2, typename T2>
+    requires requires(typename Derived::value_type lhs, T2 rhs) { lhs -= rhs; }
   MODULE_EXPORT friend constexpr auto
   operator-=(Derived& lhs, const quantity_value<U2, Q2, T2>& rhs) -> Derived& {
     static_assert(unit_subtractable_from<Derived::units, U2>,
@@ -177,19 +217,33 @@ template <quantity_value_like Derived> class _quantity_value_operators {
     return lhs;
   }
 
+  /// \brief Addition assignment operator for numeric types
+  ///
+  /// Adds a numeric value to the numerical value of this \c quantity_value
+  /// instance and returns a reference to the modified \c quantity_value.
+  ///
+  /// This operator is only available if the units of the \c quantity_value are
+  /// unitless.
+  ///
+  /// \tparam T2 The type of the numeric value.
+  /// \param lhs The \c quantity_value instance to modify.
+  /// \param rhs The numeric value to add.
+  /// \return A reference to the modified \c quantity_value instance.
   MODULE_EXPORT template <typename T2>
-    requires(!quantity_value_like<T2>)
-  friend constexpr auto operator+=(Derived& lhs, T2&& rhs) -> Derived
-    requires unitless<Derived::units>
-  {
+    requires(!quantity_value_like<T2>) &&
+            requires(typename Derived::value_type lhs, T2 rhs) {
+              lhs += rhs;
+            } && unitless<Derived::units>
+  friend constexpr auto operator+=(Derived& lhs, T2&& rhs) -> Derived {
     lhs.value_ += std::forward<T2>(rhs);
     return lhs;
   }
 
   MODULE_EXPORT template <typename T2>
-    requires(!quantity_value_like<T2>)
-  friend constexpr auto operator-=(Derived& lhs, T2&& rhs) -> Derived&
-    requires unitless<Derived::units>
+    requires(!quantity_value_like<T2>) &&
+            requires(typename Derived::value_type lhs, T2 rhs) { lhs -= rhs; }
+            friend constexpr auto operator-=(Derived& lhs, T2&& rhs) -> Derived&
+              requires unitless<Derived::units>
   {
     lhs.value_ -= std::forward<T2>(rhs);
     return lhs;
@@ -203,6 +257,7 @@ template <quantity_value_like Derived> class _quantity_value_operators {
                   "whose units have different reference points.");
     return lhs += rhs;
   }
+
   MODULE_EXPORT template <auto U2, auto Q2, typename T2>
   friend constexpr quantity_value_like auto
   operator-(Derived lhs, const quantity_value<U2, Q2, T2>& rhs) {
