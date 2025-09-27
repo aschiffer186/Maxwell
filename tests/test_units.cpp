@@ -164,17 +164,8 @@ TEST(TestUnits, TestUnitConversionOffset) {
   offset = conversion_offset(si::kelvin_unit, si::celsius_unit);
   EXPECT_FLOAT_EQ(offset, -273.15);
 
-  // constexpr double multiplier = us::fahrenheit_unit.multiplier;
-  // constexpr double multiplier2 = si::celsius_unit.multiplier;
-
-  // constexpr double reference1 = si::celsius_unit.reference;
-  // constexpr double reference2 = us::fahrenheit_unit.reference;
-
-  // constexpr double from_multiplier = us::fahrenheit_unit.multiplier;
-  // constexpr double to_multiplier = si::celsius_unit.multiplier;
-
-  // constexpr double from_reference = us::fahrenheit_unit.reference;
-  // constexpr double to_reference = si::celsius_unit.reference;
+  offset = conversion_offset(milli_unit<si::kelvin_unit>, si::celsius_unit);
+  EXPECT_FLOAT_EQ(offset, -273.15);
 
   offset = conversion_offset(si::celsius_unit, us::fahrenheit_unit);
   EXPECT_FLOAT_EQ(offset, 32.0);

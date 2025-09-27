@@ -213,7 +213,11 @@ template <quantity_value_like Derived> class _quantity_value_operators {
     static_assert(unit_subtractable_from<Derived::units, U2>,
                   "Cannot subtract quantities of different kinds or quantities "
                   "whose units have different reference points.");
-    lhs.value_ -= rhs.get_value();
+    if constexpr (U2.multiplier == Derived::units.multiplier) {
+      lhs.value_ -= rhs.get_value();
+    } else {
+      lhs.value_ -= Derived(rhs).get_value();
+    }
     return lhs;
   }
 

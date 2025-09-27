@@ -178,8 +178,9 @@ TEST(TestQuantityValue, TestConvertingConstructor) {
   EXPECT_FLOAT_EQ(f2.get_value(), 80.33);
 
   si::celsius<> c2{f};
-
+  si::kelvin<> k3{f};
   EXPECT_FLOAT_EQ(c2.get_value(), 26.85);
+  EXPECT_FLOAT_EQ(k3.get_value(), 300.0);
 }
 
 TEST(TestQuantityValue, TestConversionOperator) {
@@ -240,7 +241,7 @@ TEST(TestQuantityValue, TestDecrement) {
   EXPECT_EQ(m3.get_units(), si::meter_unit);
 }
 
-TEST(TestQuantityValue, TestSum) {
+TEST(TestQuantityValue, TestAddition) {
   si::meter<> m1{10.0};
   auto m2 = m1 += si::meter<>{5.0};
 
@@ -273,6 +274,15 @@ TEST(TestQuantityValue, TestSum) {
   const auto n2 = n1 + 3.0;
   EXPECT_EQ(n2.get_value(), 10.0);
   EXPECT_EQ(n2.get_units(), si::number_unit);
+}
+
+TEST(TestQuantity, TestSubtraction) {
+  si::meter<> m2{10.0};
+  auto m1 = m2 -= si::meter<>{5.0};
+
+  EXPECT_EQ(m1.get_value(), 5.0);
+  EXPECT_EQ(m2.get_value(), 5.0);
+  EXPECT_EQ(m1.get_units(), si::meter_unit);
 }
 
 TEST(TestQuantityVary, TestAbbreviatedConstruction) {

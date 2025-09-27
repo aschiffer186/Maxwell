@@ -385,10 +385,7 @@ constexpr auto conversion_offset(From, To) noexcept -> double {
   } else if (From::multiplier == 1.0) {
     return To::reference - To::multiplier * From::reference;
   } else {
-    return (From::multiplier / To::multiplier) * To::reference -
-           (From::reference -
-            To::multiplier * To::reference / From::multiplier) *
-               (From::multiplier / To::multiplier);
+    return To::reference - From::reference / From::multiplier;
   }
 }
 
