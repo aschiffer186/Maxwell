@@ -11,6 +11,7 @@ project(Maxwell LANGUAGES CXX VERSION ${MAXWELL_VERSION})
 option(BUILD_TESTS "Build unit tests" OFF)
 option(BUILD_EXAMPLES "Build examples" ON)
 option(BUILD_DOCS "Build documentation" OFF)
+option(BUILD_MODULES "Use C++20 modules where available" OFF)
 
 add_subdirectory(include)
 

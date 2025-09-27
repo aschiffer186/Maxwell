@@ -4,9 +4,10 @@
 #ifndef QUANTITY_HOLDER_HPP
 #define QUANTITY_HOLDER_HPP
 
-#include <functional> // hash
-#include <initializer_list>
-#include <type_traits> // false_type, remove_cvref_t, true_type
+#include <chrono>           // duration
+#include <functional>       // hash
+#include <initializer_list> // initializer_list
+#include <type_traits>      // false_type, remove_cvref_t, true_type
 
 #include "quantity.hpp"
 #include "quantity_value.hpp"
