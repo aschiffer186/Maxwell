@@ -268,7 +268,7 @@ TEST(TestQuantityValue, TestAddition) {
   EXPECT_EQ(m3.get_units(), si::meter_unit);
 
   const us::foot<> ft = m3 + kilo<si::meter<>>{1.0} + us::inch<>{12.0};
-  EXPECT_NEAR(ft.get_value(), 3379.812, 1e-4);
+  EXPECT_NEAR(ft.get_value(), 3380.2651, 1e-4);
   EXPECT_EQ(ft.get_units(), us::foot_unit);
 
   const auto n2 = n1 + 3.0;
@@ -283,6 +283,29 @@ TEST(TestQuantity, TestSubtraction) {
   EXPECT_EQ(m1.get_value(), 5.0);
   EXPECT_EQ(m2.get_value(), 5.0);
   EXPECT_EQ(m1.get_units(), si::meter_unit);
+
+  m2 -= kilo<si::meter<>>{1};
+  EXPECT_EQ(m2.get_value(), -995.0);
+  EXPECT_EQ(m2.get_units(), si::meter_unit);
+
+  m2 -= us::foot<>{1.0};
+  EXPECT_NEAR(m2.get_value(), -995.3048, 1e-4);
+  EXPECT_EQ(m2.get_units(), si::meter_unit);
+
+  si::number<> n1{5.0};
+  n1 -= 2.0;
+
+  EXPECT_EQ(n1.get_value(), 3.0);
+  EXPECT_EQ(n1.get_units(), si::number_unit);
+
+  const si::meter<> m3 = m1 - si::meter<>{2.0};
+  EXPECT_EQ(m3.get_value(), 3.0);
+  EXPECT_EQ(m3.get_units(), si::meter_unit);
+
+  const us::foot<> ft =
+      si::meter<>{1'100} - kilo<si::meter<>>{1.0} - us::inch<>{12.0};
+  EXPECT_NEAR(ft.get_value(), 327.0840, 1e-4);
+  EXPECT_EQ(ft.get_units(), us::foot_unit);
 }
 
 TEST(TestQuantityVary, TestAbbreviatedConstruction) {
