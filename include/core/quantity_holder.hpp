@@ -53,9 +53,26 @@ template <typename Derived> class quantity_holder_arithmetic_operators {
     return Derived{-d.value_};
   }
 
+  template <typename T2>
+  MODULE_EXPORT friend constexpr auto
+  operator+=(Derived& lhs, const quantity_holder<Derived::Quantity, T2>& rhs)
+      -> Derived& {
+    lhs.value_ += Derived(rhs).value_;
+    return lhs;
+  }
+
+  template <typename T2>
+  MODULE_EXPORT friend constexpr auto
+  operator-=(Derived& lhs, const quantity_holder<Derived::Quantity, T2>& rhs)
+      -> Derived& {
+    lhs.value_ -= Derived(rhs).value_;
+    return lhs;
+  }
+
   template <auto Q2, typename T2>
   MODULE_EXPORT friend constexpr auto
   operator*(const Derived& lhs, const quantity_holder<Q2, T2>& rhs) {
+
     using result_type =
         std::remove_cvref_t<decltype(lhs.get_value() * rhs.get_value())>;
     return quantity_holder<Derived::quantity_kind * Q2, result_type>(

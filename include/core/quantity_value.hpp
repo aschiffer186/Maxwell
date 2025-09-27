@@ -168,7 +168,6 @@ template <quantity_value_like Derived> class _quantity_value_operators {
   /// points.
   ///
   /// \tparam U2 The units of the other \c quantity_value instance.
-  /// \tparam Q2 The quantity of the other \c quantity_value instance.
   /// \tparam T2 The type of the other \c quantity_value instance.
   /// \param lhs The \c quantity_value instance to modify.
   /// \param rhs The other \c quantity_value instance to add.
@@ -201,7 +200,6 @@ template <quantity_value_like Derived> class _quantity_value_operators {
   /// points.
   ///
   /// \tparam U2 The units of the other \c quantity_value instance.
-  /// \tparam Q2 The quantity of the other \c quantity_value instance.
   /// \tparam T2 The type of the other \c quantity_value instance.
   /// \param lhs The \c quantity_value instance to modify.
   /// \param rhs The other \c quantity_value instance to subtract.
@@ -276,7 +274,7 @@ template <quantity_value_like Derived> class _quantity_value_operators {
   friend constexpr quantity_value_like auto operator+(Derived lhs, T&& rhs) {
     using result_number_type =
         std::remove_cvref_t<decltype(lhs.get_value() + std::forward<T>(rhs))>;
-    return quantity_value<Derived::units, Derived::quantity_kind,
+    return quantity_value<Derived::units, Derived::quantity,
                           result_number_type>(lhs.get_value() +
                                               std::forward<T>(rhs));
   }
@@ -286,7 +284,7 @@ template <quantity_value_like Derived> class _quantity_value_operators {
   friend constexpr quantity_value_like auto operator+(T&& lhs, Derived rhs) {
     using result_number_type =
         std::remove_cvref_t<decltype(std::forward<T>(lhs) + rhs.get_value())>;
-    return quantity_value<Derived::units, Derived::quantity_kind,
+    return quantity_value<Derived::units, Derived::quantity,
                           result_number_type>(std::forward<T>(lhs) +
                                               rhs.get_value());
   }
@@ -313,7 +311,7 @@ template <quantity_value_like Derived> class _quantity_value_operators {
         std::remove_cvref_t<decltype(lhs.get_value() * rhs.get_value())>;
     constexpr unit auto result_units = lhs_type::units * rhs_type::units;
     constexpr quantity auto result_quantity =
-        lhs_type::quantity_kind * rhs_type::quantity_kind;
+        lhs_type::quantity * rhs_type::quantity;
     return quantity_value<result_units, result_quantity, result_type>(
         lhs.get_value() * rhs.get_value());
   }
@@ -325,8 +323,8 @@ template <quantity_value_like Derived> class _quantity_value_operators {
                                                       const T& rhs) {
     using lhs_type = std::remove_cvref_t<decltype(lhs)>;
     using product_type = std::remove_cvref_t<decltype(lhs.get_value() * rhs)>;
-    return quantity_value<lhs_type::units, lhs_type::quantity_kind,
-                          product_type>(lhs.get_value() * rhs);
+    return quantity_value<lhs_type::units, lhs_type::quantity, product_type>(
+        lhs.get_value() * rhs);
   }
 
   MODULE_EXPORT template <typename T>
@@ -336,8 +334,8 @@ template <quantity_value_like Derived> class _quantity_value_operators {
                                                       const Derived& rhs) {
     using rhs_type = std::remove_cvref_t<decltype(rhs)>;
     using product_type = std::remove_cvref_t<decltype(lhs * rhs.get_value())>;
-    return quantity_value<rhs_type::units, rhs_type::quantity_kind,
-                          product_type>(lhs * rhs.get_value());
+    return quantity_value<rhs_type::units, rhs_type::quantity, product_type>(
+        lhs * rhs.get_value());
   }
 
   MODULE_EXPORT friend constexpr quantity_value_like auto
@@ -348,7 +346,7 @@ template <quantity_value_like Derived> class _quantity_value_operators {
         std::remove_cvref_t<decltype(lhs.get_value() / rhs.get_value())>;
     constexpr unit auto result_units = lhs_type::units / rhs_type::units;
     constexpr quantity auto result_quantity =
-        lhs_type::quantity_kind / rhs_type::quantity_kind;
+        lhs_type::quantity / rhs_type::quantity;
     return quantity_value<result_units, result_quantity, result_type>(
         lhs.get_value() / rhs.get_value());
   }
@@ -359,8 +357,8 @@ template <quantity_value_like Derived> class _quantity_value_operators {
                                                       const T& rhs) {
     using lhs_type = std::remove_cvref_t<decltype(lhs)>;
     using product_type = std::remove_cvref_t<decltype(lhs.get_value() / rhs)>;
-    return quantity_value<lhs_type::units, lhs_type::quantity_kind,
-                          product_type>(lhs.get_value() / rhs);
+    return quantity_value<lhs_type::units, lhs_type::quantity, product_type>(
+        lhs.get_value() / rhs);
   }
 
   MODULE_EXPORT template <typename T>
@@ -370,8 +368,8 @@ template <quantity_value_like Derived> class _quantity_value_operators {
                                                       const Derived& rhs) {
     using rhs_type = std::remove_cvref_t<decltype(rhs)>;
     using product_type = std::remove_cvref_t<decltype(lhs / rhs.get_value())>;
-    return quantity_value<rhs_type::units, rhs_type::quantity_kind,
-                          product_type>(lhs / rhs.get_value());
+    return quantity_value<rhs_type::units, rhs_type::quantity, product_type>(
+        lhs / rhs.get_value());
   }
 
   MODULE_EXPORT friend constexpr quantity_value_like auto
@@ -447,13 +445,13 @@ public:
   /// The type of the numerical value of the \c quantity_value.
   using value_type = T;
   /// The type of the quantity of the \c quantity_value.
-  using quantity_kind_type = std::remove_cv_t<decltype(U)>;
+  using quantity_type = std::remove_cv_t<decltype(U)>;
   /// The type of the units of the \c quantity_value.
   using units_type = std::remove_cv_t<decltype(U)>;
   /// The units of the \c quantity_value.
   static constexpr unit auto units = U;
   /// The quantity of the \c quantity_value.
-  static constexpr quantity auto quantity_kind = Q;
+  static constexpr ::maxwell::quantity auto quantity = Q;
 
   // --- Constructors ---
 
@@ -613,7 +611,7 @@ public:
   /// \throws Any exceptions thrown by the selected constructor of \c T
   template <auto FromQuantity, auto FromUnit, typename Up = T>
     requires std::constructible_from<T, Up> && unit<decltype(FromUnit)> &&
-             quantity<decltype(FromQuantity)>
+             ::maxwell::quantity<decltype(FromQuantity)>
   constexpr quantity_value(
       const quantity_value<FromUnit, FromQuantity, Up>& other)
       : value_(U.scale.from_scale(
@@ -652,7 +650,7 @@ public:
   /// \throws Any exceptions thrown by the selected constructor of \c T
   template <auto FromQuantity, auto FromUnit, typename Up = T>
     requires std::constructible_from<T, Up> && unit<decltype(FromUnit)> &&
-             quantity<decltype(FromQuantity)>
+             ::maxwell::quantity<decltype(FromQuantity)>
   constexpr quantity_value(
       quantity_value<FromUnit, FromQuantity, Up>&& other) noexcept
       : value_(U.scale.from_scale(
@@ -761,77 +759,77 @@ template <auto Q, auto U, typename T>
 quantity_value(quantity_value<Q, U, T>&&) -> quantity_value<Q, U, T>;
 
 MODULE_EXPORT template <typename Q>
-using quetta = quantity_value<quetta_unit<Q::units>, Q::quantity_kind,
-                              typename Q::value_type>;
+using quetta =
+    quantity_value<quetta_unit<Q::units>, Q::quantity, typename Q::value_type>;
 MODULE_EXPORT template <typename Q>
-using ronna = quantity_value<ronna_unit<Q::units>, Q::quantity_kind,
-                             typename Q::value_type>;
+using ronna =
+    quantity_value<ronna_unit<Q::units>, Q::quantity, typename Q::value_type>;
 MODULE_EXPORT template <typename Q>
-using yotta = quantity_value<yotta_unit<Q::units>, Q::quantity_kind,
-                             typename Q::value_type>;
+using yotta =
+    quantity_value<yotta_unit<Q::units>, Q::quantity, typename Q::value_type>;
 MODULE_EXPORT template <typename Q>
-using zetta = quantity_value<zetta_unit<Q::units>, Q::quantity_kind,
-                             typename Q::value_type>;
+using zetta =
+    quantity_value<zetta_unit<Q::units>, Q::quantity, typename Q::value_type>;
 MODULE_EXPORT template <typename Q>
-using exa = quantity_value<exa_unit<Q::units>, Q::quantity_kind,
-                           typename Q::value_type>;
+using exa =
+    quantity_value<exa_unit<Q::units>, Q::quantity, typename Q::value_type>;
 MODULE_EXPORT template <typename Q>
-using peta = quantity_value<peta_unit<Q::units>, Q::quantity_kind,
-                            typename Q::value_type>;
+using peta =
+    quantity_value<peta_unit<Q::units>, Q::quantity, typename Q::value_type>;
 MODULE_EXPORT template <typename Q>
-using tera = quantity_value<tera_unit<Q::units>, Q::quantity_kind,
-                            typename Q::value_type>;
+using tera =
+    quantity_value<tera_unit<Q::units>, Q::quantity, typename Q::value_type>;
 MODULE_EXPORT template <typename Q>
-using giga = quantity_value<giga_unit<Q::units>, Q::quantity_kind,
-                            typename Q::value_type>;
+using giga =
+    quantity_value<giga_unit<Q::units>, Q::quantity, typename Q::value_type>;
 MODULE_EXPORT template <typename Q>
-using mega = quantity_value<mega_unit<Q::units>, Q::quantity_kind,
-                            typename Q::value_type>;
+using mega =
+    quantity_value<mega_unit<Q::units>, Q::quantity, typename Q::value_type>;
 MODULE_EXPORT template <typename Q>
-using kilo = quantity_value<kilo_unit<Q::units>, Q::quantity_kind,
-                            typename Q::value_type>;
+using kilo =
+    quantity_value<kilo_unit<Q::units>, Q::quantity, typename Q::value_type>;
 MODULE_EXPORT template <typename Q>
-using hecto = quantity_value<hecto_unit<Q::units>, Q::quantity_kind,
-                             typename Q::value_type>;
+using hecto =
+    quantity_value<hecto_unit<Q::units>, Q::quantity, typename Q::value_type>;
 MODULE_EXPORT template <typename Q>
-using deca = quantity_value<deca_unit<Q::units>, Q::quantity_kind,
-                            typename Q::value_type>;
+using deca =
+    quantity_value<deca_unit<Q::units>, Q::quantity, typename Q::value_type>;
 MODULE_EXPORT template <typename Q>
-using deci = quantity_value<deci_unit<Q::units>, Q::quantity_kind,
-                            typename Q::value_type>;
+using deci =
+    quantity_value<deci_unit<Q::units>, Q::quantity, typename Q::value_type>;
 MODULE_EXPORT template <typename Q>
-using centi = quantity_value<centi_unit<Q::units>, Q::quantity_kind,
-                             typename Q::value_type>;
+using centi =
+    quantity_value<centi_unit<Q::units>, Q::quantity, typename Q::value_type>;
 MODULE_EXPORT template <typename Q>
-using milli = quantity_value<milli_unit<Q::units>, Q::quantity_kind,
-                             typename Q::value_type>;
+using milli =
+    quantity_value<milli_unit<Q::units>, Q::quantity, typename Q::value_type>;
 MODULE_EXPORT template <typename Q>
-using micro = quantity_value<micro_unit<Q::units>, Q::quantity_kind,
-                             typename Q::value_type>;
+using micro =
+    quantity_value<micro_unit<Q::units>, Q::quantity, typename Q::value_type>;
 MODULE_EXPORT template <typename Q>
-using nano = quantity_value<nano_unit<Q::units>, Q::quantity_kind,
-                            typename Q::value_type>;
+using nano =
+    quantity_value<nano_unit<Q::units>, Q::quantity, typename Q::value_type>;
 MODULE_EXPORT template <typename Q>
-using pico = quantity_value<pico_unit<Q::units>, Q::quantity_kind,
-                            typename Q::value_type>;
+using pico =
+    quantity_value<pico_unit<Q::units>, Q::quantity, typename Q::value_type>;
 MODULE_EXPORT template <typename Q>
-using femto = quantity_value<femto_unit<Q::units>, Q::quantity_kind,
-                             typename Q::value_type>;
+using femto =
+    quantity_value<femto_unit<Q::units>, Q::quantity, typename Q::value_type>;
 MODULE_EXPORT template <typename Q>
-using atto = quantity_value<atto_unit<Q::units>, Q::quantity_kind,
-                            typename Q::value_type>;
+using atto =
+    quantity_value<atto_unit<Q::units>, Q::quantity, typename Q::value_type>;
 MODULE_EXPORT template <typename Q>
-using zepto = quantity_value<zepto_unit<Q::units>, Q::quantity_kind,
-                             typename Q::value_type>;
+using zepto =
+    quantity_value<zepto_unit<Q::units>, Q::quantity, typename Q::value_type>;
 MODULE_EXPORT template <typename Q>
-using yocto = quantity_value<yocto_unit<Q::units>, Q::quantity_kind,
-                             typename Q::value_type>;
+using yocto =
+    quantity_value<yocto_unit<Q::units>, Q::quantity, typename Q::value_type>;
 MODULE_EXPORT template <typename Q>
-using ronto = quantity_value<ronto_unit<Q::units>, Q::quantity_kind,
-                             typename Q::value_type>;
+using ronto =
+    quantity_value<ronto_unit<Q::units>, Q::quantity, typename Q::value_type>;
 MODULE_EXPORT template <typename Q>
-using quecto = quantity_value<quecto_unit<Q::units>, Q::quantity_kind,
-                              typename Q::value_type>;
+using quecto =
+    quantity_value<quecto_unit<Q::units>, Q::quantity, typename Q::value_type>;
 
 /// \brief Convets between two different quantities
 ///

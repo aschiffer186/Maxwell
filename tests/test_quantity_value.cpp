@@ -308,6 +308,41 @@ TEST(TestQuantity, TestSubtraction) {
   EXPECT_EQ(ft.get_units(), us::foot_unit);
 }
 
+TEST(TestQuantity, TestQuantityComparison) {
+  si::meter<> m1{10.0};
+  si::meter<> m2{15.0};
+  si::meter<> m3{10.0};
+  kilo<si::meter<>> km{0.01};
+
+  EXPECT_TRUE(m1 < m2);
+  EXPECT_FALSE(m2 < m1);
+  EXPECT_FALSE(m1 < m3);
+  EXPECT_FALSE(m1 < km);
+
+  EXPECT_TRUE(m2 > m1);
+  EXPECT_FALSE(m1 > m2);
+  EXPECT_FALSE(m1 > m3);
+  EXPECT_FALSE(m1 > km);
+
+  EXPECT_TRUE(m1 <= m2);
+  EXPECT_FALSE(m2 <= m1);
+  EXPECT_TRUE(m1 <= m3);
+  EXPECT_TRUE(m1 <= km);
+
+  EXPECT_TRUE(m2 >= m1);
+  EXPECT_FALSE(m1 >= m2);
+  EXPECT_TRUE(m1 >= m3);
+  EXPECT_TRUE(m1 >= km);
+
+  EXPECT_TRUE(m1 == m3);
+  EXPECT_FALSE(m1 == m2);
+  EXPECT_TRUE(m1 == km);
+
+  EXPECT_FALSE(m1 != m3);
+  EXPECT_TRUE(m1 != m2);
+  EXPECT_FALSE(m1 != km);
+}
+
 TEST(TestQuantityVary, TestAbbreviatedConstruction) {
   using namespace maxwell::si::symbols;
 
