@@ -4,7 +4,8 @@
 #ifndef QUANTITY_HOLDER_HPP
 #define QUANTITY_HOLDER_HPP
 
-#include <functional>  // hash
+#include <functional> // hash
+#include <initializer_list>
 #include <type_traits> // false_type, remove_cvref_t, true_type
 
 #include "quantity.hpp"
@@ -53,20 +54,68 @@ template <typename Derived> class quantity_holder_arithmetic_operators {
     return Derived{-d.value_};
   }
 
-  template <typename T2>
+  template <auto Q2, typename T2>
   MODULE_EXPORT friend constexpr auto
-  operator+=(Derived& lhs, const quantity_holder<Derived::Quantity, T2>& rhs)
-      -> Derived& {
+  operator+=(Derived& lhs, const quantity_holder<Q2, T2>& rhs) -> Derived& {
+    static_assert(quantity_convertible_to<Q2, Derived::quantity_kind> &&
+                      quantity_convertible_to<Derived::quantity_kind, Q2>,
+                  "Cannot add quantities of different kinds");
     lhs.value_ += Derived(rhs).value_;
     return lhs;
   }
 
-  template <typename T2>
+  template <auto U2, auto Q2, typename T2>
   MODULE_EXPORT friend constexpr auto
-  operator-=(Derived& lhs, const quantity_holder<Derived::Quantity, T2>& rhs)
-      -> Derived& {
+  operator+=(Derived& lhs, const quantity_value<U2, Q2, T2>& rhs) -> Derived& {
+    static_assert(quantity_convertible_to<Q2, Derived::quantity_kind> &&
+                      quantity_convertible_to<Derived::quantity_kind, Q2>,
+                  "Cannot add quantities of different kinds");
+    lhs.value_ += Derived(rhs).value_;
+    return lhs;
+  }
+
+  template <auto Q2, typename T2>
+  MODULE_EXPORT friend constexpr auto
+  operator-=(Derived& lhs, const quantity_holder<Q2, T2>& rhs) -> Derived& {
+    static_assert(quantity_convertible_to<Q2, Derived::quantity_kind> &&
+                      quantity_convertible_to<Derived::quantity_kind, Q2>,
+                  "Cannot subtract quantities of different kinds");
     lhs.value_ -= Derived(rhs).value_;
     return lhs;
+  }
+
+  template <auto U2, auto Q2, typename T2>
+  MODULE_EXPORT friend constexpr auto
+  operator-=(Derived& lhs, const quantity_value<U2, Q2, T2>& rhs) -> Derived& {
+    static_assert(quantity_convertible_to<Q2, Derived::quantity_kind> &&
+                      quantity_convertible_to<Derived::quantity_kind, Q2>,
+                  "Cannot subtract quantities of different kinds");
+    lhs.value_ -= Derived(rhs).value_;
+    return lhs;
+  }
+
+  template <auto Q2, typename T2>
+  MODULE_EXPORT friend constexpr auto
+  operator+(Derived lhs, const quantity_holder<Q2, T2>& rhs) {
+    return lhs += rhs;
+  }
+
+  template <auto U2, auto Q2, typename T2>
+  MODULE_EXPORT friend constexpr auto
+  operator+(Derived lhs, const quantity_value<U2, Q2, T2>& rhs) {
+    return lhs += rhs;
+  }
+
+  template <auto Q2, typename T2>
+  MODULE_EXPORT friend constexpr auto
+  operator-(Derived lhs, const quantity_holder<Q2, T2>& rhs) {
+    return lhs -= rhs;
+  }
+
+  template <auto U2, auto Q2, typename T2>
+  MODULE_EXPORT friend constexpr auto
+  operator-(Derived lhs, const quantity_value<U2, Q2, T2>& rhs) {
+    return lhs -= rhs;
   }
 
   template <auto Q2, typename T2>
@@ -107,14 +156,34 @@ public:
 
   template <typename Up = T>
     requires std::constructible_from<T, Up> &&
-             (!_detail::is_quantity_holder_v<Up>)
+             (!_detail::is_quantity_holder_v<Up>) &&
+             (!_detail::quantity_value_like<Up>)
   constexpr explicit quantity_holder(Up&& u) : value_(std::forward<Up>(u)) {}
+
+  template <typename... Args>
+    requires std::constructible_from<T, Args...>
+  constexpr explicit quantity_holder(std::in_place_t, Args&&... args)
+      : value_(std::forward<Args>(args)...) {}
+
+  template <typename U, typename... Args>
+    requires std::constructible_from<T, std::initializer_list<U>, Args...>
+  constexpr explicit quantity_holder(std::in_place_t,
+                                     std::initializer_list<U> il,
+                                     Args&&... args)
+      : value_(il, std::forward<Args>(args)...) {}
+
+  template <typename Rep, typename Period>
+    requires std::constructible_from<T, Rep> && enable_chrono_conversions_v<Q>
+  constexpr explicit quantity_holder(
+      const std::chrono::duration<Rep, Period>& d)
+      : value_(d.count()), multiplier_(static_cast<double>(Period::den) /
+                                       static_cast<double>(Period::num)) {}
 
   template <auto FromQuantity, auto FromUnit, typename Up = T>
     requires std::constructible_from<T, Up>
   constexpr quantity_holder(quantity_value<FromQuantity, FromUnit, Up> other)
-      : value_(std::move(other).get_value()),
-        multiplier_(static_cast<double>(FromUnit.multplier)) {
+      : value_(std::move(other).get_value()), multiplier_(FromUnit.multiplier),
+        reference_(FromUnit.reference) {
     static_assert(quantity_convertible_to<FromUnit.quantity, Q>,
                   "Cannot convert from units of other to quantity of value "
                   "being constructed");
@@ -123,8 +192,8 @@ public:
   template <unit Unit, typename Up = T>
     requires std::constructible_from<T, Up>
   constexpr quantity_holder(Up&& u, Unit)
-      : value_(std::forward<Up>(u)),
-        multiplier_(static_cast<double>(Unit::multiplier)) {
+      : value_(std::forward<Up>(u)), multiplier_(Unit::multiplier),
+        reference_(Unit::reference) {
     static_assert(quantity_convertible_to<Unit::quantity, Q>,
                   "Cannot convert from units of other to quantity of value "
                   "being constructed");
@@ -140,13 +209,15 @@ public:
     return multiplier_;
   }
 
-  template <auto ToQuantity, auto ToUnit>
-  constexpr auto as() const -> quantity_value<ToQuantity, ToUnit, T> {
+  constexpr auto get_reference() const noexcept -> double { return reference_; }
+
+  template <auto ToUnit>
+  constexpr auto as() const -> quantity_value<Q, ToUnit, T> {
     static_assert(quantity_convertible_to<Q, ToUnit.quantity>,
                   "Cannot convert to specified unit");
 
-    return quantity_value<ToQuantity, ToUnit, T>(
-        value_ * multiplier_ / static_cast<double>(ToUnit.multiplier));
+    return quantity_value<Q, ToUnit, T>(value_ * multiplier_ /
+                                        static_cast<double>(ToUnit.multiplier));
   }
 
 private:
@@ -162,6 +233,7 @@ private:
 
   T value_{};
   double multiplier_{1.0};
+  double reference_{0.0};
 };
 
 template <unit Unit, typename T>
@@ -170,6 +242,9 @@ quantity_holder(T, Unit) -> quantity_holder<Unit::quantity, T>;
 template <auto Q, auto U, typename T>
   requires quantity<decltype(Q)>
 quantity_holder(quantity_value<Q, U, T>) -> quantity_holder<Q, T>;
+
+template <auto Q, typename T>
+quantity_holder(quantity_holder<Q, T>) -> quantity_holder<Q, T>;
 } // namespace maxwell
 
 MODULE_EXPORT template <auto Q, typename T>
