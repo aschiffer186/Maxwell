@@ -7,6 +7,7 @@
 #include <type_traits> // true_type
 
 #include "core/quantity.hpp"
+#include "core/quantity_holder.hpp"
 #include "core/quantity_system.hpp"
 #include "utility/config.hpp"
 #include "utility/type_traits.hpp"
@@ -192,6 +193,65 @@ MODULE_EXPORT constexpr struct velocity_quantity_type
 MODULE_EXPORT constexpr struct acceleration_quantity_type
     : derived_quantity<velocity / time, "Acceleration"> {
 } acceleration;
+
+// --- Quantity Holder Type Aliases ---
+
+template <typename T = double> using length_holder = quantity_holder<length, T>;
+template <typename T = double> using time_holder = quantity_holder<time, T>;
+template <typename T = double> using mass_holder = quantity_holder<mass, T>;
+template <typename T = double>
+using current_holder = quantity_holder<current, T>;
+template <typename T = double>
+using temperature_holder = quantity_holder<temperature, T>;
+template <typename T = double> using amount_holder = quantity_holder<amount, T>;
+template <typename T = double>
+using luminosity_holder = quantity_holder<luminosity, T>;
+template <typename T = double>
+using dimensionless_holder = quantity_holder<dimensionless, T>;
+template <typename T = double>
+using plane_angle_holder = quantity_holder<plane_angle, T>;
+template <typename T = double>
+using solid_angle_holder = quantity_holder<solid_angle, T>;
+template <typename T = double>
+using frequency_holder = quantity_holder<frequency, T>;
+template <typename T = double> using force_holder = quantity_holder<force, T>;
+template <typename T = double>
+using pressure_holder = quantity_holder<pressure, T>;
+template <typename T = double> using work_holder = quantity_holder<work, T>;
+template <typename T = double> using power_holder = quantity_holder<power, T>;
+template <typename T = double> using charge_holder = quantity_holder<charge, T>;
+template <typename T = double>
+using potential_holder = quantity_holder<potential, T>;
+template <typename T = double>
+using capacitance_holder = quantity_holder<capacitance, T>;
+template <typename T = double>
+using resistance_holder = quantity_holder<resistance, T>;
+template <typename T = double>
+using conductance_holder = quantity_holder<conductance, T>;
+template <typename T = double>
+using magnetic_flux_holder = quantity_holder<magnetic_flux, T>;
+template <typename T = double> using area_holder = quantity_holder<area, T>;
+template <typename T = double>
+using magnetic_flux_density_holder = quantity_holder<magnetic_flux_density, T>;
+template <typename T = double>
+using inductance_holder = quantity_holder<inductance, T>;
+template <typename T = double>
+using luminous_flux_holder = quantity_holder<luminous_flux, T>;
+template <typename T = double>
+using illuminance_holder = quantity_holder<illuminance, T>;
+template <typename T = double>
+using radioactivity_holder = quantity_holder<radioactivity, T>;
+template <typename T = double> using dose_holder = quantity_holder<dose, T>;
+template <typename T = double>
+using dose_equivalent_holder = quantity_holder<dose_equivalent, T>;
+template <typename T = double>
+using catalytic_activity_holder = quantity_holder<catalytic_activity, T>;
+template <typename T = double> using volume_holder = quantity_holder<volume, T>;
+template <typename T = double> using torque_holder = quantity_holder<torque, T>;
+template <typename T = double>
+using velocity_holder = quantity_holder<velocity, T>;
+template <typename T = double>
+using acceleration_holder = quantity_holder<acceleration, T>;
 } // namespace maxwell::isq
 
 namespace maxwell {

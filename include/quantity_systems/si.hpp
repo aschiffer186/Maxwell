@@ -15,6 +15,18 @@ namespace maxwell::si {
 MODULE_EXPORT constexpr struct meter_unit_type : base_unit<isq::length, "m"> {
 } meter_unit;
 
+MODULE_EXPORT constexpr struct kilometer_unit_type
+    : derived_unit<kilo_unit<meter_unit>, "km"> {
+} kilometer_unit;
+
+MODULE_EXPORT constexpr struct centimeter_unit_type
+    : derived_unit<centi_unit<meter_unit>, "cm"> {
+} centimeter_unit;
+
+MODULE_EXPORT constexpr struct milimeter_unit_type
+    : derived_unit<milli_unit<meter_unit>, "mm"> {
+} millimeter_unit;
+
 MODULE_EXPORT constexpr struct gram_unit_type : base_unit<isq::mass, "g"> {
 } gram_unit;
 
@@ -164,44 +176,50 @@ MODULE_EXPORT constexpr struct meter_per_second_per_second_unit_type
     : derived_unit<isq::acceleration, "m/s^2"> {
 } meter_per_second_per_second_unit;
 
-template <typename T = double>
-MODULE_EXPORT using meter = quantity_value<meter_unit, isq::length, T>;
+MODULE_EXPORT template <typename T = double>
+using meter = quantity_value<meter_unit, isq::length, T>;
+MODULE_EXPORT template <typename T = double>
+using kilometer = quantity_value<kilometer_unit, isq::length, T>;
+MODULE_EXPORT template <typename T = double>
+using centimeter = quantity_value<centimeter_unit, isq::length, T>;
+MODULE_EXPORT template <typename T = double>
+using millimeter = quantity_value<millimeter_unit, isq::length, T>;
 
-template <typename T = double>
-MODULE_EXPORT using ampere = quantity_value<ampere_unit, isq::current, T>;
+MODULE_EXPORT template <typename T = double>
+using ampere = quantity_value<ampere_unit, isq::current, T>;
 
-template <typename T = double>
-MODULE_EXPORT using second = quantity_value<second_unit, isq::time, T>;
+MODULE_EXPORT template <typename T = double>
+using second = quantity_value<second_unit, isq::time, T>;
 
-template <typename T = double>
-MODULE_EXPORT using kelvin = quantity_value<kelvin_unit, isq::temperature, T>;
+MODULE_EXPORT template <typename T = double>
+using kelvin = quantity_value<kelvin_unit, isq::temperature, T>;
 
-template <typename T = double>
-MODULE_EXPORT using mole = quantity_value<mole_unit, isq::amount, T>;
+MODULE_EXPORT template <typename T = double>
+using mole = quantity_value<mole_unit, isq::amount, T>;
 
-template <typename T = double>
-MODULE_EXPORT using candela = quantity_value<candela_unit, isq::luminosity, T>;
+MODULE_EXPORT template <typename T = double>
+using candela = quantity_value<candela_unit, isq::luminosity, T>;
 
-template <typename T = double>
-MODULE_EXPORT using number = quantity_value<number_unit, isq::dimensionless, T>;
+MODULE_EXPORT template <typename T = double>
+using number = quantity_value<number_unit, isq::dimensionless, T>;
 
-template <typename T = double>
-MODULE_EXPORT using radian = quantity_value<radian_unit, isq::plane_angle, T>;
+MODULE_EXPORT template <typename T = double>
+using radian = quantity_value<radian_unit, isq::plane_angle, T>;
 
-template <typename T = double>
-MODULE_EXPORT using degree = quantity_value<degree_unit, isq::plane_angle, T>;
+MODULE_EXPORT template <typename T = double>
+using degree = quantity_value<degree_unit, isq::plane_angle, T>;
 
-template <typename T = double>
-MODULE_EXPORT using celsius = quantity_value<celsius_unit, isq::temperature, T>;
+MODULE_EXPORT template <typename T = double>
+using celsius = quantity_value<celsius_unit, isq::temperature, T>;
 
-template <typename T = double>
-MODULE_EXPORT using newton = quantity_value<newton_unit, isq::force, T>;
+MODULE_EXPORT template <typename T = double>
+using newton = quantity_value<newton_unit, isq::force, T>;
 
-template <typename T = double>
-MODULE_EXPORT using pascal = quantity_value<pascal_unit, isq::pressure, T>;
+MODULE_EXPORT template <typename T = double>
+using pascal = quantity_value<pascal_unit, isq::pressure, T>;
 
-template <typename T = double>
-MODULE_EXPORT using joule = quantity_value<joule_unit, isq::work, T>;
+MODULE_EXPORT template <typename T = double>
+using joule = quantity_value<joule_unit, isq::work, T>;
 
 MODULE_EXPORT template <typename T = double>
 using watt = quantity_value<watt_unit, isq::power, T>;
@@ -248,13 +266,11 @@ using sievert = quantity_value<sievert_unit, isq::dose_equivalent, T>;
 MODULE_EXPORT template <typename T = double>
 using katal = quantity_value<katal_unit, isq::catalytic_activity, T>;
 
-template <typename T = double>
-MODULE_EXPORT using square_meter =
-    quantity_value<square_meter_unit, isq::area, T>;
+MODULE_EXPORT template <typename T = double>
+using square_meter = quantity_value<square_meter_unit, isq::area, T>;
 
-template <typename T = double>
-MODULE_EXPORT using cubic_meter =
-    quantity_value<cubic_meter_unit, isq::volume, T>;
+MODULE_EXPORT template <typename T = double>
+using cubic_meter = quantity_value<cubic_meter_unit, isq::volume, T>;
 
 MODULE_EXPORT template <typename T = double>
 using liter = quantity_value<liter_unit, isq::volume, T>;
@@ -275,6 +291,10 @@ MODULE_EXPORT using meter_per_second_per_second =
 /// \brief Convenience symbols for creating units
 namespace symbols {
 MODULE_EXPORT constexpr unit auto m = meter_unit;
+MODULE_EXPORT constexpr unit auto km = kilometer_unit;
+MODULE_EXPORT constexpr unit auto cm = centimeter_unit;
+MODULE_EXPORT constexpr unit auto mm = millimeter_unit;
+MODULE_EXPORT constexpr unit auto g = gram_unit;
 MODULE_EXPORT constexpr unit auto kg = kilogram_unit;
 MODULE_EXPORT constexpr unit auto s = second_unit;
 MODULE_EXPORT constexpr unit auto A = ampere_unit;
