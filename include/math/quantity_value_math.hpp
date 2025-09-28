@@ -32,6 +32,16 @@ MAXWELL_BASIC_CMATH_CONSTEXPR auto abs(quantity_value<U, Q, T>& x)
   return quantity_value<U, Q, T>(std::abs(x.get_value()));
 }
 
+/// \brief Computes the absolute value of a \c quantity_holder
+///
+/// Computes the absolute value of a \c quantity_holder. Equivalent to
+/// <tt>quantity_value<U, Q, T>(std::abs(x.get_value()))</tt>. The behavior is
+/// undefined if the result cannot be represented by the type \c T.
+///
+/// \tparam Q The quantity type of the \c quantity_holder
+/// \tparam T The type of the numerical value of the \c quantity_holder
+/// \param x The \c quantity_holder to compute the absolute value of
+/// \return The absolute value of \c x
 MODULE_EXPORT template <auto Q, typename T>
 MAXWELL_BASIC_CMATH_CONSTEXPR auto abs(quantity_holder<Q, T>& x)
     -> quantity_holder<Q, T> {

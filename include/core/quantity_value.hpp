@@ -408,6 +408,66 @@ template <quantity_value_like Derived> class _quantity_value_operators {
                   "Cannot compare quantities of different kinds");
     return lhs.in_base_units().get_value() == rhs.in_base_units().get_value();
   }
+
+  /// \brief Multiplies the units of a \c quantity_value by another unit
+  ///
+  /// Multiplies the units of a \c quantity_value by another unit, returning a
+  /// new \c quantity_value with the resulting units. Does not change the
+  /// numerical value of the \c quantity_value.
+  ///
+  /// \tparam U1 The units of the left-hand side \c quantity_value.
+  /// \tparam Q1 The quantity of the left-hand side \c quantity_value.
+  /// \tparam T The type of the numerical value of the left-hand side \c
+  /// quantity_value.
+  /// \tparam U2 The units of the right-hand side unit.
+  /// \param value The left-hand side \c quantity_value.
+  /// \param U2 The right-hand side unit.
+  /// \return A new \c quantity_value with the resulting units and the same
+  /// numerical value.
+  template <unit U2> friend constexpr auto operator*(const Derived& value, U2) {
+    constexpr unit auto new_units = Derived::units * U2{};
+    constexpr quantity auto new_quantity = new_units.quantity;
+    return quantity_value<new_units, new_quantity,
+                          typename Derived::value_type>(value.get_value());
+  }
+
+  /// \brief Multiplies the units of a \c quantity_value by another unit
+  ///
+  /// Multiplies the units of a \c quantity_value by another unit, returning a
+  /// new \c quantity_value with the resulting units. The numerical value is
+  /// moved into the new \c quantity_value.
+  ///
+  /// \tparam U1 The units of the left-hand side \c quantity_value.
+  /// \tparam Q1 The quantity of the left-hand side \c quantity_value.
+  /// \tparam T The type of the numerical value of the left-hand side \c
+  /// quantity_value.
+  /// \tparam U2 The units of the right-hand side unit.
+  /// \param value The left-hand side \c quantity_value.
+  /// \param U2 The right-hand side unit.
+  /// \return A new \c quantity_value with the resulting units and the same
+  /// numerical value.
+  template <unit U2> friend constexpr auto operator*(Derived&& value, U2) {
+    constexpr unit auto new_units = Derived::units * U2{};
+    constexpr quantity auto new_quantity = new_units.quantity;
+    return quantity_value<new_units, new_quantity,
+                          typename Derived::value_type>(
+        std::move(value).get_value());
+  }
+
+  template <unit U2> friend constexpr auto operator/(const Derived& value, U2) {
+    constexpr unit auto new_units = Derived::units / U2{};
+    constexpr quantity auto new_quantity = new_units.quantity;
+    return quantity_value<new_units, new_quantity,
+                          typename Derived::value_type>(value.get_value());
+  }
+
+  template <unit U2> friend constexpr auto operator/(Derived&& value, U2) {
+    constexpr unit auto new_units = Derived::units / U2{};
+    constexpr quantity auto new_quantity = new_units.quantity;
+    return quantity_value<new_units, new_quantity,
+                          typename Derived::value_type>(
+        std::move(value).get_value());
+  }
 };
 
 template <typename Derived> struct quantity_value_output {
@@ -877,66 +937,6 @@ template <typename T, unit U>
   requires(!_detail::is_quantity_value_v<T> && !unit<T>)
 constexpr auto operator*(T&& value, U) -> quantity_value<U{}, U::quantity, T> {
   return quantity_value<U{}, U::quantity, T>(std::forward<T>(value));
-}
-
-/// \brief Multiplies the units of a \c quantity_value by another unit
-///
-/// Multiplies the units of a \c quantity_value by another unit, returning a
-/// new \c quantity_value with the resulting units. Does not change the
-/// numerical value of the \c quantity_value.
-///
-/// \tparam U1 The units of the left-hand side \c quantity_value.
-/// \tparam Q1 The quantity of the left-hand side \c quantity_value.
-/// \tparam T The type of the numerical value of the left-hand side \c
-/// quantity_value.
-/// \tparam U2 The units of the right-hand side unit.
-/// \param value The left-hand side \c quantity_value.
-/// \param U2 The right-hand side unit.
-/// \return A new \c quantity_value with the resulting units and the same
-/// numerical value.
-template <auto U1, auto Q1, typename T, unit U2>
-constexpr auto operator*(const quantity_value<U1, Q1, T>& value, U2) {
-  constexpr unit auto new_units = U1 * U2{};
-  constexpr quantity auto new_quantity = new_units.quantity;
-  return quantity_value<new_units, new_quantity, T>(value.get_value());
-}
-
-/// \brief Multiplies the units of a \c quantity_value by another unit
-///
-/// Multiplies the units of a \c quantity_value by another unit, returning a
-/// new \c quantity_value with the resulting units. The numerical value is moved
-/// into the new \c quantity_value.
-///
-/// \tparam U1 The units of the left-hand side \c quantity_value.
-/// \tparam Q1 The quantity of the left-hand side \c quantity_value.
-/// \tparam T The type of the numerical value of the left-hand side \c
-/// quantity_value.
-/// \tparam U2 The units of the right-hand side unit.
-/// \param value The left-hand side \c quantity_value.
-/// \param U2 The right-hand side unit.
-/// \return A new \c quantity_value with the resulting units and the same
-/// numerical value.
-template <auto U1, auto Q1, typename T, unit U2>
-constexpr auto operator*(quantity_value<U1, Q1, T>&& value, U2) {
-  constexpr unit auto new_units = U1 * U2{};
-  constexpr quantity auto new_quantity = new_units.quantity;
-  return quantity_value<new_units, new_quantity, T>(
-      std::move(value).get_value());
-}
-
-template <auto U1, auto Q1, typename T, unit U2>
-constexpr auto operator/(const quantity_value<U1, Q1, T>& value, U2) {
-  constexpr unit auto new_units = U1 / U2{};
-  constexpr quantity auto new_quantity = new_units.quantity;
-  return quantity_value<new_units, new_quantity, T>(value.get_value());
-}
-
-template <auto U1, auto Q1, typename T, unit U2>
-constexpr auto operator/(quantity_value<U1, Q1, T>&& value, U2) {
-  constexpr unit auto new_units = U1 / U2{};
-  constexpr quantity auto new_quantity = new_units.quantity;
-  return quantity_value<new_units, new_quantity, T>(
-      std::move(value).get_value());
 }
 
 } // namespace maxwell
