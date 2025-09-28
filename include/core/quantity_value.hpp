@@ -964,9 +964,6 @@ struct std::hash<maxwell::quantity_value<Q, U, T>> {
         std::hash<typename decltype(q)::value_type>{}(q.get_value());
     hash_code ^= std::hash<decltype(q.get_units().name)>{}(q.get_units().name) +
                  0x9e377b9b + (hash_code << 6) + (hash_code >> 2);
-    hash_code ^=
-        std::hash<decltype(q.quantity_kind::name)>{q.quantity_kind.name} +
-        0x9e377b9b + (hash_code << 6) + (hash_code >> 2);
     return hash_code;
   }
 };

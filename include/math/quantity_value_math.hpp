@@ -6,6 +6,7 @@
 
 #include <cmath>
 
+#include "core/quantity_holder.hpp"
 #include "core/quantity_value.hpp"
 #include "quantity_systems/isq.hpp"
 #include "quantity_systems/si.hpp"
@@ -31,11 +32,17 @@ MAXWELL_BASIC_CMATH_CONSTEXPR auto abs(quantity_value<U, Q, T>& x)
   return quantity_value<U, Q, T>(std::abs(x.get_value()));
 }
 
+MODULE_EXPORT template <auto Q, typename T>
+MAXWELL_BASIC_CMATH_CONSTEXPR auto abs(quantity_holder<Q, T>& x)
+    -> quantity_holder<Q, T> {
+  return quantity_holder<Q, T>(std::abs(x.get_value()), x.get_units());
+}
+
 /// \brief Computes the sine of an angle quantity.
 ///
 /// Computes the sine of an angle quantity. If the argument is +/- infinity,
-/// NaN is returned and \c FE_INVALID is raised. If the argument is NaN, NaN is
-/// returned.
+/// NaN is returned and \c FE_INVALID is raised. If the argument is NaN, NaN
+/// is returned.
 ///
 /// \param x The angle quantity to compute the sine of.
 /// \return The sine of \c x in the range [-1, 1].
