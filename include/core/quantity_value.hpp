@@ -424,7 +424,8 @@ template <quantity_value_like Derived> class _quantity_value_operators {
   /// \param U2 The right-hand side unit.
   /// \return A new \c quantity_value with the resulting units and the same
   /// numerical value.
-  template <unit U2> friend constexpr auto operator*(const Derived& value, U2) {
+  MODULE_EXPORT template <unit U2>
+  friend constexpr auto operator*(const Derived& value, U2) {
     constexpr unit auto new_units = Derived::units * U2{};
     constexpr quantity auto new_quantity = new_units.quantity;
     return quantity_value<new_units, new_quantity,
@@ -446,7 +447,8 @@ template <quantity_value_like Derived> class _quantity_value_operators {
   /// \param U2 The right-hand side unit.
   /// \return A new \c quantity_value with the resulting units and the same
   /// numerical value.
-  template <unit U2> friend constexpr auto operator*(Derived&& value, U2) {
+  MODULE_EXPORT template <unit U2>
+  friend constexpr auto operator*(Derived&& value, U2) {
     constexpr unit auto new_units = Derived::units * U2{};
     constexpr quantity auto new_quantity = new_units.quantity;
     return quantity_value<new_units, new_quantity,
@@ -454,14 +456,16 @@ template <quantity_value_like Derived> class _quantity_value_operators {
         std::move(value).get_value());
   }
 
-  template <unit U2> friend constexpr auto operator/(const Derived& value, U2) {
+  MODULE_EXPORT template <unit U2>
+  friend constexpr auto operator/(const Derived& value, U2) {
     constexpr unit auto new_units = Derived::units / U2{};
     constexpr quantity auto new_quantity = new_units.quantity;
     return quantity_value<new_units, new_quantity,
                           typename Derived::value_type>(value.get_value());
   }
 
-  template <unit U2> friend constexpr auto operator/(Derived&& value, U2) {
+  MODULE_EXPORT template <unit U2>
+  friend constexpr auto operator/(Derived&& value, U2) {
     constexpr unit auto new_units = Derived::units / U2{};
     constexpr quantity auto new_quantity = new_units.quantity;
     return quantity_value<new_units, new_quantity,
@@ -933,7 +937,7 @@ quantity_cast(const quantity_value<FromUnits, FromQuantity, T>& value)
 /// \param value The numerical value of the quantity
 /// \param U The units of the quantity.
 /// \return A \c quantity_value with the specified value and units.
-template <typename T, unit U>
+MODULE_EXPORT template <typename T, unit U>
   requires(!_detail::is_quantity_value_v<T> && !unit<T>)
 constexpr auto operator*(T&& value, U) -> quantity_value<U{}, U::quantity, T> {
   return quantity_value<U{}, U::quantity, T>(std::forward<T>(value));
@@ -955,7 +959,7 @@ constexpr auto operator*(T&& value, U) -> quantity_value<U{}, U::quantity, T> {
 /// \tparam Q The quantity of the \c quantity_value
 /// \tparam U The units of the \c quantity_value
 /// \tparam T The underlying type of the \c quantity_value
-template <auto Q, auto U, typename T>
+MODULE_EXPORT template <auto Q, auto U, typename T>
 struct std::hash<maxwell::quantity_value<Q, U, T>> {
   auto operator()(const maxwell::quantity_value<Q, U, T>& q) noexcept
       -> std::size_t {
