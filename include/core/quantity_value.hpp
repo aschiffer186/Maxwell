@@ -730,40 +730,65 @@ public:
 
   // --- Assignment Operators ---
 
+  /// \brief Assigns the value of the specified \c quantity_value to the value
+  /// of \c *this.
+  ///
+  /// Assigns the value of the specififed \c quantity_value to the value oc \c
+  /// *this, automatically converting units where necessary. This function only
+  /// participates in overload resolution if.
+  ///   1. <tt>std::constructible_from<T, Rep></tt> is modeled
+  ///   2. \c std::swappable<T> is modeled
+  ///
+  /// The program is ill-formed if <tt>quantity_convertible_to<FromQuantity,
+  /// Q></tt> is not modeled.
+  ///
+  /// \tparam FromQuantity The quantity of the from \c quantity_value
+  /// \tparam FromUnit The units being converted from
+  /// \tparam Up The type of the numerical value being assigned to \c *this.
+  /// \param other The \c quantity_value to assign to \c *this.
+  /// \return A reference to \c *this.
   template <auto FromQuantity, auto FromUnit, typename Up = T>
     requires std::constructible_from<T, Up> && std::swappable<T>
   constexpr auto operator=(quantity_value<FromUnit, FromQuantity, Up> other)
-      -> quantity_value& {
+      -> quantity_value&;
 
-    static_assert(
-        quantity_convertible_to<FromQuantity, Q>,
-        "Attempting to construct value from incompatible quantity. Note, "
-        "quantities can be incompatible even if they have te same units.");
-
-    using std::swap;
-    quantity_value temp(std::move(other));
-    swap(temp.value_, value_);
-    return *this;
-  }
-
+  /// \brief Assigns the specified \c std::chrono::duration to the value of \c
+  /// *this.
+  ///
+  /// Assigns the specified \c std::chrono::duration to the value of \c *this,
+  /// converting from the units represented by the specified \c
+  /// std::chrono::duration to the units of \c *this if necessary. This function
+  /// only participates in overload resolution if
+  ///   1. <tt>std::constructible_from<T, Rep></tt> is modeled
+  ///   2. \c std::swappable<T> is modeled
+  ///   3. \c enabe_chrono_conversions_v<Q> is true
+  ///
+  /// \tparam Rep The representation type of the \c std::chrono::duration
+  /// \tparam Period The period type of the \c std::chrono::duration
+  /// \param d The \c std::chrono::duraation to assign to \c *this.
+  /// \return A reference to \c *this.
   template <typename Rep, typename Period>
     requires std::constructible_from<T, Rep> && std::swappable<T> &&
              enable_chrono_conversions_v<Q>
   constexpr auto operator=(const std::chrono::duration<Rep, Period>& d)
-      -> quantity_value& {
-    using std::swap;
-    quantity_value temp(d);
-    swap(temp.value_, value_);
-    return *this;
-  }
+      -> quantity_value&;
 
+  /// \brief Assigns the specified value to to the value of \c *this.
+  ///
+  /// Assigns the specififed value to the numerical value of \c *this. This
+  /// function only participates in overload resolution if
+  ///   1. \c Up is not an instantiation of \c quantity_value
+  ///   2. <tt>std::is_assignable_v<T&, Up></tt> is true
+  ///   3. \c unitless<U> is modeled.
+  ///
+  /// \tparam Up The type of the value to assign to the numerical value of \c
+  /// *this.
+  /// \param other The value to assign to \c *this.
+  /// \return A reference to \c *this.
   template <typename Up = T>
-    requires(!_detail::is_quantity_value_v<Up> && std::is_assignable_v<T&, Up>)
-  constexpr auto operator=(Up&& other) -> quantity_value& {
-    static_assert(unitless<U>);
-
-    value_ = std::forward<U>(other);
-  }
+    requires(!_detail::is_quantity_value_v<Up> &&
+             std::is_assignable_v<T&, Up> && unitless<U>)
+  constexpr auto operator=(Up&& other) -> quantity_value&;
 
   // --- Accessor Methods ---
 
@@ -774,7 +799,7 @@ public:
   ///
   /// \return A constant lvalue-reference to the numerical value of the \c
   /// quantity_value instance.
-  constexpr auto get_value() const& noexcept -> const T& { return value_; }
+  constexpr auto get_value() const& noexcept -> const T&;
 
   /// \brief Returns the numerical value of the quantity.
   ///
@@ -783,7 +808,7 @@ public:
   ///
   /// \return An rvalue-reference to the numerical value of the \c
   /// quantity_value instance.
-  constexpr auto get_value() && noexcept -> T&& { return std::move(value_); }
+  constexpr auto get_value() && noexcept -> T&&;
 
   /// \brief Returns the numerical value of the quantity.
   ///
@@ -792,27 +817,120 @@ public:
   ///
   /// \return A constant rvalue-reference to the numerical value of the \c
   /// quantity_value instance.
-  constexpr auto get_value() const&& noexcept -> const T&& {
-    return std::move(value_);
-  }
+  constexpr auto get_value() const&& noexcept -> const T&&;
 
-  constexpr explicit(!unitless<U>) operator value_type() const {
-    return value_;
-  }
+  /// \brief Conversion operator to the numerical value type
+  ///
+  /// Converts the \c quantity_value instance to its numerical value type.
+  /// This operator is explicit if the \c quantity_value is not unitless.
+  ///
+  /// \return The numerical value of the \c quantity_value instance.
+  constexpr explicit(!unitless<U>) operator value_type() const;
 
-  constexpr auto get_units() const noexcept -> units_type { return units; }
+  /// \brief Returns the units of the quantity.
+  ///
+  /// \return The units of the quantity.
+  constexpr auto get_units() const noexcept -> units_type;
 
-  constexpr auto in_base_units() const -> quantity_value<U.base_units(), Q, T> {
-    constexpr unit auto base_units = U.base_units();
-    constexpr double factor = conversion_factor(U, base_units);
-    return quantity_value<base_units, Q, T>{value_ * factor};
-  }
+  /// \brief Returns a quantity with the same value expressed in base units.
+  ///
+  /// Returns a quantity representing the same value but expressed in the
+  /// unit system's base units.
+  ///
+  /// \return A quantity with the same value expressed in base units
+  constexpr auto in_base_units() const -> quantity_value<U.base_units(), Q, T>;
 
 private:
   friend class _detail::_quantity_value_operators<quantity_value<U, Q, T>>;
 
   T value_{};
-}; // namespace maxwell
+};
+
+// --- Begin Implementation --
+template <auto U, auto Q, typename T>
+  requires unit<decltype(U)> &&
+           quantity<decltype(Q)>
+           template <auto FromQuantity, auto FromUnit, typename Up>
+             requires std::constructible_from<T, Up> && std::swappable<T>
+constexpr auto quantity_value<U, Q, T>::operator=(
+    quantity_value<FromUnit, FromQuantity, Up> other) -> quantity_value& {
+
+  static_assert(
+      quantity_convertible_to<FromQuantity, Q>,
+      "Attempting to construct value from incompatible quantity. Note, "
+      "quantities can be incompatible even if they have te same units.");
+
+  using std::swap;
+  quantity_value temp(std::move(other));
+  swap(temp.value_, value_);
+  return *this;
+}
+
+template <auto U, auto Q, typename T>
+  requires unit<decltype(U)> && quantity<decltype(Q)>
+                              template <typename Rep, typename Period>
+             requires std::constructible_from<T, Rep> && std::swappable<T> &&
+                      enable_chrono_conversions_v<Q>
+constexpr auto
+quantity_value<U, Q, T>::operator=(const std::chrono::duration<Rep, Period>& d)
+    -> quantity_value& {
+  using std::swap;
+  quantity_value temp(d);
+  swap(temp.value_, value_);
+  return *this;
+}
+
+template <auto U, auto Q, typename T>
+  requires unit<decltype(U)> && quantity<decltype(Q)>
+                              template <typename Up>
+             requires(!_detail::is_quantity_value_v<Up> &&
+                      std::is_assignable_v<T&, Up> && unitless<U>)
+constexpr auto quantity_value<U, Q, T>::operator=(Up&& other)
+    -> quantity_value& {
+  value_ = std::forward<U>(other);
+}
+
+template <auto U, auto Q, typename T>
+  requires unit<decltype(U)> && quantity<decltype(Q)>
+constexpr auto quantity_value<U, Q, T>::get_value() const& noexcept
+    -> const T& {
+  return value_;
+}
+
+template <auto U, auto Q, typename T>
+  requires unit<decltype(U)> && quantity<decltype(Q)>
+constexpr auto quantity_value<U, Q, T>::get_value() && noexcept -> T&& {
+  return std::move(value_);
+}
+
+template <auto U, auto Q, typename T>
+  requires unit<decltype(U)> && quantity<decltype(Q)>
+constexpr auto quantity_value<U, Q, T>::get_value() const&& noexcept
+    -> const T&& {
+  return std::move(value_);
+}
+
+template <auto U, auto Q, typename T>
+  requires unit<decltype(U)> && quantity<decltype(Q)>
+constexpr quantity_value<U, Q, T>::operator value_type() const {
+  return value_;
+}
+
+template <auto U, auto Q, typename T>
+  requires unit<decltype(U)> && quantity<decltype(Q)>
+constexpr auto quantity_value<U, Q, T>::get_units() const noexcept
+    -> units_type {
+  return units;
+}
+
+template <auto U, auto Q, typename T>
+  requires unit<decltype(U)> && quantity<decltype(Q)>
+constexpr auto quantity_value<U, Q, T>::in_base_units() const
+    -> quantity_value<U.base_units(), Q, T> {
+  constexpr unit auto base_units = U.base_units();
+  constexpr double factor = conversion_factor(U, base_units);
+  return quantity_value<base_units, Q, T>{value_ * factor};
+}
 
 // --- Class Template Argument Deduction Guides ---
 

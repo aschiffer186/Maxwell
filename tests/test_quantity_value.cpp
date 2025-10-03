@@ -4,6 +4,8 @@
 #include <gtest/gtest.h>
 #include <type_traits>
 
+#include "core/quantity.hpp"
+#include "quantity_systems/isq.hpp"
 #include "quantity_systems/si.hpp"
 #include "test_types.hpp"
 
@@ -205,6 +207,14 @@ TEST(TestQuantityValue, TestConversionOperator) {
   EXPECT_FLOAT_EQ(d3, 3.0);
 }
 
+TEST(TestQuantityValue, TestInBaseUnits) {
+  const kilo<si::meter<>> km{1.0};
+  const auto m = km.in_base_units();
+
+  EXPECT_FLOAT_EQ(m.get_value(), 1'000);
+  EXPECT_EQ(m.get_units(), si::meter_unit);
+}
+
 TEST(TestQuantityValue, TestNegation) {
   si::meter<> m1{10.0};
   auto m2 = -m1;
@@ -276,7 +286,7 @@ TEST(TestQuantityValue, TestAddition) {
   EXPECT_EQ(n2.get_units(), si::number_unit);
 }
 
-TEST(TestQuantity, TestSubtraction) {
+TEST(TestQuantityValue, TestSubtraction) {
   si::meter<> m2{10.0};
   auto m1 = m2 -= si::meter<>{5.0};
 
@@ -308,7 +318,38 @@ TEST(TestQuantity, TestSubtraction) {
   EXPECT_EQ(ft.get_units(), us::foot_unit);
 }
 
-TEST(TestQuantity, TestQuantityComparison) {
+TEST(TestQuantityValue, TestMultiplication) {
+  const si::square_meter<> m2 = si::meter<>{10.0} * si::meter<>{10.0};
+  EXPECT_FLOAT_EQ(m2.get_value(), 100.0);
+
+  const quantity_value q = si::meter<>{100.0} * us::foot<>{20.0};
+  EXPECT_FLOAT_EQ(q.get_value(), 2000);
+  EXPECT_EQ(q.get_units(), si::meter_unit * us::foot_unit);
+
+  const quantity_value q2 = 10.0 * si::meter<>{10.0};
+  EXPECT_FLOAT_EQ(q2.get_value(), 100.0);
+  EXPECT_EQ(q2.get_units(), si::meter_unit);
+
+  const quantity_value q3 = si::meter<>{10.0} * 10.0;
+  EXPECT_FLOAT_EQ(q3.get_value(), 100.0);
+  EXPECT_EQ(q3.get_units(), si::meter_unit);
+  // TODO: Should this be true?
+  // const quantity_value q2 =
+  //     si::radian<>{10.0} / si::second<>{1.0} * si::meter<>{10.0};
+  // EXPECT_TRUE((quantity_convertible_to<q2.quantity, isq::length>));
+}
+
+TEST(TestQuantityValue, TestDivision) {
+  const si::meter_per_second<> m3 = si::meter<>{10.0} / si::second<>{1.0};
+  EXPECT_FLOAT_EQ(m3.get_value(), 10.0);
+
+  const quantity_value q = si::meter<>{10.0} / si::meter<>{10.0};
+  EXPECT_EQ(q.get_value(), 1.0);
+  EXPECT_TRUE(unitless<q.get_units()>);
+  EXPECT_TRUE((std::convertible_to<decltype(q), double>));
+}
+
+TEST(TestQuantityValue, TestQuantityComparison) {
   si::meter<> m1{10.0};
   si::meter<> m2{15.0};
   si::meter<> m3{10.0};

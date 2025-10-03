@@ -437,7 +437,7 @@ constexpr quantity_holder<Q, T>::operator value_type() const {
   return value_;
 }
 
-// --- CTAD Declarations ---
+// --- Class Template Argument Deduction Guides ---
 
 template <unit Unit, typename T>
 quantity_holder(T, Unit) -> quantity_holder<Unit::quantity, T>;
