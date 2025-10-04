@@ -298,24 +298,24 @@ template <quantity_value_like Derived> class _quantity_value_operators {
   }
 
   MODULE_EXPORT template <typename T>
-    requires(!quantity_value_like<T> && !unit<T>)
+    requires(!quantity_value_like<T> && !quantity_holder_like<T> && !unit<T>)
   friend constexpr quantity_value_like auto operator/(const Derived& lhs,
                                                       const T& rhs) {
     using lhs_type = std::remove_cvref_t<decltype(lhs)>;
-    using product_type = std::remove_cvref_t<decltype(lhs.get_value() / rhs)>;
-    return quantity_value<lhs_type::units, lhs_type::quantity, product_type>(
+    using quotient_type = std::remove_cvref_t<decltype(lhs.get_value() / rhs)>;
+    return quantity_value<lhs_type::units, lhs_type::quantity, quotient_type>(
         lhs.get_value() / rhs);
   }
 
   MODULE_EXPORT template <typename T>
-    requires(!quantity_value_like<T> && !unit<T> &&
+    requires(!quantity_value_like<T> && !quantity_holder_like<T> && !unit<T> &&
              !utility::_detail::is_value_type<T>::value)
   friend constexpr quantity_value_like auto operator/(const T& lhs,
                                                       const Derived& rhs) {
     using rhs_type = std::remove_cvref_t<decltype(rhs)>;
-    using product_type = std::remove_cvref_t<decltype(lhs / rhs.get_value())>;
-    return quantity_value<rhs_type::units, rhs_type::quantity, product_type>(
-        lhs / rhs.get_value());
+    using quotient_type = std::remove_cvref_t<decltype(lhs / rhs.get_value())>;
+    return quantity_value<inv(rhs_type::units), inv(rhs_type::quantity),
+                          quotient_type>(lhs / rhs.get_value());
   }
 
   MODULE_EXPORT friend constexpr quantity_value_like auto

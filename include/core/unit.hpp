@@ -189,6 +189,11 @@ template <unit U> struct unit_sqrt : _detail::unit_sqrt_impl<U>::type {};
 template <unit U, auto R>
   requires utility::rational<decltype(R)>
 struct unit_pow : _detail::unit_pow_impl<U, R>::type {};
+
+template <unit U> struct unit_inv {
+  using type = unit_type<"", inv(U::quantity), 1.0 / U::multiplier,
+                         U::reference, typename U::scale_type>;
+};
 } // namespace _detail
 /// \endcond
 
@@ -276,6 +281,10 @@ constexpr unit auto pow(U /*unit*/) noexcept {
 MODULE_EXPORT template <std::intmax_t R, unit U>
 constexpr unit auto pow(U /*unit*/) noexcept {
   return _detail::unit_pow<U, utility::rational_type<R, 1>{}>{};
+}
+
+MODULE_EXPORT template <unit U> constexpr unit auto inv(U /*unit*/) noexcept {
+  return typename _detail::unit_inv<U>::type{};
 }
 
 /// \brief Changes the reference of a unit.
@@ -378,6 +387,10 @@ constexpr auto conversion_factor(From, To) noexcept -> double {
          static_cast<double>(From::multiplier);
 }
 
+constexpr auto conversion_factor(double from, double to) noexcept -> double {
+  return to / from;
+}
+
 MODULE_EXPORT template <unit From, unit To>
 constexpr auto conversion_offset(From, To) noexcept -> double {
   if (To::multiplier == 1.0 && From::multiplier == 1.0) {
@@ -386,6 +399,17 @@ constexpr auto conversion_offset(From, To) noexcept -> double {
     return To::reference - To::multiplier * From::reference;
   } else {
     return To::reference - From::reference / From::multiplier;
+  }
+}
+
+constexpr auto conversion_offset(double from_m, double from_r, double to_m,
+                                 double to_r) noexcept -> double {
+  if (to_m == 1.0 && from_m == 1.0) {
+    return to_r - from_r;
+  } else if (from_m == 1.0) {
+    return to_r - to_m * from_r;
+  } else {
+    return to_r - from_r / from_m;
   }
 }
 

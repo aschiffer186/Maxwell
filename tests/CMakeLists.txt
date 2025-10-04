@@ -22,6 +22,12 @@ target_link_libraries(test_quantity_value PRIVATE Maxwell GTest::gtest_main)
 target_compile_options(test_quantity_value PRIVATE -Wno-deprecated-declarations)
 gtest_discover_tests(test_quantity_value)
 
+add_executable(test_quantity_holder test_quantity_holder.cpp)
+add_test(NAME TestQuantityHolder COMMAND test_quantity_holder)
+target_link_libraries(test_quantity_holder PRIVATE Maxwell GTest::gtest_main)
+target_compile_options(test_quantity_holder PRIVATE -Wno-deprecated-declarations)
+gtest_discover_tests(test_quantity_holder)
+
 add_executable(test_quantity test_quantity.cpp)
 add_test(NAME TestQuantity COMMAND test_quantity)
 target_link_libraries(test_quantity PRIVATE Maxwell GTest::gtest_main)

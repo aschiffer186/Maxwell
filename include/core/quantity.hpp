@@ -221,6 +221,17 @@ MODULE_EXPORT constexpr quantity auto operator/(quantity auto lhs,
   return quantity_quotient_t<decltype(lhs), decltype(rhs)>{};
 }
 
+/// \brief Computes the inverse of a quantity.
+///
+/// Computes the inverse of a quantity. The inverse of a quantity is a quantity
+/// whose dimension product is the reciprical of the original quantity.
+///
+/// \param q The quantity to take the inverse of.
+/// \return The inverse of the quantity.
+MODULE_EXPORT constexpr quantity auto inv(quantity auto q) noexcept {
+  return number / q;
+}
+
 /// \cond
 namespace _detail {
 template <quantity Q> struct quantity_sqrt_impl {

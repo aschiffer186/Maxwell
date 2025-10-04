@@ -231,12 +231,14 @@ public:
   using quantity_kind_type = decltype(Q);
   static constexpr quantity auto quantity_kind = Q;
 
-  constexpr quantity_holder() = default;
+  constexpr explicit quantity_holder(unit auto units) noexcept(
+      std::is_nothrow_default_constructible_v<T>)
+    requires std::is_default_constructible_v<T>;
 
   template <typename Up = T>
     requires std::constructible_from<T, Up> &&
              (!_detail::is_quantity_holder_v<Up>) &&
-             (!_detail::quantity_value_like<Up>)
+             (!_detail::quantity_value_like<Up> && !unit<Up>)
   constexpr explicit quantity_holder(Up&& u, unit auto units);
 
   template <typename... Args>
@@ -258,10 +260,6 @@ public:
   template <auto FromQuantity, auto FromUnit, typename Up = T>
     requires std::constructible_from<T, Up>
   constexpr quantity_holder(quantity_value<FromQuantity, FromUnit, Up> other);
-
-  template <unit Unit, typename Up = T>
-    requires std::constructible_from<T, Up>
-  constexpr quantity_holder(Up&& u, Unit);
 
   constexpr auto get_value() const& noexcept -> const T&;
   constexpr auto get_value() && noexcept -> T&&;

@@ -1,13 +1,26 @@
 namespace maxwell {
 template <auto Q, typename T>
   requires quantity<decltype(Q)>
+constexpr quantity_holder<Q, T>::quantity_holder(unit auto units) noexcept(
+    std::is_nothrow_default_constructible_v<T>)
+  requires std::is_default_constructible_v<T>
+    : multiplier_(units.multiplier), reference_(units.reference) {
+  static_assert(quantity_convertible_to<units.quantity, Q>);
+}
+
+template <auto Q, typename T>
+  requires quantity<decltype(Q)>
 template <typename Up>
   requires std::constructible_from<T, Up> &&
                (!_detail::is_quantity_holder_v<Up>) &&
-               (!_detail::quantity_value_like<Up>)
+               (!_detail::quantity_value_like<Up> && !unit<Up>)
 constexpr quantity_holder<Q, T>::quantity_holder(Up&& u, unit auto units)
     : value_(std::forward<Up>(u)), multiplier_(units.multiplier),
-      reference_(units.reference) {}
+      reference_(units.reference) {
+  static_assert(quantity_convertible_to<decltype(units)::quantity, Q>,
+                "Cannot convert from units of other to quantity of value "
+                "being constructed");
+}
 
 template <auto Q, typename T>
   requires quantity<decltype(Q)>
@@ -48,18 +61,6 @@ constexpr quantity_holder<Q, T>::quantity_holder(
     : value_(std::move(other).get_value()), multiplier_(FromUnit.multiplier),
       reference_(FromUnit.reference) {
   static_assert(quantity_convertible_to<FromUnit.quantity, Q>,
-                "Cannot convert from units of other to quantity of value "
-                "being constructed");
-}
-
-template <auto Q, typename T>
-  requires quantity<decltype(Q)>
-template <unit Unit, typename Up>
-  requires std::constructible_from<T, Up>
-constexpr quantity_holder<Q, T>::quantity_holder(Up&& u, Unit)
-    : value_(std::forward<Up>(u)), multiplier_(Unit::multiplier),
-      reference_(Unit::reference) {
-  static_assert(quantity_convertible_to<Unit::quantity, Q>,
                 "Cannot convert from units of other to quantity of value "
                 "being constructed");
 }

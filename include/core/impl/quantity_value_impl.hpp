@@ -1,4 +1,5 @@
 #include "core/impl/quantity_value_holder_fwd.hpp"
+
 namespace maxwell {
 template <auto U, auto Q, typename T>
   requires unit<decltype(U)> && quantity<decltype(Q)>
@@ -82,6 +83,39 @@ constexpr quantity_value<U, Q, T>::quantity_value(
 }
 
 template <auto U, auto Q, typename T>
+  requires unit<decltype(U)> && quantity<decltype(Q)>
+                              template <auto FromQuantity, typename Up>
+             requires std::constructible_from<T, Up> &&
+                      ::maxwell::quantity<decltype(FromQuantity)>
+constexpr quantity_value<U, Q, T>::quantity_value(
+    const quantity_holder<FromQuantity, T>& other)
+    : value_(other.get_value() *
+                 conversion_factor(other.get_multiplier(), U.multiplier) +
+             conversion_offset(other.get_multiplier(), other.get_reference(),
+                               U.multiplier, U.reference)) {
+  static_assert(
+      quantity_convertible_to<FromQuantity, Q>,
+      "Attempting to construct value from incompatible quantity. Note, "
+      "quantities can be incompatible even if they have te same units.");
+}
+
+template <auto U, auto Q, typename T>
+  requires unit<decltype(U)> && quantity<decltype(Q)>
+                              template <auto FromQuantity, typename Up>
+             requires std::constructible_from<T, Up> &&
+                      ::maxwell::quantity<decltype(FromQuantity)>
+constexpr quantity_value<U, Q, T>::quantity_value(
+    quantity_holder<FromQuantity, T>&& other)
+    : value_(std::move(other).get_value() *
+                 conversion_factor(other.get_multiplier(), U.multiplier) +
+             conversion_offset(other.get_reference, U.reference)) {
+  static_assert(
+      quantity_convertible_to<FromQuantity, Q>,
+      "Attempting to construct value from incompatible quantity. Note, "
+      "quantities can be incompatible even if they have te same units.");
+}
+
+template <auto U, auto Q, typename T>
   requires unit<decltype(U)> &&
            quantity<decltype(Q)>
            template <auto FromQuantity, auto FromUnit, typename Up>
@@ -89,16 +123,17 @@ template <auto U, auto Q, typename T>
 constexpr auto quantity_value<U, Q, T>::operator=(
     quantity_value<FromUnit, FromQuantity, Up> other) -> quantity_value& {
 
-  static_assert(
-      quantity_convertible_to<FromQuantity, Q>,
-      "Attempting to construct value from incompatible quantity. Note, "
-      "quantities can be incompatible even if they have te same units.");
+  static_assert(quantity_convertible_to<FromQuantity, Q>,
+                "Attempting to construct value from "
+                "incompatible quantity. Note, "
+                "quantities can be incompatible even if "
+                "they have te same units.");
 
   using std::swap;
   quantity_value temp(std::move(other));
   swap(temp.value_, value_);
   return *this;
-}
+} // namespace maxwell
 
 template <auto U, auto Q, typename T>
   requires unit<decltype(U)> && quantity<decltype(Q)>

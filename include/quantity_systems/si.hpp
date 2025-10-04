@@ -213,6 +213,9 @@ MODULE_EXPORT template <typename T = double>
 using celsius = quantity_value<celsius_unit, isq::temperature, T>;
 
 MODULE_EXPORT template <typename T = double>
+using hertz = quantity_value<hertz_unit, isq::frequency, T>;
+
+MODULE_EXPORT template <typename T = double>
 using newton = quantity_value<newton_unit, isq::force, T>;
 
 MODULE_EXPORT template <typename T = double>

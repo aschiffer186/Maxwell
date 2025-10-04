@@ -1,8 +1,8 @@
 #ifndef QUANTITY_VALUE_HOLDER_FWD_HPP
 #define QUANTITY_VALUE_HOLDER_FWD_HPP
 
-#include "../quantity.hpp"
-#include "../unit.hpp"
+#include "core/quantity.hpp"
+#include "core/unit.hpp"
 #include <type_traits>
 
 namespace maxwell {

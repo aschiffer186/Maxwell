@@ -7,6 +7,7 @@
 #include "core/quantity.hpp"
 #include "quantity_systems/isq.hpp"
 #include "quantity_systems/si.hpp"
+#include "quantity_systems/us.hpp"
 #include "test_types.hpp"
 
 using namespace maxwell;
@@ -168,8 +169,6 @@ TEST(TestQuantityValue, TestConvertingConstructor) {
   si::celsius<> c{k};
   si::kelvin<> k2{c};
 
-  // constexpr double c3 = conversion_factor(si::kelvin_unit, si::celsius_unit);
-
   EXPECT_FLOAT_EQ(c.get_value(), 26.85);
   EXPECT_FLOAT_EQ(k2.get_value(), 300.0);
 
@@ -183,6 +182,20 @@ TEST(TestQuantityValue, TestConvertingConstructor) {
   si::kelvin<> k3{f};
   EXPECT_FLOAT_EQ(c2.get_value(), 26.85);
   EXPECT_FLOAT_EQ(k3.get_value(), 300.0);
+}
+
+TEST(TestQuantityValue, TestQuantityHolderConstructor) {
+  const isq::length_holder<> l{1.0, si::meter_unit};
+  const si::kilometer<> km{l};
+
+  EXPECT_FLOAT_EQ(km.get_value(), 1e-3);
+
+  const isq::temperature_holder<> t{300.0, si::kelvin_unit};
+  si::celsius<> c{t};
+  us::fahrenheit<> f{t};
+
+  EXPECT_FLOAT_EQ(c.get_value(), 26.85);
+  EXPECT_FLOAT_EQ(f.get_value(), 80.33);
 }
 
 TEST(TestQuantityValue, TestConversionOperator) {
@@ -347,6 +360,9 @@ TEST(TestQuantityValue, TestDivision) {
   EXPECT_EQ(q.get_value(), 1.0);
   EXPECT_TRUE(unitless<q.get_units()>);
   EXPECT_TRUE((std::convertible_to<decltype(q), double>));
+
+  const si::hertz<> hz = 1.0 / si::second<>{10.0};
+  EXPECT_EQ(hz.get_value(), 0.1);
 }
 
 TEST(TestQuantityValue, TestQuantityComparison) {
