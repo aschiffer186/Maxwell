@@ -346,10 +346,9 @@ TEST(TestQuantityValue, TestMultiplication) {
   const quantity_value q3 = si::meter<>{10.0} * 10.0;
   EXPECT_FLOAT_EQ(q3.get_value(), 100.0);
   EXPECT_EQ(q3.get_units(), si::meter_unit);
-  // TODO: Should this be true?
-  // const quantity_value q2 =
-  //     si::radian<>{10.0} / si::second<>{1.0} * si::meter<>{10.0};
-  // EXPECT_TRUE((quantity_convertible_to<q2.quantity, isq::length>));
+  const quantity_value q4 =
+      si::radian<>{10.0} / si::second<>{1.0} * si::meter<>{10.0};
+  EXPECT_TRUE((quantity_convertible_to<q4.quantity, isq::velocity>));
 }
 
 TEST(TestQuantityValue, TestDivision) {

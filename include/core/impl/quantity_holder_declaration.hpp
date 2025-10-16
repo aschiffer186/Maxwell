@@ -1,4 +1,9 @@
 
+#ifndef QUANTITY_HOLDER_HPP
+#error                                                                         \
+    "Do not include quantity_holder_impl.hpp directly; include quantity_holder.hpp instead"
+#endif
+
 #include <chrono>           // duration
 #include <functional>       // hash
 #include <initializer_list> // initializer_list
@@ -239,18 +244,22 @@ public:
     requires std::constructible_from<T, Up> &&
              (!_detail::is_quantity_holder_v<Up>) &&
              (!_detail::quantity_value_like<Up> && !unit<Up>)
-  constexpr explicit quantity_holder(Up&& u, unit auto units);
+  constexpr quantity_holder(Up&& u, unit auto units);
+
+  template <typename Up = T>
+    requires std::constructible_from<T, Up> &&
+             (!_detail::is_quantity_holder_v<Up>) &&
+             (!_detail::quantity_value_like<Up> && !unit<Up>)
+  constexpr quantity_holder(Up&& u, double multiplier, double reference);
 
   template <typename... Args>
     requires std::constructible_from<T, Args...>
-  constexpr explicit quantity_holder(std::in_place_t, Args&&... args,
-                                     unit auto units);
+  constexpr quantity_holder(std::in_place_t, Args&&... args, unit auto units);
 
   template <typename U, typename... Args>
     requires std::constructible_from<T, std::initializer_list<U>, Args...>
-  constexpr explicit quantity_holder(std::in_place_t,
-                                     std::initializer_list<U> il,
-                                     Args&&... args, unit auto units);
+  constexpr quantity_holder(std::in_place_t, std::initializer_list<U> il,
+                            Args&&... args, unit auto units);
 
   template <typename Rep, typename Period>
     requires std::constructible_from<T, Rep> && enable_chrono_conversions_v<Q>

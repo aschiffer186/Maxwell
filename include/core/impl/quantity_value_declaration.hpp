@@ -1,3 +1,7 @@
+#ifndef QUANTITY_VALUE_HPP
+#error "Do not include this file directly; include quantity_value.hpp instead"
+#endif
+
 #include <chrono>           // duration
 #include <compare>          // spaceship operator
 #include <concepts>         // constructible_from, convertible_to, swappable

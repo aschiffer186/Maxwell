@@ -1,4 +1,6 @@
-#include "core/impl/quantity_value_holder_fwd.hpp"
+#ifndef QUANTITY_VALUE_HPP
+#error "Do not include this file directly; include quantity_value.hpp instead"
+#endif
 
 namespace maxwell {
 template <auto U, auto Q, typename T>

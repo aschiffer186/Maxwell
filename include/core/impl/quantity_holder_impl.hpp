@@ -1,3 +1,8 @@
+#ifndef QUANTITY_HOLDER_HPP
+#error                                                                         \
+    "Do not include quantity_holder_impl.hpp directly; include quantity_holder.hpp instead"
+#endif
+
 namespace maxwell {
 template <auto Q, typename T>
   requires quantity<decltype(Q)>
@@ -21,6 +26,17 @@ constexpr quantity_holder<Q, T>::quantity_holder(Up&& u, unit auto units)
                 "Cannot convert from units of other to quantity of value "
                 "being constructed");
 }
+
+template <auto Q, typename T>
+  requires quantity<decltype(Q)>
+template <typename Up>
+  requires std::constructible_from<T, Up> &&
+               (!_detail::is_quantity_holder_v<Up>) &&
+               (!_detail::quantity_value_like<Up> && !unit<Up>)
+constexpr quantity_holder<Q, T>::quantity_holder(Up&& u, double multiplier,
+                                                 double reference)
+    : value_(std::forward<Up>(u)), multiplier_(multiplier),
+      reference_(reference) {}
 
 template <auto Q, typename T>
   requires quantity<decltype(Q)>

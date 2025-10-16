@@ -150,10 +150,7 @@ struct std::hash<maxwell::quantity_value<Q, U, T>> {
   auto operator()(const maxwell::quantity_value<Q, U, T>& q) noexcept
       -> std::size_t {
     const auto in_base_units = q.in_base_units();
-    std::size_t hash_code =
-        std::hash<typename decltype(q)::value_type>{}(q.get_value());
-    hash_code ^= std::hash<decltype(q.get_units().name)>{}(q.get_units().name) +
-                 0x9e377b9b + (hash_code << 6) + (hash_code >> 2);
+    std::size_t hash_code = std::hash<T>{}(in_base_units.value_);
     return hash_code;
   }
 };
