@@ -24,6 +24,19 @@
             }
         },
         {
+            "name": "ninja-modules",
+            "displayName": "Ninja with Modules",
+            "generator": "Ninja Multi-Config",
+            "inherits": "common",
+            "cacheVariables": {
+                "CMAKE_CXX_FLAGS": "-Wall -Wextra -pedantic -Werror",
+                "CMAKE_CXX_FLAGS_DEBUG": "-g -O0",
+                "CMAKE_CXX_FLAGS_RELEASE": "-O2 -DNDEBUG",
+                "BUILD_TESTS": "On",
+                "BUILD_MODULES": "On"
+            }
+        },
+        {
             "name": "configure-docs",
             "displayName": "Configure Documentation",
             "binaryDir": "build/docs",
@@ -47,6 +60,13 @@
             "configurePreset": "ninja",
             "displayName": "Ninja Release",
             "description": "Release build using Ninja on Linux with GCC/clang"
+        },
+        {
+            "name": "ninja-modules",
+            "configuration": "Release",
+            "configurePreset": "ninja-modules",
+            "displayName": "Ninja with Modules",
+            "description": "Release build using Ninja with C++20 modules enabled"
         },
         {
             "name": "install",

@@ -5,6 +5,7 @@
 #define QUANTITY_VALUE_HPP
 
 #include "core/impl/quantity_value_holder_fwd.hpp"
+#include "core/unit.hpp"
 #include "impl/quantity_value_declaration.hpp"
 #include "impl/quantity_value_impl.hpp"
 
@@ -129,6 +130,126 @@ constexpr auto operator*(T&& value, U) -> quantity_value<U{}, U::quantity, T> {
   return quantity_value<U{}, U::quantity, T>(std::forward<T>(value));
 }
 
+/// \brief Creates a \c quantity_value from a number and a unit
+///
+/// Creates a quantity_value from the specified numer and unit. The resulting
+/// \c quantity_value has the specified number and inverse of the specified
+/// units.
+///
+/// \tparam T The type of the numerical value of the quantity.
+/// \tparam U The units of the quantity
+/// \param value The numerical value of the quantity
+/// \param U The units of the quantity.
+/// \return A \c quantity_value with the specified value and inverse of the
+/// specified units.
+MODULE_EXPORT template <typename T, unit U>
+  requires(!_detail::is_quantity_value_v<T> && !unit<T>)
+constexpr auto operator/(T&& value, U) -> quantity_value<U{}, U::quantity, T> {
+  return quantity_value<_detail::unit_inv<U>{}, _detail::unit_inv<U>::quantity,
+                        T>(std::forward<T>(value));
+}
+
+/// \brief Multiplies a \c quantity_value by a unit
+///
+/// Multiplies a \c quantity_value by a unit, returning a new \c quantity_value
+/// with the resulting units. Does not change the numerical value of the \c
+/// quantity_value.
+///
+/// \tparam LHSUnit The units of the left-hand side \c quantity_value.
+/// \tparam LHSQuantity The quantity of the left-hand side \c quantity_value.
+/// \tparam T The type of the numerical value of the left-hand side \c
+/// quantity_value.
+/// \tparam RHSUnit The units of the right-hand side unit.
+/// \param lhs The left-hand side \c quantity_value.
+/// \param RHSUnit The right-hand side unit.
+/// \return A new \c quantity_value with the resulting units and the same
+/// numerical value.
+MODULE_EXPORT template <auto LHSUnit, auto LHSQuantity, typename T,
+                        unit RHSUnit>
+  requires(!_detail::is_quantity_value_v<T> && !unit<T>)
+constexpr auto operator*(const quantity_value<LHSUnit, LHSQuantity, T>& lhs,
+                         RHSUnit)
+    -> quantity_value<LHSUnit * RHSUnit{}, LHSQuantity * RHSUnit::quantity, T> {
+  using result_type =
+      quantity_value<LHSUnit * RHSUnit{}, LHSQuantity * RHSUnit::quantity, T>;
+  return result_type(lhs.get_value());
+}
+
+/// \brief Multiplies a \c quantity_value by a unit
+///
+/// Multiplies a \c quantity_value by a unit, returning a new \c quantity_value
+/// with the resulting units. Does not change the numerical value of the \c
+/// quantity_value. The numerical value is moved into the new \c quantity_value.
+///
+/// \tparam LHSUnit The units of the left-hand side \c quantity_value.
+/// \tparam LHSQuantity The quantity of the left-hand side \c quantity_value.
+/// \tparam T The type of the numerical value of the left-hand side \c
+/// quantity_value.
+/// \tparam RHSUnit The units of the right-hand side unit.
+/// \param lhs The left-hand side \c quantity_value.
+/// \param RHSUnit The right-hand side unit.
+/// \return A new \c quantity_value with the resulting units and the same
+/// numerical value.
+MODULE_EXPORT template <auto LHSUnit, auto LHSQuantity, typename T,
+                        unit RHSUnit>
+  requires(!_detail::is_quantity_value_v<T> && !unit<T>)
+constexpr auto operator*(quantity_value<LHSUnit, LHSQuantity, T>&& lhs, RHSUnit)
+    -> quantity_value<LHSUnit * RHSUnit{}, LHSQuantity * RHSUnit::quantity, T> {
+  using result_type =
+      quantity_value<LHSUnit * RHSUnit{}, LHSQuantity * RHSUnit::quantity, T>;
+  return result_type(std::move(lhs).get_value());
+}
+
+/// \brief Divides a \c quantity_value by a unit
+///
+/// Divides a \c quantity_value by a unit, returning a new \c quantity_value
+/// with the resulting units. Does not change the numerical value of the \c
+/// quantity_value.
+///
+/// \tparam LHSUnit The units of the left-hand side \c quantity_value.
+/// \tparam LHSQuantity The quantity of the left-hand side \c quantity_value.
+/// \tparam T The type of the numerical value of the left-hand side \c
+/// quantity_value.
+/// \tparam RHSUnit The units of the right-hand side unit.
+/// \param lhs The left-hand side \c quantity_value.
+/// \param RHSUnit The right-hand side unit.
+/// \return A new \c quantity_value with the resulting units and the same
+/// numerical value.
+MODULE_EXPORT template <auto LHSUnit, auto LHSQuantity, typename T,
+                        unit RHSUnit>
+  requires(!_detail::is_quantity_value_v<T> && !unit<T>)
+constexpr auto operator/(const quantity_value<LHSUnit, LHSQuantity, T>& lhs,
+                         RHSUnit)
+    -> quantity_value<LHSUnit / RHSUnit{}, LHSQuantity / RHSUnit::quantity, T> {
+  using result_type =
+      quantity_value<LHSUnit / RHSUnit{}, LHSQuantity / RHSUnit::quantity, T>;
+  return result_type(lhs.get_value());
+}
+
+/// \brief Divides a \c quantity_value by a unit
+///
+/// Divides a \c quantity_value by a unit, returning a new \c quantity_value
+/// with the resulting units. Does not change the numerical value of the \c
+/// quantity_value. The numerical value is moved into the new \c quantity_value.
+///
+/// \tparam LHSUnit The units of the left-hand side \c quantity_value.
+/// \tparam LHSQuantity The quantity of the left-hand side \c quantity_value.
+/// \tparam T The type of the numerical value of the left-hand side \c
+/// quantity_value.
+/// \tparam RHSUnit The units of the right-hand side unit.
+/// \param lhs The left-hand side \c quantity_value.
+/// \param RHSUnit The right-hand side unit.
+/// \return A new \c quantity_value with the resulting units and the same
+/// numerical value.
+MODULE_EXPORT template <auto LHSUnit, auto LHSQuantity, typename T,
+                        unit RHSUnit>
+  requires(!_detail::is_quantity_value_v<T> && !unit<T>)
+constexpr auto operator/(quantity_value<LHSUnit, LHSQuantity, T>&& lhs, RHSUnit)
+    -> quantity_value<LHSUnit / RHSUnit{}, LHSQuantity / RHSUnit::quantity, T> {
+  using result_type =
+      quantity_value<LHSUnit / RHSUnit{}, LHSQuantity / RHSUnit::quantity, T>;
+  return result_type(std::move(lhs).get_value());
+}
 } // namespace maxwell
 
 /// \brief Specialization of \c std::hash

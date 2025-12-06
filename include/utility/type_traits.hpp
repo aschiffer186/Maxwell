@@ -4,8 +4,10 @@
 #ifndef TYPE_TRAITS_HPP
 #define TYPE_TRAITS_HPP
 
+#ifndef MAXWELL_MODULES
 #include <concepts>
 #include <type_traits>
+#endif
 
 #include "config.hpp"
 

@@ -359,7 +359,7 @@ MAXWELL_BASIC_CMATH_CONSTEXPR auto lround(quantity_value<U, Q, T> x)
 
 MODULE_EXPORT template <auto Q, typename T>
   requires quantity<decltype(Q)>
-MODULE_EXPORT MAXWELL_BASIC_CMATH_CONSTEXPR auto lround(quantity_holder<Q, T> x)
+MAXWELL_BASIC_CMATH_CONSTEXPR auto lround(quantity_holder<Q, T> x)
     -> quantity_holder<Q, long> {
   return quantity_holder<Q, long>(std::round(x.get_value()), x.get_multiplier(),
                                   x.get_reference());

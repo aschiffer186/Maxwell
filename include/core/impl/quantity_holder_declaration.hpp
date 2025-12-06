@@ -24,33 +24,33 @@ public:
 /// \cond
 namespace _detail {
 template <typename Derived> class quantity_holder_arithmetic_operators {
-  MODULE_EXPORT friend constexpr auto operator++(Derived& d) -> Derived& {
+  friend constexpr auto operator++(Derived& d) -> Derived& {
     ++d.value_;
     return d;
   }
 
-  MODULE_EXPORT friend constexpr auto operator++(Derived& d, int) -> Derived {
+  friend constexpr auto operator++(Derived& d, int) -> Derived {
     auto temp{d};
     ++d;
     return temp;
   }
 
-  MODULE_EXPORT friend constexpr auto operator--(Derived& d) -> Derived& {
+  friend constexpr auto operator--(Derived& d) -> Derived& {
     --d.value_;
     return d;
   }
 
-  MODULE_EXPORT friend constexpr auto operator--(Derived& d, int) -> Derived {
+  friend constexpr auto operator--(Derived& d, int) -> Derived {
     auto temp{d};
     --d;
     return temp;
   }
 
-  MODULE_EXPORT friend constexpr auto operator-(const Derived& d) -> Derived {
+  constexpr auto operator-(const Derived& d) -> Derived {
     return Derived{-d.value_};
   }
 
-  MODULE_EXPORT template <auto Q2, typename T2>
+  template <auto Q2, typename T2>
   friend constexpr auto operator+=(Derived& lhs,
                                    const quantity_holder<Q2, T2>& rhs)
       -> Derived& {
@@ -66,7 +66,7 @@ template <typename Derived> class quantity_holder_arithmetic_operators {
     return lhs;
   }
 
-  MODULE_EXPORT template <auto U2, auto Q2, typename T2>
+  template <auto U2, auto Q2, typename T2>
   friend constexpr auto operator+=(Derived& lhs,
                                    const quantity_value<U2, Q2, T2>& rhs)
       -> Derived& {
@@ -82,7 +82,7 @@ template <typename Derived> class quantity_holder_arithmetic_operators {
     return lhs;
   }
 
-  MODULE_EXPORT template <typename T2>
+  template <typename T2>
     requires(!quantity_value_like<T2> && !is_quantity_holder<T2>::value &&
              quantity_convertible_to<Derived::quantity, number>)
   friend constexpr auto operator+=(Derived& lhs, T2&& rhs) -> Derived& {
@@ -90,7 +90,7 @@ template <typename Derived> class quantity_holder_arithmetic_operators {
     return lhs;
   }
 
-  MODULE_EXPORT template <auto Q2, typename T2>
+  template <auto Q2, typename T2>
   friend constexpr auto operator-=(Derived& lhs,
                                    const quantity_holder<Q2, T2>& rhs)
       -> Derived& {
@@ -106,7 +106,7 @@ template <typename Derived> class quantity_holder_arithmetic_operators {
     return lhs;
   }
 
-  MODULE_EXPORT template <auto U2, auto Q2, typename T2>
+  template <auto U2, auto Q2, typename T2>
   friend constexpr auto operator-=(Derived& lhs,
                                    const quantity_value<U2, Q2, T2>& rhs)
       -> Derived& {
@@ -122,7 +122,7 @@ template <typename Derived> class quantity_holder_arithmetic_operators {
     return lhs;
   }
 
-  MODULE_EXPORT template <typename T2>
+  template <typename T2>
     requires(!quantity_value_like<T2> && !is_quantity_holder<T2>::value &&
              quantity_convertible_to<Derived::quantity, number>)
   friend constexpr auto operator-=(Derived& lhs, T2&& rhs) -> Derived& {
@@ -130,43 +130,43 @@ template <typename Derived> class quantity_holder_arithmetic_operators {
     return lhs;
   }
 
-  MODULE_EXPORT template <auto Q2, typename T2>
+  template <auto Q2, typename T2>
   friend constexpr auto operator+(Derived lhs,
                                   const quantity_holder<Q2, T2>& rhs) {
     return lhs += rhs;
   }
 
-  MODULE_EXPORT template <auto U2, auto Q2, typename T2>
+  template <auto U2, auto Q2, typename T2>
   friend constexpr auto operator+(Derived lhs,
                                   const quantity_value<U2, Q2, T2>& rhs) {
     return lhs += rhs;
   }
 
-  MODULE_EXPORT template <auto U2, auto Q2, typename T2>
+  template <auto U2, auto Q2, typename T2>
   friend constexpr auto operator+(const quantity_value<U2, Q2, T2>& lhs,
                                   const Derived& rhs) {
     return rhs += lhs;
   }
 
-  MODULE_EXPORT template <auto Q2, typename T2>
+  template <auto Q2, typename T2>
   friend constexpr auto operator-(Derived lhs,
                                   const quantity_holder<Q2, T2>& rhs) {
     return lhs -= rhs;
   }
 
-  MODULE_EXPORT template <auto U2, auto Q2, typename T2>
+  template <auto U2, auto Q2, typename T2>
   friend constexpr auto operator-(Derived lhs,
                                   const quantity_value<U2, Q2, T2>& rhs) {
     return lhs -= rhs;
   }
 
-  MODULE_EXPORT template <auto U2, auto Q2, typename T2>
+  template <auto U2, auto Q2, typename T2>
   friend constexpr auto operator-(const quantity_value<U2, Q2, T2>& lhs,
                                   const Derived& rhs) {
     return Derived(lhs) -= rhs;
   }
 
-  MODULE_EXPORT template <auto Q2, typename T2>
+  template <auto Q2, typename T2>
   friend constexpr auto operator*(const Derived& lhs,
                                   const quantity_holder<Q2, T2>& rhs) {
 
@@ -177,7 +177,7 @@ template <typename Derived> class quantity_holder_arithmetic_operators {
         lhs.multiplier_ * rhs.get_multiplier());
   }
 
-  MODULE_EXPORT template <auto U2, auto Q2, typename T2>
+  template <auto U2, auto Q2, typename T2>
   friend constexpr auto operator*(const Derived& lhs,
                                   const quantity_value<U2, Q2, T2>& rhs) {
     using result_type =
@@ -187,7 +187,7 @@ template <typename Derived> class quantity_holder_arithmetic_operators {
         lhs.multiplier_ * U2.get_multiplier());
   }
 
-  MODULE_EXPORT template <typename T2>
+  template <typename T2>
     requires requires(Derived lhs, T2 rhs) { lhs.get_value() * rhs; } &&
              (!is_quantity_holder_v<T2> && !quantity_value_like<T2>)
   friend constexpr auto operator*(const Derived& lhs, const T2& rhs) {
@@ -196,7 +196,7 @@ template <typename Derived> class quantity_holder_arithmetic_operators {
         lhs.get_value() * rhs, lhs.multiplier_);
   }
 
-  MODULE_EXPORT template <typename T2>
+  template <typename T2>
     requires requires(T2 lhs, Derived rhs) { lhs * rhs.get_value(); } &&
              (!is_quantity_holder_v<T2> && !quantity_value_like<T2>)
   friend constexpr auto operator*(const T2& lhs, const Derived& rhs) {
@@ -205,7 +205,7 @@ template <typename Derived> class quantity_holder_arithmetic_operators {
         lhs * rhs.get_value(), rhs.multiplier_);
   }
 
-  MODULE_EXPORT template <auto Q2, typename T2>
+  template <auto Q2, typename T2>
   friend constexpr auto operator/(const Derived& lhs,
                                   const quantity_holder<Q2, T2>& rhs) {
     using result_type =
@@ -215,7 +215,7 @@ template <typename Derived> class quantity_holder_arithmetic_operators {
         lhs.multiplier_ / rhs.get_multiplier());
   }
 
-  MODULE_EXPORT template <typename T2>
+  template <typename T2>
     requires requires(Derived lhs, T2 rhs) { lhs.get_value() / rhs; } &&
              (!is_quantity_holder_v<T2> && !quantity_value_like<T2>)
   friend constexpr auto operator/(const Derived& lhs, const T2& rhs) {

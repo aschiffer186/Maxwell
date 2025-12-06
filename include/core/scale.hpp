@@ -1,14 +1,13 @@
 #ifndef SCALE_HPP
 #define SCALE_HPP
 
-#include <concepts> // same_a
+#include <concepts> // same_as
 
 #include "utility/config.hpp"
-#include "utility/type_traits.hpp"
 
 namespace maxwell {
-struct linear_scale_type;
-struct decibel_scale_type;
+MODULE_EXPORT struct linear_scale_type;
+MODULE_EXPORT struct decibel_scale_type;
 
 MODULE_EXPORT template <typename T, typename V>
 concept scale =

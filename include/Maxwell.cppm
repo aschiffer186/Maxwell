@@ -1,5 +1,6 @@
 module;
 
+#include <cassert>
 #include <chrono>
 #include <cmath>
 #include <compare>
@@ -9,6 +10,8 @@ module;
 #include <initializer_list>
 #include <iterator>
 #include <limits>
+#include <numbers>
+#include <numeric>
 #include <ostream>
 #include <string_view>
 #include <tuple>

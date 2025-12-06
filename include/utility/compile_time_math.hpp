@@ -4,6 +4,7 @@
 #ifndef RATIONAL_HPP
 #define RATIONAL_HPP
 
+#ifndef MAXWELL_MODULES
 #include <cassert>     // assert
 #include <compare>     // strong_ordering
 #include <cstdint>     // intmax_t
@@ -11,6 +12,7 @@
 #include <numeric>     // gcd
 #include <ratio>       // ratio
 #include <type_traits> // false_type, remove_cvref_t, true_type
+#endif
 
 #include "config.hpp"
 

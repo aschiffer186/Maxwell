@@ -199,9 +199,8 @@ using quantity_quotient_t = _detail::quantity_quotient<LHS, RHS>;
 /// \param lhs The left hand side of the multiplication.
 /// \param rhs The right hand side of the multiplication.
 /// \return The product of two quantities.
-template <quantity LHS, quantity RHS>
-MODULE_EXPORT constexpr quantity auto operator*(LHS /*lhs*/,
-                                                RHS /*rhs*/) noexcept {
+MODULE_EXPORT template <quantity LHS, quantity RHS>
+constexpr quantity auto operator*(LHS /*lhs*/, RHS /*rhs*/) noexcept {
   return quantity_product_t<LHS, RHS>{};
 }
 

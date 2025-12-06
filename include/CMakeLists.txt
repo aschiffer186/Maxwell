@@ -23,6 +23,9 @@ INTERFACE
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
   $<INSTALL_INTERFACE:${CMAKE_INSTALL_DIR}>
 )
+target_compile_features(Maxwell 
+  INTERFACE cxx_std_20
+)
 
 if (${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.28" AND BUILD_MODULES)
 add_library(Maxwell_Modules)
@@ -30,5 +33,7 @@ target_sources(Maxwell_Modules
   PUBLIC FILE_SET CXX_MODULES FILES 
     ${CMAKE_CURRENT_SOURCE_DIR}/Maxwell.cppm
  )
-target_compile_features(Maxwell_Modules PRIVATE cxx_std_20)
+target_compile_features(Maxwell_Modules PUBLIC cxx_std_20)
+target_compile_definitions(Maxwell_Modules PRIVATE MAXWELL_MODULES)
+target_include_directories(Maxwell_Modules PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 endif()

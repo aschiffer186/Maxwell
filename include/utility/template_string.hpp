@@ -4,6 +4,7 @@
 #ifndef TEMPLATE_STRING_HPP
 #define TEMPLATE_STRING_HPP
 
+#ifndef MAXWELL_MODULES
 #include <algorithm>   // ranges::copy, lexicographical_compare_three_way
 #include <array>       // array
 #include <compare>     // strong_ordering
@@ -12,6 +13,7 @@
 #include <functional>  // hash
 #include <iterator>    // contiguous_iterator
 #include <string_view> // string_view
+#endif
 
 #include "config.hpp"
 
