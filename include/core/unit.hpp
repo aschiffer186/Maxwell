@@ -387,7 +387,8 @@ constexpr auto conversion_factor(From, To) noexcept -> double {
          static_cast<double>(From::multiplier);
 }
 
-constexpr auto conversion_factor(double from, double to) noexcept -> double {
+MODULE_EXPORT constexpr auto conversion_factor(double from, double to) noexcept
+    -> double {
   return to / from;
 }
 
@@ -402,8 +403,9 @@ constexpr auto conversion_offset(From, To) noexcept -> double {
   }
 }
 
-constexpr auto conversion_offset(double from_m, double from_r, double to_m,
-                                 double to_r) noexcept -> double {
+MODULE_EXPORT constexpr auto conversion_offset(double from_m, double from_r,
+                                               double to_m,
+                                               double to_r) noexcept -> double {
   if (to_m == 1.0 && from_m == 1.0) {
     return to_r - from_r;
   } else if (from_m == 1.0) {
@@ -438,6 +440,8 @@ MODULE_EXPORT constexpr double base_to_yocto_prefix{1e24};
 MODULE_EXPORT constexpr double base_to_ronto_prefix{1e27};
 MODULE_EXPORT constexpr double base_to_quecto_prefix{1e30};
 
+/// \cond
+namespace _detail {
 template <auto Prefix, auto U, utility::template_string Name>
 struct prefixed_unit {
 public:
@@ -449,9 +453,19 @@ public:
   
   // clang-format on 
 };
+}
+/// \endcond
 
+/// \brief Creates a new unit with the specified metric prefix
+///
+/// Creates a new unit by applying the specified metric prefix to an existing
+/// unit. The new unit will have the specified name.
+///
+/// \tparam Prefix The metric prefix multiplier.
+/// \tparam U The existing unit to apply the prefix to.
+/// \tparam Name The name of the new prefixed unit.
 MODULE_EXPORT template <auto Prefix, auto U, utility::template_string Name>
-using prefixed_unit_t = prefixed_unit<Prefix, U, Name>::type;
+using prefixed_unit_t = _detail::prefixed_unit<Prefix, U, Name>::type;
 
 MODULE_EXPORT template <auto U>
 constexpr unit auto quetta_unit =

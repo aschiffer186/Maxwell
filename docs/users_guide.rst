@@ -278,6 +278,8 @@ This is accomplished using the :code:`quantity_holder` class template.
 
 Compile-time verification that operations on instances of :code:`quantity_holder` is still performed, but unit conversions will be performed at run-time instead of compile-time.
 
+It is possible to mix compile-time and run-time unit checking. All overloaded math functions will work with both instances of :code:`quantity_value` and :code:`quantity_holder`.
+
 Defining Custom Quantities and Units 
 ====================================
 

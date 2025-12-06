@@ -10,10 +10,7 @@ The easiest way to install Maxwell is by cloning the repository from GitHub and 
 
     git clone https://github.com/aschiffer186/Maxwell.git
     cd Maxwell 
-    mkdir build 
-    cmake -S . -B build 
-    cd build 
-    cmake --build . --config Release --target install 
+    cmake --workflow --preset install
 
 Once Maxwell has been installed, it can be discovered in a source package using :code:`find_package`. 
 The Maxwell package provides the following helper variables: 

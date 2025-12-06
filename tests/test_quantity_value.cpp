@@ -399,7 +399,7 @@ TEST(TestQuantityValue, TestQuantityComparison) {
   EXPECT_FALSE(m1 != km);
 }
 
-TEST(TestQuantityVary, TestAbbreviatedConstruction) {
+TEST(TestQuantityValue, TestAbbreviatedConstruction) {
   using namespace maxwell::si::symbols;
 
   const quantity_value q1 = 1.0 * m;
@@ -418,4 +418,17 @@ TEST(TestQuantityVary, TestAbbreviatedConstruction) {
   EXPECT_FLOAT_EQ(q4.get_value(), 1.0);
   EXPECT_EQ(q4.get_units(),
             si::joule_unit / (si::kilogram_unit * si::kelvin_unit));
+}
+
+TEST(TestQuantityValue, TestQuantityCast) {
+  using namespace maxwell::si::symbols;
+  const quantity_value q1 = 1.0 * m;
+
+  const quantity_value q2 = quantity_cast<si::kilometer<double>>(q1);
+  EXPECT_EQ(q2.get_value(), 0.001);
+
+  using wavelength = sub_quantity<isq::length, "wavelength">;
+  const auto q3 =
+      quantity_cast<quantity_value<si::meter_unit, wavelength{}>>(q1);
+  EXPECT_EQ(q3.get_value(), 1.0);
 }

@@ -278,16 +278,15 @@ using cubic_meter = quantity_value<cubic_meter_unit, isq::volume, T>;
 MODULE_EXPORT template <typename T = double>
 using liter = quantity_value<liter_unit, isq::volume, T>;
 
-template <typename T = double>
-MODULE_EXPORT using newton_meter =
-    quantity_value<newton_meter_unit, isq::torque, T>;
+MODULE_EXPORT template <typename T = double>
+using newton_meter = quantity_value<newton_meter_unit, isq::torque, T>;
 
-template <typename T = double>
-MODULE_EXPORT using meter_per_second =
+MODULE_EXPORT template <typename T = double>
+using meter_per_second =
     quantity_value<meter_per_second_unit, isq::velocity, T>;
 
-template <typename T = double>
-MODULE_EXPORT using meter_per_second_per_second =
+MODULE_EXPORT template <typename T = double>
+using meter_per_second_per_second =
     quantity_value<meter_per_second_per_second_unit, isq::acceleration, T>;
 
 /// \namespace maxwell::si::symbols

@@ -50,8 +50,51 @@ For example, for meter, the unit is named :code:`meter_unit`, the type alias for
 SI Units 
 ^^^^^^^^
 All SI units and type aliases are defined in the :code:`maxwell::si` namespace. Although Maxwell, does not pre-define every metric prefix of every
-unit, many commonly used prefixed units are pre-defined. 
+unit, many commonly used prefixed units are pre-defined. Note that all type aliases are templates, so that the underlying representation type can be specified. 
+The default underlying representation type is :code:`double` which can be specified by leaving the template parameter list empty.
 
+.. code-block:: cpp
+
+    si::meter<int> // Quantity value representing meters with underlying type int
+    si::meter<> // Quantity value representing meters with underlying type double (default)
+ 
 * :code:`meter, meter_unit`
+* :code:`kilometer, kilometer_unit`
+* :code:`centimeter, centimeter_unit`
+* :code:`millimeter, millimeter_unit`
 * :code:`gram, gram_unit`
 * :code:`kilogram, kilogram_unit`
+* :code:`second, second_unit`
+* :code:`ampere, ampere_unit`
+* :code:`kelvin, kelvin_unit`
+* :code:`mole, mole_unit`
+* :code:`candela, candela_unit` 
+* :code:`radian, radian_unit`
+* :code:`celsius, celsius_unit`
+* :code:`degree, degree_unit`
+* :code:`steradian, steradian_unit`
+* :code:`hertz, hertz_unit`
+* :code:`newton, newton_unit`
+* :code:`pascal, pascal_unit`
+* :code:`joule, joule_unit`
+* :code:`newton_meter, newton_meter_unit`
+* :code:`watt, watt_unit`
+* :code:`coulomb, coulomb_unit`
+* :code:`volt, volt_unit`
+* :code:`ohm, ohm_unit`
+* :code:`siemens, siemens_unit`
+* :code:`farad, farad_unit`
+* :code:`weber, weber_unit`
+* :code:`tesla, tesla_unit`
+* :code:`henry, henry_unit`
+* :code:`lumen, lumen_unit`
+* :code:`lux, lux_unit`
+* :code:`becquerel, becquerel_unit`
+* :code:`gray, gray_unit`
+* :code:`sievert, sievert_unit`
+* :code:`katal, katal_unit`
+* :code:`square_meter, square_meter_unit`
+* :code:`cubic_meter, cubic_meter_unit`
+* :code:`liter, liter_unit`
+* :code:`meter_per_second, meter_per_second_unit`
+* :code:`meter_per_second_squared, meter_per_second_squared_unit`

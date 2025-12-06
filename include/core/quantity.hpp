@@ -395,7 +395,7 @@ concept quantity_convertible_to =
 /// \tparam Q The quantity being converted to
 template <typename T, auto Q>
 concept quantity_of =
-    quantity<decltype(Q)> && quantity_convertible_to<T::quantity_kind, Q>;
+    quantity<decltype(Q)> && quantity_convertible_to<T::quantity, Q>;
 
 template <auto> struct is_angle_like : std::false_type {};
 

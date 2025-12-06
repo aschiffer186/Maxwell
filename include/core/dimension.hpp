@@ -534,7 +534,6 @@ constexpr dimension_product auto operator/(dimension_product_type<D, Ds...>,
                                            dimension_product_type<>) {
   return dimension_product_type<D, Ds...>{};
 }
-/// \endcond
 
 MODULE_EXPORT template <dimension D, dimension... Ds>
 constexpr dimension_product auto operator/(dimension_product_type<>,

@@ -40,6 +40,7 @@ MODULE_EXPORT struct decibel_scale_type {
     return value;
   }
 };
+
 } // namespace maxwell
 
 #endif

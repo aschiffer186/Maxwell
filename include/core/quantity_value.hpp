@@ -4,6 +4,7 @@
 #ifndef QUANTITY_VALUE_HPP
 #define QUANTITY_VALUE_HPP
 
+#include "core/impl/quantity_value_holder_fwd.hpp"
 #include "impl/quantity_value_declaration.hpp"
 #include "impl/quantity_value_impl.hpp"
 
@@ -99,18 +100,17 @@ using quecto =
 /// \param value The quantity being converted from.
 /// \return A \c quantity_value with the specified units and quantity, and the
 /// converted numerical value.
-MODULE_EXPORT template <auto ToUnits, auto ToQuantity = ToUnits.quantity,
-                        auto FromUnits, auto FromQuantity, typename T>
+MODULE_EXPORT template <_detail::quantity_value_like ToType, auto FromUnits,
+                        auto FromQuantity, typename T = double>
 constexpr auto
 quantity_cast(const quantity_value<FromUnits, FromQuantity, T>& value)
-    -> quantity_value<ToUnits, ToQuantity, T> {
-  static_assert(ToQuantity.dimensions == FromQuantity.dimensions,
+    -> ToType {
+  static_assert(ToType::quantity.dimensions == FromQuantity.dimensions,
                 "Cannot convert between quantities with different dimensions");
 
-  constexpr double multiplier = conversion_factor(FromUnits, ToUnits);
-  constexpr double offset = conversion_offset(FromUnits, ToUnits);
-  return quantity_value<ToUnits, ToQuantity, T>(
-      (value.get_value() * multiplier) + offset);
+  constexpr double multiplier = conversion_factor(FromUnits, ToType::units);
+  constexpr double offset = conversion_offset(FromUnits, ToType::units);
+  return ToType((value.get_value() * multiplier) + offset);
 }
 
 /// \brief Creates a \c quantity_value from a number and a unit

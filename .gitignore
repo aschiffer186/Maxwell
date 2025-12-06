@@ -5,3 +5,6 @@ notes/*
 
 doc/html/*
 doc/latex/*
+
+proposal/*
+.DS_Store

@@ -241,31 +241,30 @@ log1p(quantity_of<number> auto x) -> double {
   return std::log1p(x.get_value());
 }
 
-template <auto R, auto U, auto Q, typename T>
+MODULE_EXPORT template <auto R, auto U, auto Q, typename T>
   requires utility::rational<decltype(R)>
-MODULE_EXPORT MAXWELL_EXTENDED_CMATH_CONSTEXPR auto
-pow(quantity_value<U, Q, T> x) -> quantity_value<pow<U, R>, pow<Q, R>, T> {
+MAXWELL_EXTENDED_CMATH_CONSTEXPR auto pow(quantity_value<U, Q, T> x)
+    -> quantity_value<pow<U, R>, pow<Q, R>, T> {
   return quantity_value<pow<U, R>, pow<Q, R>, T>(
       std::pow(x.get_value(), static_cast<double>(R)));
 }
-
+MODULE_EXPORT
 template <std::intmax_t P, auto U, auto Q, typename T>
-MODULE_EXPORT MAXWELL_EXTENDED_CMATH_CONSTEXPR auto
-pow(quantity_value<U, Q, T> x) -> quantity_value<pow<U, P>, pow<Q, P>, T> {
+MAXWELL_EXTENDED_CMATH_CONSTEXPR auto pow(quantity_value<U, Q, T> x)
+    -> quantity_value<pow<U, P>, pow<Q, P>, T> {
   return quantity_value<pow<U, P>, pow<Q, P>, T>(std::pow(x.get_value(), P));
 }
 
-template <auto U, auto Q, typename T>
+MODULE_EXPORT template <auto U, auto Q, typename T>
   requires unit<decltype(U)> && quantity<decltype(Q)>
-MODULE_EXPORT MAXWELL_EXTENDED_CMATH_CONSTEXPR auto
-sqrt(quantity_value<U, Q, T> x) -> quantity_value<sqrt(U), Q, T> {
+MAXWELL_EXTENDED_CMATH_CONSTEXPR auto sqrt(quantity_value<U, Q, T> x)
+    -> quantity_value<sqrt(U), Q, T> {
   return quantity_value<sqrt(U), Q, T>(std::sqrt(x.get_value()));
 }
 
-template <auto U, auto Q, typename T>
+MODULE_EXPORT template <auto U, auto Q, typename T>
   requires unit<decltype(U)> && quantity<decltype(Q)>
-MODULE_EXPORT MAXWELL_EXTENDED_CMATH_CONSTEXPR auto
-cbrt(quantity_value<U, Q, T> x)
+MAXWELL_EXTENDED_CMATH_CONSTEXPR auto cbrt(quantity_value<U, Q, T> x)
     -> quantity_value<pow<U, rational<1, 3>>, pow<Q, rational<1, 3>>, T> {
   return quantity_value<pow<U, rational<1, 3>>, pow<Q, rational<1, 3>>, T>(
       cbrt(x.get_value()));
@@ -291,121 +290,124 @@ lgamma(quantity_of<number> auto x) -> double {
   return std::lgamma(x.get_value());
 }
 
-template <auto U, auto Q, typename T>
+MODULE_EXPORT template <auto U, auto Q, typename T>
   requires unit<decltype(U)> && quantity<decltype(Q)>
-MODULE_EXPORT MAXWELL_BASIC_CMATH_CONSTEXPR auto ceil(quantity_value<U, Q, T> x)
+MAXWELL_BASIC_CMATH_CONSTEXPR auto ceil(quantity_value<U, Q, T> x)
     -> quantity_value<U, Q, T> {
   return quantity_value<U, Q, T>(std::ceil(x.get_value()));
 }
 
-template <auto Q, typename T>
+MODULE_EXPORT template <auto Q, typename T>
   requires quantity<decltype(Q)>
-MODULE_EXPORT MAXWELL_BASIC_CMATH_CONSTEXPR auto ceil(quantity_holder<Q, T> x)
+MAXWELL_BASIC_CMATH_CONSTEXPR auto ceil(quantity_holder<Q, T> x)
     -> quantity_holder<Q, T> {
-  return quantity_holder<Q, T>(std::ceil(x.get_value()), x.get_units());
+  return quantity_holder<Q, T>(std::ceil(x.get_value()), x.get_multiplier(),
+                               x.get_reference());
 }
 
-template <auto U, auto Q, typename T>
+MODULE_EXPORT template <auto U, auto Q, typename T>
   requires unit<decltype(U)> && quantity<decltype(Q)>
-MODULE_EXPORT MAXWELL_BASIC_CMATH_CONSTEXPR auto
-floor(quantity_value<U, Q, T> x) -> quantity_value<U, Q, T> {
+MAXWELL_BASIC_CMATH_CONSTEXPR auto floor(quantity_value<U, Q, T> x)
+    -> quantity_value<U, Q, T> {
   return quantity_value<U, Q, T>(std::floor(x.get_value()));
 }
 
-template <auto Q, typename T>
+MODULE_EXPORT template <auto Q, typename T>
   requires quantity<decltype(Q)>
-MODULE_EXPORT MAXWELL_BASIC_CMATH_CONSTEXPR auto floor(quantity_holder<Q, T> x)
+MAXWELL_BASIC_CMATH_CONSTEXPR auto floor(quantity_holder<Q, T> x)
     -> quantity_holder<Q, T> {
-  return quantity_holder<Q, T>(std::floor(x.get_value()), x.get_units());
+  return quantity_holder<Q, T>(std::floor(x.get_value()), x.get_multiplier(),
+                               x.get_reference());
 }
 
-template <auto U, auto Q, typename T>
+MODULE_EXPORT template <auto U, auto Q, typename T>
   requires unit<decltype(U)> && quantity<decltype(Q)>
-MODULE_EXPORT MAXWELL_BASIC_CMATH_CONSTEXPR auto
-trunc(quantity_value<U, Q, T> x) -> quantity_value<U, Q, T> {
+MAXWELL_BASIC_CMATH_CONSTEXPR auto trunc(quantity_value<U, Q, T> x)
+    -> quantity_value<U, Q, T> {
   return quantity_value<U, Q, T>(std::trunc(x.get_value()));
 }
 
-template <auto Q, typename T>
+MODULE_EXPORT template <auto Q, typename T>
   requires quantity<decltype(Q)>
-MODULE_EXPORT MAXWELL_BASIC_CMATH_CONSTEXPR auto trunc(quantity_holder<Q, T> x)
+MAXWELL_BASIC_CMATH_CONSTEXPR auto trunc(quantity_holder<Q, T> x)
     -> quantity_holder<Q, T> {
-  return quantity_holder<Q, T>(std::trunc(x.get_value()), x.get_units());
+  return quantity_holder<Q, T>(std::trunc(x.get_value()), x.get_multiplier(),
+                               x.get_reference());
 }
 
-template <auto U, auto Q, typename T>
+MODULE_EXPORT template <auto U, auto Q, typename T>
   requires unit<decltype(U)> && quantity<decltype(Q)>
-MODULE_EXPORT MAXWELL_BASIC_CMATH_CONSTEXPR auto
-round(quantity_value<U, Q, T> x) -> quantity_value<U, Q, T> {
+MAXWELL_BASIC_CMATH_CONSTEXPR auto round(quantity_value<U, Q, T> x)
+    -> quantity_value<U, Q, T> {
   return quantity_value<U, Q, T>(std::round(x.get_value()));
 }
 
-template <auto Q, typename T>
+MODULE_EXPORT template <auto Q, typename T>
   requires quantity<decltype(Q)>
-MODULE_EXPORT MAXWELL_BASIC_CMATH_CONSTEXPR auto round(quantity_holder<Q, T> x)
+MAXWELL_BASIC_CMATH_CONSTEXPR auto round(quantity_holder<Q, T> x)
     -> quantity_holder<Q, T> {
-  return quantity_holder<Q, T>(std::round(x.get_value()), x.get_units());
+  return quantity_holder<Q, T>(std::round(x.get_value()), x.get_multiplier(),
+                               x.get_reference());
 }
 
-template <auto U, auto Q, typename T>
+MODULE_EXPORT template <auto U, auto Q, typename T>
   requires unit<decltype(U)> && quantity<decltype(Q)>
-MODULE_EXPORT MAXWELL_BASIC_CMATH_CONSTEXPR auto
-lround(quantity_value<U, Q, T> x) -> quantity_value<U, Q, long> {
+MAXWELL_BASIC_CMATH_CONSTEXPR auto lround(quantity_value<U, Q, T> x)
+    -> quantity_value<U, Q, long> {
   return quantity_value<U, Q, long>(std::round(x.get_value()));
 }
 
-template <auto Q, typename T>
+MODULE_EXPORT template <auto Q, typename T>
   requires quantity<decltype(Q)>
 MODULE_EXPORT MAXWELL_BASIC_CMATH_CONSTEXPR auto lround(quantity_holder<Q, T> x)
     -> quantity_holder<Q, long> {
-  return quantity_holder<Q, long>(std::round(x.get_value()), x.get_units());
+  return quantity_holder<Q, long>(std::round(x.get_value()), x.get_multiplier(),
+                                  x.get_reference());
 }
 
-template <auto U, auto Q, typename T>
+MODULE_EXPORT template <auto U, auto Q, typename T>
   requires unit<decltype(U)> && quantity<decltype(Q)>
-MODULE_EXPORT MAXWELL_BASIC_CMATH_CONSTEXPR auto
-llround(quantity_value<U, Q, T> x) -> quantity_value<U, Q, long long> {
+MAXWELL_BASIC_CMATH_CONSTEXPR auto llround(quantity_value<U, Q, T> x)
+    -> quantity_value<U, Q, long long> {
   return quantity_value<U, Q, long long>(std::round(x.get_value()));
 }
 
-template <auto Q, typename T>
+MODULE_EXPORT template <auto Q, typename T>
   requires quantity<decltype(Q)>
-MODULE_EXPORT MAXWELL_BASIC_CMATH_CONSTEXPR auto
-llround(quantity_holder<Q, T> x) -> quantity_holder<Q, long long> {
+MAXWELL_BASIC_CMATH_CONSTEXPR auto llround(quantity_holder<Q, T> x)
+    -> quantity_holder<Q, long long> {
   return quantity_holder<Q, long long>(std::round(x.get_value()),
-                                       x.get_units());
+                                       x.get_multiplier(), x.get_reference());
 }
 
-template <auto U, auto Q, typename T>
+MODULE_EXPORT template <auto U, auto Q, typename T>
   requires unit<decltype(U)> && quantity<decltype(Q)>
-MODULE_EXPORT auto nearbyint(quantity_value<U, Q, T> x)
-    -> quantity_value<U, Q, T> {
+auto nearbyint(quantity_value<U, Q, T> x) -> quantity_value<U, Q, T> {
   return quantity_value<U, Q, T>(std::nearbyint(x.get_value()));
 }
 
-template <auto Q, typename T>
+MODULE_EXPORT template <auto Q, typename T>
   requires quantity<decltype(Q)>
-MODULE_EXPORT auto nearbyint(quantity_holder<Q, T> x) -> quantity_holder<Q, T> {
-  return quantity_holder<Q, T>(std::nearbyint(x.get_value()), x.get_units());
+auto nearbyint(quantity_holder<Q, T> x) -> quantity_holder<Q, T> {
+  return quantity_holder<Q, T>(std::nearbyint(x.get_value()),
+                               x.get_multiplier(), x.get_reference());
 }
 
-template <auto U, auto Q, typename T>
+MODULE_EXPORT template <auto U, auto Q, typename T>
   requires unit<decltype(U)> && quantity<decltype(Q)>
-MODULE_EXPORT auto rint(quantity_value<U, Q, T> x) -> quantity_value<U, Q, T> {
+auto rint(quantity_value<U, Q, T> x) -> quantity_value<U, Q, T> {
   return quantity_value<U, Q, T>(std::rint(x.get_value()));
 }
 
-template <auto U, auto Q, typename T>
+MODULE_EXPORT template <auto U, auto Q, typename T>
   requires unit<decltype(U)> && quantity<decltype(Q)>
-MODULE_EXPORT auto lrint(quantity_value<U, Q, T> x)
-    -> quantity_value<U, Q, long> {
+auto lrint(quantity_value<U, Q, T> x) -> quantity_value<U, Q, long> {
   return quantity_value<U, Q, long>(std::rint(x.get_value()));
 }
 
-template <auto U, auto Q, typename T>
+MODULE_EXPORT template <auto U, auto Q, typename T>
   requires unit<decltype(U)> && quantity<decltype(Q)>
-MODULE_EXPORT auto llrint(quantity_value<U, Q, T> x)
-    -> quantity_value<U, Q, long long> {
+auto llrint(quantity_value<U, Q, T> x) -> quantity_value<U, Q, long long> {
   return quantity_value<U, Q, long long>(std::rint(x.get_value()));
 }
 
