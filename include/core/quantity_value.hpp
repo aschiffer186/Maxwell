@@ -5,9 +5,11 @@
 #define QUANTITY_VALUE_HPP
 
 #include "core/impl/quantity_value_holder_fwd.hpp"
+#include "core/quantity.hpp"
 #include "core/unit.hpp"
 #include "impl/quantity_value_declaration.hpp"
 #include "impl/quantity_value_impl.hpp"
+#include "quantity_systems/isq.hpp"
 
 namespace maxwell {
 MODULE_EXPORT template <typename Q>
@@ -143,10 +145,11 @@ constexpr auto operator*(T&& value, U) -> quantity_value<U{}, U::quantity, T> {
 /// \return A \c quantity_value with the specified value and inverse of the
 /// specified units.
 MODULE_EXPORT template <typename T, unit U>
-  requires(!_detail::is_quantity_value_v<T> && !unit<T>)
-constexpr auto operator/(T&& value, U) -> quantity_value<U{}, U::quantity, T> {
-  return quantity_value<_detail::unit_inv<U>{}, _detail::unit_inv<U>::quantity,
-                        T>(std::forward<T>(value));
+  requires(!_detail::is_quantity_value_v<T> && !unit<T> && !quantity<T>)
+constexpr auto operator/(T&& value, U)
+    -> quantity_value<inv(U{}), number / U::quantity, T> {
+  return quantity_value<inv(U{}), number / U::quantity, T>(
+      std::forward<T>(value));
 }
 
 /// \brief Multiplies a \c quantity_value by a unit
@@ -159,7 +162,7 @@ constexpr auto operator/(T&& value, U) -> quantity_value<U{}, U::quantity, T> {
 /// \tparam LHSQuantity The quantity of the left-hand side \c quantity_value.
 /// \tparam T The type of the numerical value of the left-hand side \c
 /// quantity_value.
-/// \tparam RHSUnit The units of the right-hand side unit.
+/// \tparam RHSUnit The units` of the right-hand side unit.
 /// \param lhs The left-hand side \c quantity_value.
 /// \param RHSUnit The right-hand side unit.
 /// \return A new \c quantity_value with the resulting units and the same

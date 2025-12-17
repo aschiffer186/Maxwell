@@ -61,7 +61,7 @@ constexpr quantity_value<U, Q, T>::quantity_value(
   static_assert(
       quantity_convertible_to<FromQuantity, Q>,
       "Attempting to construct value from incompatible quantity. Note, "
-      "quantities can be incompatible even if they have te same units.");
+      "quantities can be incompatible even if they have the same units.");
 }
 
 template <auto U, auto Q, typename T>
@@ -81,7 +81,7 @@ constexpr quantity_value<U, Q, T>::quantity_value(
   static_assert(
       quantity_convertible_to<FromQuantity, Q>,
       "Attempting to construct value from incompatible quantity. Note, "
-      "quantities can be incompatible even if they have te same units.");
+      "quantities can be incompatible even if they have the same units.");
 }
 
 template <auto U, auto Q, typename T>
@@ -98,7 +98,7 @@ constexpr quantity_value<U, Q, T>::quantity_value(
   static_assert(
       quantity_convertible_to<FromQuantity, Q>,
       "Attempting to construct value from incompatible quantity. Note, "
-      "quantities can be incompatible even if they have te same units.");
+      "quantities can be incompatible even if they have the same units.");
 }
 
 template <auto U, auto Q, typename T>
@@ -114,7 +114,7 @@ constexpr quantity_value<U, Q, T>::quantity_value(
   static_assert(
       quantity_convertible_to<FromQuantity, Q>,
       "Attempting to construct value from incompatible quantity. Note, "
-      "quantities can be incompatible even if they have te same units.");
+      "quantities can be incompatible even if they have the same units.");
 }
 
 template <auto U, auto Q, typename T>
@@ -129,7 +129,7 @@ constexpr auto quantity_value<U, Q, T>::operator=(
                 "Attempting to construct value from "
                 "incompatible quantity. Note, "
                 "quantities can be incompatible even if "
-                "they have te same units.");
+                "they have the same units.");
 
   using std::swap;
   quantity_value temp(std::move(other));

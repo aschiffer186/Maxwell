@@ -4,6 +4,11 @@ add_library(${PROJECT_NAME} INTERFACE
     ${CMAKE_CURRENT_SOURCE_DIR}/core/quantity_value.hpp
     ${CMAKE_CURRENT_SOURCE_DIR}/core/quantity.hpp
     ${CMAKE_CURRENT_SOURCE_DIR}/core/quantity_system.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/core/impl/quantity_holder_declaration.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/core/impl/quantity_value_declaration.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/core/impl/quantity_value_holder_fwd.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/core/impl/quantity_holder_impl.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/core/impl/quantity_value_impl.hpp
     ${CMAKE_CURRENT_SOURCE_DIR}/core/scale.hpp
     ${CMAKE_CURRENT_SOURCE_DIR}/core/unit.hpp 
     ${CMAKE_CURRENT_SOURCE_DIR}/formatting/formatting.hpp 
