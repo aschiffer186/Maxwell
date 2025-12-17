@@ -51,3 +51,23 @@ TEST(TestQuantityHolder, TestValueConstructors) {
   EXPECT_EQ(t2.get_multiplier(), 1.0);
   EXPECT_EQ(t2.get_reference(), 0.0);
 }
+
+TEST(TestQuantityHolder, TestUnitPieceConstructor) {
+  quantity_holder<isq::temperature, double> t{10.0, 9.0 / 5.0, -459.67};
+  EXPECT_EQ(t.get_value(), 10.0);
+  EXPECT_EQ(t.get_multiplier(), 9.0 / 5.0);
+  EXPECT_EQ(t.get_reference(), -459.67);
+}
+
+TEST(TestQuantityHolder, TestAsMethod) {
+  length_holder<> l{5000.0, si::meter_unit};
+  const kilo<si::meter<>> km = l.as<kilo_unit<si::meter_unit>>();
+  EXPECT_FLOAT_EQ(km.get_value(), 5.0);
+
+  temperature_holder<> t{300.0, si::kelvin_unit};
+  const si::celsius<> c = t.as<si::celsius_unit>();
+  EXPECT_FLOAT_EQ(c.get_value(), 26.85);
+
+  const us::fahrenheit<> f = t.as<us::fahrenheit_unit>();
+  EXPECT_FLOAT_EQ(f.get_value(), 80.33);
+}

@@ -117,11 +117,11 @@ template <auto Q, typename T>
   requires quantity<decltype(Q)>
 template <auto ToUnit>
 constexpr auto quantity_holder<Q, T>::as() const
-    -> quantity_value<Q, ToUnit, T> {
+    -> quantity_value<ToUnit, Q, T> {
   static_assert(quantity_convertible_to<Q, ToUnit.quantity>,
                 "Cannot convert to specified unit");
 
-  return quantity_value<Q, ToUnit, T>(value_ * multiplier_ /
+  return quantity_value<ToUnit, Q, T>(value_ * multiplier_ /
                                       static_cast<double>(ToUnit.multiplier));
 }
 

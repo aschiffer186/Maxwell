@@ -279,7 +279,7 @@ public:
   constexpr auto get_reference() const noexcept -> double;
 
   template <auto ToUnit>
-  constexpr auto as() const -> quantity_value<Q, ToUnit, T>;
+  constexpr auto as() const -> quantity_value<ToUnit, Q, T>;
 
   constexpr auto in_base_units() const -> quantity_holder<Q, T>;
 
