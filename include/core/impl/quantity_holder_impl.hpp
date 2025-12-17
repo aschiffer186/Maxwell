@@ -121,8 +121,7 @@ constexpr auto quantity_holder<Q, T>::as() const
   static_assert(quantity_convertible_to<Q, ToUnit.quantity>,
                 "Cannot convert to specified unit");
 
-  return quantity_value<ToUnit, Q, T>(value_ * multiplier_ /
-                                      static_cast<double>(ToUnit.multiplier));
+  return quantity_value<ToUnit, Q, T>(value_ * ToUnit.multiplier / multiplier_);
 }
 
 template <auto Q, typename T>

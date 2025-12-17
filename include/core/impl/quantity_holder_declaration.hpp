@@ -227,14 +227,18 @@ template <typename Derived> class quantity_holder_arithmetic_operators {
 } // namespace _detail
 /// \endcond
 
+/// \brief Holds a numerical value associated with a physical quantity.
 MODULE_EXPORT template <auto Q, typename T>
   requires quantity<decltype(Q)>
 class quantity_holder
     : _detail::quantity_holder_arithmetic_operators<quantity_holder<Q, T>> {
 public:
+  /// The type of the numerical value of the \c quantity_holder.
   using value_type = T;
-  using quantity_kind_type = decltype(Q);
-  static constexpr quantity auto quantity_kind = Q;
+  /// The type of the quantity of the \c quantity_holder.
+  using quantity_type = std::remove_cv_t<decltype(Q)>;
+  /// The quantity of the \c quantity_holder.
+  static constexpr ::maxwell::quantity auto quantity = Q;
 
   constexpr explicit quantity_holder(unit auto units) noexcept(
       std::is_nothrow_default_constructible_v<T>)
@@ -274,10 +278,24 @@ public:
   constexpr auto get_value() && noexcept -> T&&;
   constexpr auto get_value() const&& noexcept -> const T&&;
 
+  /// \brief Returns the multiplier of the quantity holder.
+  ///
+  /// \return The multiplier of the quantity holder.
   constexpr auto get_multiplier() const noexcept -> double;
 
+  /// \brief Returns the reference of the quantity holder.
+  ///
+  /// \return The reference of the quantity holder.
   constexpr auto get_reference() const noexcept -> double;
 
+  /// \brief Converts the quantity holder to the specified unit.
+  ///
+  /// Converts the \c quantity_holder to a \c quantity_value expressed in the
+  /// specified units.
+  ///
+  /// \tparam ToUnit The unit to convert to.
+  /// \return A \c quantity_value representing the quantity in the specified
+  /// unit.
   template <auto ToUnit>
   constexpr auto as() const -> quantity_value<ToUnit, Q, T>;
 
