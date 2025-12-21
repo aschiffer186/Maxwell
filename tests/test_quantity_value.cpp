@@ -185,12 +185,12 @@ TEST(TestQuantityValue, TestConvertingConstructor) {
 }
 
 TEST(TestQuantityValue, TestQuantityHolderConstructor) {
-  const isq::length_holder<> l{1.0, si::meter_unit};
+  const isq::length_holder<> l{si::meter_unit, 1.0};
   const si::kilometer<> km{l};
 
   EXPECT_FLOAT_EQ(km.get_value(), 1e-3);
 
-  const isq::temperature_holder<> t{300.0, si::kelvin_unit};
+  const isq::temperature_holder<> t{si::kelvin_unit, 300.0};
   si::celsius<> c{t};
   us::fahrenheit<> f{t};
 

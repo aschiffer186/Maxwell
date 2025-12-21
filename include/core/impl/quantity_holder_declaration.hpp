@@ -15,8 +15,18 @@
 #include "quantity_value_holder_fwd.hpp"
 
 namespace maxwell {
+/// \brief Exception thrown when attempting to perform an operation on
+/// incompatible \c quantity_holders
+///
+/// Class \c incompatible_quantity_holder is an exception thrown when an
+/// arithmetic operation is performed on two instaces of \c quantity_holder with
+/// difference references. Because the units of a \c quantity_holder are
+/// determined at run-time, this error cannot be caught at compile-time.
 class incompatible_quantity_holder : public std::runtime_error {
 public:
+  /// \brief Constructor
+  ///
+  /// \param message The error message associated with the exception.
   explicit incompatible_quantity_holder(const std::string& message)
       : std::runtime_error(message) {}
 };
@@ -240,31 +250,108 @@ public:
   /// The quantity of the \c quantity_holder.
   static constexpr ::maxwell::quantity auto quantity = Q;
 
+  /// \brief Constructor
+  ///
+  /// Constructs a \c quantity_holder whose underlying value is
+  /// default-initialized in the specified units.
+  ///
+  /// \param units The units to use for the \c quantity_holder.
+  /// \throw Any exceptions thrown by the default constructor of \c T.
   constexpr explicit quantity_holder(unit auto units) noexcept(
       std::is_nothrow_default_constructible_v<T>)
     requires std::is_default_constructible_v<T>;
 
+  /// \brief Constructor
+  ///
+  /// Constructs a \c quantity_holder whose underlying value is direct non-list
+  /// initialized from the specified value as if by \c std::forward<Up>(u). The
+  /// units of value stored by the \c quantity_holder are the specified units.
+  ///
+  /// \tparam Up The type of the value used to initialize the \c
+  /// quantity_holder.
+  /// \param u The value used to initialize the \c quantity_holder.
+  /// \param units The units to use for the \c quantity_holder.
+  /// \throw Any exceptions thrown by the selected constructor of \c T.
   template <typename Up = T>
     requires std::constructible_from<T, Up> &&
              (!_detail::is_quantity_holder_v<Up>) &&
              (!_detail::quantity_value_like<Up> && !unit<Up>)
-  constexpr quantity_holder(Up&& u, unit auto units);
+  constexpr quantity_holder(unit auto units, Up&& u);
 
+  /// \brief Constructor
+  ///
+  /// Constructs a \c quantity_holder whose underlying value is direct non-list
+  /// initialized from the specified value as if by \c std::forward<Up>(u). The
+  /// units of value stored by the \c quantity_holder are the units represented
+  /// by the specified multiplier and reference from the base units of the \c
+  /// quantity_holder's quantity.
+  ///
+  /// \tparam Up The type of the value used to initialize the \c
+  /// quantity_holder.
+  /// \param u The value used to initialize the \c quantity_holder.
+  /// \param multiplier The multiplier from the base units of the \c
+  /// quantity_holder's quantity.
+  /// \param reference The reference from the base units of the \c
+  /// quantity_holder's quantity.
+  /// \throw Any exceptions thrown by the selected constructor of \c T.
   template <typename Up = T>
     requires std::constructible_from<T, Up> &&
              (!_detail::is_quantity_holder_v<Up>) &&
              (!_detail::quantity_value_like<Up> && !unit<Up>)
   constexpr quantity_holder(Up&& u, double multiplier, double reference);
 
+  /// \brief Constructor
+  ///
+  /// Constructs a \c quantity_holder whose underlying value is direct non-list
+  /// initialized from the specified arguments as if by \c
+  /// std::forward<Args>(args).... The units of value stored by the \c
+  /// quantity_holder are the specified units.
+  ///
+  /// \pre <tt>std::constructible_from<T, Args...></tt> is modeled.
+  ///
+  /// \tparam Args The types of the arguments used to construct the numerical
+  /// value of the quantity.
+  /// \param units The units to use for the \c quantity_holder.
+  /// \param args The arguments used to construct the numerical value of the
+  /// quantity.
+  /// \throw Any exceptions thrown by the selected constructor of \c T.
   template <typename... Args>
     requires std::constructible_from<T, Args...>
-  constexpr quantity_holder(std::in_place_t, Args&&... args, unit auto units);
+  constexpr quantity_holder(unit auto units, std::in_place_t, Args&&... args);
 
+  /// \brief Constructor
+  ///
+  /// Constructs a \c quantity_holder whose underlying value is direct non-list
+  /// initialized from the specified arguments. The units of value stored by the
+  /// \c quantity_holder are the specified units.
+  ///
+  /// \pre <tt>std::constructible_from<T, std::initialize_list<U>&,
+  /// Args...></tt> is modeled.
+  ///
+  /// \tparam Args The types of the arguments used to construct the numerical
+  /// value of the quantity.
+  /// \param units The units to use for the \c quantity_holder.
+  /// \param args The arguments used to construct the numerical value of the
+  /// quantity.
+  /// \throw Any exceptions thrown by the selected constructor of \c T.
   template <typename U, typename... Args>
-    requires std::constructible_from<T, std::initializer_list<U>, Args...>
-  constexpr quantity_holder(std::in_place_t, std::initializer_list<U> il,
-                            Args&&... args, unit auto units);
+    requires std::constructible_from<T, std::initializer_list<U>&, Args...>
+  constexpr quantity_holder(unit auto units, std::in_place_t,
+                            std::initializer_list<U> il, Args&&... args);
 
+  /// \brief Constructor
+  /// Constructs a \c quantity_holder from a
+  /// \c std::chrono::duration. The units of the \c quantity_holder are the same
+  /// as the units of the specified duration type.
+  ///
+  /// \pre <tt>std::constructible_from_v<T, Rep></tt> is modeled.
+  /// \pre \c enable_chrono_conversions_v<Q> is \c true.
+  ///
+  /// \tparam Rep The representation type of the \c std::chrono::duration
+  /// \tparam Period The period type of the \c std::chrono::duration
+  /// \param d The \c std::chrono::duration used to construct the \c
+  /// quantity_holder.
+  /// \throw Any exceptions thrown by the selected constructor of \c T.
   template <typename Rep, typename Period>
     requires std::constructible_from<T, Rep> && enable_chrono_conversions_v<Q>
   constexpr explicit quantity_holder(
@@ -272,7 +359,7 @@ public:
 
   template <auto FromQuantity, auto FromUnit, typename Up = T>
     requires std::constructible_from<T, Up>
-  constexpr quantity_holder(quantity_value<FromQuantity, FromUnit, Up> other);
+  constexpr quantity_holder(quantity_value<FromUnit, FromQuantity, Up> other);
 
   constexpr auto get_value() const& noexcept -> const T&;
   constexpr auto get_value() && noexcept -> T&&;

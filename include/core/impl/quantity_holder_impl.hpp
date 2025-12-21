@@ -19,7 +19,7 @@ template <typename Up>
   requires std::constructible_from<T, Up> &&
                (!_detail::is_quantity_holder_v<Up>) &&
                (!_detail::quantity_value_like<Up> && !unit<Up>)
-constexpr quantity_holder<Q, T>::quantity_holder(Up&& u, unit auto units)
+constexpr quantity_holder<Q, T>::quantity_holder(unit auto units, Up&& u)
     : value_(std::forward<Up>(u)), multiplier_(units.multiplier),
       reference_(units.reference) {
   static_assert(quantity_convertible_to<decltype(units)::quantity, Q>,
@@ -42,20 +42,20 @@ template <auto Q, typename T>
   requires quantity<decltype(Q)>
 template <typename... Args>
   requires std::constructible_from<T, Args...>
-constexpr quantity_holder<Q, T>::quantity_holder(std::in_place_t,
-                                                 Args&&... args,
-                                                 unit auto units)
+constexpr quantity_holder<Q, T>::quantity_holder(unit auto units,
+                                                 std::in_place_t,
+                                                 Args&&... args)
     : value_(std::forward<Args>(args)...), multiplier_(units.multiplier),
       reference_(units.reference) {}
 
 template <auto Q, typename T>
   requires quantity<decltype(Q)>
 template <typename U, typename... Args>
-  requires std::constructible_from<T, std::initializer_list<U>, Args...>
-constexpr quantity_holder<Q, T>::quantity_holder(std::in_place_t,
+  requires std::constructible_from<T, std::initializer_list<U>&, Args...>
+constexpr quantity_holder<Q, T>::quantity_holder(unit auto units,
+                                                 std::in_place_t,
                                                  std::initializer_list<U> il,
-                                                 Args&&... args,
-                                                 unit auto units)
+                                                 Args&&... args)
     : value_(il, std::forward<Args>(args)...), multiplier_(units.multiplier),
       reference_(units.reference) {}
 
@@ -73,7 +73,7 @@ template <auto Q, typename T>
 template <auto FromQuantity, auto FromUnit, typename Up>
   requires std::constructible_from<T, Up>
 constexpr quantity_holder<Q, T>::quantity_holder(
-    quantity_value<FromQuantity, FromUnit, Up> other)
+    quantity_value<FromUnit, FromQuantity, Up> other)
     : value_(std::move(other).get_value()), multiplier_(FromUnit.multiplier),
       reference_(FromUnit.reference) {
   static_assert(quantity_convertible_to<FromUnit.quantity, Q>,
