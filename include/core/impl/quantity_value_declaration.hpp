@@ -679,15 +679,58 @@ public:
              ::maxwell::quantity<decltype(FromQuantity)>
   constexpr quantity_value(quantity_value<FromUnit, FromQuantity, Up>&& other);
 
+  /// \brief Converting constructor
+  ///
+  /// Constructs an instance of \c quantity_value from an instance of \c
+  /// quantity_holder, automatically converting from the quantity and units of
+  /// the \c quantity_holder to the quantity and units of the \c quantity_value.
+  /// The conversion factor is calculated at compile-time. In this constructor,
+  /// an lvalue-reference to the numerical value of \c other is passed to the
+  /// conversion function.
+  ///
+  /// This function only participates in overload resolution if the following
+  /// are true:
+  /// 1. <tt>std::is_constructible_from_v<T, Up></tt> is \c true.
+  /// 2. \c quantity<decltype(FromQuantity)> is \c true.
+  ///
+  /// \tparam FromQuantity The quantity of the \c quantity_holder used to
+  /// construct the \c quantity_value.
+  /// \tparam Up The type of the numerical value of the \c quantity_holder being
+  /// used to construct the \c quantity_value.
+  /// \param other The \c quantity_holder instance used to construct the \c
+  /// quantity_value.
+  /// \throws Any exceptions thrown by the selected constructor of \c T.
   template <auto FromQuantity, typename Up = T>
     requires std::constructible_from<T, Up> &&
              ::maxwell::quantity<decltype(FromQuantity)>
   constexpr quantity_value(const quantity_holder<FromQuantity, T>& other);
 
+  /// \brief Converting constructor
+  ///
+  /// Constructs an instance of \c quantity_value from an instance of \c
+  /// quantity_holder, automatically converting from the quantity and units of
+  /// the \c quantity_holder to the quantity and units of the \c quantity_value.
+  /// The conversion factor is calculated at compile-time. In this constructor,
+  /// an rvalue-reference to the numerical value of \c other is passed to the
+  /// conversion function.
+  ///
+  /// This function only participates in overload resolution if the following
+  /// are true:
+  /// 1. <tt>std::is_constructible_from_v<T, Up></tt> is \c true.
+  /// 2. \c quantity<decltype(FromQuantity)> is \c true.
+  ///
+  /// \tparam FromQuantity The quantity of the \c quantity_holder used to
+  /// construct the \c quantity_value.
+  /// \tparam Up The type of the numerical value of the \c quantity_holder being
+  /// used to construct the \c quantity_value.
+  /// \param other The \c quantity_holder instance used to construct the \c
+  /// quantity_value.
+  /// \throws Any exceptions thrown by the selected constructor of \c T.
   template <auto FromQuantity, typename Up = T>
     requires std::constructible_from<T, Up> &&
              ::maxwell::quantity<decltype(FromQuantity)>
   constexpr quantity_value(quantity_holder<FromQuantity, T>&& other);
+
   // --- Assignment Operators ---
 
   /// \brief Assigns the value of the specified \c quantity_value to the value

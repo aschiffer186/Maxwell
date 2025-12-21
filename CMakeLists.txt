@@ -31,6 +31,7 @@ if (BUILD_DOCS)
     doxygen_add_docs(doxygen 
         ${DOXYGEN_INPUT}
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include
+        CONFIG_FILE ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile
     )
 
     set(SPHINX_SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/docs)

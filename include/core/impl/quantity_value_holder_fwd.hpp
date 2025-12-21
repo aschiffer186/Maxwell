@@ -6,10 +6,45 @@
 #include <type_traits>
 
 namespace maxwell {
+/// \brief Holds a numerical value associated with a physical quantity.
 MODULE_EXPORT template <auto Q, typename T = double>
   requires quantity<decltype(Q)>
 class quantity_holder;
 
+/// \brief Class template representing the value of a quantity with a particular
+/// unit.
+///
+/// Class template \c quantity_value represents the value of a quantity
+/// expressed in a particular unit. Both the quantity and unit of the \c
+/// quantity_value are specified at compile-time and are part of the type of the
+/// \c quantity_value. By making the quantity and unit part of the type of the
+/// \c quantity_value, unit coherence can be verified at compile-time. It is not
+/// permited to mix instances of \c quantity_value representing different
+/// quantities. However, two \c quantity_value instances may have the same unit,
+/// but represent different quantities, e.g. length and wavelength can both be
+/// expressed in nanometers, but may represent different quantities. This allows
+/// for an additional level of type safety. <br>
+///
+/// By making the unit part of the type, unit conversions can be performed
+/// automatically at compile-time rather than run-time. This makes the library
+/// extremely efficient. <br>
+///
+/// Both the units and the quantity of the \c quantity_value are specified as
+/// non-type template parameters (NTTPs).
+/// Using NTTPs allows for more natural definitions of custom units and
+/// definitions.
+///
+/// \warning Using an integral type with \c quantity_value will perform
+/// truncation when converting units and integer division when performing
+/// division.
+///
+/// \pre \c Q is convertible to the quantity of the specified units \c U.
+///       The program is ill-formed if this is violated.
+///
+/// \tparam U The units of the \c quantity_value.
+/// \tparam Q The quantity of the \c quantity_value. Default: the quantity of
+/// the units.
+/// \tparam T The type of the \c quantity_value. Default: \c double.
 MODULE_EXPORT template <auto U, auto Q = U.quantity, typename T = double>
   requires unit<decltype(U)> && quantity<decltype(Q)>
 class quantity_value;

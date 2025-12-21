@@ -1,5 +1,5 @@
 Building and Installation
-============ 
+========================= 
 
 Installing Maxwell
 ------------------
@@ -19,7 +19,7 @@ The Maxwell package provides the following helper variables:
 The package also provides a single target to link against: :code:`Maxwell::Maxwell`.
 
 Building Tests 
--------------
+--------------
 The unit tests for Maxwell and be build and run using CMake from the top level Maxwell folder. 
 
 .. code-block:: bash 

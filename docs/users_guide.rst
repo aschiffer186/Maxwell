@@ -71,7 +71,7 @@ Multiplying or dividing two quantity values provides a new quantity value of a d
 In Maxwell, quantity values are represented by the :code:`quantity_value` class template. This is the most commonly used type in Maxwell.
 
 Compile-Time Unit Checking and Conversion 
-----------------------------
+-----------------------------------------
 Overview
 ^^^^^^^^
 The most common use case of Maxwell involves performing both unit check and unit conversions at compile-time. 
@@ -267,7 +267,7 @@ with :code:`d`.
 Special mathematical functions, e.g. :code:`exp` or :code:`log` are only provided for dimensionless quantities. 
 
 Compile-Time Unit Checking and Run-Time Conversions
----------------------------------------
+---------------------------------------------------
 Maxwell also provides the ability to perform unit conversions at run-time instead of compile-time while still providing compile-time safety. 
 This is accomplished using the :code:`quantity_holder` class template.
 

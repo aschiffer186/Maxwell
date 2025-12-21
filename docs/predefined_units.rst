@@ -5,7 +5,7 @@ To make the library more ergonomic, Maxwell provides many predefined quantities 
 predefined units and aliases for :code:`quantity_value` instances representing those units. 
 
 Predefined Quantities 
---------------------
+---------------------
 All predefined quantities are constants defined in the namespace :code:`Maxwell::isq`, e.g. :code:`maxwell::isq::length`.
 
 All pre-defined quantities are incompatible; it is not possble to assign an instance of :code:`quantity_value` representing 
