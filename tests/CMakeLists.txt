@@ -45,3 +45,8 @@ add_executable(test_isq test_isq.cpp)
 add_test(NAME TestISQ COMMAND test_isq)
 target_link_libraries(test_isq PRIVATE Maxwell GTest::gtest_main)
 gtest_discover_tests(test_isq)
+
+add_executable(test_si_units test_si_units.cpp)
+add_test(NAME TestSIUnits COMMAND test_si_units)
+target_link_libraries(test_si_units PRIVATE Maxwell GTest::gtest_main)
+gtest_discover_tests(test_si_units)

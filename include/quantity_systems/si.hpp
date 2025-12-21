@@ -23,7 +23,7 @@ MODULE_EXPORT constexpr struct centimeter_unit_type
     : derived_unit<centi_unit<meter_unit>, "cm"> {
 } centimeter_unit;
 
-MODULE_EXPORT constexpr struct milimeter_unit_type
+MODULE_EXPORT constexpr struct millimeter_unit_type
     : derived_unit<milli_unit<meter_unit>, "mm"> {
 } millimeter_unit;
 
