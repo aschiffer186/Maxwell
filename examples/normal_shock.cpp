@@ -1,10 +1,4 @@
-#include "core/quantity.hpp"
-#include "quantity_systems/isq.hpp"
 #include <Maxwell.hpp>
-
-// using Mach = maxwell::quantity_value<
-//     maxwell::si::number_unit,
-//     maxwell::make_derived_quantity_t<"Mach", maxwell::isq::dimensionless>{}>;
 
 using namespace maxwell;
 

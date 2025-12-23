@@ -9,6 +9,7 @@
 #include <utility>     // declval
 
 #include "dimension.hpp"
+#include "utility/config.hpp"
 #include "utility/template_string.hpp"
 
 namespace maxwell {
@@ -311,7 +312,7 @@ struct derived_quantity_impl {
 /// \tparam Definition An expression representing the dimensions of the
 /// quantity. Should be an arithmetic expression involving quantities.
 /// \tparam DerivedName The name of the new quantity.
-template <auto Definition, utility::template_string DerivedName>
+MODULE_EXPORT template <auto Definition, utility::template_string DerivedName>
   requires quantity<decltype(Definition)>
 using derived_quantity =
     derived_quantity_impl<Definition, DerivedName, false>::type;
@@ -327,7 +328,7 @@ using derived_quantity =
 ///
 /// \tparam Base The base quantity to derive from.
 /// \tparam Derived The name of the new quantity.
-template <auto Base, utility::template_string Derived>
+MODULE_EXPORT template <auto Base, utility::template_string Derived>
   requires quantity<decltype(Base)>
 using sub_quantity = derived_quantity_impl<Base, Derived, true>::type;
 
@@ -380,7 +381,7 @@ consteval auto quantity_convertible_to_impl(From, To) noexcept -> bool {
 ///
 /// \tparam From The quantity to convert from.
 /// \tparam To The quantity to convert to.
-template <auto From, auto To>
+MODULE_EXPORT template <auto From, auto To>
 concept quantity_convertible_to =
     _detail::quantity_convertible_to_impl(From, To);
 
@@ -392,7 +393,7 @@ concept quantity_convertible_to =
 ///
 /// \tparam T The type to check.
 /// \tparam Q The quantity being converted to
-template <typename T, auto Q>
+MODULE_EXPORT template <typename T, auto Q>
 concept quantity_of =
     quantity<decltype(Q)> && quantity_convertible_to<T::quantity, Q>;
 

@@ -21,6 +21,7 @@ module;
 export module Maxwell;
 
 #include "core/dimension.hpp"
+#include "core/quantity.hpp"
 #include "core/quantity_holder.hpp"
 #include "core/quantity_system.hpp"
 #include "core/quantity_value.hpp"
