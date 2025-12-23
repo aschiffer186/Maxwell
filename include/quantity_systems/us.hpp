@@ -55,6 +55,14 @@ using mile = quantity_value<mile_unit, mile_unit.quantity, T>;
 
 MODULE_EXPORT template <typename T = double>
 using fahrenheit = quantity_value<fahrenheit_unit, fahrenheit_unit.quantity, T>;
+
+namespace symbols {
+MODULE_EXPORT constexpr unit auto ft = foot_unit;
+MODULE_EXPORT constexpr unit auto in = inch_unit;
+MODULE_EXPORT constexpr unit auto yard = yard_unit;
+MODULE_EXPORT constexpr unit auto mi = mile_unit;
+MODULE_EXPORT constexpr unit auto degF = fahrenheit_unit;
+} // namespace symbols
 } // namespace maxwell::us
 
 #endif

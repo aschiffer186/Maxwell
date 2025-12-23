@@ -83,6 +83,19 @@ constexpr quantity_holder<Q, T>::quantity_holder(
 
 template <auto Q, typename T>
   requires quantity<decltype(Q)>
+template <auto FromQuantity, typename Up>
+  requires std::constructible_from<T, Up>
+constexpr quantity_holder<Q, T>::quantity_holder(
+    quantity_holder<FromQuantity, Up> other)
+    : value_(std::move(other).get_value()), multiplier_(other.get_multiplier()),
+      reference_(other.get_reference()) {
+  static_assert(
+      quantity_convertible_to<FromQuantity, Q>,
+      "Attempting to constructr quantity holder using incompatible quantity");
+}
+
+template <auto Q, typename T>
+  requires quantity<decltype(Q)>
 constexpr auto quantity_holder<Q, T>::get_value() const& noexcept -> const T& {
   return value_;
 }

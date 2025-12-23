@@ -27,12 +27,11 @@ MODULE_EXPORT constexpr struct millimeter_unit_type
     : derived_unit<milli_unit<meter_unit>, "mm"> {
 } millimeter_unit;
 
-MODULE_EXPORT constexpr struct gram_unit_type : base_unit<isq::mass, "g"> {
-} gram_unit;
-
-MODULE_EXPORT constexpr struct kilogram_unit_type
-    : derived_unit<kilo_unit<gram_unit>, "kg"> {
+MODULE_EXPORT constexpr struct kilogram_unit_type : base_unit<isq::mass, "kg"> {
 } kilogram_unit;
+MODULE_EXPORT constexpr struct gram_unit_type
+    : derived_unit<value<1e3> * kilogram_unit, "g"> {
+} gram_unit;
 
 MODULE_EXPORT constexpr struct second_unit_type : base_unit<isq::time, "s"> {
 } second_unit;
@@ -184,6 +183,11 @@ MODULE_EXPORT template <typename T = double>
 using centimeter = quantity_value<centimeter_unit, isq::length, T>;
 MODULE_EXPORT template <typename T = double>
 using millimeter = quantity_value<millimeter_unit, isq::length, T>;
+
+MODULE_EXPORT template <typename T = double>
+using kilogram = quantity_value<kilogram_unit, isq::mass, T>;
+MODULE_EXPORT template <typename T = double>
+using gram = quantity_value<gram_unit, isq::mass, T>;
 
 MODULE_EXPORT template <typename T = double>
 using ampere = quantity_value<ampere_unit, isq::current, T>;

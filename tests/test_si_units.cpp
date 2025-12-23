@@ -47,7 +47,7 @@ TEST(TestSIUnits, TestMilimeterUnit) {
 
 TEST(TestSIUnits, TestGramUnit) {
   EXPECT_TRUE((quantity_convertible_to<gram_unit.quantity, mass>));
-  EXPECT_EQ(gram_unit.multiplier, 1.0);
+  EXPECT_EQ(gram_unit.multiplier, 1e3);
   EXPECT_EQ(gram_unit.reference, 0.0);
 
   const std::string rep = std::format("{}", gram_unit);
@@ -56,7 +56,7 @@ TEST(TestSIUnits, TestGramUnit) {
 
 TEST(TestSIUnits, TestKilogramUnit) {
   EXPECT_TRUE((quantity_convertible_to<kilogram_unit.quantity, mass>));
-  EXPECT_EQ(kilogram_unit.multiplier, 1e-3);
+  EXPECT_EQ(kilogram_unit.multiplier, 1.0);
   EXPECT_EQ(kilogram_unit.reference, 0.0);
 
   const std::string rep = std::format("{}", kilogram_unit);

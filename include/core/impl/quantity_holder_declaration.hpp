@@ -340,6 +340,7 @@ public:
                             std::initializer_list<U> il, Args&&... args);
 
   /// \brief Constructor
+  ///
   /// Constructs a \c quantity_holder from a
   /// \c std::chrono::duration. The units of the \c quantity_holder are the same
   /// as the units of the specified duration type.
@@ -357,12 +358,47 @@ public:
   constexpr explicit quantity_holder(
       const std::chrono::duration<Rep, Period>& d);
 
+  /// \brief Constructor
+  /// Constructs a \c quantity_holder from a \c quantity_value. The units of the
+  /// \c quantity_holder are the same as the units of the specified \c
+  /// quantity_value.
+  ///
+  /// \pre <tt>quantity_convertible_to<FromQuantity, quantity></tt> is modeled.
+  ///
+  /// \tparam FromQuantity The quantity of the specified \c quantity_value
   template <auto FromQuantity, auto FromUnit, typename Up = T>
     requires std::constructible_from<T, Up>
   constexpr quantity_holder(quantity_value<FromUnit, FromQuantity, Up> other);
 
+  template <auto FromQuantity, typename Up = T>
+    requires std::constructible_from<T, Up>
+  constexpr quantity_holder(quantity_holder<FromQuantity, Up> other);
+
+  /// \brief Returns the numerical value of the quantity.
+  ///
+  /// Returns a constant lvalue-reference to the numerical value of the \c
+  /// quantity_holder instance.
+  ///
+  /// \return A constant lvalue-reference to the numerical value of the \c
+  /// quantity_holder instance.
   constexpr auto get_value() const& noexcept -> const T&;
+
+  /// \brief Returns the numerical value of the quantity.
+  ///
+  /// Returns an rvalue-reference to the numerical value of the \c
+  /// quantity_holder instance.
+  ///
+  /// \return An rvalue-reference to the numerical value of the \c
+  /// quantity_holder instance.
   constexpr auto get_value() && noexcept -> T&&;
+
+  /// \brief Returns the numerical value of the quantity.
+  ///
+  /// Returns a constant rvalue-reference to the numerical value of the \c
+  /// quantity_value instance.
+  ///
+  /// \return A constant rvalue-reference to the numerical value of the \c
+  /// quantity_value instance.
   constexpr auto get_value() const&& noexcept -> const T&&;
 
   /// \brief Returns the multiplier of the quantity holder.

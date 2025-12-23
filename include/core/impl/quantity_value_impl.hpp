@@ -1,3 +1,4 @@
+#include "core/unit.hpp"
 #ifndef QUANTITY_VALUE_HPP
 #error "Do not include this file directly; include quantity_value.hpp instead"
 #endif
@@ -200,6 +201,7 @@ constexpr auto quantity_value<U, Q, T>::in_base_units() const
     -> quantity_value<U.base_units(), Q, T> {
   constexpr unit auto base_units = U.base_units();
   constexpr double factor = conversion_factor(U, base_units);
-  return quantity_value<base_units, Q, T>{value_ * factor};
+  const double offset = conversion_offset(U, base_units);
+  return quantity_value<base_units, Q, T>{value_ * factor + offset};
 }
 } // namespace maxwell
