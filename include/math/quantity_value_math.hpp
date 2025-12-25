@@ -314,19 +314,42 @@ MAXWELL_EXTENDED_CMATH_CONSTEXPR auto pow(quantity_holder<Q, T> x)
       std::pow(x.get_multiplier(), static_cast<double>(R)), x.get_reference());
 }
 
-MODULE_EXPORT template <auto U, auto Q, typename T>
-  requires unit<decltype(U)> && quantity<decltype(Q)>
-MAXWELL_EXTENDED_CMATH_CONSTEXPR auto sqrt(quantity_value<U, Q, T> x)
-    -> quantity_value<sqrt(U), Q, T> {
-  return quantity_value<sqrt(U), Q, T>(std::sqrt(x.get_value()));
+MODULE_EXPORT template <std::intmax_t P, auto Q, typename T>
+MAXWELL_EXTENDED_CMATH_CONSTEXPR auto pow(quantity_holder<Q, T> x)
+    -> quantity_holder<pow<P>(Q), T> {
+  return quantity_holder<pow<P>(Q), T>(std::pow(x.get_value(), P),
+                                       std::pow(x.get_multiplier(), P),
+                                       x.get_reference());
 }
 
 MODULE_EXPORT template <auto U, auto Q, typename T>
   requires unit<decltype(U)> && quantity<decltype(Q)>
+MAXWELL_EXTENDED_CMATH_CONSTEXPR auto sqrt(quantity_value<U, Q, T> x)
+    -> quantity_value<sqrt(U), sqrt(Q), T> {
+  return quantity_value<sqrt(U), sqrt(Q), T>(std::sqrt(x.get_value()));
+}
+
+MODULE_EXPORT template <auto Q, typename T>
+MAXWELL_EXTENDED_CMATH_CONSTEXPR auto sqrt(quantity_holder<Q, T> x)
+    -> quantity_holder<sqrt(Q), T> {
+  return quantity_holder<sqrt(Q), T>(std::sqrt(x.get_value()),
+                                     std::sqrt(x.get_multiplier()),
+                                     x.get_reference());
+}
+
+MODULE_EXPORT template <auto U, auto Q, typename T>
 MAXWELL_EXTENDED_CMATH_CONSTEXPR auto cbrt(quantity_value<U, Q, T> x)
-    -> quantity_value<pow<U, rational<1, 3>>, pow<Q, rational<1, 3>>, T> {
-  return quantity_value<pow<U, rational<1, 3>>, pow<Q, rational<1, 3>>, T>(
-      cbrt(x.get_value()));
+    -> quantity_value<pow<rational<1, 3>>(U), pow<rational<1, 3>>(Q), T> {
+  return quantity_value<pow<rational<1, 3>>(U), pow<rational<1, 3>>(Q), T>(
+      std::cbrt(x.get_value()));
+}
+
+MODULE_EXPORT template <auto Q, typename T>
+MAXWELL_EXTENDED_CMATH_CONSTEXPR auto cbrt(quantity_holder<Q, T> x)
+    -> quantity_holder<pow<rational<1, 3>>(Q), T> {
+  return quantity_holder<pow<rational<1, 3>>(Q), T>(
+      std::cbrt(x.get_value()), std::cbrt(x.get_multiplier()),
+      x.get_reference());
 }
 
 MODULE_EXPORT MAXWELL_EXTENDED_CMATH_CONSTEXPR auto

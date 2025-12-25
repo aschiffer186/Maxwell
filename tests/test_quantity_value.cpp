@@ -2,6 +2,7 @@
 
 #include <concepts>
 #include <gtest/gtest.h>
+#include <sstream>
 #include <type_traits>
 
 #include "core/quantity.hpp"
@@ -435,4 +436,17 @@ TEST(TestQuantityValue, TestQuantityCast) {
   const auto q3 =
       quantity_cast<quantity_value<si::meter_unit, wavelength{}>>(q1);
   EXPECT_EQ(q3.get_value(), 1.0);
+}
+
+TEST(TestQuantityValue, TestFormatting) {
+  using namespace maxwell::si::symbols;
+  const quantity_value q1 = 1.0 * m;
+
+  const std::string rep1 = std::format("{}", q1);
+  EXPECT_STREQ(rep1.c_str(), "1 m");
+
+  std::stringstream ss;
+  ss << q1;
+  const std::string rep2 = ss.str();
+  EXPECT_STREQ(rep2.c_str(), "1 m");
 }

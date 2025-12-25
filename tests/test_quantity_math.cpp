@@ -301,4 +301,45 @@ TEST(TestQuantityMath, TestPow) {
 
   EXPECT_FLOAT_EQ(volume2.get_value(), 64.0);
   EXPECT_EQ(volume2.get_multiplier(), 1e6);
+
+  const isq::length_holder<> length4{si::centimeter_unit, 3.0};
+  const isq::area_holder<> area2 = pow<2>(length4);
+
+  EXPECT_FLOAT_EQ(area2.get_value(), 9.0);
+  EXPECT_EQ(area2.get_multiplier(), 1e4);
+
+  const si::square_meter<> area3{4.0};
+  const si::meter<> length5 = pow<rational<1, 2>>(area3);
+
+  EXPECT_FLOAT_EQ(length5.get_value(), 2.0);
+
+  const isq::area_holder<> area4{centi_unit<si::square_meter_unit>, 9.0};
+  const isq::length_holder<> length6 = pow<rational<1, 2>>(area4);
+
+  EXPECT_FLOAT_EQ(length6.get_value(), 3.0);
+  EXPECT_EQ(length6.get_multiplier(), 1e2);
+}
+
+TEST(TestQuantityMath, TestSqrt) {
+  const si::square_meter<> area{9.0};
+  const si::meter<> length = sqrt(area);
+
+  EXPECT_FLOAT_EQ(length.get_value(), 3.0);
+
+  const isq::area_holder<> area2{centi_unit<si::square_meter_unit>, 16.0};
+  const isq::length_holder<> length2 = sqrt(area2);
+  EXPECT_FLOAT_EQ(length2.get_value(), 4.0);
+  EXPECT_EQ(length2.get_multiplier(), 1e2);
+}
+
+TEST(TestQuantityMath, TestCbrt) {
+  const si::cubic_meter<> volume{27.0};
+  const si::meter<> length = cbrt(volume);
+
+  EXPECT_FLOAT_EQ(length.get_value(), 3.0);
+
+  const isq::volume_holder<> volume2{centi_unit<si::cubic_meter_unit>, 8.0};
+  const isq::length_holder<> length2 = cbrt(volume2);
+  EXPECT_FLOAT_EQ(length2.get_value(), 2.0);
+  EXPECT_EQ(length2.get_multiplier(), 1e2);
 }
