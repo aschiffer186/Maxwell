@@ -28,7 +28,7 @@ namespace maxwell::math {
 /// \param x The \c quantity_value to compute the absolute value of
 /// \return The absolute value of \c x
 MODULE_EXPORT template <auto U, auto Q, typename T>
-MAXWELL_BASIC_CMATH_CONSTEXPR auto abs(quantity_value<U, Q, T>& x)
+MAXWELL_BASIC_CMATH_CONSTEXPR auto abs(const quantity_value<U, Q, T>& x)
     -> quantity_value<U, Q, T> {
   return quantity_value<U, Q, T>(std::abs(x.get_value()));
 }
@@ -44,9 +44,10 @@ MAXWELL_BASIC_CMATH_CONSTEXPR auto abs(quantity_value<U, Q, T>& x)
 /// \param x The \c quantity_holder to compute the absolute value of
 /// \return The absolute value of \c x
 MODULE_EXPORT template <auto Q, typename T>
-MAXWELL_BASIC_CMATH_CONSTEXPR auto abs(quantity_holder<Q, T>& x)
+MAXWELL_BASIC_CMATH_CONSTEXPR auto abs(const quantity_holder<Q, T>& x)
     -> quantity_holder<Q, T> {
-  return quantity_holder<Q, T>(std::abs(x.get_value()), x.get_units());
+  return quantity_holder<Q, T>(std::abs(x.get_value()), x.get_multiplier(),
+                               x.get_reference());
 }
 
 /// \brief Computes the sine of an angle quantity.
@@ -59,7 +60,8 @@ MAXWELL_BASIC_CMATH_CONSTEXPR auto abs(quantity_holder<Q, T>& x)
 /// \return The sine of \c x in the range [-1, 1].
 MODULE_EXPORT MAXWELL_EXTENDED_CMATH_CONSTEXPR auto
 sin(quantity_of<isq::plane_angle> auto x) -> double {
-  return std::sin(si::radian<>{x}.get_value());
+  const double r = si::radian<>{x}.get_value();
+  return std::sin(r);
 }
 
 /// \brief Computes the cosine of an angle quantity.
@@ -134,21 +136,42 @@ cot(quantity_of<isq::plane_angle> auto x) -> double {
 /// \brief Computes the arcsine of a value
 ///
 /// Computes the arcsin of a value in the domain [-1, 1].
+///
+/// \param x The value to compute the arcsine of.
+/// \return The arcsine of \c x in radians
 MODULE_EXPORT MAXWELL_EXTENDED_CMATH_CONSTEXPR inline auto asin(double x)
     -> si::radian<> {
   return si::radian<>{std::asin(x)};
 }
 
+/// \brief Computes the arcsine of a value
+///
+/// Computes the arcsin of a value in the domain [-1, 1].
+///
+/// \param x The value to compute the arcsine of.
+/// \return The arcsine of \c x in degrees
 MODULE_EXPORT MAXWELL_EXTENDED_CMATH_CONSTEXPR inline auto asind(double x)
     -> si::degree<> {
   return si::degree<>(asin(x));
 }
 
+/// \brief Computes the arccosine of a value
+///
+/// Computes the arccosine of a value in the domain [-1, 1].
+///
+/// \param x The value to compute the arccosine of.
+/// \return The arccosine of \c x in radians
 MODULE_EXPORT MAXWELL_EXTENDED_CMATH_CONSTEXPR inline auto acos(double x)
     -> si::radian<> {
   return si::radian<>{std::acos(x)};
 }
 
+/// \brief Computes the arccosine of a value
+///
+/// Computes the arccosine of a value in the domain [-1, 1].
+///
+/// \param x The value to compute the arccosine of.
+/// \return The arccosine of \c x in degrees
 MODULE_EXPORT MAXWELL_EXTENDED_CMATH_CONSTEXPR inline auto acosd(double x)
     -> si::degree<> {
   return si::degree<>(acos(x));
@@ -170,7 +193,7 @@ MODULE_EXPORT MAXWELL_EXTENDED_CMATH_CONSTEXPR inline auto atan2(double y,
   return si::radian<>{std::atan2(y, x)};
 }
 
-MODULE_EXPORT MAXWELL_EXTENDED_CMATH_CONSTEXPR inline auto atand2(double y,
+MODULE_EXPORT MAXWELL_EXTENDED_CMATH_CONSTEXPR inline auto atan2d(double y,
                                                                   double x)
     -> si::degree<> {
   return si::degree<>(atan2(y, x));
@@ -241,18 +264,54 @@ log1p(quantity_of<number> auto x) -> double {
   return std::log1p(x.get_value());
 }
 
+/// \brief Computes the power of a quantity value to a rational exponent
+///
+/// Raises a quantity value to a rational exponent. The resulting quantity value
+/// has units that are the units of the original quantity value raised to the
+/// power, a quantity type that is the quantity type of the original quantity
+/// value raised to the power, and the same numerical type.
+///
+/// \tparam R The rational exponent to raise the quantity value to.
+/// \tparam U The units of the quantity value.
+/// \tparam Q The quantity type of the quantity value.
+/// \tparam T The type of the numerical value of the quantity value.
+/// \param x The quantity value to raise to the power.
+/// \return The quantity value raised to the power.
 MODULE_EXPORT template <auto R, auto U, auto Q, typename T>
   requires utility::rational<decltype(R)>
 MAXWELL_EXTENDED_CMATH_CONSTEXPR auto pow(quantity_value<U, Q, T> x)
-    -> quantity_value<pow<U, R>, pow<Q, R>, T> {
-  return quantity_value<pow<U, R>, pow<Q, R>, T>(
+    -> quantity_value<pow<R>(U), pow<R>(Q), T> {
+  return quantity_value<pow<R>(U), pow<R>(Q), T>(
       std::pow(x.get_value(), static_cast<double>(R)));
 }
+
+/// \brief Computes the power of a quantity value to an integer exponent
+///
+/// Raises a quantity value to an integer exponent. The resulting quantity value
+/// has units that are the units of the original quantity value raised to the
+/// power, a quantity type that is the quantity type of the original quantity
+/// value raised to the power, and the same numerical type.
+///
+/// \tparam P The integer exponent to raise the quantity value to.
+/// \tparam U The units of the quantity value.
+/// \tparam Q The quantity type of the quantity value.
+/// \tparam T The type of the numerical value of the quantity value.
+/// \param x The quantity value to raise to the power.
+/// \return The quantity value raised to the power.
 MODULE_EXPORT
 template <std::intmax_t P, auto U, auto Q, typename T>
 MAXWELL_EXTENDED_CMATH_CONSTEXPR auto pow(quantity_value<U, Q, T> x)
-    -> quantity_value<pow<U, P>, pow<Q, P>, T> {
-  return quantity_value<pow<U, P>, pow<Q, P>, T>(std::pow(x.get_value(), P));
+    -> quantity_value<pow<P>(U), pow<P>(Q), T> {
+  return quantity_value<pow<P>(U), pow<P>(Q), T>(std::pow(x.get_value(), P));
+}
+
+MODULE_EXPORT template <auto R, auto Q, typename T>
+  requires utility::rational<decltype(R)>
+MAXWELL_EXTENDED_CMATH_CONSTEXPR auto pow(quantity_holder<Q, T> x)
+    -> quantity_holder<pow<R>(Q), T> {
+  return quantity_holder<pow<R>(Q), T>(
+      std::pow(x.get_value(), static_cast<double>(R)),
+      std::pow(x.get_multiplier(), static_cast<double>(R)), x.get_reference());
 }
 
 MODULE_EXPORT template <auto U, auto Q, typename T>

@@ -424,7 +424,7 @@ public:
 
   constexpr auto in_base_units() const -> quantity_holder<Q, T>;
 
-  constexpr explicit(!quantity_convertible_to<Q, number>)
+  constexpr explicit(!quantity_convertible_to<Q, number> || Q.derived)
   operator value_type() const;
 
 private:

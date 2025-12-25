@@ -57,7 +57,7 @@ MODULE_EXPORT constexpr unit auto min = minute_unit;
 MODULE_EXPORT constexpr unit auto hr = hour_unit;
 MODULE_EXPORT constexpr unit auto day = day_unit;
 MODULE_EXPORT constexpr unit auto week = week_unit;
-MODULE_EXPORT constexpr unit auto year = year_unit;
+MODULE_EXPORT constexpr unit auto yr = year_unit;
 } // namespace symbols
 } // namespace time
 

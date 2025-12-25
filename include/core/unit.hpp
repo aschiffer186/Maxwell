@@ -383,8 +383,7 @@ using derived_unit = _detail::derived_unit_impl<Val, Name>::type;
 
 MODULE_EXPORT template <unit From, unit To>
 constexpr auto conversion_factor(From, To) noexcept -> double {
-  return static_cast<double>(To::multiplier) /
-         static_cast<double>(From::multiplier);
+  return To::multiplier / From::multiplier;
 }
 
 MODULE_EXPORT constexpr auto conversion_factor(double from, double to) noexcept
@@ -395,7 +394,7 @@ MODULE_EXPORT constexpr auto conversion_factor(double from, double to) noexcept
 MODULE_EXPORT template <unit From, unit To>
 constexpr auto conversion_offset(From, To) noexcept -> double {
   if (To::multiplier == 1.0 && From::multiplier == 1.0) {
-    return static_cast<double>(To::reference - From::reference);
+    return To::reference - From::reference;
   } else if (From::multiplier == 1.0) {
     return To::reference - To::multiplier * From::reference;
   } else {

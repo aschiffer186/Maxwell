@@ -111,7 +111,8 @@ constexpr quantity_value<U, Q, T>::quantity_value(
     quantity_holder<FromQuantity, T>&& other)
     : value_(std::move(other).get_value() *
                  conversion_factor(other.get_multiplier(), U.multiplier) +
-             conversion_offset(other.get_reference, U.reference)) {
+             conversion_offset(other.get_multiplier(), other.get_reference(),
+                               U.multiplier, U.reference)) {
   static_assert(
       quantity_convertible_to<FromQuantity, Q>,
       "Attempting to construct value from incompatible quantity. Note, "

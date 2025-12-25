@@ -196,6 +196,10 @@ TEST(TestQuantityValue, TestQuantityHolderConstructor) {
 
   EXPECT_FLOAT_EQ(c.get_value(), 26.85);
   EXPECT_FLOAT_EQ(f.get_value(), 80.33);
+
+  const isq::plane_angle_holder<> a{si::degree_unit, 180.0};
+  si::radian<> r{a};
+  EXPECT_FLOAT_EQ(r.get_value(), std::numbers::pi);
 }
 
 TEST(TestQuantityValue, TestConversionOperator) {

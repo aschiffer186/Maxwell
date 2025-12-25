@@ -50,3 +50,8 @@ add_executable(test_si_units test_si_units.cpp)
 add_test(NAME TestSIUnits COMMAND test_si_units)
 target_link_libraries(test_si_units PRIVATE Maxwell GTest::gtest_main)
 gtest_discover_tests(test_si_units)
+
+add_executable(test_quantity_math test_quantity_math.cpp)
+add_test(NAME TestQuantityMath COMMAND test_quantity_math)
+target_link_libraries(test_quantity_math PRIVATE Maxwell GTest::gtest_main) 
+gtest_discover_tests(test_quantity_math)

@@ -29,6 +29,7 @@ MODULE_EXPORT constexpr struct millimeter_unit_type
 
 MODULE_EXPORT constexpr struct kilogram_unit_type : base_unit<isq::mass, "kg"> {
 } kilogram_unit;
+
 MODULE_EXPORT constexpr struct gram_unit_type
     : derived_unit<value<1e3> * kilogram_unit, "g"> {
 } gram_unit;
