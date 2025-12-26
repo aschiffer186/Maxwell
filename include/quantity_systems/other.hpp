@@ -1,6 +1,7 @@
 #ifndef OTHER_HPP
 #define OTHER_HPP
 
+#include "core/scale.hpp"
 #include "core/unit.hpp"
 #include "isq.hpp"
 #include "si.hpp"
@@ -75,6 +76,46 @@ MODULE_EXPORT constexpr unit auto min = arcminute_unit;
 MODULE_EXPORT constexpr unit auto s = arcsecond_unit;
 } // namespace symbols
 } // namespace angle
+
+namespace chemical {
+struct ph_scale_type {};
+
+MODULE_EXPORT constexpr struct molar_unit_type
+    : derived_unit<si::mole_unit / si::cubic_meter_unit, "M"> {
+} molar_unit;
+
+struct ph_unit_type
+    : unit_type<"pH", molar_unit.quantity, 1.0, 0.0, ph_scale_type> {};
+constexpr ph_unit_type ph_unit{};
+
+MODULE_EXPORT template <typename T = double>
+using molar = quantity_value<molar_unit, molar_unit.quantity, T>;
+
+MODULE_EXPORT template <typename T = double>
+using ph = quantity_value<ph_unit, ph_unit.quantity, T>;
+} // namespace chemical
 } // namespace maxwell::other
+
+namespace maxwell {
+template <>
+struct scale_converter<linear_scale_type{}, other::chemical::ph_scale_type{}> {
+  template <auto FromUnit, auto ToUnit, typename U>
+  static constexpr auto convert(U&& u) {
+    constexpr double factor = conversion_factor(FromUnit, ToUnit);
+    constexpr double offset = conversion_offset(FromUnit, ToUnit);
+    return -utility::log10(std::forward<U>(u) * factor + offset);
+  }
+};
+
+template <>
+struct scale_converter<other::chemical::ph_scale_type{}, linear_scale_type{}> {
+  template <auto FromUnit, auto ToUnit, typename U>
+  static constexpr auto convert(U&& u) {
+    constexpr double factor = conversion_factor(FromUnit, ToUnit);
+    constexpr double offset = conversion_offset(FromUnit, ToUnit);
+    return (std::pow(10.0, -std::forward<U>(u))) / factor + offset;
+  }
+};
+} // namespace maxwell
 
 #endif
