@@ -85,6 +85,10 @@ MODULE_EXPORT template <typename Q>
 using quecto =
     quantity_value<quecto_unit<Q::units>, Q::quantity, typename Q::value_type>;
 
+MODULE_EXPORT template <typename Q>
+using dB =
+    quantity_value<dB_unit<Q::units>, Q::quantity, typename Q::value_type>;
+
 /// \brief Convets between two different quantities
 ///
 /// Explicit cast between two different quantities. This function only checks

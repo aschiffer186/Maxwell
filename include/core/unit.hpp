@@ -7,12 +7,16 @@
 #include <type_traits> // false_type, remove_cvref_t, true_type
 #include <utility>     // declval
 
-#include "core/scale.hpp"
 #include "dimension.hpp"
 #include "quantity.hpp"
 #include "utility/compile_time_math.hpp"
 
 namespace maxwell {
+/// Tag indiating the unit follows a linear scale
+struct linear_scale_type {};
+/// Tag indicating the unit follows a decibel scale
+struct decibel_scale_type {};
+
 /// \brief Represents an instance of a quantity used as a reference.
 ///
 /// Class template \c unit_type represents a particular instance of a quantity
@@ -106,7 +110,7 @@ struct unit_type {
   ///
   /// \return The base unit for the unit.
   constexpr static auto base_units() {
-    return unit_type<Name, Quantity, 1.0>{};
+    return unit_type<Name, Quantity, 1.0, 0.0, linear_scale_type>{};
   }
 
   /// \brief Returns the sum of the exponents of the unit's dimensions.
@@ -347,7 +351,8 @@ template <auto Val, utility::template_string Name> struct derived_unit_impl;
 template <auto U, utility::template_string Name>
   requires unit<decltype(U)>
 struct derived_unit_impl<U, Name> {
-  using type = unit_type<Name, U.quantity, U.multiplier, U.reference>;
+  using type = unit_type<Name, U.quantity, U.multiplier, U.reference,
+                         decltype(U.scale), U.dim_for_multiplier>;
 };
 
 template <auto Q, utility::template_string Name>
@@ -443,16 +448,21 @@ MODULE_EXPORT constexpr double base_to_quecto_prefix{1e30};
 namespace _detail {
 template <auto Prefix, auto U, utility::template_string Name>
 struct prefixed_unit {
-public:
-  // clang-format off
+  using dim_for_multiplier =
+      std::conditional_t<U.dimension_sum() == utility::zero,
+                         decltype(rational<1, 1>), decltype(U.dimension_sum())>;
 
+public:
   using type = unit_type<Name, U.quantity,
-                pow(Prefix, U.dimension_sum()) *
-                    U.multiplier>;
-  
-  // clang-format on 
+                         pow(Prefix, dim_for_multiplier{}) * U.multiplier>;
 };
-}
+
+template <auto U> struct decibel_unit {
+public:
+  using type = unit_type<utility::template_string{"dB"} + U.name, U.quantity,
+                         U.multiplier, U.reference, decibel_scale_type>;
+};
+} // namespace _detail
 /// \endcond
 
 /// \brief Creates a new unit with the specified metric prefix
@@ -468,88 +478,124 @@ using prefixed_unit_t = _detail::prefixed_unit<Prefix, U, Name>::type;
 
 MODULE_EXPORT template <auto U>
 constexpr unit auto quetta_unit =
-    prefixed_unit_t<base_to_quetta_prefix, U, utility::template_string{"Q"} + U.name>{};
+    prefixed_unit_t<base_to_quetta_prefix, U,
+                    utility::template_string{"Q"} + U.name>{};
 MODULE_EXPORT template <auto U>
 constexpr unit auto ronna_unit =
-    prefixed_unit_t<base_to_ronna_prefix, U, utility::template_string{"R"} + U.name>{};
+    prefixed_unit_t<base_to_ronna_prefix, U,
+                    utility::template_string{"R"} + U.name>{};
 MODULE_EXPORT template <auto U>
 constexpr unit auto yotta_unit =
-    prefixed_unit_t<base_to_yotta_prefix, U, utility::template_string{"Y"} + U.name>{};
+    prefixed_unit_t<base_to_yotta_prefix, U,
+                    utility::template_string{"Y"} + U.name>{};
 MODULE_EXPORT template <auto U>
 constexpr unit auto zetta_unit =
-    prefixed_unit_t<base_to_zetta_prefix, U, utility::template_string{"Z"} + U.name>{};
+    prefixed_unit_t<base_to_zetta_prefix, U,
+                    utility::template_string{"Z"} + U.name>{};
 MODULE_EXPORT template <auto U>
 constexpr unit auto exa_unit =
-    prefixed_unit_t<base_to_exa_prefix, U, utility::template_string{"E"} + U.name>{};
+    prefixed_unit_t<base_to_exa_prefix, U,
+                    utility::template_string{"E"} + U.name>{};
 MODULE_EXPORT template <auto U>
 constexpr unit auto peta_unit =
-    prefixed_unit_t<base_to_peta_prefix, U, utility::template_string{"P"} + U.name>{};
+    prefixed_unit_t<base_to_peta_prefix, U,
+                    utility::template_string{"P"} + U.name>{};
 MODULE_EXPORT template <auto U>
 constexpr unit auto tera_unit =
-    prefixed_unit_t<base_to_tera_prefix, U, utility::template_string{"T"} + U.name>{};
+    prefixed_unit_t<base_to_tera_prefix, U,
+                    utility::template_string{"T"} + U.name>{};
 MODULE_EXPORT template <auto U>
 constexpr unit auto giga_unit =
-    prefixed_unit_t<base_to_giga_prefix, U, utility::template_string{"G"} + U.name>{};
+    prefixed_unit_t<base_to_giga_prefix, U,
+                    utility::template_string{"G"} + U.name>{};
 MODULE_EXPORT template <auto U>
 constexpr unit auto mega_unit =
-    prefixed_unit_t<base_to_mega_prefix, U, utility::template_string{"M"} + U.name>{};
+    prefixed_unit_t<base_to_mega_prefix, U,
+                    utility::template_string{"M"} + U.name>{};
 MODULE_EXPORT template <auto U>
 constexpr unit auto kilo_unit =
-    prefixed_unit_t<base_to_kilo_prefix, U, utility::template_string{"k"} + U.name>{};
+    prefixed_unit_t<base_to_kilo_prefix, U,
+                    utility::template_string{"k"} + U.name>{};
 MODULE_EXPORT template <auto U>
 constexpr unit auto hecto_unit =
-    prefixed_unit_t<base_to_hecto_prefix, U, utility::template_string{"h"} + U.name>{};
+    prefixed_unit_t<base_to_hecto_prefix, U,
+                    utility::template_string{"h"} + U.name>{};
 MODULE_EXPORT template <auto U>
 constexpr unit auto deca_unit =
-    prefixed_unit_t<base_to_deca_prefix, U, utility::template_string{"da"} + U.name>{};
+    prefixed_unit_t<base_to_deca_prefix, U,
+                    utility::template_string{"da"} + U.name>{};
 MODULE_EXPORT template <auto U>
 constexpr unit auto deci_unit =
-    prefixed_unit_t<base_to_deci_prefix, U, utility::template_string{"d"} + U.name>{};
+    prefixed_unit_t<base_to_deci_prefix, U,
+                    utility::template_string{"d"} + U.name>{};
 MODULE_EXPORT template <auto U>
 constexpr unit auto centi_unit =
-    prefixed_unit_t<base_to_centi_prefix, U, utility::template_string{"c"} + U.name>{};
+    prefixed_unit_t<base_to_centi_prefix, U,
+                    utility::template_string{"c"} + U.name>{};
 MODULE_EXPORT template <auto U>
 constexpr unit auto milli_unit =
-    prefixed_unit_t<base_to_milli_prefix, U, utility::template_string{"m"} + U.name>{};
+    prefixed_unit_t<base_to_milli_prefix, U,
+                    utility::template_string{"m"} + U.name>{};
 MODULE_EXPORT template <auto U>
 constexpr unit auto micro_unit =
-    prefixed_unit_t<base_to_micro_prefix, U, utility::template_string{"μ"} + U.name>{};
+    prefixed_unit_t<base_to_micro_prefix, U,
+                    utility::template_string{"μ"} + U.name>{};
 MODULE_EXPORT template <auto U>
 constexpr unit auto nano_unit =
-    prefixed_unit_t<base_to_nano_prefix, U, utility::template_string{"n"} + U.name>{};
+    prefixed_unit_t<base_to_nano_prefix, U,
+                    utility::template_string{"n"} + U.name>{};
 MODULE_EXPORT template <auto U>
 constexpr unit auto pico_unit =
-    prefixed_unit_t<base_to_pico_prefix, U, utility::template_string{"p"} + U.name>{};
+    prefixed_unit_t<base_to_pico_prefix, U,
+                    utility::template_string{"p"} + U.name>{};
 MODULE_EXPORT template <auto U>
 constexpr unit auto femto_unit =
-    prefixed_unit_t<base_to_femto_prefix, U, utility::template_string{"f"} + U.name>{};
+    prefixed_unit_t<base_to_femto_prefix, U,
+                    utility::template_string{"f"} + U.name>{};
 MODULE_EXPORT template <auto U>
 constexpr unit auto atto_unit =
-    prefixed_unit_t<base_to_atto_prefix, U, utility::template_string{"a"} + U.name>{};
+    prefixed_unit_t<base_to_atto_prefix, U,
+                    utility::template_string{"a"} + U.name>{};
 MODULE_EXPORT template <auto U>
 constexpr unit auto zepto_unit =
-    prefixed_unit_t<base_to_zepto_prefix, U, utility::template_string{"z"} + U.name>{};
+    prefixed_unit_t<base_to_zepto_prefix, U,
+                    utility::template_string{"z"} + U.name>{};
 MODULE_EXPORT template <auto U>
 constexpr unit auto yocto_unit =
-    prefixed_unit_t<base_to_yocto_prefix, U, utility::template_string{"y"} + U.name>{};
+    prefixed_unit_t<base_to_yocto_prefix, U,
+                    utility::template_string{"y"} + U.name>{};
 MODULE_EXPORT template <auto U>
 constexpr unit auto ronto_unit =
-    prefixed_unit_t<base_to_ronto_prefix, U, utility::template_string{"r"} + U.name>{};
+    prefixed_unit_t<base_to_ronto_prefix, U,
+                    utility::template_string{"r"} + U.name>{};
 MODULE_EXPORT template <auto U>
 constexpr unit auto quecto_unit =
-    prefixed_unit_t<base_to_quecto_prefix, U, utility::template_string{"q"} + U.name>{};
+    prefixed_unit_t<base_to_quecto_prefix, U,
+                    utility::template_string{"q"} + U.name>{};
 
 MODULE_EXPORT template <auto U>
-concept unitless = quantity_convertible_to<U.quantity, number> && !U.quantity.derived;
+constexpr unit auto dB_unit = typename _detail::decibel_unit<U>::type{};
+
+MODULE_EXPORT template <auto U>
+concept unitless =
+    quantity_convertible_to<U.quantity, number> && !U.quantity.derived;
 
 MODULE_EXPORT template <auto LHS, auto RHS>
-concept unit_comparable_with = quantity_convertible_to<LHS.quantity, RHS.quantity> && LHS.reference == RHS.reference;
+concept unit_comparable_with =
+    quantity_convertible_to<LHS.quantity, RHS.quantity> &&
+    LHS.reference == RHS.reference;
 
 MODULE_EXPORT template <auto LHS, auto RHS>
-concept unit_addable_with = quantity_convertible_to<LHS.quantity, RHS.quantity> && quantity_convertible_to<RHS.quantity, LHS.quantity> && LHS.reference == RHS.reference;
+concept unit_addable_with =
+    quantity_convertible_to<LHS.quantity, RHS.quantity> &&
+    quantity_convertible_to<RHS.quantity, LHS.quantity> &&
+    LHS.reference == RHS.reference;
 
 MODULE_EXPORT template <auto LHS, auto RHS>
-concept unit_subtractable_from = quantity_convertible_to<LHS.quantity, RHS.quantity> && quantity_convertible_to<RHS.quantity, LHS.quantity> && LHS.reference == RHS.reference;
+concept unit_subtractable_from =
+    quantity_convertible_to<LHS.quantity, RHS.quantity> &&
+    quantity_convertible_to<RHS.quantity, LHS.quantity> &&
+    LHS.reference == RHS.reference;
 } // namespace maxwell
 
 #endif

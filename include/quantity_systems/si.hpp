@@ -101,6 +101,14 @@ MODULE_EXPORT constexpr struct newton_meter_unit_type
 MODULE_EXPORT constexpr struct watt_unit_type : derived_unit<isq::power, "W"> {
 } watt_unit;
 
+MODULE_EXPORT constexpr struct decibel_watt_unit_type
+    : derived_unit<dB_unit<watt_unit>, "dB"> {
+} decibel_watt_unit;
+
+MODULE_EXPORT constexpr struct decibel_milliwatt_unit_type
+    : derived_unit<dB_unit<milli_unit<watt_unit>>, "dBm"> {
+} decibel_milliwatt_unit;
+
 MODULE_EXPORT constexpr struct coulomb_unit_type
     : derived_unit<isq::charge, "C"> {
 } coulomb_unit;
@@ -233,6 +241,12 @@ MODULE_EXPORT template <typename T = double>
 using watt = quantity_value<watt_unit, isq::power, T>;
 
 MODULE_EXPORT template <typename T = double>
+using decibel_watt = quantity_value<decibel_watt_unit, isq::power, T>;
+
+MODULE_EXPORT template <typename T = double>
+using decibel_milliwatt = quantity_value<decibel_milliwatt_unit, isq::power, T>;
+
+MODULE_EXPORT template <typename T = double>
 using coulomb = quantity_value<coulomb_unit, isq::charge, T>;
 
 MODULE_EXPORT template <typename T = double>
@@ -319,6 +333,8 @@ MODULE_EXPORT constexpr unit auto Pa = pascal_unit;
 MODULE_EXPORT constexpr unit auto J = joule_unit;
 MODULE_EXPORT constexpr unit auto N_m = newton_meter_unit;
 MODULE_EXPORT constexpr unit auto W = watt_unit;
+MODULE_EXPORT constexpr unit auto dBW = decibel_watt_unit;
+MODULE_EXPORT constexpr unit auto dBm = decibel_milliwatt_unit;
 MODULE_EXPORT constexpr unit auto C = coulomb_unit;
 MODULE_EXPORT constexpr unit auto V = volt_unit;
 MODULE_EXPORT constexpr unit auto O = ohm_unit;

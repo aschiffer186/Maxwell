@@ -183,6 +183,22 @@ TEST(TestQuantityValue, TestConvertingConstructor) {
   si::kelvin<> k3{f};
   EXPECT_FLOAT_EQ(c2.get_value(), 26.85);
   EXPECT_FLOAT_EQ(k3.get_value(), 300.0);
+
+  const dB<si::watt<>> p1{20.0};
+  const si::watt<> w{p1};
+  EXPECT_FLOAT_EQ(w.get_value(), 100.0);
+
+  const dB<milli<si::watt<>>> p2{30.0};
+  const si::watt<> w2{p2};
+  EXPECT_FLOAT_EQ(w2.get_value(), 1.0);
+
+  const si::watt<> w3{100.0};
+  const dB<si::watt<>> p3{w3};
+  EXPECT_FLOAT_EQ(p3.get_value(), 20.0);
+
+  const si::watt<> w4{1.0};
+  const si::decibel_milliwatt<> p4{w4};
+  EXPECT_FLOAT_EQ(p4.get_value(), 30.0);
 }
 
 TEST(TestQuantityValue, TestQuantityHolderConstructor) {

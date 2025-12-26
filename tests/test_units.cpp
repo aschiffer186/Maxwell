@@ -197,3 +197,10 @@ TEST(TestUnits, TestUnitAddableSubtractableWith) {
   EXPECT_FALSE((unit_subtractable_from<kelvin_unit, celsius_unit>));
   EXPECT_FALSE((unit_subtractable_from<radian_unit, number_unit>));
 }
+
+TEST(TestUnits, TestAddDecibel) {
+  using namespace maxwell::si;
+
+  constexpr unit auto dBW = maxwell::dB_unit<watt_unit>;
+  EXPECT_TRUE((std::same_as<decltype(dBW.scale), const decibel_scale_type>));
+}

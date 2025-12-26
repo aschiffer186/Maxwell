@@ -124,6 +124,15 @@ TEST(TestQuatityHolder, TestQuantityValueConstructor) {
   EXPECT_FLOAT_EQ(t1.get_reference(), us::fahrenheit_unit.reference);
 }
 
+TEST(TestQuantityHolder, TestMixedAddition) {
+  // length_holder<> l1{si::meter_unit, 5000.0};
+  // l1 += si::kilometer<>{2.0};
+  // EXPECT_FLOAT_EQ(l1.get_value(), 7000.0);
+
+  temperature_holder<> t1{si::celsius_unit, 100.0};
+  EXPECT_THROW(t1 += us::fahrenheit<>{212.0}, incompatible_quantity_holder);
+}
+
 TEST(TestQuantityHolder, TestAsMethod) {
   length_holder<> l{si::meter_unit, 5000.0};
   const kilo<si::meter<>> km = l.as<kilo_unit<si::meter_unit>>();

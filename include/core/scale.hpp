@@ -1,42 +1,37 @@
 #ifndef SCALE_HPP
 #define SCALE_HPP
 
-#include <concepts> // same_as
+#include <cmath>   // pow
+#include <utility> // forward
 
-#include "utility/config.hpp"
+#include "core/unit.hpp"
+#include "utility/compile_time_math.hpp"
 
 namespace maxwell {
-MODULE_EXPORT struct linear_scale_type;
-MODULE_EXPORT struct decibel_scale_type;
-
-MODULE_EXPORT template <typename T, typename V>
-concept scale =
-    requires(T, V v, const linear_scale_type& l, const decibel_scale_type& d) {
-      { T::from_scale(v, l) } -> std::same_as<V>;
-      { T::from_scale(v, d) } -> std::same_as<V>;
-    };
-
-MODULE_EXPORT struct linear_scale_type {
-  static constexpr auto from_scale(const auto& value,
-                                   const linear_scale_type&) noexcept {
-    return value;
-  }
-
-  static constexpr auto from_scale(const auto& value,
-                                   const decibel_scale_type&) noexcept {
-    return value;
+template <auto FromScale, auto ToScale> struct scale_converter {
+  template <auto FromUnit, auto ToUnit, typename U>
+  static constexpr auto convert(U&& u) {
+    constexpr double factor = conversion_factor(FromUnit, ToUnit);
+    constexpr double offset = conversion_offset(FromUnit, ToUnit);
+    return std::forward<U>(u) * factor + offset;
   }
 };
 
-MODULE_EXPORT struct decibel_scale_type {
-  static constexpr auto from_scale(const auto& value,
-                                   const linear_scale_type&) noexcept {
-    return value;
+template <> struct scale_converter<decibel_scale_type{}, linear_scale_type{}> {
+  template <auto FromUnit, auto ToUnit, typename U>
+  static constexpr auto convert(U&& u) {
+    constexpr double factor = conversion_factor(FromUnit, ToUnit);
+    constexpr double offset = conversion_offset(FromUnit, ToUnit);
+    return std::pow(10.0, std::forward<U>(u) / 10.0) * factor + offset;
   }
+};
 
-  static constexpr auto from_scale(const auto& value,
-                                   const decibel_scale_type&) noexcept {
-    return value;
+template <> struct scale_converter<linear_scale_type{}, decibel_scale_type{}> {
+  template <auto FromUnit, auto ToUnit, typename U>
+  static constexpr auto convert(U&& u) {
+    constexpr double factor = conversion_factor(FromUnit, ToUnit);
+    constexpr double offset = conversion_offset(FromUnit, ToUnit);
+    return 10.0 * utility::log10(std::forward<U>(u) * factor + offset);
   }
 };
 

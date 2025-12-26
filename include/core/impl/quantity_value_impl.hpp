@@ -1,4 +1,6 @@
+#include "core/scale.hpp"
 #include "core/unit.hpp"
+
 #ifndef QUANTITY_VALUE_HPP
 #error "Do not include this file directly; include quantity_value.hpp instead"
 #endif
@@ -54,11 +56,8 @@ template <auto U, auto Q, typename T>
                       ::maxwell::quantity<decltype(FromQuantity)>
 constexpr quantity_value<U, Q, T>::quantity_value(
     const quantity_value<FromUnit, FromQuantity, Up>& other)
-    : value_(U.scale.from_scale(
-          other.get_value() *
-                  utility::as_constant<conversion_factor(FromUnit, U)> +
-              utility::as_constant<conversion_offset(FromUnit, U)>,
-          FromUnit.scale)) {
+    : value_(scale_converter<FromUnit.scale, U.scale>::template convert<
+             FromUnit, U>(other.get_value())) {
   static_assert(
       quantity_convertible_to<FromQuantity, Q>,
       "Attempting to construct value from incompatible quantity. Note, "
@@ -74,11 +73,8 @@ template <auto U, auto Q, typename T>
                       ::maxwell::quantity<decltype(FromQuantity)>
 constexpr quantity_value<U, Q, T>::quantity_value(
     quantity_value<FromUnit, FromQuantity, Up>&& other)
-    : value_(U.scale.from_scale(
-          std::move(other).get_value() *
-                  utility::as_constant<conversion_factor(FromUnit, U)> +
-              utility::as_constant<conversion_offset(FromUnit, U)>,
-          FromUnit.scale)) {
+    : value_(scale_converter<FromUnit.scale, U.scale>::template convert<
+             FromUnit, U>(std::move(other).get_value())) {
   static_assert(
       quantity_convertible_to<FromQuantity, Q>,
       "Attempting to construct value from incompatible quantity. Note, "

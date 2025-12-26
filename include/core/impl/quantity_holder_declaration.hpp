@@ -64,8 +64,8 @@ template <typename Derived> class quantity_holder_arithmetic_operators {
   friend constexpr auto operator+=(Derived& lhs,
                                    const quantity_holder<Q2, T2>& rhs)
       -> Derived& {
-    static_assert(quantity_convertible_to<Q2, Derived::quantity_kind> &&
-                      quantity_convertible_to<Derived::quantity_kind, Q2>,
+    static_assert(quantity_convertible_to<Q2, Derived::quantity> &&
+                      quantity_convertible_to<Derived::quantity, Q2>,
                   "Cannot add quantities of different kinds");
     if (lhs.reference_ != rhs.get_reference()) {
       throw incompatible_quantity_holder(
@@ -80,10 +80,10 @@ template <typename Derived> class quantity_holder_arithmetic_operators {
   friend constexpr auto operator+=(Derived& lhs,
                                    const quantity_value<U2, Q2, T2>& rhs)
       -> Derived& {
-    static_assert(quantity_convertible_to<Q2, Derived::quantity_kind> &&
-                      quantity_convertible_to<Derived::quantity_kind, Q2>,
+    static_assert(quantity_convertible_to<Q2, Derived::quantity> &&
+                      quantity_convertible_to<Derived::quantity, Q2>,
                   "Cannot add quantities of different kinds");
-    if (lhs.reference_ != U2.get_reference()) {
+    if (lhs.reference_ != U2.reference) {
       throw incompatible_quantity_holder(
           "Cannot add quantities whose units have different reference "
           "points.");
@@ -104,8 +104,8 @@ template <typename Derived> class quantity_holder_arithmetic_operators {
   friend constexpr auto operator-=(Derived& lhs,
                                    const quantity_holder<Q2, T2>& rhs)
       -> Derived& {
-    static_assert(quantity_convertible_to<Q2, Derived::quantity_kind> &&
-                      quantity_convertible_to<Derived::quantity_kind, Q2>,
+    static_assert(quantity_convertible_to<Q2, Derived::quantity> &&
+                      quantity_convertible_to<Derived::quantity, Q2>,
                   "Cannot subtract quantities of different kinds");
     if (lhs.reference_ != rhs.get_reference()) {
       throw incompatible_quantity_holder(
@@ -120,10 +120,10 @@ template <typename Derived> class quantity_holder_arithmetic_operators {
   friend constexpr auto operator-=(Derived& lhs,
                                    const quantity_value<U2, Q2, T2>& rhs)
       -> Derived& {
-    static_assert(quantity_convertible_to<Q2, Derived::quantity_kind> &&
-                      quantity_convertible_to<Derived::quantity_kind, Q2>,
+    static_assert(quantity_convertible_to<Q2, Derived::quantity> &&
+                      quantity_convertible_to<Derived::quantity, Q2>,
                   "Cannot subtract quantities of different kinds");
-    if (lhs.reference_ != U2.get_reference()) {
+    if (lhs.reference_ != U2.reference) {
       throw incompatible_quantity_holder(
           "Cannot subtract quantities whose units have different reference "
           "points.");
@@ -182,7 +182,7 @@ template <typename Derived> class quantity_holder_arithmetic_operators {
 
     using result_type =
         std::remove_cvref_t<decltype(lhs.get_value() * rhs.get_value())>;
-    return quantity_holder<Derived::quantity_kind * Q2, result_type>(
+    return quantity_holder<Derived::quantity * Q2, result_type>(
         lhs.get_value() * rhs.get_value(),
         lhs.multiplier_ * rhs.get_multiplier());
   }
@@ -192,7 +192,7 @@ template <typename Derived> class quantity_holder_arithmetic_operators {
                                   const quantity_value<U2, Q2, T2>& rhs) {
     using result_type =
         std::remove_cvref_t<decltype(lhs.get_value() * rhs.get_value())>;
-    return quantity_holder<Derived::quantity_kind * Q2, result_type>(
+    return quantity_holder<Derived::quantity * Q2, result_type>(
         lhs.get_value() * rhs.get_value(),
         lhs.multiplier_ * U2.get_multiplier());
   }
@@ -202,7 +202,7 @@ template <typename Derived> class quantity_holder_arithmetic_operators {
              (!is_quantity_holder_v<T2> && !quantity_value_like<T2>)
   friend constexpr auto operator*(const Derived& lhs, const T2& rhs) {
     using result_type = std::remove_cvref_t<decltype(lhs.get_value() * rhs)>;
-    return quantity_holder<Derived::quantity_kind, result_type>(
+    return quantity_holder<Derived::quantity, result_type>(
         lhs.get_value() * rhs, lhs.multiplier_);
   }
 
@@ -211,7 +211,7 @@ template <typename Derived> class quantity_holder_arithmetic_operators {
              (!is_quantity_holder_v<T2> && !quantity_value_like<T2>)
   friend constexpr auto operator*(const T2& lhs, const Derived& rhs) {
     using result_type = std::remove_cvref_t<decltype(lhs * rhs.get_value())>;
-    return quantity_holder<Derived::quantity_kind, result_type>(
+    return quantity_holder<Derived::quantity, result_type>(
         lhs * rhs.get_value(), rhs.multiplier_);
   }
 
@@ -220,7 +220,7 @@ template <typename Derived> class quantity_holder_arithmetic_operators {
                                   const quantity_holder<Q2, T2>& rhs) {
     using result_type =
         std::remove_cvref_t<decltype(lhs.get_value() * rhs.get_value())>;
-    return quantity_holder<Derived::quantity_kind / Q2, result_type>(
+    return quantity_holder<Derived::quantity / Q2, result_type>(
         lhs.get_value() / rhs.get_value(),
         lhs.multiplier_ / rhs.get_multiplier());
   }
@@ -230,7 +230,7 @@ template <typename Derived> class quantity_holder_arithmetic_operators {
              (!is_quantity_holder_v<T2> && !quantity_value_like<T2>)
   friend constexpr auto operator/(const Derived& lhs, const T2& rhs) {
     using result_type = std::remove_cvref_t<decltype(lhs.get_value() / rhs)>;
-    return quantity_holder<Derived::quantity_kind, result_type>(
+    return quantity_holder<Derived::quantity, result_type>(
         lhs.get_value() / rhs, lhs.multiplier_);
   }
 };

@@ -49,6 +49,7 @@ struct quantity_type {
   constexpr static bool derived = Derived;
   /// A flag indicating the quantity is part of an arithmetic expression.
   constexpr static bool arithmetic = Arithmetic;
+
   /// \brief Returns the sum of the exponents of quantity's dimensions.
   ///
   /// Returns the sum of the exponents of the quantity's dimensions. Note,
