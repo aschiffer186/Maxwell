@@ -104,7 +104,7 @@ concept quantity = (!std::same_as<T, _detail::quantity_product_tag>) &&
 /// \return \c true if the quantities are equal, \c false otherwise.
 [[deprecated("The use of operator== is deprecated in user facing code; use "
              "convertible_to concepts")]] constexpr auto
-operator==(quantity auto lhs, quantity auto rhs) noexcept -> bool {
+operator==(const quantity auto lhs, const quantity auto rhs) noexcept -> bool {
   return lhs.dimensions == rhs.dimensions && lhs.derived == rhs.derived;
 }
 
@@ -202,7 +202,8 @@ using quantity_quotient_t = _detail::quantity_quotient<LHS, RHS>;
 /// \param rhs The right hand side of the multiplication.
 /// \return The product of two quantities.
 MODULE_EXPORT template <quantity LHS, quantity RHS>
-constexpr quantity auto operator*(LHS /*lhs*/, RHS /*rhs*/) noexcept {
+constexpr quantity auto operator*(const LHS /*lhs*/,
+                                  const RHS /*rhs*/) noexcept {
   return quantity_product_t<LHS, RHS>{};
 }
 
@@ -217,8 +218,8 @@ constexpr quantity auto operator*(LHS /*lhs*/, RHS /*rhs*/) noexcept {
 /// \param lhs The left hand side of the quotient.
 /// \param rhs The right hand side of the quotient.
 /// \return The quotient of two quantities.
-MODULE_EXPORT constexpr quantity auto operator/(quantity auto lhs,
-                                                quantity auto rhs) noexcept {
+MODULE_EXPORT constexpr quantity auto
+operator/(const quantity auto lhs, const quantity auto rhs) noexcept {
   return quantity_quotient_t<decltype(lhs), decltype(rhs)>{};
 }
 
@@ -229,7 +230,7 @@ MODULE_EXPORT constexpr quantity auto operator/(quantity auto lhs,
 ///
 /// \param q The quantity to take the inverse of.
 /// \return The inverse of the quantity.
-MODULE_EXPORT constexpr quantity auto inv(quantity auto q) noexcept {
+MODULE_EXPORT constexpr quantity auto inv(const quantity auto q) noexcept {
   return number / q;
 }
 
@@ -266,7 +267,7 @@ struct quantity_pow : _detail::quantity_pow_impl<Q, R>::type {};
 
 template <quantity Q> using quantity_sqrt_t = _detail::quantity_sqrt<Q>;
 
-MODULE_EXPORT constexpr quantity auto sqrt(quantity auto q) noexcept {
+MODULE_EXPORT constexpr quantity auto sqrt(const quantity auto q) noexcept {
   return quantity_sqrt_t<decltype(q)>{};
 }
 
@@ -275,12 +276,12 @@ using quantity_pow_t = _detail::quantity_pow<Q, R>;
 
 MODULE_EXPORT template <auto R>
   requires utility::rational<decltype(R)>
-constexpr quantity auto pow(quantity auto q) noexcept {
+constexpr quantity auto pow(const quantity auto q) noexcept {
   return quantity_pow_t<decltype(q), R>{};
 }
 
 MODULE_EXPORT template <std::intmax_t N>
-constexpr quantity auto pow(quantity auto q) noexcept {
+constexpr quantity auto pow(const quantity auto q) noexcept {
   return quantity_pow_t<decltype(q), utility::rational_type<N, 1>{}>();
 }
 
@@ -351,7 +352,8 @@ struct has_derived_base<T, std::void_t<derived_base_t<T>>> : std::true_type {};
 template <typename T> struct has_derived_base<const T> : has_derived_base<T> {};
 
 template <quantity From, quantity To>
-consteval auto quantity_convertible_to_impl(From, To) noexcept -> bool {
+consteval auto quantity_convertible_to_impl(const From /*from*/,
+                                            const To /*to*/) noexcept -> bool {
   // If dimensions size > 1 we know it's a product or a quotient
   if (From::arithmetic && !has_derived_base<From>::value) {
     return From::dimensions == To::dimensions;

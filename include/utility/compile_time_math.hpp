@@ -29,8 +29,8 @@ namespace maxwell::utility {
 /// \param base The base of the exponentiation.
 /// \param pow The power of the exponentiation.
 /// \return \f$base^{pow}\f$
-MODULE_EXPORT constexpr auto pos_pow(std::intmax_t base,
-                                     std::intmax_t pow) noexcept
+MODULE_EXPORT constexpr auto pos_pow(const std::intmax_t base,
+                                     const std::intmax_t pow) noexcept
     -> std::intmax_t {
   assert(pow >= 0);
   if (pow == 0) {
@@ -49,7 +49,7 @@ MODULE_EXPORT constexpr auto pos_pow(std::intmax_t base,
 ///
 /// \param pow The exponent to which 10 is raised.
 /// \return \f$10^{pow}\f$
-MODULE_EXPORT constexpr auto pos_pow_10(std::intmax_t pow) noexcept
+MODULE_EXPORT constexpr auto pos_pow_10(const std::intmax_t pow) noexcept
     -> std::intmax_t {
   return pos_pow(10, pow);
 }
@@ -128,7 +128,7 @@ MODULE_EXPORT constexpr rational_type<1, 1> one;
 /// \tparam Num The numerator of the rational number.
 /// \tparam Den The denominator of the rational number
 MODULE_EXPORT template <std::intmax_t Num, std::intmax_t Den>
-constexpr rational auto reduce(rational_type<Num, Den> /*r*/) noexcept {
+constexpr rational auto reduce(const rational_type<Num, Den> /*r*/) noexcept {
   static_assert(Den != 0, "Attempting to divide by zero");
   if constexpr (Num == 0) {
     return rational_type<0, 1>{};
@@ -157,8 +157,8 @@ constexpr rational auto reduce(rational_type<Num, Den> /*r*/) noexcept {
 /// \return The product of two rational numbers.
 MODULE_EXPORT template <std::intmax_t N1, std::intmax_t D1, std::intmax_t N2,
                         std::intmax_t D2>
-constexpr rational auto operator*(rational_type<N1, D1> lhs,
-                                  rational_type<N2, D2> rhs) noexcept {
+constexpr rational auto operator*(const rational_type<N1, D1> lhs,
+                                  const rational_type<N2, D2> rhs) noexcept {
   if constexpr (std::gcd(N1, D1) != 1) {
     return reduce(lhs) * rhs;
   } else if constexpr (std::gcd(N2, D2) != 1) {
@@ -183,8 +183,8 @@ constexpr rational auto operator*(rational_type<N1, D1> lhs,
 /// \return The quotient of two rational numbers.
 MODULE_EXPORT template <std::intmax_t N1, std::intmax_t D1, std::intmax_t N2,
                         std::intmax_t D2>
-constexpr rational auto operator/(rational_type<N1, D1> lhs,
-                                  rational_type<N2, D2> rhs) noexcept {
+constexpr rational auto operator/(const rational_type<N1, D1> lhs,
+                                  const rational_type<N2, D2> rhs) noexcept {
   static_assert(D1 != 0, "Attempting to divide by zero");
   static_assert(D2 != 0, "Attempting to divide by zero");
   static_assert(N2 != 0, "Attempting to divide by zero");
@@ -213,7 +213,7 @@ constexpr rational auto operator/(rational_type<N1, D1> lhs,
 /// \return The sum of two rational numbers.
 MODULE_EXPORT template <std::intmax_t N1, std::intmax_t D1, std::intmax_t N2,
                         std::intmax_t D2>
-constexpr rational auto operator+(rational_type<N1, D1> /*lhs*/,
+constexpr rational auto operator+(const rational_type<N1, D1> /*lhs*/,
                                   rational_type<N2, D2> /*rhs*/) noexcept {
   constexpr std::intmax_t output_num = (N2 * D1) + (N1 * D2);
   constexpr std::intmax_t output_den = D1 * D2;
@@ -234,8 +234,9 @@ constexpr rational auto operator+(rational_type<N1, D1> /*lhs*/,
 /// \return The difference of two rational numbers.
 MODULE_EXPORT template <std::intmax_t N1, std::intmax_t D1, std::intmax_t N2,
                         std::intmax_t D2>
-constexpr rational auto operator-(rational_type<N1, D1> /*lhs*/,
-                                  rational_type<N2, D2> /*rhs*/) noexcept {
+constexpr rational auto
+operator-(const rational_type<N1, D1> /*lhs*/,
+          const rational_type<N2, D2> /*rhs*/) noexcept {
   constexpr std::intmax_t output_num = (N1 * D2) - (N2 * D1);
   constexpr std::intmax_t output_den = D1 * D2;
   return reduce<output_num, output_den>({});
@@ -251,7 +252,7 @@ constexpr rational auto operator-(rational_type<N1, D1> /*lhs*/,
 /// \return A \c rational_type instance equivalent to the \c std::ratio
 /// type.
 MODULE_EXPORT template <std::intmax_t N, std::intmax_t D>
-constexpr rational auto from_ratio(std::ratio<N, D> /*rat*/) noexcept {
+constexpr rational auto from_ratio(const std::ratio<N, D> /*rat*/) noexcept {
   static_assert(D != 0, "Attempting to divide by zero");
   return rational_type<N, D>{};
 }
@@ -274,7 +275,7 @@ constexpr rational auto from_ratio(std::ratio<N, D> /*rat*/) noexcept {
 /// comparison.
 MODULE_EXPORT template <std::intmax_t N1, std::intmax_t D1, std::intmax_t N2,
                         std::intmax_t D2>
-constexpr auto operator<=>(rational_type<N1, D1> /*lhs*/,
+constexpr auto operator<=>(const rational_type<N1, D1> /*lhs*/,
                            rational_type<N2, D2> /*rhs*/)
     -> std::strong_ordering {
   static_assert(D1 != 0);
@@ -285,8 +286,8 @@ constexpr auto operator<=>(rational_type<N1, D1> /*lhs*/,
 
 MODULE_EXPORT template <std::intmax_t N1, std::intmax_t D1, std::intmax_t N2,
                         std::intmax_t D2>
-constexpr auto operator==(rational_type<N1, D1> lhs, rational_type<N2, D2> rhs)
-    -> bool {
+constexpr auto operator==(const rational_type<N1, D1> lhs,
+                          const rational_type<N2, D2> rhs) -> bool {
   return (lhs <=> rhs) == std::strong_ordering::equal;
 }
 
@@ -314,8 +315,8 @@ constexpr double pow_double_pos(double base, std::intmax_t exp) noexcept {
 }
 
 // Newton iteration for nth root: returns x^(1/n) for x > 0 and n > 0.
-constexpr double nth_root_impl(double x, std::intmax_t n, double curr,
-                               double prev) noexcept {
+constexpr double nth_root_impl(const double x, const std::intmax_t n,
+                               double curr, const double prev) noexcept {
   if (curr == prev)
     return curr;
   const double t = pow_double_pos(curr, n - 1);
@@ -324,7 +325,7 @@ constexpr double nth_root_impl(double x, std::intmax_t n, double curr,
   return nth_root_impl(x, n, next, curr);
 }
 
-constexpr double nth_root(double x, std::intmax_t n) noexcept {
+constexpr double nth_root(const double x, const std::intmax_t n) noexcept {
   assert(n > 0);
   if (x == 0.0)
     return 0.0;
@@ -342,7 +343,8 @@ constexpr double nth_root(double x, std::intmax_t n) noexcept {
 ///
 /// Supports arbitrary rational powers N/D at compile time.
 MODULE_EXPORT template <std::intmax_t N, std::intmax_t D>
-constexpr double pow(double base, rational_type<N, D>) noexcept {
+constexpr double pow(const double base,
+                     const rational_type<N, D> /*pow*/) noexcept {
   static_assert(D != 0, "Denominator must not be zero");
 
   // Reduce the rational exponent at compile time.
@@ -417,7 +419,8 @@ struct is_value_type<value_type<Value>> : std::true_type {};
 
 template <typename T> struct is_value_type<const T> : is_value_type<T> {};
 
-constexpr double sqrt_impl(double x, double curr, double prev) noexcept {
+constexpr double sqrt_impl(const double x, const double curr,
+                           const double prev) noexcept {
   if (curr == prev) {
     return curr;
   }
@@ -436,8 +439,9 @@ constexpr double sqrt(double x) noexcept {
 
 // Compile-time examples / smoke tests
 namespace _compile_time_checks {
-constexpr double absd(double x) noexcept { return x < 0.0 ? -x : x; }
-constexpr bool approx_equal(double a, double b, double eps = 1e-12) noexcept {
+constexpr double absd(const double x) noexcept { return x < 0.0 ? -x : x; }
+constexpr bool approx_equal(const double a, const double b,
+                            const double eps = 1e-12) noexcept {
   return absd(a - b) <= eps;
 }
 
@@ -457,7 +461,7 @@ static_assert(approx_equal(maxwell::utility::pow<-1, 3>(
 // atanh-series: ln(y) = 2 * (z + z^3/3 + z^5/5 + ...), where z = (y-1)/(y+1)
 // Range reduction: repeatedly take sqrt to bring y close to 1 and then
 // multiply the result by 2^k where k is the number of sqrt operations.
-constexpr double ln(double x) noexcept {
+constexpr double ln(const double x) noexcept {
   assert(x > 0.0 && "ln domain error: x must be positive");
   if (x == 1.0)
     return 0.0;
@@ -516,7 +520,7 @@ constexpr double ln(double x) noexcept {
   return result;
 }
 
-constexpr double log10(double x) noexcept {
+constexpr double log10(const double x) noexcept {
   constexpr double ln10_inv = 1.0 / 2.30258509299;
   const double ln_value = ln(x);
   return ln_value * ln10_inv;

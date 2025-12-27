@@ -386,12 +386,19 @@ using base_unit = _detail::base_unit_impl<Q, Name>::type;
 MODULE_EXPORT template <auto Val, utility::template_string Name>
 using derived_unit = _detail::derived_unit_impl<Val, Name>::type;
 
+/// \brief Computes the conversion factor between two units.
+///
+/// Calculates the conversion factor between to units.
+///
+/// \tparam From The unit being converted from
+/// \tparam To The unit being converted to
 MODULE_EXPORT template <unit From, unit To>
-constexpr auto conversion_factor(From, To) noexcept -> double {
+constexpr auto conversion_factor(From /*from*/, To /*to*/) noexcept -> double {
   return To::multiplier / From::multiplier;
 }
 
-MODULE_EXPORT constexpr auto conversion_factor(double from, double to) noexcept
+MODULE_EXPORT constexpr auto conversion_factor(const double from,
+                                               const double to) noexcept
     -> double {
   return to / from;
 }
@@ -407,9 +414,9 @@ constexpr auto conversion_offset(From, To) noexcept -> double {
   }
 }
 
-MODULE_EXPORT constexpr auto conversion_offset(double from_m, double from_r,
-                                               double to_m,
-                                               double to_r) noexcept -> double {
+MODULE_EXPORT constexpr auto
+conversion_offset(const double from_m, const double from_r, const double to_m,
+                  const double to_r) noexcept -> double {
   if (to_m == 1.0 && from_m == 1.0) {
     return to_r - from_r;
   } else if (from_m == 1.0) {

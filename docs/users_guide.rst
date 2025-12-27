@@ -8,7 +8,7 @@ Maxwell provides strongly-typed units representations that are designed to be us
 
 Using Header Files 
 ^^^^^^^^^^^^^^^^^^
-The simplest way to get started with Maxwell is the include the `Maxwell.hpp` header in your source code. 
+The simplest way to get started with Maxwell is the include the :code:`Maxwell.hpp` header in your source code. 
 This header provides access to all types in Maxwell. 
 For convenience, you may wish to add a using declaration for Maxwell as well. 
 
@@ -29,7 +29,21 @@ Example:
 
 Using Modules
 ^^^^^^^^^^^^^
-TBD
+Maxwell also provides a C++20 module interface. 
+To use the module interface, import the :code:`maxwell` module in your source code. 
+
+.. code-block:: c++ 
+
+    import maxwell;
+
+    using namespace maxwell; 
+
+    int main() 
+    {
+        si::meter<> m1{100};
+        std::cout << m1 << "\n"; // prints 100 m; 
+        return 0;
+    }
 
 
 Quantities, Units, and Quantity Values

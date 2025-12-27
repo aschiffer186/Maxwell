@@ -6,9 +6,10 @@
 
 #include "core/unit.hpp"
 #include "utility/compile_time_math.hpp"
+#include "utility/config.hpp"
 
 namespace maxwell {
-template <auto FromScale, auto ToScale> struct scale_converter {
+MODULE_EXPORT template <auto FromScale, auto ToScale> struct scale_converter {
   template <auto FromUnit, auto ToUnit, typename U>
   static constexpr auto convert(U&& u) {
     constexpr double factor = conversion_factor(FromUnit, ToUnit);
@@ -17,7 +18,8 @@ template <auto FromScale, auto ToScale> struct scale_converter {
   }
 };
 
-template <> struct scale_converter<decibel_scale_type{}, linear_scale_type{}> {
+MODULE_EXPORT template <>
+struct scale_converter<decibel_scale_type{}, linear_scale_type{}> {
   template <auto FromUnit, auto ToUnit, typename U>
   static constexpr auto convert(U&& u) {
     constexpr double factor = conversion_factor(FromUnit, ToUnit);
@@ -26,7 +28,8 @@ template <> struct scale_converter<decibel_scale_type{}, linear_scale_type{}> {
   }
 };
 
-template <> struct scale_converter<linear_scale_type{}, decibel_scale_type{}> {
+MODULE_EXPORT template <>
+struct scale_converter<linear_scale_type{}, decibel_scale_type{}> {
   template <auto FromUnit, auto ToUnit, typename U>
   static constexpr auto convert(U&& u) {
     constexpr double factor = conversion_factor(FromUnit, ToUnit);

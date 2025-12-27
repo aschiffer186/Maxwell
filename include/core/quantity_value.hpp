@@ -6,6 +6,7 @@
 
 #include "core/impl/quantity_value_holder_fwd.hpp"
 #include "core/quantity.hpp"
+#include "core/scale.hpp"
 #include "core/unit.hpp"
 #include "impl/quantity_value_declaration.hpp"
 #include "impl/quantity_value_impl.hpp"
@@ -114,10 +115,10 @@ quantity_cast(const quantity_value<FromUnits, FromQuantity, T>& value)
     -> ToType {
   static_assert(ToType::quantity.dimensions == FromQuantity.dimensions,
                 "Cannot convert between quantities with different dimensions");
-
-  constexpr double multiplier = conversion_factor(FromUnits, ToType::units);
-  constexpr double offset = conversion_offset(FromUnits, ToType::units);
-  return ToType((value.get_value() * multiplier) + offset);
+  const double new_value =
+      scale_converter<FromUnits.scale, ToType::units.scale>::template convert<
+          FromUnits, ToType::units>(value.get_value());
+  return ToType(new_value);
 }
 
 /// \brief Creates a \c quantity_value from a number and a unit
@@ -132,7 +133,8 @@ quantity_cast(const quantity_value<FromUnits, FromQuantity, T>& value)
 /// \return A \c quantity_value with the specified value and units.
 MODULE_EXPORT template <typename T, unit U>
   requires(!_detail::is_quantity_value_v<T> && !unit<T>)
-constexpr auto operator*(T&& value, U) -> quantity_value<U{}, U::quantity, T> {
+constexpr auto operator*(T&& value, const U /*rhs*/)
+    -> quantity_value<U{}, U::quantity, T> {
   return quantity_value<U{}, U::quantity, T>(std::forward<T>(value));
 }
 
@@ -150,7 +152,7 @@ constexpr auto operator*(T&& value, U) -> quantity_value<U{}, U::quantity, T> {
 /// specified units.
 MODULE_EXPORT template <typename T, unit U>
   requires(!_detail::is_quantity_value_v<T> && !unit<T> && !quantity<T>)
-constexpr auto operator/(T&& value, U)
+constexpr auto operator/(T&& value, const U /*rhs*/)
     -> quantity_value<inv(U{}), number / U::quantity, T> {
   return quantity_value<inv(U{}), number / U::quantity, T>(
       std::forward<T>(value));
@@ -168,14 +170,14 @@ constexpr auto operator/(T&& value, U)
 /// quantity_value.
 /// \tparam RHSUnit The units` of the right-hand side unit.
 /// \param lhs The left-hand side \c quantity_value.
-/// \param RHSUnit The right-hand side unit.
+/// \param rhs The right-hand side unit.
 /// \return A new \c quantity_value with the resulting units and the same
 /// numerical value.
 MODULE_EXPORT template <auto LHSUnit, auto LHSQuantity, typename T,
                         unit RHSUnit>
   requires(!_detail::is_quantity_value_v<T> && !unit<T>)
 constexpr auto operator*(const quantity_value<LHSUnit, LHSQuantity, T>& lhs,
-                         RHSUnit)
+                         const RHSUnit /*rhs*/)
     -> quantity_value<LHSUnit * RHSUnit{}, LHSQuantity * RHSUnit::quantity, T> {
   using result_type =
       quantity_value<LHSUnit * RHSUnit{}, LHSQuantity * RHSUnit::quantity, T>;
@@ -194,13 +196,14 @@ constexpr auto operator*(const quantity_value<LHSUnit, LHSQuantity, T>& lhs,
 /// quantity_value.
 /// \tparam RHSUnit The units of the right-hand side unit.
 /// \param lhs The left-hand side \c quantity_value.
-/// \param RHSUnit The right-hand side unit.
+/// \param rhs The right-hand side unit.
 /// \return A new \c quantity_value with the resulting units and the same
 /// numerical value.
 MODULE_EXPORT template <auto LHSUnit, auto LHSQuantity, typename T,
                         unit RHSUnit>
   requires(!_detail::is_quantity_value_v<T> && !unit<T>)
-constexpr auto operator*(quantity_value<LHSUnit, LHSQuantity, T>&& lhs, RHSUnit)
+constexpr auto operator*(quantity_value<LHSUnit, LHSQuantity, T>&& lhs,
+                         const RHSUnit /*rhs*/)
     -> quantity_value<LHSUnit * RHSUnit{}, LHSQuantity * RHSUnit::quantity, T> {
   using result_type =
       quantity_value<LHSUnit * RHSUnit{}, LHSQuantity * RHSUnit::quantity, T>;
@@ -219,14 +222,14 @@ constexpr auto operator*(quantity_value<LHSUnit, LHSQuantity, T>&& lhs, RHSUnit)
 /// quantity_value.
 /// \tparam RHSUnit The units of the right-hand side unit.
 /// \param lhs The left-hand side \c quantity_value.
-/// \param RHSUnit The right-hand side unit.
+/// \param rhs The right-hand side unit.
 /// \return A new \c quantity_value with the resulting units and the same
 /// numerical value.
 MODULE_EXPORT template <auto LHSUnit, auto LHSQuantity, typename T,
                         unit RHSUnit>
   requires(!_detail::is_quantity_value_v<T> && !unit<T>)
 constexpr auto operator/(const quantity_value<LHSUnit, LHSQuantity, T>& lhs,
-                         RHSUnit)
+                         const RHSUnit /*rhs*/)
     -> quantity_value<LHSUnit / RHSUnit{}, LHSQuantity / RHSUnit::quantity, T> {
   using result_type =
       quantity_value<LHSUnit / RHSUnit{}, LHSQuantity / RHSUnit::quantity, T>;
@@ -245,13 +248,14 @@ constexpr auto operator/(const quantity_value<LHSUnit, LHSQuantity, T>& lhs,
 /// quantity_value.
 /// \tparam RHSUnit The units of the right-hand side unit.
 /// \param lhs The left-hand side \c quantity_value.
-/// \param RHSUnit The right-hand side unit.
+/// \param rhs The right-hand side unit.
 /// \return A new \c quantity_value with the resulting units and the same
 /// numerical value.
 MODULE_EXPORT template <auto LHSUnit, auto LHSQuantity, typename T,
                         unit RHSUnit>
   requires(!_detail::is_quantity_value_v<T> && !unit<T>)
-constexpr auto operator/(quantity_value<LHSUnit, LHSQuantity, T>&& lhs, RHSUnit)
+constexpr auto operator/(quantity_value<LHSUnit, LHSQuantity, T>&& lhs,
+                         const RHSUnit /*rhs*/)
     -> quantity_value<LHSUnit / RHSUnit{}, LHSQuantity / RHSUnit::quantity, T> {
   using result_type =
       quantity_value<LHSUnit / RHSUnit{}, LHSQuantity / RHSUnit::quantity, T>;
