@@ -24,6 +24,17 @@
             }
         },
         {
+            "name": "make-debug",
+            "displayName": "Make (Debug)",
+            "generator": "Unix Makefiles",
+            "inherits": "common",
+            "cacheVariables": {
+                "CMAKE_CXX_FLAGS_DEBUG": "-Wall -Wextra -pedantic -Werror",
+                "CMAKE_BUILD_TYPE": "Debug",
+                "BUILD_TESTS": "On"
+            }
+        },
+        {
             "name": "ninja-modules",
             "displayName": "Ninja with Modules",
             "generator": "Ninja Multi-Config",
@@ -62,6 +73,12 @@
             "description": "Release build using Ninja on Linux with GCC/clang"
         },
         {
+            "name": "make-debug",
+            "configuration": "Debug",
+            "configurePreset": "make-debug",
+            "displayName": "Make (Debug)"
+        },
+        {
             "name": "ninja-modules",
             "configuration": "Release",
             "configurePreset": "ninja-modules",
@@ -91,9 +108,18 @@
     "testPresets": [
         {
             "name": "ninja",
-            "configuration": "Debug",
+            "configuration": "Release",
             "configurePreset": "ninja",
             "displayName": "Run Tests built using Ninja",
+            "output": {
+                "outputOnFailure": true
+            }
+        },
+        {
+            "name": "make",
+            "configuration": "Debug",
+            "configurePreset": "make-debug",
+            "displayName": "Run Tests built using Make",
             "output": {
                 "outputOnFailure": true
             }
@@ -110,7 +136,7 @@
                 },
                 {
                     "type": "build",
-                    "name": "ninja-debug"
+                    "name": "ninja-release"
                 },
                 {
                     "type": "test",
@@ -133,7 +159,7 @@
             ]
         },
         {
-            "name": "install",
+            "name": "install-ninja",
             "displayName": "Install",
             "steps": [
                 {

@@ -3,6 +3,7 @@
 #include <gtest/gtest.h>
 #include <type_traits>
 
+#include "quantity_systems/isq.hpp"
 #include "quantity_systems/si.hpp"
 #include "quantity_systems/us.hpp"
 #include "test_types.hpp"
@@ -124,15 +125,6 @@ TEST(TestQuatityHolder, TestQuantityValueConstructor) {
   EXPECT_FLOAT_EQ(t1.get_reference(), us::fahrenheit_unit.reference);
 }
 
-TEST(TestQuantityHolder, TestMixedAddition) {
-  // length_holder<> l1{si::meter_unit, 5000.0};
-  // l1 += si::kilometer<>{2.0};
-  // EXPECT_FLOAT_EQ(l1.get_value(), 7000.0);
-
-  temperature_holder<> t1{si::celsius_unit, 100.0};
-  EXPECT_THROW(t1 += us::fahrenheit<>{212.0}, incompatible_quantity_holder);
-}
-
 TEST(TestQuantityHolder, TestAsMethod) {
   length_holder<> l{si::meter_unit, 5000.0};
   const kilo<si::meter<>> km = l.as<kilo_unit<si::meter_unit>>();
@@ -144,4 +136,156 @@ TEST(TestQuantityHolder, TestAsMethod) {
 
   const us::fahrenheit<> f = t.as<us::fahrenheit_unit>();
   EXPECT_FLOAT_EQ(f.get_value(), 80.33);
+}
+
+TEST(TestQuantityHolder, TestAddition) {
+  length_holder<> l1{si::meter_unit, 5000.0};
+  l1 += si::kilometer<>{2.0};
+  EXPECT_FLOAT_EQ(l1.get_value(), 7000.0);
+  EXPECT_FLOAT_EQ(l1.get_multiplier(), 1.0);
+  EXPECT_FLOAT_EQ(l1.get_reference(), 0.0);
+
+  area_holder<> a1{centi_unit<si::square_meter_unit>, 10'000.0};
+  a1 += si::square_meter<>{1.0};
+  EXPECT_FLOAT_EQ(a1.get_value(), 20'000.0);
+  EXPECT_FLOAT_EQ(a1.get_multiplier(), 1e4);
+  EXPECT_FLOAT_EQ(a1.get_reference(), 0.0);
+
+  const length_holder l2{si::meter_unit, 3000.0};
+  const length_holder l3 = l2 + length_holder<>{si::kilometer_unit, 3.0};
+  EXPECT_FLOAT_EQ(l3.get_value(), 6000.0);
+  EXPECT_FLOAT_EQ(l3.get_multiplier(), 1.0);
+  EXPECT_FLOAT_EQ(l3.get_reference(), 0.0);
+
+  area_holder<> a2{centi_unit<si::square_meter_unit>, 10'000.0};
+  const area_holder<> a3 = a2 + area_holder<>{si::square_meter_unit, 1.0};
+  EXPECT_FLOAT_EQ(a3.get_value(), 20'000.0);
+  EXPECT_FLOAT_EQ(a3.get_multiplier(), 1e4);
+
+  temperature_holder<> t1{si::celsius_unit, 100.0};
+  EXPECT_THROW(t1 += si::kelvin<>{173.15}, incompatible_quantity_holder);
+
+  const dimensionless_holder<> d1{si::number_unit, 10.0};
+  const dimensionless_holder<> d2 = d1 + 20.0;
+  EXPECT_FLOAT_EQ(d2.get_value(), 30.0);
+  EXPECT_FLOAT_EQ(d2.get_multiplier(), 1.0);
+  EXPECT_FLOAT_EQ(d2.get_reference(), 0.0);
+
+  dimensionless_holder<> d3{si::number_unit, 10.0};
+  d3 += 20.0;
+  EXPECT_FLOAT_EQ(d3.get_value(), 30.0);
+  EXPECT_FLOAT_EQ(d3.get_multiplier(), 1.0);
+  EXPECT_FLOAT_EQ(d3.get_reference(), 0.0);
+}
+
+TEST(TestQuantityHolder, TestSubtraction) {
+  length_holder<> l1{si::meter_unit, 5000.0};
+  l1 -= si::kilometer<>{2.0};
+  EXPECT_FLOAT_EQ(l1.get_value(), 3000.0);
+  EXPECT_FLOAT_EQ(l1.get_multiplier(), 1.0);
+  EXPECT_FLOAT_EQ(l1.get_reference(), 0.0);
+
+  area_holder<> a1{centi_unit<si::square_meter_unit>, 20'000.0};
+  a1 -= si::square_meter<>{1.0};
+  EXPECT_FLOAT_EQ(a1.get_value(), 10'000.0);
+  EXPECT_FLOAT_EQ(a1.get_multiplier(), 1e4);
+  EXPECT_FLOAT_EQ(a1.get_reference(), 0.0);
+
+  const length_holder l2{si::meter_unit, 5000.0};
+  const length_holder l3 = l2 - length_holder<>{si::kilometer_unit, 3.0};
+  EXPECT_FLOAT_EQ(l3.get_value(), 2000.0);
+  EXPECT_FLOAT_EQ(l3.get_multiplier(), 1.0);
+  EXPECT_FLOAT_EQ(l3.get_reference(), 0.0);
+
+  area_holder<> a2{centi_unit<si::square_meter_unit>, 20'000.0};
+  const area_holder<> a3 = a2 - area_holder<>{si::square_meter_unit, 1.0};
+  EXPECT_FLOAT_EQ(a3.get_value(), 10'000.0);
+  EXPECT_FLOAT_EQ(a3.get_multiplier(), 1e4);
+  EXPECT_FLOAT_EQ(a3.get_reference(), 0.0);
+
+  temperature_holder<> t1{si::celsius_unit, 100.0};
+  EXPECT_THROW(t1 -= si::kelvin<>{173.15}, incompatible_quantity_holder);
+
+  dimensionless_holder<> d1{si::number_unit, 10.0};
+  d1 -= 20.0;
+  EXPECT_FLOAT_EQ(d1.get_value(), -10.0);
+  EXPECT_FLOAT_EQ(d1.get_multiplier(), 1.0);
+  EXPECT_FLOAT_EQ(d1.get_reference(), 0.0);
+
+  const dimensionless_holder<> d2{si::number_unit, 30.0};
+  const dimensionless_holder<> d3 = d2 - 15.0;
+  EXPECT_FLOAT_EQ(d3.get_value(), 15.0);
+  EXPECT_FLOAT_EQ(d3.get_multiplier(), 1.0);
+  EXPECT_FLOAT_EQ(d3.get_reference(), 0.0);
+}
+
+TEST(TestQuantityHolder, TestMultiplication) {
+  const length_holder<> l1{si::centimeter_unit, 5.0};
+  const area_holder<> a1 = l1 * l1;
+  EXPECT_FLOAT_EQ(a1.get_value(), 25.0);
+  EXPECT_FLOAT_EQ(a1.get_multiplier(), 1e4);
+  EXPECT_FLOAT_EQ(a1.get_reference(), 0.0);
+}
+
+TEST(TestQuantityHolder, TestDivision) {
+  const area_holder<> a1{si::square_meter_unit, 20.0};
+  const length_holder<> l1 = a1 / length_holder<>{si::meter_unit, 4.0};
+  EXPECT_FLOAT_EQ(l1.get_value(), 5.0);
+  EXPECT_FLOAT_EQ(l1.get_multiplier(), 1.0);
+  EXPECT_FLOAT_EQ(l1.get_reference(), 0.0);
+}
+
+TEST(TestQuantityHolder, TestMixedAddition) {
+  length_holder<> l1{si::meter_unit, 5000.0};
+  l1 += si::kilometer<>{2.0};
+  EXPECT_FLOAT_EQ(l1.get_value(), 7000.0);
+
+  const length_holder<> l2{si::meter_unit, 5000.0};
+  const length_holder<> l3 = l2 + si::kilometer<>{3.0};
+  EXPECT_FLOAT_EQ(l3.get_value(), 8000.0);
+
+  si::meter<> m4{3000.0};
+  m4 += length_holder<>{si::kilometer_unit, 2.0};
+  EXPECT_FLOAT_EQ(m4.get_value(), 5000.0);
+
+  const si::kilometer<> m5{5.0};
+  const si::meter<> m6 = m5 + length_holder<>{si::meter_unit, 3000.0};
+  EXPECT_FLOAT_EQ(m6.get_value(), 8000.0);
+
+  temperature_holder<> t1{si::celsius_unit, 100.0};
+  EXPECT_THROW(t1 += us::fahrenheit<>{212.0}, incompatible_quantity_holder);
+}
+
+TEST(TestQuantityHolder, TestMixedSubtraction) {
+  length_holder<> l1{si::meter_unit, 5000.0};
+  l1 -= si::kilometer<>{2.0};
+  EXPECT_FLOAT_EQ(l1.get_value(), 3000.0);
+
+  const length_holder<> l2{si::meter_unit, 5000.0};
+  const length_holder<> l3 = l2 - si::kilometer<>{3.0};
+  EXPECT_FLOAT_EQ(l3.get_value(), 2000.0);
+
+  si::meter<> m4{5000.0};
+  m4 -= length_holder<>{si::kilometer_unit, 2.0};
+  EXPECT_FLOAT_EQ(m4.get_value(), 3000.0);
+
+  const si::kilometer<> m5{5.0};
+  const si::meter<> m6 = m5 - length_holder<>{si::meter_unit, 3000.0};
+  EXPECT_FLOAT_EQ(m6.get_value(), 2000.0);
+
+  temperature_holder<> t1{si::celsius_unit, 100.0};
+  EXPECT_THROW(t1 -= us::fahrenheit<>{32.0}, incompatible_quantity_holder);
+}
+
+TEST(TestQuantityHolder, TestMixedMultiplication) {
+  const length_holder<> l1{si::centimeter_unit, 5.0};
+  const area_holder<> a1 = l1 * si::meter<>{2.0};
+  EXPECT_FLOAT_EQ(a1.get_value(), 10.0);
+  EXPECT_FLOAT_EQ(a1.get_multiplier(), 1e2);
+  EXPECT_FLOAT_EQ(a1.get_reference(), 0.0);
+
+  const area_holder<> a2 = si::meter<>{2.0} * l1;
+  EXPECT_FLOAT_EQ(a2.get_value(), 10.0);
+  EXPECT_FLOAT_EQ(a2.get_multiplier(), 1e2);
+  EXPECT_FLOAT_EQ(a2.get_reference(), 0.0);
 }

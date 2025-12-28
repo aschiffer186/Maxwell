@@ -4,6 +4,8 @@
 #ifndef QUANTITY_VALUE_HPP
 #define QUANTITY_VALUE_HPP
 
+#include <functional> // hash
+
 #include "core/impl/quantity_value_holder_fwd.hpp"
 #include "core/quantity.hpp"
 #include "core/scale.hpp"

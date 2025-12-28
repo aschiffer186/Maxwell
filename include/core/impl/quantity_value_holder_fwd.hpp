@@ -6,6 +6,22 @@
 #include <type_traits>
 
 namespace maxwell {
+/// \brief Exception thrown when attempting to perform an operation on
+/// incompatible \c quantity_holders
+///
+/// Class \c incompatible_quantity_holder is an exception thrown when an
+/// arithmetic operation is performed on two instaces of \c quantity_holder with
+/// difference references. Because the units of a \c quantity_holder are
+/// determined at run-time, this error cannot be caught at compile-time.
+class incompatible_quantity_holder : public std::runtime_error {
+public:
+  /// \brief Constructor
+  ///
+  /// \param message The error message associated with the exception.
+  explicit incompatible_quantity_holder(const std::string& message)
+      : std::runtime_error(message) {}
+};
+
 /// \brief Holds a numerical value associated with a physical quantity.
 MODULE_EXPORT template <auto Q, typename T = double>
   requires quantity<decltype(Q)>

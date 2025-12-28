@@ -6,7 +6,6 @@
 #include <compare>          // spaceship operator
 #include <concepts>         // constructible_from, convertible_to, swappable
 #include <format>           // formatter
-#include <functional>       // hash
 #include <initializer_list> // initializer_list
 #include <iterator>         // back_inserter
 #include <ostream>          // ostream
@@ -138,6 +137,41 @@ template <quantity_value_like Derived> class _quantity_value_operators {
     return lhs;
   }
 
+  /// \brief Addition assignment operator
+  ///
+  /// Adds the numeric value of a \c quantity_holder instance to the numerical
+  /// value of \c lhs, converting units if necessary. Returns a reference to the
+  /// modified \c quantity_value. The program is ill-formed if the quantities of
+  /// the two values being added are not convertible to each other.
+  ///
+  /// \tparam Q2 The quantity of the \c quantity_holder instance.
+  /// \tparam T2 The type of the numerical value of the \c quantity_holder
+  /// instance.
+  /// \param lhs The left-hand side of the addition.
+  /// \param rhs The right-hand side of the addition.
+  /// \return A reference to the modified \c quantity_value instance.
+  /// \throw incompatible_quantity_holder if the the units of the quantities
+  /// being added have difference reference points.
+  template <auto Q2, typename T2>
+  friend constexpr auto operator+=(Derived& lhs,
+                                   const quantity_holder<Q2, T2>& rhs)
+      -> Derived& {
+    static_assert(quantity_convertible_to<Q2, Derived::quantity> &&
+                      quantity_convertible_to<Derived::quantity, Q2>,
+                  "Cannot add quantities of different kinds");
+    if (Derived::units.reference != rhs.get_reference()) [[unlikely]] {
+      throw incompatible_quantity_holder(
+          "Cannot add quantities whose units have different reference "
+          "points.");
+    }
+    if (rhs.get_multiplier() == Derived::units.multiplier) {
+      lhs.value_ += rhs.get_value();
+    } else {
+      lhs.value_ += Derived(rhs).get_value();
+    }
+    return lhs;
+  }
+
   /// \brief Subtraction assignment operator
   ///
   /// Subtracts the numerical value of another \c quantity_value instance from
@@ -163,6 +197,42 @@ template <quantity_value_like Derived> class _quantity_value_operators {
                   "Cannot subtract quantities of different kinds or quantities "
                   "whose units have different reference points.");
     if constexpr (U2.multiplier == Derived::units.multiplier) {
+      lhs.value_ -= rhs.get_value();
+    } else {
+      lhs.value_ -= Derived(rhs).get_value();
+    }
+    return lhs;
+  }
+
+  /// \brief Subtraction assignment operator
+  ///
+  /// Subtracts the numeric value of a \c quantity_holder instance from the
+  /// numerical value of \c lhs, converting units if necessary. Returns a
+  /// reference to the modified \c quantity_value. The program is ill-formed if
+  /// the quantities of the two values being added are not convertible to each
+  /// other.
+  ///
+  /// \tparam Q2 The quantity of the \c quantity_holder instance.
+  /// \tparam T2 The type of the numerical value of the \c quantity_holder
+  /// instance.
+  /// \param lhs The left-hand side of the subtraction.
+  /// \param rhs The right-hand side of the subtraction.
+  /// \return A reference to the modified \c quantity_value instance.
+  /// \throw incompatible_quantity_holder if the the units of the quantities
+  /// being added have difference reference points.
+  template <auto Q2, typename T2>
+  friend constexpr auto operator-=(Derived& lhs,
+                                   const quantity_holder<Q2, T2>& rhs)
+      -> Derived& {
+    static_assert(quantity_convertible_to<Q2, Derived::quantity> &&
+                      quantity_convertible_to<Derived::quantity, Q2>,
+                  "Cannot subtract quantities of different kinds");
+    if (Derived::units.reference != rhs.get_reference()) [[unlikely]] {
+      throw incompatible_quantity_holder(
+          "Cannot subtract quantities whose units have different reference "
+          "points.");
+    }
+    if (rhs.get_multiplier() == Derived::units.multiplier) {
       lhs.value_ -= rhs.get_value();
     } else {
       lhs.value_ -= Derived(rhs).get_value();
@@ -221,7 +291,7 @@ template <quantity_value_like Derived> class _quantity_value_operators {
   }
 
   template <typename T>
-    requires(!quantity_value_like<T>)
+    requires(!quantity_value_like<T> && !is_quantity_holder_v<T>)
   friend constexpr quantity_value_like auto operator+(Derived lhs, T&& rhs) {
     using result_number_type =
         std::remove_cvref_t<decltype(lhs.get_value() + std::forward<T>(rhs))>;
@@ -231,7 +301,7 @@ template <quantity_value_like Derived> class _quantity_value_operators {
   }
 
   template <typename T>
-    requires(!quantity_value_like<T>)
+    requires(!quantity_value_like<T> && !is_quantity_holder_v<T>)
   friend constexpr quantity_value_like auto operator+(T&& lhs, Derived rhs) {
     using result_number_type =
         std::remove_cvref_t<decltype(std::forward<T>(lhs) + rhs.get_value())>;
@@ -241,13 +311,13 @@ template <quantity_value_like Derived> class _quantity_value_operators {
   }
 
   template <typename T>
-    requires(!quantity_value_like<T>)
+    requires(!quantity_value_like<T> && !is_quantity_holder_v<T>)
   friend constexpr quantity_value_like auto operator-(Derived lhs, T&& rhs) {
     return lhs -= std::forward<T>(rhs);
   }
 
   template <typename T>
-    requires(!quantity_value_like<T>)
+    requires(!quantity_value_like<T> && !is_quantity_holder_v<T>)
   friend constexpr quantity_value_like auto operator-(T&& lhs, Derived rhs)
     requires unitless<decltype(rhs)::units>
   {
@@ -268,7 +338,7 @@ template <quantity_value_like Derived> class _quantity_value_operators {
   }
 
   template <typename T>
-    requires(!quantity_value_like<T> && !unit<T> &&
+    requires(!quantity_value_like<T> && !unit<T> && !is_quantity_holder_v<T> &&
              !utility::_detail::is_value_type<T>::value)
   friend constexpr quantity_value_like auto operator*(const Derived& lhs,
                                                       const T& rhs) {
@@ -279,7 +349,7 @@ template <quantity_value_like Derived> class _quantity_value_operators {
   }
 
   template <typename T>
-    requires(!quantity_value_like<T> && !unit<T> &&
+    requires(!quantity_value_like<T> && !unit<T> && !is_quantity_holder_v<T> &&
              !utility::_detail::is_value_type<T>::value)
   friend constexpr quantity_value_like auto operator*(const T& lhs,
                                                       const Derived& rhs) {
@@ -842,6 +912,10 @@ public:
   ///
   /// \return A quantity with the same value expressed in base units
   constexpr auto in_base_units() const -> quantity_value<U.base_units(), Q, T>;
+
+  template <auto ToUnit>
+    requires unit<decltype(ToUnit)>
+  constexpr auto as() const -> quantity_value<ToUnit, Q, T>;
 
 private:
   friend class _detail::_quantity_value_operators<quantity_value<U, Q, T>>;

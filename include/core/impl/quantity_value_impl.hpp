@@ -199,4 +199,13 @@ constexpr auto quantity_value<U, Q, T>::in_base_units() const
   constexpr unit auto base_units = U.base_units();
   return quantity_value<base_units, Q, T>(*this);
 }
+
+template <auto U, auto Q, typename T>
+  requires unit<decltype(U)> && quantity<decltype(Q)>
+                              template <auto ToUnit>
+             requires unit<decltype(ToUnit)>
+constexpr auto quantity_value<U, Q, T>::as() const
+    -> quantity_value<ToUnit, Q, T> {
+  return quantity_value<ToUnit, Q, T>(*this);
+}
 } // namespace maxwell

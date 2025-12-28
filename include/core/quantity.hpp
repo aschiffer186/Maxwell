@@ -218,9 +218,11 @@ constexpr quantity auto operator*(const LHS /*lhs*/,
 /// \param lhs The left hand side of the quotient.
 /// \param rhs The right hand side of the quotient.
 /// \return The quotient of two quantities.
-MODULE_EXPORT constexpr quantity auto
-operator/(const quantity auto lhs, const quantity auto rhs) noexcept {
-  return quantity_quotient_t<decltype(lhs), decltype(rhs)>{};
+
+MODULE_EXPORT template <quantity LHS, quantity RHS>
+constexpr quantity auto operator/(const LHS /*lhs*/,
+                                  const RHS /*rhs*/) noexcept {
+  return quantity_quotient_t<LHS, RHS>{};
 }
 
 /// \brief Computes the inverse of a quantity.
