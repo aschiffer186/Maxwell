@@ -95,7 +95,7 @@ MODULE_EXPORT constexpr struct joule_unit_type : derived_unit<isq::work, "J"> {
 } joule_unit;
 
 MODULE_EXPORT constexpr struct newton_meter_unit_type
-    : derived_unit<isq::torque, "N·m"> {
+    : derived_unit<isq::torque, "N*m"> {
 } newton_meter_unit;
 
 MODULE_EXPORT constexpr struct watt_unit_type : derived_unit<isq::power, "W"> {
@@ -177,11 +177,11 @@ MODULE_EXPORT constexpr struct liter_unit_type
 } liter_unit;
 
 MODULE_EXPORT constexpr struct meter_per_second_unit_type
-    : derived_unit<isq::velocity, "m/s"> {
+    : derived_unit<isq::velocity, "m*s^-1"> {
 } meter_per_second_unit;
 
 MODULE_EXPORT constexpr struct meter_per_second_per_second_unit_type
-    : derived_unit<isq::acceleration, "m/s^2"> {
+    : derived_unit<isq::acceleration, "m*s^-2"> {
 } meter_per_second_per_second_unit;
 
 MODULE_EXPORT template <typename T = double>
@@ -353,6 +353,7 @@ MODULE_EXPORT constexpr unit auto m2 = square_meter_unit;
 MODULE_EXPORT constexpr unit auto m3 = cubic_meter_unit;
 MODULE_EXPORT constexpr unit auto L = liter_unit;
 MODULE_EXPORT constexpr unit auto m_s = meter_per_second_unit;
+MODULE_EXPORT constexpr unit auto m_s2 = meter_per_second_per_second_unit;
 } // namespace symbols
 } // namespace maxwell::si
 

@@ -249,6 +249,14 @@ TEST(TestQuantityValue, TestInBaseUnits) {
   EXPECT_EQ(m.get_units(), si::meter_unit);
 }
 
+TEST(TestQuantityValue, TestIn) {
+  const us::fahrenheit<> f{50.0};
+  const quantity_value K = f.in(si::kelvin_unit);
+
+  EXPECT_FLOAT_EQ(K.get_value(), 283.15);
+  EXPECT_EQ(K.get_units(), si::kelvin_unit);
+}
+
 TEST(TestQuantityValue, TestNegation) {
   si::meter<> m1{10.0};
   auto m2 = -m1;

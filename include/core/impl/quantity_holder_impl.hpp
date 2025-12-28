@@ -129,29 +129,51 @@ constexpr auto quantity_holder<Q, T>::get_reference() const noexcept -> double {
 
 template <auto Q, typename T>
   requires quantity<decltype(Q)>
-template <auto ToUnit>
-constexpr auto quantity_holder<Q, T>::as() const
-    -> quantity_value<ToUnit, Q, T> {
-  static_assert(quantity_convertible_to<Q, ToUnit.quantity>,
-                "Cannot convert to specified unit");
+template <unit ToUnit>
+constexpr auto quantity_holder<Q, T>::as(const ToUnit /*to_unit*/) const
+    -> quantity_value<ToUnit{}, Q, T> {
+  static_assert(quantity_convertible_to<Q, ToUnit::quantity>,
+                "Cannot convert to specified units");
 
-  const double multiplier = ToUnit.multiplier / multiplier_;
+  const double multiplier = ToUnit::multiplier / multiplier_;
   double offset{};
-  if (ToUnit.multiplier == 1.0 && multiplier_ == 1.0) {
-    offset = ToUnit.reference - reference_;
+  if (ToUnit::multiplier == 1.0 && multiplier_ == 1.0) {
+    offset = ToUnit::reference - reference_;
   } else if (multiplier == 1.0) {
-    offset = ToUnit.reference - ToUnit.multiplier * reference_;
+    offset = ToUnit::reference - ToUnit::multiplier * reference_;
   } else {
-    offset = ToUnit.reference - reference_ / multiplier_;
+    offset = ToUnit::reference - reference_ / multiplier_;
   }
-  return quantity_value<ToUnit, Q, T>(value_ * multiplier + offset);
+  return quantity_value<ToUnit{}, Q, T>(value_ * multiplier + offset);
+}
+
+template <auto Q, typename T>
+  requires quantity<decltype(Q)>
+template <unit ToUnit>
+constexpr auto quantity_holder<Q, T>::in(const ToUnit /*to_unit*/) const
+    -> value_type {
+  static_assert(quantity_convertible_to<Q, ToUnit::quantity>,
+                "Cannot convert to specified units");
+
+  const double multiplier = ToUnit::multiplier / multiplier_;
+  double offset{};
+  if (ToUnit::multiplier == 1.0 && multiplier_ == 1.0) {
+    offset = ToUnit::reference - reference_;
+  } else if (multiplier == 1.0) {
+    offset = ToUnit::reference - ToUnit::multiplier * reference_;
+  } else {
+    offset = ToUnit::reference - reference_ / multiplier_;
+  }
+  return value_ * multiplier + offset;
 }
 
 template <auto Q, typename T>
   requires quantity<decltype(Q)>
 constexpr auto quantity_holder<Q, T>::in_base_units() const
     -> quantity_holder<Q, T> {
-  return quantity_holder<Q, T>(value_ * multiplier_);
+  const double multiplier = conversion_factor(multiplier_, 1.0);
+  const double offset = conversion_offset(multiplier_, reference_, 1.0, 0.0);
+  return quantity_holder<Q, T>(value_ * multiplier + offset, 1.0, 0.0);
 }
 
 template <auto Q, typename T>

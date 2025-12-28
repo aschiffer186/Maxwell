@@ -202,10 +202,12 @@ constexpr auto quantity_value<U, Q, T>::in_base_units() const
 
 template <auto U, auto Q, typename T>
   requires unit<decltype(U)> && quantity<decltype(Q)>
-                              template <auto ToUnit>
-             requires unit<decltype(ToUnit)>
-constexpr auto quantity_value<U, Q, T>::as() const
-    -> quantity_value<ToUnit, Q, T> {
-  return quantity_value<ToUnit, Q, T>(*this);
+template <unit ToUnit>
+constexpr auto quantity_value<U, Q, T>::in(const ToUnit /*to_unit*/) const
+    -> quantity_value<ToUnit{}, Q, T> {
+  static_assert(
+      quantity_convertible_to<Q, ToUnit::quantity>,
+      "Cannot convert to specified units because quantities are incompatible");
+  return quantity_value<ToUnit{}, Q, T>(*this);
 }
 } // namespace maxwell

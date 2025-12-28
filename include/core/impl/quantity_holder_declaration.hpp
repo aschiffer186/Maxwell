@@ -1,5 +1,7 @@
 
 #include "core/unit.hpp"
+#include <compare>
+#include <concepts>
 #ifndef QUANTITY_HOLDER_HPP
 #error                                                                         \
     "Do not include quantity_holder_impl.hpp directly; include quantity_holder.hpp instead"
@@ -281,6 +283,26 @@ template <typename Derived> class quantity_holder_arithmetic_operators {
     return quantity_holder<Derived::quantity, result_type>(
         lhs.get_value() / rhs, lhs.multiplier_);
   }
+
+  template <auto Q2, typename T2>
+    requires std::three_way_comparable_with<typename Derived::value_type, T2>
+  friend constexpr auto operator<=>(const Derived& lhs,
+                                    const quantity_holder<Q2, T2>& rhs) {
+    static_assert(quantity_convertible_to<Q2, Derived::quantity> &&
+                      quantity_convertible_to<Derived::quantity, Q2>,
+                  "Cannot compare quantities of different kinds");
+    return lhs.in_base_units().get_value() <=> rhs.in_base_units().get_value();
+  }
+
+  template <auto Q2, typename T2>
+    requires std::equality_comparable_with<typename Derived::value_type, T2>
+  friend constexpr auto operator==(const Derived& lhs,
+                                   const quantity_holder<Q2, T2>& rhs) -> bool {
+    static_assert(quantity_convertible_to<Q2, Derived::quantity> &&
+                      quantity_convertible_to<Derived::quantity, Q2>,
+                  "Cannot compare quantities of different kinds");
+    return lhs.in_base_units().get_value() == rhs.in_base_units().get_value();
+  }
 };
 } // namespace _detail
 /// \endcond
@@ -467,9 +489,18 @@ public:
   /// \tparam ToUnit The unit to convert to.
   /// \return A \c quantity_value representing the quantity in the specified
   /// unit.
-  template <auto ToUnit>
-  constexpr auto as() const -> quantity_value<ToUnit, Q, T>;
+  template <unit ToUnit>
+  constexpr auto as(ToUnit /*to_unit*/) const -> quantity_value<ToUnit{}, Q, T>;
 
+  template <unit ToUnit>
+  constexpr auto in(ToUnit /*to_unit*/) const -> value_type;
+
+  /// \brief Convers the quatity holder to base units.
+  ///
+  /// Converts the \c quantity_holder to a \c quantity_holder expressed in the
+  /// base units of the quantity.
+  ///
+  /// \return A \c quantity_holder representing the quantity in base units.
   constexpr auto in_base_units() const -> quantity_holder<Q, T>;
 
   constexpr explicit(!quantity_convertible_to<Q, number> || Q.derived)

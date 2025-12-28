@@ -913,9 +913,8 @@ public:
   /// \return A quantity with the same value expressed in base units
   constexpr auto in_base_units() const -> quantity_value<U.base_units(), Q, T>;
 
-  template <auto ToUnit>
-    requires unit<decltype(ToUnit)>
-  constexpr auto as() const -> quantity_value<ToUnit, Q, T>;
+  template <unit ToUnit>
+  constexpr auto in(ToUnit) const -> quantity_value<ToUnit{}, Q, T>;
 
 private:
   friend class _detail::_quantity_value_operators<quantity_value<U, Q, T>>;

@@ -3,7 +3,6 @@
 #include <gtest/gtest.h>
 #include <type_traits>
 
-#include "quantity_systems/isq.hpp"
 #include "quantity_systems/si.hpp"
 #include "quantity_systems/us.hpp"
 #include "test_types.hpp"
@@ -17,6 +16,7 @@ TEST(TestQuantityHolder, TestCXXProperties) {
   EXPECT_EQ(sizeof(test_type), 3 * sizeof(double));
   EXPECT_EQ(alignof(test_type), alignof(double));
 
+  EXPECT_FALSE(std::is_default_constructible_v<test_type>);
   EXPECT_TRUE(std::is_copy_constructible_v<test_type>);
   EXPECT_TRUE(std::is_nothrow_copy_constructible_v<test_type>);
   EXPECT_TRUE(std::is_move_constructible_v<test_type>);
@@ -127,15 +127,21 @@ TEST(TestQuatityHolder, TestQuantityValueConstructor) {
 
 TEST(TestQuantityHolder, TestAsMethod) {
   length_holder<> l{si::meter_unit, 5000.0};
-  const kilo<si::meter<>> km = l.as<kilo_unit<si::meter_unit>>();
+  const kilo<si::meter<>> km = l.as(kilo_unit<si::meter_unit>);
   EXPECT_FLOAT_EQ(km.get_value(), 5.0);
 
   temperature_holder<> t{si::kelvin_unit, 300.0};
-  const si::celsius<> c = t.as<si::celsius_unit>();
+  const si::celsius<> c = t.as(si::celsius_unit);
   EXPECT_FLOAT_EQ(c.get_value(), 26.85);
 
-  const us::fahrenheit<> f = t.as<us::fahrenheit_unit>();
+  const us::fahrenheit<> f = t.as(us::fahrenheit_unit);
   EXPECT_FLOAT_EQ(f.get_value(), 80.33);
+}
+
+TEST(TestQuantityHolder, TestInMethod) {
+  temperature_holder<> t{si::kelvin_unit, 300.0};
+  const double f = t.in(us::fahrenheit_unit);
+  EXPECT_FLOAT_EQ(f, 80.33);
 }
 
 TEST(TestQuantityHolder, TestAddition) {
@@ -288,4 +294,17 @@ TEST(TestQuantityHolder, TestMixedMultiplication) {
   EXPECT_FLOAT_EQ(a2.get_value(), 10.0);
   EXPECT_FLOAT_EQ(a2.get_multiplier(), 1e2);
   EXPECT_FLOAT_EQ(a2.get_reference(), 0.0);
+}
+
+TEST(TestQuantityHolder, TestComparisonOperators) {
+  length_holder<> l1{si::meter_unit, 5000.0};
+  length_holder<> l2{si::kilometer_unit, 5.0};
+  length_holder<> l3{si::meter_unit, 3000.0};
+
+  EXPECT_TRUE(l1 == l2);
+  EXPECT_FALSE(l1 != l2);
+  EXPECT_TRUE(l3 < l1);
+  EXPECT_TRUE(l3 <= l1);
+  EXPECT_FALSE(l3 > l1);
+  EXPECT_FALSE(l3 >= l1);
 }
