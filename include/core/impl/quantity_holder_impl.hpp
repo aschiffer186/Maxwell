@@ -75,8 +75,8 @@ template <auto FromQuantity, auto FromUnit, typename Up>
   requires std::constructible_from<T, Up>
 constexpr quantity_holder<Q, T>::quantity_holder(
     quantity_value<FromUnit, FromQuantity, Up> other)
-    : value_(std::move(other).get_value()), multiplier_(FromUnit.multiplier),
-      reference_(FromUnit.reference) {
+    : value_(std::move(other).get_value_unsafe()),
+      multiplier_(FromUnit.multiplier), reference_(FromUnit.reference) {
   static_assert(quantity_convertible_to<FromUnit.quantity, Q>,
                 "Cannot convert from units of other to quantity of value "
                 "being constructed");
@@ -88,29 +88,50 @@ template <auto FromQuantity, typename Up>
   requires std::constructible_from<T, Up>
 constexpr quantity_holder<Q, T>::quantity_holder(
     quantity_holder<FromQuantity, Up> other)
-    : value_(std::move(other).get_value()), multiplier_(other.get_multiplier()),
-      reference_(other.get_reference()) {
+    : value_(std::move(other).get_value_unsafe()),
+      multiplier_(other.get_multiplier()), reference_(other.get_reference()) {
   static_assert(
       quantity_convertible_to<FromQuantity, Q>,
-      "Attempting to constructr quantity holder using incompatible quantity");
+      "Attempting to construct quantity holder from incompatible quantity");
 }
 
 template <auto Q, typename T>
   requires quantity<decltype(Q)>
-constexpr auto quantity_holder<Q, T>::get_value() const& noexcept -> const T& {
+template <auto FromQuantity, typename Up>
+  requires std::constructible_from<T, Up>
+constexpr auto
+quantity_holder<Q, T>::operator=(quantity_holder<FromQuantity, Up> other)
+    -> quantity_holder& {
+
+  static_assert(
+      quantity_convertible_to<FromQuantity, Q>,
+      "Attempting to construct quantity holder from incompatible quantity");
+
+  using std::swap;
+  quantity_holder temp(std::move(other));
+  swap(temp.value_, value_);
+  swap(temp.multiplier_, multiplier_);
+  swap(temp.reference_, reference_);
+  return *this;
+}
+
+template <auto Q, typename T>
+  requires quantity<decltype(Q)>
+constexpr auto quantity_holder<Q, T>::get_value_unsafe() const& noexcept
+    -> const T& {
   return value_;
 }
 
 template <auto Q, typename T>
   requires quantity<decltype(Q)>
-constexpr auto quantity_holder<Q, T>::get_value() const&& noexcept
+constexpr auto quantity_holder<Q, T>::get_value_unsafe() const&& noexcept
     -> const T&& {
   return std::move(value_);
 }
 
 template <auto Q, typename T>
   requires quantity<decltype(Q)>
-constexpr auto quantity_holder<Q, T>::get_value() && noexcept -> T&& {
+constexpr auto quantity_holder<Q, T>::get_value_unsafe() && noexcept -> T&& {
   return std::move(value_);
 }
 

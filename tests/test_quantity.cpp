@@ -1,6 +1,4 @@
 #include "Maxwell.hpp"
-#include "quantity_systems/isq.hpp"
-#include "utility/type_traits.hpp"
 
 #include <gtest/gtest.h>
 #include <type_traits>

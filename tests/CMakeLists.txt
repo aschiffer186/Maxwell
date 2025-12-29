@@ -1,6 +1,18 @@
 find_package(GTest REQUIRED)
 include(CTest)
 
+function(make_compilation_failure_test test_executable_name test_name)
+    add_executable(${test_executable_name} test_compilation_failure.cpp)
+    set_target_properties(${test_executable_name} PROPERTIES EXCLUDE_FROM_ALL TRUE EXCLUDE_FROM_DEFAULT_BUILT TRUE)
+    target_compile_definitions(${test_executable_name} PRIVATE ${test_name})
+    target_link_libraries(${test_executable_name} PRIVATE Maxwell)
+    add_test(
+        NAME ${test_name} 
+        COMMAND ${CMAKE_COMMAND} --build . --target ${test_executable_name} --config $<CONFIGURATION>
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
+    set_tests_properties(${test_name} PROPERTIES WILL_FAIL TRUE)
+endfunction()
+
 add_executable(test_template_string test_template_string.cpp)
 add_test(NAME TestTemplateString COMMAND test_template_string)
 target_link_libraries(test_template_string PRIVATE Maxwell GTest::gtest_main)
@@ -34,7 +46,6 @@ target_link_libraries(test_quantity PRIVATE Maxwell GTest::gtest_main)
 target_compile_options(test_quantity PRIVATE -Wno-deprecated-declarations)
 gtest_discover_tests(test_quantity)
 
-
 add_executable(test_units test_units.cpp)
 add_test(NAME TestUnits COMMAND test_units)
 target_link_libraries(test_units PRIVATE Maxwell GTest::gtest_main)
@@ -55,3 +66,25 @@ add_executable(test_quantity_math test_quantity_math.cpp)
 add_test(NAME TestQuantityMath COMMAND test_quantity_math)
 target_link_libraries(test_quantity_math PRIVATE Maxwell GTest::gtest_main) 
 gtest_discover_tests(test_quantity_math)
+
+make_compilation_failure_test(test_invalid_quantity_value_constructor_1 TEST_INVALID_QUANTITY_VALUE_CONSTRUCTOR_1)
+make_compilation_failure_test(test_invalid_quantity_value_constructor_2 TEST_INVALID_QUANTITY_VALUE_CONSTRUCTOR_2)
+make_compilation_failure_test(test_invalid_quantity_value_constructor_3 TEST_INVALID_QUANTITY_VALUE_CONSTRUCTOR_3)
+make_compilation_failure_test(test_invalid_quantity_value_chrono_constructor TEST_INVALID_QUANTITY_VALUE_CHRONO_CONSTRUCTOR)
+
+make_compilation_failure_test(test_invalid_quantity_value_conversion1 TEST_INVALID_QUANTITY_VALUE_CONVERSION_1)
+make_compilation_failure_test(test_invalid_quantity_value_conversion2 TEST_INVALID_QUANTITY_VALUE_CONVERSION_2)
+make_compilation_failure_test(test_invalid_quantity_value_conversion3 TEST_INVALID_QUANTITY_VALUE_CONVERSION_3)
+make_compilation_failure_test(test_invalid_quantity_value_conversion4 TEST_INVALID_QUANTITY_VALUE_CONVERSION_4)
+make_compilation_failure_test(test_invalid_quantity_value_conversion5 TEST_INVALID_QUANTITY_VALUE_CONVERSION_5)
+make_compilation_failure_test(test_invalid_quantity_value_conversion6 TEST_INVALID_QUANTITY_VALUE_CONVERSION_6)
+
+make_compilation_failure_test(test_invalid_quantity_value_quantity_holder1 TEST_INVALID_QUANTITY_VALUE_QUANTITY_HOLDER_1)
+make_compilation_failure_test(test_invalid_quantity_value_quantity_holder2 TEST_INVALID_QUANTITY_VALUE_QUANTITY_HOLDER_2)
+make_compilation_failure_test(test_invalid_quantity_value_quantity_holder3 TEST_INVALID_QUANTIY_VALUE_QUANTITY_HOLDER_3)
+make_compilation_failure_test(test_invalid_quantity_value_quantity_holder4 TEST_INVALID_QUANTITY_VALUE_QUANTITY_HOLDER_4)
+
+make_compilation_failure_test(test_invalid_quantity_value_conversion_operator1 TEST_INVALID_QUANTITY_VALUE_CONVERSION_OPERATOR_1)
+make_compilation_failure_test(test_invalid_quantity_value_conversion_operator2 TEST_INVALID_QUANTITY_VALUE_CONVERSION_OPERATOR_2)
+
+make_compilation_failure_test(test_invalid_quantity_value_in1 TEST_INVALID_QUANTITY_VALUE_IN_1)

@@ -19,8 +19,8 @@ namespace maxwell::math {
 /// \brief Computes the absolute value of a \c quantity_value
 ///
 /// Computes the absolute value of a \c quantity_value. Equivalent to
-/// <tt>quantity_value<U, Q, T>(std::abs(x.get_value()))</tt>. The behavior is
-/// undefined if the result cannot be represented by the type \c T.
+/// <tt>quantity_value<U, Q, T>(std::abs(x.get_value_unsafe()))</tt>. The
+/// behavior is undefined if the result cannot be represented by the type \c T.
 ///
 /// \tparam U The units of the \c quantity_value
 /// \tparam Q The quantity type of the \c quantity_value
@@ -30,14 +30,14 @@ namespace maxwell::math {
 MODULE_EXPORT template <auto U, auto Q, typename T>
 MAXWELL_BASIC_CMATH_CONSTEXPR auto abs(const quantity_value<U, Q, T>& x)
     -> quantity_value<U, Q, T> {
-  return quantity_value<U, Q, T>(std::abs(x.get_value()));
+  return quantity_value<U, Q, T>(std::abs(x.get_value_unsafe()));
 }
 
 /// \brief Computes the absolute value of a \c quantity_holder
 ///
 /// Computes the absolute value of a \c quantity_holder. Equivalent to
-/// <tt>quantity_value<U, Q, T>(std::abs(x.get_value()))</tt>. The behavior is
-/// undefined if the result cannot be represented by the type \c T.
+/// <tt>quantity_value<U, Q, T>(std::abs(x.get_value_unsafe()))</tt>. The
+/// behavior is undefined if the result cannot be represented by the type \c T.
 ///
 /// \tparam Q The quantity type of the \c quantity_holder
 /// \tparam T The type of the numerical value of the \c quantity_holder
@@ -46,8 +46,8 @@ MAXWELL_BASIC_CMATH_CONSTEXPR auto abs(const quantity_value<U, Q, T>& x)
 MODULE_EXPORT template <auto Q, typename T>
 MAXWELL_BASIC_CMATH_CONSTEXPR auto abs(const quantity_holder<Q, T>& x)
     -> quantity_holder<Q, T> {
-  return quantity_holder<Q, T>(std::abs(x.get_value()), x.get_multiplier(),
-                               x.get_reference());
+  return quantity_holder<Q, T>(std::abs(x.get_value_unsafe()),
+                               x.get_multiplier(), x.get_reference());
 }
 
 /// \brief Computes the sine of an angle quantity.
@@ -60,7 +60,7 @@ MAXWELL_BASIC_CMATH_CONSTEXPR auto abs(const quantity_holder<Q, T>& x)
 /// \return The sine of \c x in the range [-1, 1].
 MODULE_EXPORT MAXWELL_EXTENDED_CMATH_CONSTEXPR auto
 sin(const quantity_of<isq::plane_angle> auto x) -> double {
-  const double r = si::radian<>{x}.get_value();
+  const double r = si::radian<>{x}.get_value_unsafe();
   return std::sin(r);
 }
 
@@ -74,7 +74,7 @@ sin(const quantity_of<isq::plane_angle> auto x) -> double {
 /// \return The cosine of \c x in the range [-1, 1].
 MODULE_EXPORT MAXWELL_EXTENDED_CMATH_CONSTEXPR auto
 cos(const quantity_of<isq::plane_angle> auto x) -> double {
-  return std::cos(si::radian<>{x}.get_value());
+  return std::cos(si::radian<>{x}.get_value_unsafe());
 }
 
 /// \brief Computes the tangent of an angle quantity.
@@ -88,7 +88,7 @@ cos(const quantity_of<isq::plane_angle> auto x) -> double {
 /// \return The tangent of \c x.
 MODULE_EXPORT MAXWELL_EXTENDED_CMATH_CONSTEXPR auto
 tan(const quantity_of<isq::plane_angle> auto x) -> double {
-  return std::tan(si::radian<>{x}.get_value());
+  return std::tan(si::radian<>{x}.get_value_unsafe());
 }
 
 /// \brief Computes the secant of an angle quantity.
@@ -102,7 +102,7 @@ tan(const quantity_of<isq::plane_angle> auto x) -> double {
 /// \return The secant of \c x.
 MODULE_EXPORT MAXWELL_EXTENDED_CMATH_CONSTEXPR auto
 sec(const quantity_of<isq::plane_angle> auto x) -> double {
-  return 1.0 / std::cos(si::radian<>{x}.get_value());
+  return 1.0 / std::cos(si::radian<>{x}.get_value_unsafe());
 }
 
 /// \brief Computes the cosecant of an angle quantity.
@@ -116,7 +116,7 @@ sec(const quantity_of<isq::plane_angle> auto x) -> double {
 /// \return The cosecant of \c x.
 MODULE_EXPORT MAXWELL_EXTENDED_CMATH_CONSTEXPR auto
 csc(const quantity_of<isq::plane_angle> auto x) -> double {
-  return 1.0 / std::sin(si::radian<>{x}.get_value());
+  return 1.0 / std::sin(si::radian<>{x}.get_value_unsafe());
 }
 
 /// \brief Computes the cotangent of an angle quantity.
@@ -130,7 +130,7 @@ csc(const quantity_of<isq::plane_angle> auto x) -> double {
 /// \return The cotangent of \c x.
 MODULE_EXPORT MAXWELL_EXTENDED_CMATH_CONSTEXPR auto
 cot(const quantity_of<isq::plane_angle> auto x) -> double {
-  return 1.0 / std::tan(si::radian<>{x}.get_value());
+  return 1.0 / std::tan(si::radian<>{x}.get_value_unsafe());
 }
 
 /// \brief Computes the arcsine of a value
@@ -230,37 +230,37 @@ MODULE_EXPORT MAXWELL_EXTENDED_CMATH_CONSTEXPR inline auto acotd(const double x)
 
 MODULE_EXPORT MAXWELL_EXTENDED_CMATH_CONSTEXPR auto
 exp(const quantity_of<isq::dimensionless> auto x) -> double {
-  return std::exp(x.get_value());
+  return std::exp(x.get_value_unsafe());
 }
 
 MODULE_EXPORT MAXWELL_EXTENDED_CMATH_CONSTEXPR auto
 exp2(const quantity_of<number> auto x) -> double {
-  return std::exp2(x.get_value());
+  return std::exp2(x.get_value_unsafe());
 }
 
 MODULE_EXPORT MAXWELL_EXTENDED_CMATH_CONSTEXPR auto
 expm1(const quantity_of<number> auto x) {
-  return std::expm1(x.get_value());
+  return std::expm1(x.get_value_unsafe());
 }
 
 MODULE_EXPORT MAXWELL_EXTENDED_CMATH_CONSTEXPR auto
 log(const quantity_of<number> auto x) -> double {
-  return std::log(x.get_value());
+  return std::log(x.get_value_unsafe());
 }
 
 MODULE_EXPORT MAXWELL_EXTENDED_CMATH_CONSTEXPR auto
 log2(const quantity_of<number> auto x) -> double {
-  return std::log2(x.get_value());
+  return std::log2(x.get_value_unsafe());
 }
 
 MODULE_EXPORT MAXWELL_EXTENDED_CMATH_CONSTEXPR auto
 log10(const quantity_of<number> auto x) -> double {
-  return std::log10(x.get_value());
+  return std::log10(x.get_value_unsafe());
 }
 
 MODULE_EXPORT MAXWELL_EXTENDED_CMATH_CONSTEXPR auto
 log1p(const quantity_of<number> auto x) -> double {
-  return std::log1p(x.get_value());
+  return std::log1p(x.get_value_unsafe());
 }
 
 /// \brief Computes the power of a quantity value to a rational exponent
@@ -281,7 +281,7 @@ MODULE_EXPORT template <auto R, auto U, auto Q, typename T>
 MAXWELL_EXTENDED_CMATH_CONSTEXPR auto pow(const quantity_value<U, Q, T> x)
     -> quantity_value<pow<R>(U), pow<R>(Q), T> {
   return quantity_value<pow<R>(U), pow<R>(Q), T>(
-      std::pow(x.get_value(), static_cast<double>(R)));
+      std::pow(x.get_value_unsafe(), static_cast<double>(R)));
 }
 
 /// \brief Computes the power of a quantity value to an integer exponent
@@ -301,7 +301,8 @@ MODULE_EXPORT
 template <std::intmax_t P, auto U, auto Q, typename T>
 MAXWELL_EXTENDED_CMATH_CONSTEXPR auto pow(const quantity_value<U, Q, T> x)
     -> quantity_value<pow<P>(U), pow<P>(Q), T> {
-  return quantity_value<pow<P>(U), pow<P>(Q), T>(std::pow(x.get_value(), P));
+  return quantity_value<pow<P>(U), pow<P>(Q), T>(
+      std::pow(x.get_value_unsafe(), P));
 }
 
 MODULE_EXPORT template <auto R, auto Q, typename T>
@@ -309,14 +310,14 @@ MODULE_EXPORT template <auto R, auto Q, typename T>
 MAXWELL_EXTENDED_CMATH_CONSTEXPR auto pow(const quantity_holder<Q, T> x)
     -> quantity_holder<pow<R>(Q), T> {
   return quantity_holder<pow<R>(Q), T>(
-      std::pow(x.get_value(), static_cast<double>(R)),
+      std::pow(x.get_value_unsafe(), static_cast<double>(R)),
       std::pow(x.get_multiplier(), static_cast<double>(R)), x.get_reference());
 }
 
 MODULE_EXPORT template <std::intmax_t P, auto Q, typename T>
 MAXWELL_EXTENDED_CMATH_CONSTEXPR auto pow(const quantity_holder<Q, T> x)
     -> quantity_holder<pow<P>(Q), T> {
-  return quantity_holder<pow<P>(Q), T>(std::pow(x.get_value(), P),
+  return quantity_holder<pow<P>(Q), T>(std::pow(x.get_value_unsafe(), P),
                                        std::pow(x.get_multiplier(), P),
                                        x.get_reference());
 }
@@ -325,13 +326,13 @@ MODULE_EXPORT template <auto U, auto Q, typename T>
   requires unit<decltype(U)> && quantity<decltype(Q)>
 MAXWELL_EXTENDED_CMATH_CONSTEXPR auto sqrt(const quantity_value<U, Q, T> x)
     -> quantity_value<sqrt(U), sqrt(Q), T> {
-  return quantity_value<sqrt(U), sqrt(Q), T>(std::sqrt(x.get_value()));
+  return quantity_value<sqrt(U), sqrt(Q), T>(std::sqrt(x.get_value_unsafe()));
 }
 
 MODULE_EXPORT template <auto Q, typename T>
 MAXWELL_EXTENDED_CMATH_CONSTEXPR auto sqrt(const quantity_holder<Q, T> x)
     -> quantity_holder<sqrt(Q), T> {
-  return quantity_holder<sqrt(Q), T>(std::sqrt(x.get_value()),
+  return quantity_holder<sqrt(Q), T>(std::sqrt(x.get_value_unsafe()),
                                      std::sqrt(x.get_multiplier()),
                                      x.get_reference());
 }
@@ -340,157 +341,157 @@ MODULE_EXPORT template <auto U, auto Q, typename T>
 MAXWELL_EXTENDED_CMATH_CONSTEXPR auto cbrt(const quantity_value<U, Q, T> x)
     -> quantity_value<pow<rational<1, 3>>(U), pow<rational<1, 3>>(Q), T> {
   return quantity_value<pow<rational<1, 3>>(U), pow<rational<1, 3>>(Q), T>(
-      std::cbrt(x.get_value()));
+      std::cbrt(x.get_value_unsafe()));
 }
 
 MODULE_EXPORT template <auto Q, typename T>
 MAXWELL_EXTENDED_CMATH_CONSTEXPR auto cbrt(const quantity_holder<Q, T> x)
     -> quantity_holder<pow<rational<1, 3>>(Q), T> {
   return quantity_holder<pow<rational<1, 3>>(Q), T>(
-      std::cbrt(x.get_value()), std::cbrt(x.get_multiplier()),
+      std::cbrt(x.get_value_unsafe()), std::cbrt(x.get_multiplier()),
       x.get_reference());
 }
 
 MODULE_EXPORT MAXWELL_EXTENDED_CMATH_CONSTEXPR auto
 erf(const quantity_of<number> auto x) -> double {
-  return std::erf(x.get_value());
+  return std::erf(x.get_value_unsafe());
 }
 
 MODULE_EXPORT MAXWELL_EXTENDED_CMATH_CONSTEXPR auto
 erfc(const quantity_of<number> auto x) -> double {
-  return std::erfc(x.get_value());
+  return std::erfc(x.get_value_unsafe());
 }
 
 MODULE_EXPORT MAXWELL_EXTENDED_CMATH_CONSTEXPR auto
 tgamma(const quantity_of<number> auto x) -> double {
-  return std::tgamma(x.get_value());
+  return std::tgamma(x.get_value_unsafe());
 }
 
 MODULE_EXPORT MAXWELL_EXTENDED_CMATH_CONSTEXPR auto
 lgamma(const quantity_of<number> auto x) -> double {
-  return std::lgamma(x.get_value());
+  return std::lgamma(x.get_value_unsafe());
 }
 
 MODULE_EXPORT template <auto U, auto Q, typename T>
   requires unit<decltype(U)> && quantity<decltype(Q)>
 MAXWELL_BASIC_CMATH_CONSTEXPR auto ceil(const quantity_value<U, Q, T> x)
     -> quantity_value<U, Q, T> {
-  return quantity_value<U, Q, T>(std::ceil(x.get_value()));
+  return quantity_value<U, Q, T>(std::ceil(x.get_value_unsafe()));
 }
 
 MODULE_EXPORT template <auto Q, typename T>
   requires quantity<decltype(Q)>
 MAXWELL_BASIC_CMATH_CONSTEXPR auto ceil(const quantity_holder<Q, T> x)
     -> quantity_holder<Q, T> {
-  return quantity_holder<Q, T>(std::ceil(x.get_value()), x.get_multiplier(),
-                               x.get_reference());
+  return quantity_holder<Q, T>(std::ceil(x.get_value_unsafe()),
+                               x.get_multiplier(), x.get_reference());
 }
 
 MODULE_EXPORT template <auto U, auto Q, typename T>
   requires unit<decltype(U)> && quantity<decltype(Q)>
 MAXWELL_BASIC_CMATH_CONSTEXPR auto floor(const quantity_value<U, Q, T> x)
     -> quantity_value<U, Q, T> {
-  return quantity_value<U, Q, T>(std::floor(x.get_value()));
+  return quantity_value<U, Q, T>(std::floor(x.get_value_unsafe()));
 }
 
 MODULE_EXPORT template <auto Q, typename T>
   requires quantity<decltype(Q)>
 MAXWELL_BASIC_CMATH_CONSTEXPR auto floor(const quantity_holder<Q, T> x)
     -> quantity_holder<Q, T> {
-  return quantity_holder<Q, T>(std::floor(x.get_value()), x.get_multiplier(),
-                               x.get_reference());
+  return quantity_holder<Q, T>(std::floor(x.get_value_unsafe()),
+                               x.get_multiplier(), x.get_reference());
 }
 
 MODULE_EXPORT template <auto U, auto Q, typename T>
   requires unit<decltype(U)> && quantity<decltype(Q)>
 MAXWELL_BASIC_CMATH_CONSTEXPR auto trunc(const quantity_value<U, Q, T> x)
     -> quantity_value<U, Q, T> {
-  return quantity_value<U, Q, T>(std::trunc(x.get_value()));
+  return quantity_value<U, Q, T>(std::trunc(x.get_value_unsafe()));
 }
 
 MODULE_EXPORT template <auto Q, typename T>
   requires quantity<decltype(Q)>
 MAXWELL_BASIC_CMATH_CONSTEXPR auto trunc(const quantity_holder<Q, T> x)
     -> quantity_holder<Q, T> {
-  return quantity_holder<Q, T>(std::trunc(x.get_value()), x.get_multiplier(),
-                               x.get_reference());
+  return quantity_holder<Q, T>(std::trunc(x.get_value_unsafe()),
+                               x.get_multiplier(), x.get_reference());
 }
 
 MODULE_EXPORT template <auto U, auto Q, typename T>
   requires unit<decltype(U)> && quantity<decltype(Q)>
 MAXWELL_BASIC_CMATH_CONSTEXPR auto round(const quantity_value<U, Q, T> x)
     -> quantity_value<U, Q, T> {
-  return quantity_value<U, Q, T>(std::round(x.get_value()));
+  return quantity_value<U, Q, T>(std::round(x.get_value_unsafe()));
 }
 
 MODULE_EXPORT template <auto Q, typename T>
   requires quantity<decltype(Q)>
 MAXWELL_BASIC_CMATH_CONSTEXPR auto round(const quantity_holder<Q, T> x)
     -> quantity_holder<Q, T> {
-  return quantity_holder<Q, T>(std::round(x.get_value()), x.get_multiplier(),
-                               x.get_reference());
+  return quantity_holder<Q, T>(std::round(x.get_value_unsafe()),
+                               x.get_multiplier(), x.get_reference());
 }
 
 MODULE_EXPORT template <auto U, auto Q, typename T>
   requires unit<decltype(U)> && quantity<decltype(Q)>
 MAXWELL_BASIC_CMATH_CONSTEXPR auto lround(const quantity_value<U, Q, T> x)
     -> quantity_value<U, Q, long> {
-  return quantity_value<U, Q, long>(std::round(x.get_value()));
+  return quantity_value<U, Q, long>(std::round(x.get_value_unsafe()));
 }
 
 MODULE_EXPORT template <auto Q, typename T>
   requires quantity<decltype(Q)>
 MAXWELL_BASIC_CMATH_CONSTEXPR auto lround(const quantity_holder<Q, T> x)
     -> quantity_holder<Q, long> {
-  return quantity_holder<Q, long>(std::round(x.get_value()), x.get_multiplier(),
-                                  x.get_reference());
+  return quantity_holder<Q, long>(std::round(x.get_value_unsafe()),
+                                  x.get_multiplier(), x.get_reference());
 }
 
 MODULE_EXPORT template <auto U, auto Q, typename T>
   requires unit<decltype(U)> && quantity<decltype(Q)>
 MAXWELL_BASIC_CMATH_CONSTEXPR auto llround(const quantity_value<U, Q, T> x)
     -> quantity_value<U, Q, long long> {
-  return quantity_value<U, Q, long long>(std::round(x.get_value()));
+  return quantity_value<U, Q, long long>(std::round(x.get_value_unsafe()));
 }
 
 MODULE_EXPORT template <auto Q, typename T>
   requires quantity<decltype(Q)>
 MAXWELL_BASIC_CMATH_CONSTEXPR auto llround(const quantity_holder<Q, T> x)
     -> quantity_holder<Q, long long> {
-  return quantity_holder<Q, long long>(std::round(x.get_value()),
+  return quantity_holder<Q, long long>(std::round(x.get_value_unsafe()),
                                        x.get_multiplier(), x.get_reference());
 }
 
 MODULE_EXPORT template <auto U, auto Q, typename T>
   requires unit<decltype(U)> && quantity<decltype(Q)>
 auto nearbyint(const quantity_value<U, Q, T> x) -> quantity_value<U, Q, T> {
-  return quantity_value<U, Q, T>(std::nearbyint(x.get_value()));
+  return quantity_value<U, Q, T>(std::nearbyint(x.get_value_unsafe()));
 }
 
 MODULE_EXPORT template <auto Q, typename T>
   requires quantity<decltype(Q)>
 auto nearbyint(const quantity_holder<Q, T> x) -> quantity_holder<Q, T> {
-  return quantity_holder<Q, T>(std::nearbyint(x.get_value()),
+  return quantity_holder<Q, T>(std::nearbyint(x.get_value_unsafe()),
                                x.get_multiplier(), x.get_reference());
 }
 
 MODULE_EXPORT template <auto U, auto Q, typename T>
   requires unit<decltype(U)> && quantity<decltype(Q)>
 auto rint(const quantity_value<U, Q, T> x) -> quantity_value<U, Q, T> {
-  return quantity_value<U, Q, T>(std::rint(x.get_value()));
+  return quantity_value<U, Q, T>(std::rint(x.get_value_unsafe()));
 }
 
 MODULE_EXPORT template <auto U, auto Q, typename T>
   requires unit<decltype(U)> && quantity<decltype(Q)>
 auto lrint(const quantity_value<U, Q, T> x) -> quantity_value<U, Q, long> {
-  return quantity_value<U, Q, long>(std::rint(x.get_value()));
+  return quantity_value<U, Q, long>(std::rint(x.get_value_unsafe()));
 }
 
 MODULE_EXPORT template <auto U, auto Q, typename T>
   requires unit<decltype(U)> && quantity<decltype(Q)>
 auto llrint(const quantity_value<U, Q, T> x)
     -> quantity_value<U, Q, long long> {
-  return quantity_value<U, Q, long long>(std::rint(x.get_value()));
+  return quantity_value<U, Q, long long>(std::rint(x.get_value_unsafe()));
 }
 
 } // namespace maxwell::math

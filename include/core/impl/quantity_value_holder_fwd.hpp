@@ -1,9 +1,11 @@
 #ifndef QUANTITY_VALUE_HOLDER_FWD_HPP
 #define QUANTITY_VALUE_HOLDER_FWD_HPP
 
+#include <stdexcept>   // runtime_error
+#include <type_traits> // false_type, remove_cvref_t, true_type
+
 #include "core/quantity.hpp"
 #include "core/unit.hpp"
-#include <type_traits>
 
 namespace maxwell {
 /// \brief Exception thrown when attempting to perform an operation on
@@ -13,7 +15,7 @@ namespace maxwell {
 /// arithmetic operation is performed on two instaces of \c quantity_holder with
 /// difference references. Because the units of a \c quantity_holder are
 /// determined at run-time, this error cannot be caught at compile-time.
-class incompatible_quantity_holder : public std::runtime_error {
+MODULE_EXPORT class incompatible_quantity_holder : public std::runtime_error {
 public:
   /// \brief Constructor
   ///

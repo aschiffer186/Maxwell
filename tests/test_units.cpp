@@ -1,8 +1,4 @@
 #include "Maxwell.hpp"
-#include "core/unit.hpp"
-#include "quantity_systems/isq.hpp"
-#include "quantity_systems/si.hpp"
-#include "quantity_systems/us.hpp"
 
 #include <gtest/gtest.h>
 

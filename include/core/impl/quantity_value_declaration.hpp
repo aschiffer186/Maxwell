@@ -20,8 +20,6 @@
 #include "utility/config.hpp"
 #include "utility/type_traits.hpp"
 
-namespace maxwell {} // namespace maxwell
-
 template <auto U, auto Q, typename T>
 struct std::formatter<maxwell::quantity_value<U, Q, T>>
     : formatter<string_view> {
@@ -30,7 +28,7 @@ struct std::formatter<maxwell::quantity_value<U, Q, T>>
   auto constexpr format(const maxwell::quantity_value<U, Q, T>& q,
                         format_context& ctx) const {
     string str;
-    format_to(back_inserter(str), "{} {}", q.get_value(), q.get_units());
+    format_to(back_inserter(str), "{} {}", q.get_value_unsafe(), q.get_units());
     return formatter<string_view>::format(str, ctx);
   }
 };
@@ -52,7 +50,7 @@ template <quantity_value_like Derived> class _quantity_value_operators {
   /// \param q The quantity value instance to negate.
   /// \return The negated value of the `quantity_value` instance.
   friend constexpr auto operator-(const Derived& q) -> Derived {
-    return std::remove_cvref_t<decltype(q)>(-q.get_value());
+    return std::remove_cvref_t<decltype(q)>(-q.get_value_unsafe());
   }
 
   /// \brief Pre-increment operator
@@ -130,9 +128,9 @@ template <quantity_value_like Derived> class _quantity_value_operators {
                   "Cannot add quantities of different kinds or quantities "
                   "whose units have different reference points.");
     if constexpr (U2.multiplier == Derived::units.multiplier) {
-      lhs.value_ += rhs.get_value();
+      lhs.value_ += rhs.get_value_unsafe();
     } else {
-      lhs.value_ += Derived(rhs).get_value();
+      lhs.value_ += Derived(rhs).get_value_unsafe();
     }
     return lhs;
   }
@@ -165,9 +163,9 @@ template <quantity_value_like Derived> class _quantity_value_operators {
           "points.");
     }
     if (rhs.get_multiplier() == Derived::units.multiplier) {
-      lhs.value_ += rhs.get_value();
+      lhs.value_ += rhs.get_value_unsafe();
     } else {
-      lhs.value_ += Derived(rhs).get_value();
+      lhs.value_ += Derived(rhs).get_value_unsafe();
     }
     return lhs;
   }
@@ -197,9 +195,9 @@ template <quantity_value_like Derived> class _quantity_value_operators {
                   "Cannot subtract quantities of different kinds or quantities "
                   "whose units have different reference points.");
     if constexpr (U2.multiplier == Derived::units.multiplier) {
-      lhs.value_ -= rhs.get_value();
+      lhs.value_ -= rhs.get_value_unsafe();
     } else {
-      lhs.value_ -= Derived(rhs).get_value();
+      lhs.value_ -= Derived(rhs).get_value_unsafe();
     }
     return lhs;
   }
@@ -233,9 +231,9 @@ template <quantity_value_like Derived> class _quantity_value_operators {
           "points.");
     }
     if (rhs.get_multiplier() == Derived::units.multiplier) {
-      lhs.value_ -= rhs.get_value();
+      lhs.value_ -= rhs.get_value_unsafe();
     } else {
-      lhs.value_ -= Derived(rhs).get_value();
+      lhs.value_ -= Derived(rhs).get_value_unsafe();
     }
     return lhs;
   }
@@ -294,9 +292,10 @@ template <quantity_value_like Derived> class _quantity_value_operators {
     requires(!quantity_value_like<T> && !is_quantity_holder_v<T>)
   friend constexpr quantity_value_like auto operator+(Derived lhs, T&& rhs) {
     using result_number_type =
-        std::remove_cvref_t<decltype(lhs.get_value() + std::forward<T>(rhs))>;
+        std::remove_cvref_t<decltype(lhs.get_value_unsafe() +
+                                     std::forward<T>(rhs))>;
     return quantity_value<Derived::units, Derived::quantity,
-                          result_number_type>(lhs.get_value() +
+                          result_number_type>(lhs.get_value_unsafe() +
                                               std::forward<T>(rhs));
   }
 
@@ -304,10 +303,11 @@ template <quantity_value_like Derived> class _quantity_value_operators {
     requires(!quantity_value_like<T> && !is_quantity_holder_v<T>)
   friend constexpr quantity_value_like auto operator+(T&& lhs, Derived rhs) {
     using result_number_type =
-        std::remove_cvref_t<decltype(std::forward<T>(lhs) + rhs.get_value())>;
+        std::remove_cvref_t<decltype(std::forward<T>(lhs) +
+                                     rhs.get_value_unsafe())>;
     return quantity_value<Derived::units, Derived::quantity,
                           result_number_type>(std::forward<T>(lhs) +
-                                              rhs.get_value());
+                                              rhs.get_value_unsafe());
   }
 
   template <typename T>
@@ -328,13 +328,13 @@ template <quantity_value_like Derived> class _quantity_value_operators {
   operator*(const Derived& lhs, const quantity_value_like auto& rhs) {
     using lhs_type = std::remove_cvref_t<decltype(lhs)>;
     using rhs_type = std::remove_cvref_t<decltype(rhs)>;
-    using result_type =
-        std::remove_cvref_t<decltype(lhs.get_value() * rhs.get_value())>;
+    using result_type = std::remove_cvref_t<decltype(lhs.get_value_unsafe() *
+                                                     rhs.get_value_unsafe())>;
     constexpr unit auto result_units = lhs_type::units * rhs_type::units;
     constexpr quantity auto result_quantity =
         lhs_type::quantity * rhs_type::quantity;
     return quantity_value<result_units, result_quantity, result_type>(
-        lhs.get_value() * rhs.get_value());
+        lhs.get_value_unsafe() * rhs.get_value_unsafe());
   }
 
   template <typename T>
@@ -343,9 +343,10 @@ template <quantity_value_like Derived> class _quantity_value_operators {
   friend constexpr quantity_value_like auto operator*(const Derived& lhs,
                                                       const T& rhs) {
     using lhs_type = std::remove_cvref_t<decltype(lhs)>;
-    using product_type = std::remove_cvref_t<decltype(lhs.get_value() * rhs)>;
+    using product_type =
+        std::remove_cvref_t<decltype(lhs.get_value_unsafe() * rhs)>;
     return quantity_value<lhs_type::units, lhs_type::quantity, product_type>(
-        lhs.get_value() * rhs);
+        lhs.get_value_unsafe() * rhs);
   }
 
   template <typename T>
@@ -354,22 +355,23 @@ template <quantity_value_like Derived> class _quantity_value_operators {
   friend constexpr quantity_value_like auto operator*(const T& lhs,
                                                       const Derived& rhs) {
     using rhs_type = std::remove_cvref_t<decltype(rhs)>;
-    using product_type = std::remove_cvref_t<decltype(lhs * rhs.get_value())>;
+    using product_type =
+        std::remove_cvref_t<decltype(lhs * rhs.get_value_unsafe())>;
     return quantity_value<rhs_type::units, rhs_type::quantity, product_type>(
-        lhs * rhs.get_value());
+        lhs * rhs.get_value_unsafe());
   }
 
   friend constexpr quantity_value_like auto
   operator/(const Derived& lhs, const quantity_value_like auto& rhs) {
     using lhs_type = std::remove_cvref_t<decltype(lhs)>;
     using rhs_type = std::remove_cvref_t<decltype(rhs)>;
-    using result_type =
-        std::remove_cvref_t<decltype(lhs.get_value() / rhs.get_value())>;
+    using result_type = std::remove_cvref_t<decltype(lhs.get_value_unsafe() /
+                                                     rhs.get_value_unsafe())>;
     constexpr unit auto result_units = lhs_type::units / rhs_type::units;
     constexpr quantity auto result_quantity =
         lhs_type::quantity / rhs_type::quantity;
     return quantity_value<result_units, result_quantity, result_type>(
-        lhs.get_value() / rhs.get_value());
+        lhs.get_value_unsafe() / rhs.get_value_unsafe());
   }
 
   template <typename T>
@@ -377,9 +379,10 @@ template <quantity_value_like Derived> class _quantity_value_operators {
   friend constexpr quantity_value_like auto operator/(const Derived& lhs,
                                                       const T& rhs) {
     using lhs_type = std::remove_cvref_t<decltype(lhs)>;
-    using quotient_type = std::remove_cvref_t<decltype(lhs.get_value() / rhs)>;
+    using quotient_type =
+        std::remove_cvref_t<decltype(lhs.get_value_unsafe() / rhs)>;
     return quantity_value<lhs_type::units, lhs_type::quantity, quotient_type>(
-        lhs.get_value() / rhs);
+        lhs.get_value_unsafe() / rhs);
   }
 
   template <typename T>
@@ -388,46 +391,49 @@ template <quantity_value_like Derived> class _quantity_value_operators {
   friend constexpr quantity_value_like auto operator/(const T& lhs,
                                                       const Derived& rhs) {
     using rhs_type = std::remove_cvref_t<decltype(rhs)>;
-    using quotient_type = std::remove_cvref_t<decltype(lhs / rhs.get_value())>;
+    using quotient_type =
+        std::remove_cvref_t<decltype(lhs / rhs.get_value_unsafe())>;
     return quantity_value<inv(rhs_type::units), inv(rhs_type::quantity),
-                          quotient_type>(lhs / rhs.get_value());
+                          quotient_type>(lhs / rhs.get_value_unsafe());
   }
 
   friend constexpr quantity_value_like auto
   operator%(const Derived& lhs, const quantity_value_like auto& rhs) {
     using lhs_type = std::remove_cvref_t<decltype(lhs)>;
     using rhs_type = std::remove_cvref_t<decltype(rhs)>;
-    using result_type =
-        std::remove_cvref_t<decltype(lhs.get_value() % rhs.get_value())>;
+    using result_type = std::remove_cvref_t<decltype(lhs.get_value_unsafe() %
+                                                     rhs.get_value_unsafe())>;
     constexpr unit auto result_units = lhs_type::units / rhs_type::units;
     constexpr quantity auto result_quantity =
         lhs_type::quantity_kind / rhs_type::quantity_kind;
     return quantity_value<result_units, result_quantity, result_type>(
-        lhs.get_value() % rhs.get_value());
+        lhs.get_value_unsafe() % rhs.get_value_unsafe());
   }
 
   template <auto U2, auto Q2, typename T2>
   friend constexpr auto operator<=>(const Derived& lhs,
                                     const quantity_value<U2, Q2, T2>& rhs)
     requires std::three_way_comparable_with<
-        std::remove_cvref_t<decltype(lhs.get_value())>,
-        std::remove_cvref_t<decltype(rhs.get_value())>>
+        std::remove_cvref_t<decltype(lhs.get_value_unsafe())>,
+        std::remove_cvref_t<decltype(rhs.get_value_unsafe())>>
   {
     static_assert(unit_comparable_with<Derived::units, U2>,
                   "Cannot compare quantities of different kinds");
-    return lhs.in_base_units().get_value() <=> rhs.in_base_units().get_value();
+    return lhs.in_base_units().get_value_unsafe() <=>
+           rhs.in_base_units().get_value_unsafe();
   }
 
   template <auto U2, auto Q2, typename T2>
   friend auto operator==(const Derived& lhs,
                          const quantity_value<U2, Q2, T2>& rhs) -> bool
     requires std::equality_comparable_with<
-        std::remove_cvref_t<decltype(lhs.get_value())>,
-        std::remove_cvref_t<decltype(rhs.get_value())>>
+        std::remove_cvref_t<decltype(lhs.get_value_unsafe())>,
+        std::remove_cvref_t<decltype(rhs.get_value_unsafe())>>
   {
     static_assert(unit_comparable_with<Derived::units, U2>,
                   "Cannot compare quantities of different kinds");
-    return lhs.in_base_units().get_value() == rhs.in_base_units().get_value();
+    return lhs.in_base_units().get_value_unsafe() ==
+           rhs.in_base_units().get_value_unsafe();
   }
 
   /// \brief Multiplies the units of a \c quantity_value by another unit
@@ -449,7 +455,8 @@ template <quantity_value_like Derived> class _quantity_value_operators {
     constexpr unit auto new_units = Derived::units * U2{};
     constexpr quantity auto new_quantity = new_units.quantity;
     return quantity_value<new_units, new_quantity,
-                          typename Derived::value_type>(value.get_value());
+                          typename Derived::value_type>(
+        value.get_value_unsafe());
   }
 
   /// \brief Multiplies the units of a \c quantity_value by another unit
@@ -472,14 +479,15 @@ template <quantity_value_like Derived> class _quantity_value_operators {
     constexpr quantity auto new_quantity = new_units.quantity;
     return quantity_value<new_units, new_quantity,
                           typename Derived::value_type>(
-        std::move(value).get_value());
+        std::move(value).get_value_unsafe());
   }
 
   template <unit U2> friend constexpr auto operator/(const Derived& value, U2) {
     constexpr unit auto new_units = Derived::units / U2{};
     constexpr quantity auto new_quantity = new_units.quantity;
     return quantity_value<new_units, new_quantity,
-                          typename Derived::value_type>(value.get_value());
+                          typename Derived::value_type>(
+        value.get_value_unsafe());
   }
 
   template <unit U2> friend constexpr auto operator/(Derived&& value, U2) {
@@ -487,7 +495,7 @@ template <quantity_value_like Derived> class _quantity_value_operators {
     constexpr quantity auto new_quantity = new_units.quantity;
     return quantity_value<new_units, new_quantity,
                           typename Derived::value_type>(
-        std::move(value).get_value());
+        std::move(value).get_value_unsafe());
   }
 };
 
@@ -825,6 +833,27 @@ public:
   constexpr auto operator=(quantity_value<FromUnit, FromQuantity, Up> other)
       -> quantity_value&;
 
+  /// \brief Assigns the value of the specified \c quantity_holder to the value
+  /// of \c *this.
+  ///
+  /// Assigns the value of the specififed \c quantity_ho,der to the value oc \c
+  /// *this, automatically converting units where necessary. This function only
+  /// participates in overload resolution if.
+  ///   1. <tt>std::constructible_from<T, Rep></tt> is modeled
+  ///   2. \c std::swappable<T> is modeled
+  ///
+  /// The program is ill-formed if <tt>quantity_convertible_to<FromQuantity,
+  /// Q></tt> is not modeled.
+  ///
+  /// \tparam FromQuantity The quantity of the from \c quantity_holder
+  /// \tparam Up The type of the numerical value being assigned to \c *this.
+  /// \param other The \c quantity_holder to assign to \c *this.
+  /// \return A reference to \c *this.
+  template <auto FromQuantity, typename Up = T>
+    requires std::constructible_from<T, Up> && std::swappable<T>
+  constexpr auto operator=(quantity_holder<FromQuantity, Up> other)
+      -> quantity_value&;
+
   /// \brief Assigns the specified \c std::chrono::duration to the value of \c
   /// *this.
   ///
@@ -860,6 +889,7 @@ public:
   /// \return A reference to \c *this.
   template <typename Up = T>
     requires(!_detail::is_quantity_value_v<Up> &&
+             !_detail::is_quantity_holder_v<Up> &&
              std::is_assignable_v<T&, Up> && unitless<U>)
   constexpr auto operator=(Up&& other) -> quantity_value&;
 
@@ -867,30 +897,34 @@ public:
 
   /// \brief Returns the numerical value of the quantity.
   ///
-  /// Returns a constant lvalue-reference to the numerical value of the \c
-  /// quantity_value instance.
+  /// Returns a constant lvalue-reference to the raw numerical value of the \c
+  /// quantity_value instance. This method is unsafe because it exposes the raw
+  /// numerical value, allowing for modification without regard to units.
+  ///
   ///
   /// \return A constant lvalue-reference to the numerical value of the \c
   /// quantity_value instance.
-  constexpr auto get_value() const& noexcept -> const T&;
+  constexpr auto get_value_unsafe() const& noexcept -> const T&;
 
   /// \brief Returns the numerical value of the quantity.
   ///
   /// Returns an rvalue-reference to the numerical value of the \c
-  /// quantity_value instance.
+  /// quantity_value instance. This method is unsafe because it exposes the raw
+  /// numerical value, allowing for modification without regard to units.
   ///
   /// \return An rvalue-reference to the numerical value of the \c
   /// quantity_value instance.
-  constexpr auto get_value() && noexcept -> T&&;
+  constexpr auto get_value_unsafe() && noexcept -> T&&;
 
   /// \brief Returns the numerical value of the quantity.
   ///
   /// Returns a constant rvalue-reference to the numerical value of the \c
-  /// quantity_value instance.
+  /// quantity_value instance. This method is unsafe because it exposes the raw
+  /// numerical value, allowing for modification without regard to units.
   ///
   /// \return A constant rvalue-reference to the numerical value of the \c
   /// quantity_value instance.
-  constexpr auto get_value() const&& noexcept -> const T&&;
+  constexpr auto get_value_unsafe() const&& noexcept -> const T&&;
 
   /// \brief Conversion operator to the numerical value type
   ///

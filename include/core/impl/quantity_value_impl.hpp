@@ -57,7 +57,7 @@ template <auto U, auto Q, typename T>
 constexpr quantity_value<U, Q, T>::quantity_value(
     const quantity_value<FromUnit, FromQuantity, Up>& other)
     : value_(scale_converter<FromUnit.scale, U.scale>::template convert<
-             FromUnit, U>(other.get_value())) {
+             FromUnit, U>(other.get_value_unsafe())) {
   static_assert(
       quantity_convertible_to<FromQuantity, Q>,
       "Attempting to construct value from incompatible quantity. Note, "
@@ -74,7 +74,7 @@ template <auto U, auto Q, typename T>
 constexpr quantity_value<U, Q, T>::quantity_value(
     quantity_value<FromUnit, FromQuantity, Up>&& other)
     : value_(scale_converter<FromUnit.scale, U.scale>::template convert<
-             FromUnit, U>(std::move(other).get_value())) {
+             FromUnit, U>(std::move(other).get_value_unsafe())) {
   static_assert(
       quantity_convertible_to<FromQuantity, Q>,
       "Attempting to construct value from incompatible quantity. Note, "
@@ -88,7 +88,7 @@ template <auto U, auto Q, typename T>
                       ::maxwell::quantity<decltype(FromQuantity)>
 constexpr quantity_value<U, Q, T>::quantity_value(
     const quantity_holder<FromQuantity, T>& other)
-    : value_(other.get_value() *
+    : value_(other.get_value_unsafe() *
                  conversion_factor(other.get_multiplier(), U.multiplier) +
              conversion_offset(other.get_multiplier(), other.get_reference(),
                                U.multiplier, U.reference)) {
@@ -105,7 +105,7 @@ template <auto U, auto Q, typename T>
                       ::maxwell::quantity<decltype(FromQuantity)>
 constexpr quantity_value<U, Q, T>::quantity_value(
     quantity_holder<FromQuantity, T>&& other)
-    : value_(std::move(other).get_value() *
+    : value_(std::move(other).get_value_unsafe() *
                  conversion_factor(other.get_multiplier(), U.multiplier) +
              conversion_offset(other.get_multiplier(), other.get_reference(),
                                U.multiplier, U.reference)) {
@@ -133,7 +133,26 @@ constexpr auto quantity_value<U, Q, T>::operator=(
   quantity_value temp(std::move(other));
   swap(temp.value_, value_);
   return *this;
-} // namespace maxwell
+}
+
+template <auto U, auto Q, typename T>
+  requires unit<decltype(U)> && quantity<decltype(Q)>
+                              template <auto FromQuantity, typename Up>
+             requires std::constructible_from<T, Up> && std::swappable<T>
+constexpr auto
+quantity_value<U, Q, T>::operator=(quantity_holder<FromQuantity, Up> other)
+    -> quantity_value& {
+  static_assert(quantity_convertible_to<FromQuantity, Q>,
+                "Attempting to construct value from "
+                "incompatible quantity. Note, "
+                "quantities can be incompatible even if "
+                "they have the same units.");
+
+  using std::swap;
+  quantity_value temp(std::move(other));
+  swap(temp.value_, value_);
+  return *this;
+}
 
 template <auto U, auto Q, typename T>
   requires unit<decltype(U)> && quantity<decltype(Q)>
@@ -153,28 +172,30 @@ template <auto U, auto Q, typename T>
   requires unit<decltype(U)> && quantity<decltype(Q)>
                               template <typename Up>
              requires(!_detail::is_quantity_value_v<Up> &&
+                      !_detail::is_quantity_holder_v<Up> &&
                       std::is_assignable_v<T&, Up> && unitless<U>)
 constexpr auto quantity_value<U, Q, T>::operator=(Up&& other)
     -> quantity_value& {
-  value_ = std::forward<U>(other);
+  value_ = std::forward<Up>(other);
+  return *this;
 }
 
 template <auto U, auto Q, typename T>
   requires unit<decltype(U)> && quantity<decltype(Q)>
-constexpr auto quantity_value<U, Q, T>::get_value() const& noexcept
+constexpr auto quantity_value<U, Q, T>::get_value_unsafe() const& noexcept
     -> const T& {
   return value_;
 }
 
 template <auto U, auto Q, typename T>
   requires unit<decltype(U)> && quantity<decltype(Q)>
-constexpr auto quantity_value<U, Q, T>::get_value() && noexcept -> T&& {
+constexpr auto quantity_value<U, Q, T>::get_value_unsafe() && noexcept -> T&& {
   return std::move(value_);
 }
 
 template <auto U, auto Q, typename T>
   requires unit<decltype(U)> && quantity<decltype(Q)>
-constexpr auto quantity_value<U, Q, T>::get_value() const&& noexcept
+constexpr auto quantity_value<U, Q, T>::get_value_unsafe() const&& noexcept
     -> const T&& {
   return std::move(value_);
 }

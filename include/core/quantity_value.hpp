@@ -12,7 +12,6 @@
 #include "core/unit.hpp"
 #include "impl/quantity_value_declaration.hpp"
 #include "impl/quantity_value_impl.hpp"
-#include "quantity_systems/isq.hpp"
 
 namespace maxwell {
 MODULE_EXPORT template <typename Q>
@@ -119,7 +118,7 @@ quantity_cast(const quantity_value<FromUnits, FromQuantity, T>& value)
                 "Cannot convert between quantities with different dimensions");
   const double new_value =
       scale_converter<FromUnits.scale, ToType::units.scale>::template convert<
-          FromUnits, ToType::units>(value.get_value());
+          FromUnits, ToType::units>(value.get_value_unsafe());
   return ToType(new_value);
 }
 
@@ -183,7 +182,7 @@ constexpr auto operator*(const quantity_value<LHSUnit, LHSQuantity, T>& lhs,
     -> quantity_value<LHSUnit * RHSUnit{}, LHSQuantity * RHSUnit::quantity, T> {
   using result_type =
       quantity_value<LHSUnit * RHSUnit{}, LHSQuantity * RHSUnit::quantity, T>;
-  return result_type(lhs.get_value());
+  return result_type(lhs.get_value_unsafe());
 }
 
 /// \brief Multiplies a \c quantity_value by a unit
@@ -209,7 +208,7 @@ constexpr auto operator*(quantity_value<LHSUnit, LHSQuantity, T>&& lhs,
     -> quantity_value<LHSUnit * RHSUnit{}, LHSQuantity * RHSUnit::quantity, T> {
   using result_type =
       quantity_value<LHSUnit * RHSUnit{}, LHSQuantity * RHSUnit::quantity, T>;
-  return result_type(std::move(lhs).get_value());
+  return result_type(std::move(lhs).get_value_unsafe());
 }
 
 /// \brief Divides a \c quantity_value by a unit
@@ -235,7 +234,7 @@ constexpr auto operator/(const quantity_value<LHSUnit, LHSQuantity, T>& lhs,
     -> quantity_value<LHSUnit / RHSUnit{}, LHSQuantity / RHSUnit::quantity, T> {
   using result_type =
       quantity_value<LHSUnit / RHSUnit{}, LHSQuantity / RHSUnit::quantity, T>;
-  return result_type(lhs.get_value());
+  return result_type(lhs.get_value_unsafe());
 }
 
 /// \brief Divides a \c quantity_value by a unit
@@ -261,7 +260,7 @@ constexpr auto operator/(quantity_value<LHSUnit, LHSQuantity, T>&& lhs,
     -> quantity_value<LHSUnit / RHSUnit{}, LHSQuantity / RHSUnit::quantity, T> {
   using result_type =
       quantity_value<LHSUnit / RHSUnit{}, LHSQuantity / RHSUnit::quantity, T>;
-  return result_type(std::move(lhs).get_value());
+  return result_type(std::move(lhs).get_value_unsafe());
 }
 } // namespace maxwell
 

@@ -1,6 +1,4 @@
 #include "Maxwell.hpp"
-#include "quantity_systems/isq.hpp"
-#include "quantity_systems/si.hpp"
 
 #include <gtest/gtest.h>
 
@@ -13,11 +11,11 @@ TEST(TestQuantityMath, TestAbs) {
   const si::meter<> m{-5.0};
   const si::meter<> abs_m = abs(m);
 
-  EXPECT_FLOAT_EQ(abs_m.get_value(), 5.0);
+  EXPECT_FLOAT_EQ(abs_m.get_value_unsafe(), 5.0);
 
   const isq::length_holder<> l{si::meter_unit, -5.0};
   const isq::length_holder<> abs_l = abs(l);
-  EXPECT_FLOAT_EQ(abs_l.get_value(), 5.0);
+  EXPECT_FLOAT_EQ(abs_l.get_value_unsafe(), 5.0);
 }
 
 TEST(TestQuantityMath, TestSin) {
@@ -137,30 +135,30 @@ TEST(TestQuantityMath, TestAsin) {
   const double value = 0.5;
   const si::radian<> angle = math::asin(value);
 
-  EXPECT_FLOAT_EQ(angle.get_value(), std::numbers::pi / 6.0);
+  EXPECT_FLOAT_EQ(angle.get_value_unsafe(), std::numbers::pi / 6.0);
 
   const si::degree<> angle_deg = math::asind(value);
-  EXPECT_FLOAT_EQ(angle_deg.get_value(), 30.0);
+  EXPECT_FLOAT_EQ(angle_deg.get_value_unsafe(), 30.0);
 }
 
 TEST(TestQuantityMath, TestAcos) {
   const double value = 0.5;
   const si::radian<> angle = math::acos(value);
 
-  EXPECT_FLOAT_EQ(angle.get_value(), std::numbers::pi / 3.0);
+  EXPECT_FLOAT_EQ(angle.get_value_unsafe(), std::numbers::pi / 3.0);
 
   const si::degree<> angle_deg = math::acosd(value);
-  EXPECT_FLOAT_EQ(angle_deg.get_value(), 60.0);
+  EXPECT_FLOAT_EQ(angle_deg.get_value_unsafe(), 60.0);
 }
 
 TEST(TestQuantityMath, TestAtan) {
   const double value = 1.0;
   const si::radian<> angle = math::atan(value);
 
-  EXPECT_FLOAT_EQ(angle.get_value(), std::numbers::pi / 4.0);
+  EXPECT_FLOAT_EQ(angle.get_value_unsafe(), std::numbers::pi / 4.0);
 
   const si::degree<> angle_deg = math::atand(value);
-  EXPECT_FLOAT_EQ(angle_deg.get_value(), 45.0);
+  EXPECT_FLOAT_EQ(angle_deg.get_value_unsafe(), 45.0);
 }
 
 TEST(TestQuantityMath, TestAtan2) {
@@ -168,40 +166,40 @@ TEST(TestQuantityMath, TestAtan2) {
   const double x = 1.0;
   const si::radian<> angle = math::atan2(y, x);
 
-  EXPECT_FLOAT_EQ(angle.get_value(), std::numbers::pi / 4.0);
+  EXPECT_FLOAT_EQ(angle.get_value_unsafe(), std::numbers::pi / 4.0);
 
   const si::degree<> angle_deg = math::atan2d(y, x);
-  EXPECT_FLOAT_EQ(angle_deg.get_value(), 45.0);
+  EXPECT_FLOAT_EQ(angle_deg.get_value_unsafe(), 45.0);
 }
 
 TEST(TestQuantityMath, TestAcsc) {
   const double value = 2.0;
   const si::radian<> angle = math::acsc(value);
 
-  EXPECT_FLOAT_EQ(angle.get_value(), std::numbers::pi / 6.0);
+  EXPECT_FLOAT_EQ(angle.get_value_unsafe(), std::numbers::pi / 6.0);
 
   const si::degree<> angle_deg = math::acscd(value);
-  EXPECT_FLOAT_EQ(angle_deg.get_value(), 30.0);
+  EXPECT_FLOAT_EQ(angle_deg.get_value_unsafe(), 30.0);
 }
 
 TEST(TestQuantityMath, TestAsec) {
   const double value = 2.0;
   const si::radian<> angle = math::asec(value);
 
-  EXPECT_FLOAT_EQ(angle.get_value(), std::numbers::pi / 3.0);
+  EXPECT_FLOAT_EQ(angle.get_value_unsafe(), std::numbers::pi / 3.0);
 
   const si::degree<> angle_deg = math::asecd(value);
-  EXPECT_FLOAT_EQ(angle_deg.get_value(), 60.0);
+  EXPECT_FLOAT_EQ(angle_deg.get_value_unsafe(), 60.0);
 }
 
 TEST(TestQuantityMath, TestAcot) {
   const double value = 1.0 / std::sqrt(3.0);
   const si::radian<> angle = math::acot(value);
 
-  EXPECT_FLOAT_EQ(angle.get_value(), std::numbers::pi / 3.0);
+  EXPECT_FLOAT_EQ(angle.get_value_unsafe(), std::numbers::pi / 3.0);
 
   const si::degree<> angle_deg = math::acotd(value);
-  EXPECT_FLOAT_EQ(angle_deg.get_value(), 60.0);
+  EXPECT_FLOAT_EQ(angle_deg.get_value_unsafe(), 60.0);
 }
 
 TEST(TestQuantityMath, TestExp) {
@@ -290,33 +288,33 @@ TEST(TestQuantityMath, TestPow) {
   const si::meter<> length{2.0};
   const si::square_meter<> area = pow<2>(length);
 
-  EXPECT_FLOAT_EQ(area.get_value(), 4.0);
+  EXPECT_FLOAT_EQ(area.get_value_unsafe(), 4.0);
 
   const si::meter<> length2{8.0};
   const si::cubic_meter<> volume = pow<rational<3, 1>>(length2);
-  EXPECT_FLOAT_EQ(volume.get_value(), 512.0);
+  EXPECT_FLOAT_EQ(volume.get_value_unsafe(), 512.0);
 
   const isq::length_holder<> length3{si::centimeter_unit, 4.0};
   const isq::volume_holder<> volume2 = pow<rational<3, 1>>(length3);
 
-  EXPECT_FLOAT_EQ(volume2.get_value(), 64.0);
+  EXPECT_FLOAT_EQ(volume2.get_value_unsafe(), 64.0);
   EXPECT_EQ(volume2.get_multiplier(), 1e6);
 
   const isq::length_holder<> length4{si::centimeter_unit, 3.0};
   const isq::area_holder<> area2 = pow<2>(length4);
 
-  EXPECT_FLOAT_EQ(area2.get_value(), 9.0);
+  EXPECT_FLOAT_EQ(area2.get_value_unsafe(), 9.0);
   EXPECT_EQ(area2.get_multiplier(), 1e4);
 
   const si::square_meter<> area3{4.0};
   const si::meter<> length5 = pow<rational<1, 2>>(area3);
 
-  EXPECT_FLOAT_EQ(length5.get_value(), 2.0);
+  EXPECT_FLOAT_EQ(length5.get_value_unsafe(), 2.0);
 
   const isq::area_holder<> area4{centi_unit<si::square_meter_unit>, 9.0};
   const isq::length_holder<> length6 = pow<rational<1, 2>>(area4);
 
-  EXPECT_FLOAT_EQ(length6.get_value(), 3.0);
+  EXPECT_FLOAT_EQ(length6.get_value_unsafe(), 3.0);
   EXPECT_EQ(length6.get_multiplier(), 1e2);
 }
 
@@ -324,11 +322,11 @@ TEST(TestQuantityMath, TestSqrt) {
   const si::square_meter<> area{9.0};
   const si::meter<> length = sqrt(area);
 
-  EXPECT_FLOAT_EQ(length.get_value(), 3.0);
+  EXPECT_FLOAT_EQ(length.get_value_unsafe(), 3.0);
 
   const isq::area_holder<> area2{centi_unit<si::square_meter_unit>, 16.0};
   const isq::length_holder<> length2 = sqrt(area2);
-  EXPECT_FLOAT_EQ(length2.get_value(), 4.0);
+  EXPECT_FLOAT_EQ(length2.get_value_unsafe(), 4.0);
   EXPECT_EQ(length2.get_multiplier(), 1e2);
 }
 
@@ -336,10 +334,10 @@ TEST(TestQuantityMath, TestCbrt) {
   const si::cubic_meter<> volume{27.0};
   const si::meter<> length = cbrt(volume);
 
-  EXPECT_FLOAT_EQ(length.get_value(), 3.0);
+  EXPECT_FLOAT_EQ(length.get_value_unsafe(), 3.0);
 
   const isq::volume_holder<> volume2{centi_unit<si::cubic_meter_unit>, 8.0};
   const isq::length_holder<> length2 = cbrt(volume2);
-  EXPECT_FLOAT_EQ(length2.get_value(), 2.0);
+  EXPECT_FLOAT_EQ(length2.get_value_unsafe(), 2.0);
   EXPECT_EQ(length2.get_multiplier(), 1e2);
 }

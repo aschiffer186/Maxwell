@@ -1,6 +1,3 @@
-#include "core/quantity.hpp"
-#include "core/unit.hpp"
-#include "quantity_systems/si.hpp"
 #include <Maxwell.hpp>
 
 #include <gtest/gtest.h>

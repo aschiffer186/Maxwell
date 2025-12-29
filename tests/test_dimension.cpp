@@ -1,7 +1,4 @@
 #include "Maxwell.hpp"
-#include "core/dimension.hpp"
-#include "core/quantity.hpp"
-#include "utility/compile_time_math.hpp"
 
 #include <gtest/gtest.h>
 #include <tuple>

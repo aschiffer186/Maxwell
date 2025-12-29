@@ -10,7 +10,6 @@
 #include <chrono>           // duration
 #include <functional>       // hash
 #include <initializer_list> // initializer_list
-#include <stdexcept>        // runtime_error
 #include <string>           // string
 #include <type_traits>      // false_type, remove_cvref_t, true_type
 
@@ -21,31 +20,61 @@ namespace maxwell {
 
 /// \cond
 namespace _detail {
-template <typename Derived> class quantity_holder_arithmetic_operators {
+template <typename Derived> class quantity_holder_operators {
+  /// \brief Pre-increment operator
+  ///
+  /// Increments the value of the quantity holder by one
+  ///
+  /// \param d The quantity holder to increment
+  /// \return A reference to the incremented quantity holder
   friend constexpr auto operator++(Derived& d) -> Derived& {
     ++d.value_;
     return d;
   }
 
+  /// \brief Post-increment operator.
+  ///
+  /// Increments the value of the quantity holder by one.
+  ///
+  /// \param d The quantity holder to increment.
+  /// \return A copy of the quantity holder before it was incremented.
   friend constexpr auto operator++(Derived& d, int) -> Derived {
     auto temp{d};
     ++d;
     return temp;
   }
 
+  /// \brief Pre-decrement operator
+  ///
+  /// Decrements the value of the quantity holder by one.
+  ///
+  /// \param d The quantity holder to decrement.
+  /// \return A reference to the decremented quantity holder.
   friend constexpr auto operator--(Derived& d) -> Derived& {
     --d.value_;
     return d;
   }
 
+  /// \brief Post-decrement operator
+  ///
+  /// Decrements the value of the quantity holder by one.
+  ///
+  /// \param d The quantity holder to decrement
+  /// \return A copy of the quantity holder before it was decremented
   friend constexpr auto operator--(Derived& d, int) -> Derived {
     auto temp{d};
     --d;
     return temp;
   }
 
-  constexpr auto operator-(const Derived& d) -> Derived {
-    return Derived{-d.value_};
+  /// \brief Unary negation operator
+  ///
+  /// Negates the value of the quantity holder.
+  ///
+  /// \param d The quantity holder to negate.
+  /// \return The negated quantity holder.
+  friend constexpr auto operator-(const Derived& d) -> Derived {
+    return Derived{-d.value_, d.get_multiplier(), d.get_reference()};
   }
 
   template <auto Q2, typename T2>
@@ -65,7 +94,7 @@ template <typename Derived> class quantity_holder_arithmetic_operators {
     const double offset =
         conversion_offset(rhs.get_multiplier(), rhs.get_reference(),
                           lhs.multiplier_, lhs.reference_);
-    lhs.value_ += rhs.get_value() * multiplier + offset;
+    lhs.value_ += rhs.get_value_unsafe() * multiplier + offset;
     return lhs;
   }
 
@@ -84,7 +113,7 @@ template <typename Derived> class quantity_holder_arithmetic_operators {
     const double multiplier = conversion_factor(U2.multiplier, lhs.multiplier_);
     const double offset = conversion_offset(U2.multiplier, U2.reference,
                                             lhs.multiplier_, lhs.reference_);
-    lhs.value_ += rhs.get_value() * multiplier + offset;
+    lhs.value_ += rhs.get_value_unsafe() * multiplier + offset;
     return lhs;
   }
 
@@ -113,7 +142,7 @@ template <typename Derived> class quantity_holder_arithmetic_operators {
     const double offset =
         conversion_offset(rhs.get_multiplier(), rhs.get_reference(),
                           lhs.multiplier_, lhs.reference_);
-    lhs.value_ -= rhs.get_value() * multiplier + offset;
+    lhs.value_ -= rhs.get_value_unsafe() * multiplier + offset;
     return lhs;
   }
 
@@ -124,7 +153,7 @@ template <typename Derived> class quantity_holder_arithmetic_operators {
     static_assert(quantity_convertible_to<Q2, Derived::quantity> &&
                       quantity_convertible_to<Derived::quantity, Q2>,
                   "Cannot subtract quantities of different kinds");
-    if (lhs.reference_ != U2.reference) {
+    if (lhs.reference_ != U2.reference) [[unlikely]] {
       throw incompatible_quantity_holder(
           "Cannot subtract quantities whose units have different reference "
           "points.");
@@ -132,7 +161,7 @@ template <typename Derived> class quantity_holder_arithmetic_operators {
     const double multiplier = conversion_factor(U2.multiplier, lhs.multiplier_);
     const double offset = conversion_offset(U2.multiplier, U2.reference,
                                             lhs.multiplier_, lhs.reference_);
-    lhs.value_ -= rhs.get_value() * multiplier + offset;
+    lhs.value_ -= rhs.get_value_unsafe() * multiplier + offset;
     return lhs;
   }
 
@@ -228,37 +257,39 @@ template <typename Derived> class quantity_holder_arithmetic_operators {
   friend constexpr auto operator*(const Derived& lhs,
                                   const quantity_holder<Q2, T2>& rhs) {
 
-    using result_type =
-        std::remove_cvref_t<decltype(lhs.get_value() * rhs.get_value())>;
+    using result_type = std::remove_cvref_t<decltype(lhs.get_value_unsafe() *
+                                                     rhs.get_value_unsafe())>;
     return quantity_holder<Derived::quantity * Q2, result_type>(
-        lhs.get_value() * rhs.get_value(),
+        lhs.get_value_unsafe() * rhs.get_value_unsafe(),
         lhs.multiplier_ * rhs.get_multiplier(), lhs.reference_);
   }
 
   template <auto U2, auto Q2, typename T2>
   friend constexpr auto operator*(const Derived& lhs,
                                   const quantity_value<U2, Q2, T2>& rhs) {
-    using result_type =
-        std::remove_cvref_t<decltype(lhs.get_value() * rhs.get_value())>;
+    using result_type = std::remove_cvref_t<decltype(lhs.get_value_unsafe() *
+                                                     rhs.get_value_unsafe())>;
     return quantity_holder<Derived::quantity * Q2, result_type>(
-        lhs.get_value() * rhs.get_value(), lhs.multiplier_ * U2.multiplier,
-        lhs.reference_);
+        lhs.get_value_unsafe() * rhs.get_value_unsafe(),
+        lhs.multiplier_ * U2.multiplier, lhs.reference_);
   }
 
   template <typename T2>
     requires(!is_quantity_holder_v<T2> && !quantity_value_like<T2>)
   friend constexpr auto operator*(const Derived& lhs, const T2& rhs) {
-    using result_type = std::remove_cvref_t<decltype(lhs.get_value() * rhs)>;
+    using result_type =
+        std::remove_cvref_t<decltype(lhs.get_value_unsafe() * rhs)>;
     return quantity_holder<Derived::quantity, result_type>(
-        lhs.get_value() * rhs, lhs.multiplier_, lhs.reference_);
+        lhs.get_value_unsafe() * rhs, lhs.multiplier_, lhs.reference_);
   }
 
   template <typename T2>
     requires(!is_quantity_holder_v<T2> && !quantity_value_like<T2>)
   friend constexpr auto operator*(const T2& lhs, const Derived& rhs) {
-    using result_type = std::remove_cvref_t<decltype(lhs * rhs.get_value())>;
+    using result_type =
+        std::remove_cvref_t<decltype(lhs * rhs.get_value_unsafe())>;
     return quantity_holder<Derived::quantity, result_type>(
-        lhs * rhs.get_value(), rhs.multiplier_, rhs.reference_);
+        lhs * rhs.get_value_unsafe(), rhs.multiplier_, rhs.reference_);
   }
 
   template <auto Q2, typename T2>
@@ -269,19 +300,20 @@ template <typename Derived> class quantity_holder_arithmetic_operators {
           "Cannot divide quantities whose units have different reference "
           "points.");
     }
-    using result_type =
-        std::remove_cvref_t<decltype(lhs.get_value() * rhs.get_value())>;
+    using result_type = std::remove_cvref_t<decltype(lhs.get_value_unsafe() *
+                                                     rhs.get_value_unsafe())>;
     return quantity_holder<Derived::quantity / Q2, result_type>(
-        lhs.get_value() / rhs.get_value(),
+        lhs.get_value_unsafe() / rhs.get_value_unsafe(),
         lhs.multiplier_ / rhs.get_multiplier(), lhs.reference_);
   }
 
   template <typename T2>
     requires(!is_quantity_holder_v<T2> && !quantity_value_like<T2>)
   friend constexpr auto operator/(const Derived& lhs, const T2& rhs) {
-    using result_type = std::remove_cvref_t<decltype(lhs.get_value() / rhs)>;
+    using result_type =
+        std::remove_cvref_t<decltype(lhs.get_value_unsafe() / rhs)>;
     return quantity_holder<Derived::quantity, result_type>(
-        lhs.get_value() / rhs, lhs.multiplier_);
+        lhs.get_value_unsafe() / rhs, lhs.multiplier_);
   }
 
   template <auto Q2, typename T2>
@@ -291,7 +323,8 @@ template <typename Derived> class quantity_holder_arithmetic_operators {
     static_assert(quantity_convertible_to<Q2, Derived::quantity> &&
                       quantity_convertible_to<Derived::quantity, Q2>,
                   "Cannot compare quantities of different kinds");
-    return lhs.in_base_units().get_value() <=> rhs.in_base_units().get_value();
+    return lhs.in_base_units().get_value_unsafe() <=>
+           rhs.in_base_units().get_value_unsafe();
   }
 
   template <auto Q2, typename T2>
@@ -301,7 +334,8 @@ template <typename Derived> class quantity_holder_arithmetic_operators {
     static_assert(quantity_convertible_to<Q2, Derived::quantity> &&
                       quantity_convertible_to<Derived::quantity, Q2>,
                   "Cannot compare quantities of different kinds");
-    return lhs.in_base_units().get_value() == rhs.in_base_units().get_value();
+    return lhs.in_base_units().get_value_unsafe() ==
+           rhs.in_base_units().get_value_unsafe();
   }
 };
 } // namespace _detail
@@ -311,7 +345,7 @@ template <typename Derived> class quantity_holder_arithmetic_operators {
 MODULE_EXPORT template <auto Q, typename T>
   requires quantity<decltype(Q)>
 class quantity_holder
-    : _detail::quantity_holder_arithmetic_operators<quantity_holder<Q, T>> {
+    : _detail::quantity_holder_operators<quantity_holder<Q, T>> {
 public:
   /// The type of the numerical value of the \c quantity_holder.
   using value_type = T;
@@ -444,32 +478,63 @@ public:
     requires std::constructible_from<T, Up>
   constexpr quantity_holder(quantity_holder<FromQuantity, Up> other);
 
+  template <auto FromQuantity, typename Up = T>
+    requires std::constructible_from<T, Up>
+  constexpr auto operator=(quantity_holder<FromQuantity, Up> other)
+      -> quantity_holder&;
+
+  template <auto FromUnits, auto FromQuantity, typename Up = T>
+    requires std::constructible_from<T, Up>
+  constexpr auto operator=(quantity_value<FromUnits, FromQuantity, Up> other)
+      -> quantity_holder&;
+
+  template <typename Rep, typename Period>
+    requires std::constructible_from<T, Rep> && enable_chrono_conversions_v<Q>
+  constexpr auto operator=(const std::chrono::duration<Rep, Period>& d)
+      -> quantity_holder&;
+
+  template <typename Up = T>
+    requires(!_detail::is_quantity_holder_v<Up>) &&
+            (!_detail::quantity_value_like<Up> && !unit<Up>) &&
+            std::is_assignable_v<T&, Up> && quantity_convertible_to<number, Q>
+  constexpr auto operator=(Up&& other) -> quantity_holder&;
+
   /// \brief Returns the numerical value of the quantity.
   ///
   /// Returns a constant lvalue-reference to the numerical value of the \c
-  /// quantity_holder instance.
+  /// quantity_holder instance. This function is unsafe because it returns the
+  /// raw numerical value in whatever units the quantity holder happens to be
+  /// storing at the moment. It is highly recommended to use the \c as() or \c
+  /// in() methods to convert to desired units before accessing the value.
+  ///
   ///
   /// \return A constant lvalue-reference to the numerical value of the \c
   /// quantity_holder instance.
-  constexpr auto get_value() const& noexcept -> const T&;
+  constexpr auto get_value_unsafe() const& noexcept -> const T&;
 
   /// \brief Returns the numerical value of the quantity.
   ///
   /// Returns an rvalue-reference to the numerical value of the \c
-  /// quantity_holder instance.
+  /// quantity_holder instance. his function is unsafe because it returns the
+  /// raw numerical value in whatever units the quantity holder happens to be
+  /// storing at the moment. It is highly recommended to use the \c as() or \c
+  /// in() methods to convert to desired units before accessing the value.
   ///
   /// \return An rvalue-reference to the numerical value of the \c
   /// quantity_holder instance.
-  constexpr auto get_value() && noexcept -> T&&;
+  constexpr auto get_value_unsafe() && noexcept -> T&&;
 
   /// \brief Returns the numerical value of the quantity.
   ///
   /// Returns a constant rvalue-reference to the numerical value of the \c
-  /// quantity_value instance.
+  /// quantity_value instance. his function is unsafe because it returns the
+  /// raw numerical value in whatever units the quantity holder happens to be
+  /// storing at the moment. It is highly recommended to use the \c as() or \c
+  /// in() methods to convert to desired units before accessing the value.
   ///
   /// \return A constant rvalue-reference to the numerical value of the \c
   /// quantity_value instance.
-  constexpr auto get_value() const&& noexcept -> const T&&;
+  constexpr auto get_value_unsafe() const&& noexcept -> const T&&;
 
   /// \brief Returns the multiplier of the quantity holder.
   ///
@@ -509,8 +574,7 @@ public:
 private:
   friend class std::hash<maxwell::quantity_holder<Q, T>>;
 
-  friend class _detail::quantity_holder_arithmetic_operators<
-      quantity_holder<Q, T>>;
+  friend class _detail::quantity_holder_operators<quantity_holder<Q, T>>;
 
   T value_{};
   double multiplier_{1.0};
@@ -518,14 +582,12 @@ private:
 };
 
 // --- Class Template Argument Deduction Guides ---
-
-template <unit Unit, typename T>
-quantity_holder(T, Unit) -> quantity_holder<Unit::quantity, T>;
-
-template <auto Q, auto U, typename T>
-  requires quantity<decltype(Q)>
-quantity_holder(quantity_value<Q, U, T>) -> quantity_holder<Q, T>;
+template <auto U, auto Q, typename T>
+quantity_holder(quantity_value<U, Q, T>) -> quantity_holder<Q, T>;
 
 template <auto Q, typename T>
 quantity_holder(quantity_holder<Q, T>) -> quantity_holder<Q, T>;
+
+template <unit U, typename T>
+quantity_holder(U, T) -> quantity_holder<U::quantity, T>;
 } // namespace maxwell
