@@ -1,3 +1,4 @@
+#include "core/impl/quantity_value_holder_fwd.hpp"
 #ifndef QUANTITY_HOLDER_HPP
 #error                                                                         \
     "Do not include quantity_holder_impl.hpp directly; include quantity_holder.hpp instead"
@@ -22,7 +23,7 @@ template <typename Up>
 constexpr quantity_holder<Q, T>::quantity_holder(const unit auto units, Up&& u)
     : value_(std::forward<Up>(u)), multiplier_(units.multiplier),
       reference_(units.reference) {
-  static_assert(quantity_convertible_to<decltype(units)::quantity, Q>,
+  static_assert(quantity_convertible_to<Q, decltype(units)::quantity>,
                 "Cannot convert from units of other to quantity of value "
                 "being constructed");
 }
@@ -105,13 +106,58 @@ quantity_holder<Q, T>::operator=(quantity_holder<FromQuantity, Up> other)
 
   static_assert(
       quantity_convertible_to<FromQuantity, Q>,
-      "Attempting to construct quantity holder from incompatible quantity");
+      "Attempting to assign quantity holder value with incompatible quantity");
 
   using std::swap;
   quantity_holder temp(std::move(other));
   swap(temp.value_, value_);
   swap(temp.multiplier_, multiplier_);
   swap(temp.reference_, reference_);
+  return *this;
+}
+
+template <auto Q, typename T>
+  requires quantity<decltype(Q)>
+template <auto FromUnits, auto FromQuantity, typename Up>
+  requires std::constructible_from<T, Up>
+constexpr auto quantity_holder<Q, T>::operator=(
+    quantity_value<FromUnits, FromQuantity, Up> other) -> quantity_holder& {
+  static_assert(
+      quantity_convertible_to<FromQuantity, Q>,
+      "Attempting to assign quantity holder value with incompatible quantity");
+
+  using std::swap;
+  quantity_holder temp(std::move(other));
+  swap(temp.value_, value_);
+  swap(temp.multiplier_, multiplier_);
+  swap(temp.reference_, reference_);
+  return *this;
+}
+
+template <auto Q, typename T>
+  requires quantity<decltype(Q)>
+template <typename Rep, typename Period>
+  requires std::constructible_from<T, Rep> && enable_chrono_conversions_v<Q>
+constexpr auto
+quantity_holder<Q, T>::operator=(const std::chrono::duration<Rep, Period>& d)
+    -> quantity_holder& {
+  using std::swap;
+  quantity_holder temp(d);
+  swap(temp.value_, value_);
+  swap(temp.multiplier_, multiplier_);
+  swap(temp.reference_, reference_);
+  return *this;
+}
+
+template <auto Q, typename T>
+  requires quantity<decltype(Q)>
+template <typename Up>
+  requires(!_detail::quantity_holder_like<Up>) &&
+          (!_detail::quantity_value_like<Up> && !unit<Up>) &&
+          std::is_assignable_v<T&, Up> && quantity_convertible_to<number, Q>
+constexpr auto quantity_holder<Q, T>::operator=(Up&& other)
+    -> quantity_holder& {
+  value_ = std::forward<Up>(other);
   return *this;
 }
 

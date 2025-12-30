@@ -1,5 +1,6 @@
 #include "Maxwell.hpp"
 
+#include <chrono>
 #include <gtest/gtest.h>
 #include <type_traits>
 
@@ -122,6 +123,45 @@ TEST(TestQuatityHolder, TestQuantityValueConstructor) {
   EXPECT_FLOAT_EQ(t1.get_value_unsafe(), 32.0);
   EXPECT_FLOAT_EQ(t1.get_multiplier(), us::fahrenheit_unit.multiplier);
   EXPECT_FLOAT_EQ(t1.get_reference(), us::fahrenheit_unit.reference);
+}
+
+TEST(TestQuatityHolder, TestQuantityHolderAssignment) {
+  constexpr maxwell::quantity auto wavelength =
+      maxwell::sub_quantity<isq::length, "wavelength">{};
+  const quantity_holder<wavelength> l{nano_unit<si::meter_unit>, 500.0};
+  const length_holder<> l2 = l;
+  EXPECT_FLOAT_EQ(l2.get_value_unsafe(), 500.0);
+  EXPECT_FLOAT_EQ(l2.get_multiplier(), nano_unit<si::meter_unit>.multiplier);
+  EXPECT_FLOAT_EQ(l2.get_reference(), 0.0);
+}
+
+TEST(TestQuantityHolder, TestQuantityValueAssignment) {
+  constexpr maxwell::quantity auto wavelength =
+      maxwell::sub_quantity<isq::length, "wavelength">{};
+  const quantity_value<nano_unit<si::meter_unit>, wavelength> l{500.0};
+  const length_holder<> l2 = l;
+  EXPECT_FLOAT_EQ(l2.get_value_unsafe(), 500.0);
+  EXPECT_FLOAT_EQ(l2.get_multiplier(), nano_unit<si::meter_unit>.multiplier);
+  EXPECT_FLOAT_EQ(l2.get_reference(), 0.0);
+}
+
+TEST(TestQuantityHolder, TestChronoAssignment) {
+  using namespace std::chrono_literals;
+
+  time_holder<> t1{si::second_unit};
+  t1 = std::chrono::nanoseconds{100};
+
+  EXPECT_FLOAT_EQ(t1.get_value_unsafe(), 100.0);
+  EXPECT_FLOAT_EQ(t1.get_multiplier(), nano_unit<si::second_unit>.multiplier);
+  EXPECT_FLOAT_EQ(t1.get_reference(), 0.0);
+}
+
+TEST(TestQuantityHolder, TestValueAssignment) {
+  dimensionless_holder<> d1{si::number_unit};
+  d1 = 10.0;
+  EXPECT_FLOAT_EQ(d1.get_value_unsafe(), 10.0);
+  EXPECT_FLOAT_EQ(d1.get_multiplier(), 1.0);
+  EXPECT_FLOAT_EQ(d1.get_reference(), 0.0);
 }
 
 TEST(TestQuantityHolder, TestCTAD) {
@@ -299,6 +339,11 @@ TEST(TestQuantityHolder, TestDivision) {
   EXPECT_FLOAT_EQ(l1.get_value_unsafe(), 5.0);
   EXPECT_FLOAT_EQ(l1.get_multiplier(), 1.0);
   EXPECT_FLOAT_EQ(l1.get_reference(), 0.0);
+
+  const dimensionless_holder<> d1 = a1 / a1;
+  EXPECT_FLOAT_EQ(d1.get_value_unsafe(), 1.0);
+  EXPECT_FLOAT_EQ(d1.get_multiplier(), 1.0);
+  EXPECT_FLOAT_EQ(d1.get_reference(), 0.0);
 }
 
 TEST(TestQuantityHolder, TestMixedAddition) {
@@ -354,6 +399,35 @@ TEST(TestQuantityHolder, TestMixedMultiplication) {
   EXPECT_FLOAT_EQ(a2.get_value_unsafe(), 10.0);
   EXPECT_FLOAT_EQ(a2.get_multiplier(), 1e2);
   EXPECT_FLOAT_EQ(a2.get_reference(), 0.0);
+
+  const si::kilometer<> k1{2.0};
+  const kilo<si::square_meter<>> m2 =
+      k1 * length_holder<>{si::meter_unit, 5000.0};
+  EXPECT_FLOAT_EQ(m2.get_value_unsafe(), 10.0);
+
+  const kilo<si::square_meter<>> m3 =
+      length_holder<>{si::meter_unit, 5000.0} * k1;
+  EXPECT_FLOAT_EQ(m3.get_value_unsafe(), 10.0);
+}
+
+TEST(TestQuantityHolder, TestMixedDivision) {
+  const area_holder<> a1{si::square_meter_unit, 20.0};
+  const length_holder<> l1 = a1 / si::meter<>{4.0};
+  EXPECT_FLOAT_EQ(l1.get_value_unsafe(), 5.0);
+  EXPECT_FLOAT_EQ(l1.get_multiplier(), 1.0);
+  EXPECT_FLOAT_EQ(l1.get_reference(), 0.0);
+
+  const si::meter<> m1 =
+      si::square_meter<>{20.0} / length_holder<>{si::meter_unit, 4.0};
+  EXPECT_FLOAT_EQ(m1.get_value_unsafe(), 5.0);
+
+  const dimensionless_holder<> d1 = a1 / si::square_meter<>{20.0};
+  EXPECT_FLOAT_EQ(d1.get_value_unsafe(), 1.0);
+  EXPECT_FLOAT_EQ(d1.get_multiplier(), 1.0);
+  EXPECT_FLOAT_EQ(d1.get_reference(), 0.0);
+
+  const si::number<> n1 = si::square_meter<>{20.0} / a1;
+  EXPECT_FLOAT_EQ(n1.get_value_unsafe(), 1.0);
 }
 
 TEST(TestQuantityHolder, TestComparisonOperators) {

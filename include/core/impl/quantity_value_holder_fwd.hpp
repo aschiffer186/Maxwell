@@ -56,7 +56,7 @@ constexpr bool is_quantity_holder_v =
     is_quantity_holder<std::remove_cvref_t<T>>::value;
 
 template <typename T>
-concept quantity_holder_like = is_quantity_value_v<std::remove_cvref_t<T>>;
+concept quantity_holder_like = is_quantity_holder_v<std::remove_cvref_t<T>>;
 } // namespace _detail
 /// \endcond
 } // namespace maxwell

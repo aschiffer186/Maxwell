@@ -58,8 +58,8 @@ The types can and should be used anywhere the underlying numeric type can be use
     using namespace maxwell::si::symbols;
 
     const double area                = 5 * 5 + 10 * 10; 
-    const si::square_meter<> area1   = 5 * 5 * m + 10 * 10 * m; 
-    const isq::length_holder<> area2 = 5 * 5 * m + 10 * 10 * m;
+    const si::square_meter<> area1   = 5 * m * 5 * m + 10 * m * 10 * m; 
+    const isq::area_holder<> area2 = 5 * m * 5 * m + 10 * m * 10 * m;
 
 Quantities, Units, and Quantity Values
 --------------------------------------
@@ -169,7 +169,7 @@ Units are provided in the :code:`si`, :code:`us`, and :code:`other` namespaces.
 
     using namespace maxwell:si::symbols;
 
-    const quantity_value K = 5.670'374e-8 * W / (m2 * K * K * K * K); // Stefan-Boltzmann constant
+    const quantity_value Kb = 5.670'374e-8 * W / (m2 * K * K * K * K); // Stefan-Boltzmann constant
 
 :code:`quantity_value` instances support class template argument deduction (CTAD). 
 This allows for more concise construction of quantity values; the units and quantity of the :code:`quantity_value` are deduced from the initialization expression;
@@ -233,6 +233,16 @@ If necessary, unit conversions are performed automatically.
     const bool b = 100 * km > 60 * mi; // b is true
 
     const maxwell::quantity_value q = 5.0 * m + 10.0 * s // Error - length and time are not compatible --- won't compile
+
+Note that arithetic operations can only be performed on quantity values whose units have the same reference point. 
+For example, it is not permitte to mix different temperature scales such as Kelvin and Fahrenheit in arithmetic operations.
+
+.. code-block:: c++ 
+    
+    const maxwell::si::kelvin<> t1{300.0};
+    const maxwell::si::fahrenheit<> t2{80.33};
+
+    const auto t3 = t1 + t2; // Error - Kelvin and Fahrenheit have different reference points --- won't compile
 
 Ratios of :code:`quantity_values` of the same units are correctly identified as dimensionless quantities.
 

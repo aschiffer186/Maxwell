@@ -174,7 +174,7 @@ template <quantity_value_like Derived> class _quantity_value_operators {
   }
 
   template <typename T>
-    requires(!quantity_value_like<T> && !is_quantity_holder_v<T>)
+    requires(!quantity_value_like<T> && !quantity_holder_like<T>)
   friend constexpr quantity_value_like auto operator+(Derived lhs, T&& rhs) {
     using result_number_type =
         std::remove_cvref_t<decltype(lhs.get_value_unsafe() +
@@ -185,7 +185,7 @@ template <quantity_value_like Derived> class _quantity_value_operators {
   }
 
   template <typename T>
-    requires(!quantity_value_like<T> && !is_quantity_holder_v<T>)
+    requires(!quantity_value_like<T> && !quantity_holder_like<T>)
   friend constexpr quantity_value_like auto operator+(T&& lhs, Derived rhs) {
     using result_number_type =
         std::remove_cvref_t<decltype(std::forward<T>(lhs) +
@@ -223,7 +223,7 @@ template <quantity_value_like Derived> class _quantity_value_operators {
   }
 
   template <typename T>
-    requires(!quantity_value_like<T> && !unit<T> && !is_quantity_holder_v<T> &&
+    requires(!quantity_value_like<T> && !unit<T> && !quantity_holder_like<T> &&
              !utility::_detail::is_value_type<T>::value)
   friend constexpr quantity_value_like auto operator*(const Derived& lhs,
                                                       const T& rhs) {
@@ -235,7 +235,7 @@ template <quantity_value_like Derived> class _quantity_value_operators {
   }
 
   template <typename T>
-    requires(!quantity_value_like<T> && !unit<T> && !is_quantity_holder_v<T> &&
+    requires(!quantity_value_like<T> && !unit<T> && !quantity_holder_like<T> &&
              !utility::_detail::is_value_type<T>::value)
   friend constexpr quantity_value_like auto operator*(const T& lhs,
                                                       const Derived& rhs) {
@@ -257,6 +257,21 @@ template <quantity_value_like Derived> class _quantity_value_operators {
         lhs_type::quantity / rhs_type::quantity;
     return quantity_value<result_units, result_quantity, result_type>(
         lhs.get_value_unsafe() / rhs.get_value_unsafe());
+  }
+
+  template <auto Q2, typename T2>
+  friend constexpr quantity_holder_like auto
+  operator/(const Derived& lhs, const quantity_holder<Q2, T2>& rhs) {
+    if (Derived::units.reference != rhs.get_reference()) [[unlikely]] {
+      throw incompatible_quantity_holder(
+          "Cannot divide quantities whose units have different reference "
+          "points.");
+    }
+    using result_type = std::remove_cvref_t<decltype(lhs.get_value_unsafe() /
+                                                     rhs.get_value_unsafe())>;
+    return quantity_holder<Derived::quantity / Q2, result_type>(
+        lhs.get_value_unsafe() / rhs.get_value_unsafe(),
+        Derived::units.multiplier / rhs.get_multiplier(), rhs.get_reference());
   }
 
   template <typename T>

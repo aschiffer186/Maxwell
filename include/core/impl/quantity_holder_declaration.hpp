@@ -286,6 +286,22 @@ template <typename Derived> class quantity_holder_operators {
         lhs.get_value_unsafe() / rhs, lhs.multiplier_);
   }
 
+  template <auto U, auto Q, typename T2>
+  friend constexpr auto operator/(const Derived& lhs,
+                                  const quantity_value<U, Q, T2>& rhs) {
+    if (lhs.get_reference() != U.reference) [[unlikely]] {
+      throw incompatible_quantity_holder(
+          "Cannot divide quantities whose units have different reference "
+          "points.");
+    }
+
+    using result_type = std::remove_cvref_t<decltype(lhs.get_value_unsafe() /
+                                                     rhs.get_value_unsafe())>;
+    return quantity_holder<Derived::quantity / Q, result_type>(
+        lhs.get_value_unsafe() / rhs.get_value_unsafe(),
+        lhs.multiplier_ / U.multiplier, lhs.reference_);
+  }
+
   template <auto Q2, typename T2>
     requires std::three_way_comparable_with<typename Derived::value_type, T2>
   friend constexpr auto operator<=>(const Derived& lhs,
@@ -452,8 +468,7 @@ public:
   /// \throw Any exceptions thrown by the selected constructor of \c T.
   template <typename Rep, typename Period>
     requires std::constructible_from<T, Rep> && enable_chrono_conversions_v<Q>
-  constexpr explicit quantity_holder(
-      const std::chrono::duration<Rep, Period>& d);
+  constexpr quantity_holder(const std::chrono::duration<Rep, Period>& d);
 
   /// \brief Constructor
   ///
@@ -581,7 +596,7 @@ public:
   /// \param other The value to assign to \c *this.
   /// \return A reference to \c *this.
   template <typename Up = T>
-    requires(!_detail::is_quantity_holder_v<Up>) &&
+    requires(!_detail::quantity_holder_like<Up>) &&
             (!_detail::quantity_value_like<Up> && !unit<Up>) &&
             std::is_assignable_v<T&, Up> && quantity_convertible_to<number, Q>
   constexpr auto operator=(Up&& other) -> quantity_holder&;

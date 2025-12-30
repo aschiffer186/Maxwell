@@ -267,10 +267,10 @@ constexpr auto operator/(quantity_value<LHSUnit, LHSQuantity, T>&& lhs,
 /// \brief Specialization of \c std::hash
 ///
 /// Specialization of \c std::hash for \c quantity_value.
-/// Two \c quantity_value instances have the same hash code if they represent
-/// the same value after being converted to base units.
-/// Two \c quantity_values instances will have difference hash codes if they
-/// have the same value and same units, but represent different quantities.
+/// Two \c quantity_value instances have the same hash code if they have the
+/// same value. Two \c quantity_values instances will have difference hash codes
+/// if they have the same value and same units, but represent different
+/// quantities.
 ///
 /// \note The specialization of \c std::hash is not suitable as cryptographic
 /// hash function.
@@ -280,10 +280,10 @@ constexpr auto operator/(quantity_value<LHSUnit, LHSQuantity, T>&& lhs,
 /// \tparam T The underlying type of the \c quantity_value
 MODULE_EXPORT template <auto Q, auto U, typename T>
 struct std::hash<maxwell::quantity_value<Q, U, T>> {
-  auto operator()(const maxwell::quantity_value<Q, U, T>& q) noexcept
+  auto operator()(const maxwell::quantity_value<Q, U, T>& q) const noexcept
       -> std::size_t {
-    const auto in_base_units = q.in_base_units();
-    std::size_t hash_code = std::hash<T>{}(in_base_units.value_);
+
+    std::size_t hash_code = std::hash<T>{}(q.get_value_unsafe());
     return hash_code;
   }
 };
