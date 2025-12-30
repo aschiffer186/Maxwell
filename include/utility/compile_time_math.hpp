@@ -293,14 +293,7 @@ constexpr auto operator==(const rational_type<N1, D1> lhs,
 
 constexpr double ln(double x) noexcept;
 
-/// \brief Computes base raised to a rational power.
-///
-/// Computes the value of a real number rasied to a rational power.
-/// \tparam N The numerator of the rational power.
-/// \tparam D The denominator of the rational power.
-/// \tparam E The exponent of the rational power.
-/// \param base The base to be raised to the rational power.
-/// \return The value of base raised to the rational power
+/// \cond
 namespace _detail {
 // Integer exponentiation for doubles (positive exponent) using binary exp.
 constexpr double pow_double_pos(double base, std::intmax_t exp) noexcept {
@@ -338,10 +331,16 @@ constexpr double nth_root(const double x, const std::intmax_t n) noexcept {
   return nth_root_impl(x, n, init, 0.0);
 }
 } // namespace _detail
+/// \endcond
 
 /// \brief Computes base raised to a rational power.
 ///
 /// Supports arbitrary rational powers N/D at compile time.
+/// \tparam N The numerator of the rational power.
+/// \tparam D The denominator of the rational power.
+/// \param base The base to be raised to the rational power.
+/// \param pow The rational power.
+/// \return The value of base raised to the rational power
 MODULE_EXPORT template <std::intmax_t N, std::intmax_t D>
 constexpr double pow(const double base,
                      const rational_type<N, D> /*pow*/) noexcept {
@@ -429,6 +428,13 @@ constexpr double sqrt_impl(const double x, const double curr,
 } // namespace _detail
 /// \endcond
 
+/// \brief Computes the square root of a number.
+///
+/// Computes the square root of a non-negative number using Newton's method.
+/// This function is usable in constant expressions.
+///
+/// \param x The number to compute the square root of. Must be non-negative.
+/// \return The square root of \c x.
 constexpr double sqrt(double x) noexcept {
   assert(x >= 0.0);
   assert(!(x != x));
@@ -438,6 +444,7 @@ constexpr double sqrt(double x) noexcept {
 // Forward declaration of ln so compile-time checks can reference it.
 
 // Compile-time examples / smoke tests
+/// \cond
 namespace _compile_time_checks {
 constexpr double absd(const double x) noexcept { return x < 0.0 ? -x : x; }
 constexpr bool approx_equal(const double a, const double b,
@@ -456,6 +463,7 @@ static_assert(approx_equal(maxwell::utility::pow<-1, 3>(
                                -8.0, maxwell::utility::rational_type<-1, 3>{}),
                            -0.5));
 } // namespace _compile_time_checks
+/// \endcond
 
 // constexpr natural logarithm for double using range reduction and
 // atanh-series: ln(y) = 2 * (z + z^3/3 + z^5/5 + ...), where z = (y-1)/(y+1)

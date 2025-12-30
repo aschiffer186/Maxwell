@@ -21,58 +21,28 @@ namespace maxwell {
 /// \cond
 namespace _detail {
 template <typename Derived> class quantity_holder_operators {
-  /// \brief Pre-increment operator
-  ///
-  /// Increments the value of the quantity holder by one
-  ///
-  /// \param d The quantity holder to increment
-  /// \return A reference to the incremented quantity holder
   friend constexpr auto operator++(Derived& d) -> Derived& {
     ++d.value_;
     return d;
   }
 
-  /// \brief Post-increment operator.
-  ///
-  /// Increments the value of the quantity holder by one.
-  ///
-  /// \param d The quantity holder to increment.
-  /// \return A copy of the quantity holder before it was incremented.
   friend constexpr auto operator++(Derived& d, int) -> Derived {
     auto temp{d};
     ++d;
     return temp;
   }
 
-  /// \brief Pre-decrement operator
-  ///
-  /// Decrements the value of the quantity holder by one.
-  ///
-  /// \param d The quantity holder to decrement.
-  /// \return A reference to the decremented quantity holder.
   friend constexpr auto operator--(Derived& d) -> Derived& {
     --d.value_;
     return d;
   }
 
-  /// \brief Post-decrement operator
-  ///
-  /// Decrements the value of the quantity holder by one.
-  ///
-  /// \param d The quantity holder to decrement
-  /// \return A copy of the quantity holder before it was decremented
   friend constexpr auto operator--(Derived& d, int) -> Derived {
     auto temp{d};
     --d;
     return temp;
   }
 
-  /// \brief Unary negation operator
-  ///
-  /// Negates the value of the quantity holder.
-  ///
-  /// \param d The quantity holder to negate.
-  /// \return The negated quantity holder.
   friend constexpr auto operator-(const Derived& d) -> Derived {
     return Derived{-d.value_, d.get_multiplier(), d.get_reference()};
   }
@@ -341,7 +311,30 @@ template <typename Derived> class quantity_holder_operators {
 } // namespace _detail
 /// \endcond
 
-/// \brief Holds a numerical value associated with a physical quantity.
+/// \brief Class template representing the value of a quantity expressed in a
+/// particular unit.
+///
+/// Class template \c quantity_holder represents the value of a quantity
+/// expression in a particular unit. Like class template \c quantity_value, the
+/// quantity of the \c quantity_holder is specified at compie-time; however, the
+/// units of the \c quantity_holder are specified at run-time. Unit coherence is
+/// still verified at compile-time, but conversions between units will be
+/// performed at run-time rather than compile-time. <br>
+///
+/// Like \c quantity_value, two instances of \c quantity_holder may have the
+/// same unit but represent different quantities, e.g. length and wavelength can
+/// be expressed in nanometers, but may represent different quantities. <br>
+///
+/// The quantity of the \c quantity_holder is expressed as a non-type template
+/// parameters (NTTP). Using an NTTP for quantity allows for more natural
+/// definitions of custom quantities.
+///
+/// \warning Using an integral type with \c quantity_holder will perform
+/// truncation when convering units and integer division when performing
+/// division.
+///
+/// \tparam Q The quantity of the \c quantity_holder.
+/// \tparam T The type of the \c quantity_holder. Default: \c double.
 MODULE_EXPORT template <auto Q, typename T>
   requires quantity<decltype(Q)>
 class quantity_holder
@@ -463,36 +456,130 @@ public:
       const std::chrono::duration<Rep, Period>& d);
 
   /// \brief Constructor
+  ///
   /// Constructs a \c quantity_holder from a \c quantity_value. The units of the
   /// \c quantity_holder are the same as the units of the specified \c
   /// quantity_value.
   ///
-  /// \pre <tt>quantity_convertible_to<FromQuantity, quantity></tt> is modeled.
+  /// \pre <tt>quantity_convertible_to<FromQuantity, quantity></tt> is modeled
+  /// and <tt>std::constructible_from<T, Up></tt> is modeled.
   ///
-  /// \tparam FromQuantity The quantity of the specified \c quantity_value
+  /// \tparam FromQuantity The quantity of the specified \c quantity_value.
+  /// \tparam FromUnit The unit of the specified \c quantity_value.
+  /// \tparam Up The type of the value used to initialize the \c
+  /// quantity_holder.
+  /// \param other The \c quantity_value used to construct the \c
+  /// quantity_holder.
+  /// \throw Any exceptions thrown by the selected constructor of \c T.
   template <auto FromQuantity, auto FromUnit, typename Up = T>
     requires std::constructible_from<T, Up>
   constexpr quantity_holder(quantity_value<FromUnit, FromQuantity, Up> other);
 
+  /// \brief Constructor
+  ///
+  /// Constructs a \c quantity_holder from another \c quantity_holder. The units
+  /// of the new \c quantity_holder are the same as the units of the specified \
+  /// \c quantity_holder.
+  ///
+  /// \pre <tt>quantity_convertible_to<FromQuantity, quantity></tt> is modeled
+  /// and <tt>std::constructible_from<T, Up></tt> is modeled.
+  ///
+  /// \tparam FromQuantity The quantity of the specified \c quantity_holder.
+  /// \tparam Up The type of the value used to initialize the \c
+  /// quantity_holder.
+  /// \param other The \c quantity_holder used to construct the new \c
+  /// quantity_holder.
+  /// \throw Any exceptions thrown by the selected constructor of \c T.
   template <auto FromQuantity, typename Up = T>
     requires std::constructible_from<T, Up>
   constexpr quantity_holder(quantity_holder<FromQuantity, Up> other);
 
+  /// \brief Assigns the value of the specified \c quantity_holder to the value
+  /// of \c *this.
+  ///
+  /// Assigns the value and units of the specified \c quantity_holder to the
+  /// value of \c *this. This function only participates in overload resolution
+  /// if
+  ///    1. <tt>std::constructible_from_v<T, Up></tt> is modeled
+  ///    2. \c std::swappable<T> is modeled.
+  ///
+  /// The program is ill-formed if <tt>quantity_convertible_to<FromQuantity,
+  /// Q></tt> is not modeled.
+  ///
+  /// \note This function updates the units of \c *this to the match the
+  /// units of the specified \c quantity_holder.
+  ///
+  /// \tparam FromQuantity The quantity of the specified \c quantity_holder.
+  /// \tparam Up The type of the numerical value being assigned to \c *this.
+  /// \param other The \c quantity_holder whose value is being assigned to \c
+  /// *this.
+  /// \return A reference to \c *this.
   template <auto FromQuantity, typename Up = T>
-    requires std::constructible_from<T, Up>
+    requires std::constructible_from<T, Up> && std::swappable<T>
   constexpr auto operator=(quantity_holder<FromQuantity, Up> other)
       -> quantity_holder&;
 
+  /// \brief Assigns the value of the specified \c quantity_value to the value
+  /// of \c *this.
+  ///
+  /// Assigns the value and units of the specified \c quantity_value to the
+  /// value of \c *this. This function only participates in overload resolution
+  /// if
+  ///    1. <tt>std::constructible_from_v<T, Up></tt> is modeled
+  ///    2. \c std::swappable<T> is modeled.
+  ///
+  /// The program is ill-formed if <tt>quantity_convertible_to<FromQuantity,
+  /// Q></tt> is not modeled.
+  ///
+  /// \note This function updates the units of \c *this to the match the
+  /// units of the specified \c quantity_value.
+  ///
+  /// \tparam FromUnit The units of the specified \c quantity_value.
+  /// \tparam FromQuantity The quantity of the specified \c quantity_value.
+  /// \tparam Up The type of the numerical value being assigned to \c *this.
+  /// \param other The \c quantity_value whose value is being assigned to \c
+  /// *this.
+  /// \return A reference to \c *this.
   template <auto FromUnits, auto FromQuantity, typename Up = T>
     requires std::constructible_from<T, Up>
   constexpr auto operator=(quantity_value<FromUnits, FromQuantity, Up> other)
       -> quantity_holder&;
 
+  /// \brief Assigns the specified \c std::chrono::duration to the value of \c
+  /// *this.
+  ///
+  /// Assigns the specified \c std::chrono::duration to the value of \c *this.
+  /// This function only participates in overload resolution if
+  ///   1. <tt>std::constructible_from<T, Rep></tt> is modeled
+  ///   2. \c std::swappable<T> is modeled
+  ///   3. \c enabe_chrono_conversions_v<Q> is true
+  ///
+  ///
+  /// \note The units of the \c quantity_holder after assignment will be the
+  /// same as the units of the specified \c std:chrono::duration.
+  ///
+  /// \tparam Rep The representation type of the \c std::chrono::duration
+  /// \tparam Period The period type of the \c std::chrono::duration
+  /// \param d The \c std::chrono::duration to assign to \c *this.
+  /// \return A reference to \c *this.
   template <typename Rep, typename Period>
     requires std::constructible_from<T, Rep> && enable_chrono_conversions_v<Q>
   constexpr auto operator=(const std::chrono::duration<Rep, Period>& d)
       -> quantity_holder&;
 
+  /// \brief Assigns the specified value to to the value of \c *this.
+  ///
+  /// Assigns the specififed value to the numerical value of \c *this. This
+  /// function only participates in overload resolution if
+  ///   1. \c Up is not an instantiation of \c quantity_value
+  ///   2. \c Up is not an instantiation of \c quantity_holder
+  ///   3. <tt>std::is_assignable_v<T&, Up></tt> is true
+  ///   4. \c unitless<U> is modeled.
+  ///
+  /// \tparam Up The type of the value to assign to the numerical value of \c
+  /// *this.
+  /// \param other The value to assign to \c *this.
+  /// \return A reference to \c *this.
   template <typename Up = T>
     requires(!_detail::is_quantity_holder_v<Up>) &&
             (!_detail::quantity_value_like<Up> && !unit<Up>) &&
@@ -552,13 +639,21 @@ public:
   /// specified units.
   ///
   /// \tparam ToUnit The unit to convert to.
+  /// \param to_unit The unit to convert to.
   /// \return A \c quantity_value representing the quantity in the specified
   /// unit.
   template <unit ToUnit>
-  constexpr auto as(ToUnit /*to_unit*/) const -> quantity_value<ToUnit{}, Q, T>;
+  constexpr auto as(ToUnit to_unit) const -> quantity_value<ToUnit{}, Q, T>;
 
-  template <unit ToUnit>
-  constexpr auto in(ToUnit /*to_unit*/) const -> value_type;
+  /// \brief Returns the value of the quantity holder in the specified unit.
+  ///
+  /// Returns the numerical value of the \c quantity_holder converted to the
+  /// specified unit.
+  ///
+  /// \tparam ToUnit The unit to convert to.
+  /// \param to_unit The unit to convert to.
+  /// \return The numerical value of the quantity in the specified unit.
+  template <unit ToUnit> constexpr auto in(ToUnit to_unit) const -> value_type;
 
   /// \brief Convers the quatity holder to base units.
   ///
@@ -568,8 +663,15 @@ public:
   /// \return A \c quantity_holder representing the quantity in base units.
   constexpr auto in_base_units() const -> quantity_holder<Q, T>;
 
-  constexpr explicit(!quantity_convertible_to<Q, number> || Q.derived)
-  operator value_type() const;
+  /// \brief Conversion operator to the numerical value type
+  ///
+  /// Converts the \c quantity_holder instance to its numerical value type.
+  /// This operator only participates in overload resolution if the \c
+  /// quantity_holder represents a number quantity.
+
+  /// \return The numerical value of the \c quantity_holder instance.
+  constexpr operator value_type() const
+    requires(quantity_convertible_to<Q, number> && !Q.derived);
 
 private:
   friend class std::hash<maxwell::quantity_holder<Q, T>>;

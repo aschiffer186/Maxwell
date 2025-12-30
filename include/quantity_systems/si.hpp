@@ -11,6 +11,8 @@
 #include "isq.hpp"
 #include "utility/config.hpp"
 
+/// \namespace maxwell::si
+/// \brief Namespace containing definition of the SI system of units.
 namespace maxwell::si {
 MODULE_EXPORT constexpr struct meter_unit_type : base_unit<isq::length, "m"> {
 } meter_unit;

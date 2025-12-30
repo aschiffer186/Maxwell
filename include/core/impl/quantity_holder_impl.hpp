@@ -98,7 +98,7 @@ constexpr quantity_holder<Q, T>::quantity_holder(
 template <auto Q, typename T>
   requires quantity<decltype(Q)>
 template <auto FromQuantity, typename Up>
-  requires std::constructible_from<T, Up>
+  requires std::constructible_from<T, Up> && std::swappable<T>
 constexpr auto
 quantity_holder<Q, T>::operator=(quantity_holder<FromQuantity, Up> other)
     -> quantity_holder& {
@@ -199,7 +199,9 @@ constexpr auto quantity_holder<Q, T>::in_base_units() const
 
 template <auto Q, typename T>
   requires quantity<decltype(Q)>
-constexpr quantity_holder<Q, T>::operator value_type() const {
+constexpr quantity_holder<Q, T>::operator value_type() const
+  requires(quantity_convertible_to<Q, number> && !Q.derived)
+{
   return value_;
 }
 } // namespace maxwell

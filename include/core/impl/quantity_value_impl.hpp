@@ -201,8 +201,11 @@ constexpr auto quantity_value<U, Q, T>::get_value_unsafe() const&& noexcept
 }
 
 template <auto U, auto Q, typename T>
-  requires unit<decltype(U)> && quantity<decltype(Q)>
-constexpr quantity_value<U, Q, T>::operator value_type() const {
+  requires unit<decltype(U)> &&
+           quantity<decltype(Q)>
+           constexpr quantity_value<U, Q, T>::operator value_type() const
+             requires unitless<U>
+{
   return value_;
 }
 

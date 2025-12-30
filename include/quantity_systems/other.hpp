@@ -17,6 +17,8 @@ constexpr auto day_to_week = utility::value_type<1.0 / 7.0>{};
 constexpr auto week_to_year = utility::value_type<1.0 / 52.1429>{};
 } // namespace _detail
 
+/// \namespace maxwell::other::time
+/// \brief Namespace containing definition of extra time units.
 namespace time {
 MODULE_EXPORT constexpr struct minute_unit_type
     : derived_unit<_detail::sec_to_min * si::second_unit, "min"> {
@@ -62,6 +64,8 @@ MODULE_EXPORT constexpr unit auto yr = year_unit;
 } // namespace symbols
 } // namespace time
 
+/// \namespace maxwell::other::angle
+/// \brief Namespace containing definition of extra angle units.
 namespace angle {
 MODULE_EXPORT constexpr struct arcminute_unit_type
     : derived_unit<value<60.0> * si::degree_unit, "arcmin"> {
@@ -77,6 +81,8 @@ MODULE_EXPORT constexpr unit auto s = arcsecond_unit;
 } // namespace symbols
 } // namespace angle
 
+/// \namespace maxwell::other::chemical
+/// \brief Namespace containing definition of chemical units.
 namespace chemical {
 struct ph_scale_type {};
 

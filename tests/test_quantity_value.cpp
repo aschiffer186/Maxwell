@@ -287,17 +287,9 @@ TEST(TestQuantityValue, TestConversionOperator) {
   EXPECT_TRUE((std::convertible_to<test_type2, double>));
   EXPECT_FALSE((std::convertible_to<test_type3, double>));
 
-  const si::meter<> m{10.0};
   const si::number<> n{5.0};
-  const si::radian<> r{3.0};
-
-  const double d1 = static_cast<double>(m);
   const double d2 = n;
-  const double d3 = static_cast<double>(r);
-
-  EXPECT_FLOAT_EQ(d1, 10.0);
   EXPECT_FLOAT_EQ(d2, 5.0);
-  EXPECT_FLOAT_EQ(d3, 3.0);
 }
 
 TEST(TestQuantityValue, TestCTAD) {

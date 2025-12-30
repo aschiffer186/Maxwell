@@ -36,89 +36,33 @@ struct std::formatter<maxwell::quantity_value<U, Q, T>>
 namespace maxwell {
 /// \cond
 namespace _detail {
-/// \endcond
-
-/// \brief Provides operator overloads for \c quantity_value instances.
-///
-/// \tparam Derived The \c quantity_value type to provide arithmetic operators
-/// for.
 template <quantity_value_like Derived> class _quantity_value_operators {
-  /// \brief Negation operator
-  ///
-  /// Negates the value of a \c quantity_value instance.
-  ///
-  /// \param q The quantity value instance to negate.
-  /// \return The negated value of the `quantity_value` instance.
   friend constexpr auto operator-(const Derived& q) -> Derived {
     return std::remove_cvref_t<decltype(q)>(-q.get_value_unsafe());
   }
 
-  /// \brief Pre-increment operator
-  ///
-  /// Increments the numerical value of a \c quantity_value instance and returns
-  /// a reference to the modified \c quantity_value.
-  ///
-  /// \param q The quantity value instance to increment.
-  /// \return A reference to the modified \c quantity_value instance.
   friend constexpr auto operator++(Derived& q) -> Derived& {
     ++q.value_;
     return q;
   }
 
-  /// \brief Post-increment operator
-  ///
-  /// Increments the numerical value of a \c quantiity_value instance and
-  /// returns a copy of the \c quantity_value before it was modified.
-  ///
-  /// \param q The quantity value instance to increment.
-  /// \return A reference to the modified \c quantity_value instance.
   friend constexpr auto operator++(Derived& q, int) -> Derived {
     auto temp{q};
     ++q;
     return temp;
   }
 
-  /// \brief Pre-decrement operator
-  ///
-  /// Decrement the numerical value of a \c quantity_value instance and returns
-  /// a reference to the modified \c quantity_value.
-  ///
-  /// \param q The quantity value instance to decrement.
-  /// \return A reference to the modified \c quantity_value instance.
   friend constexpr auto operator--(Derived& q) -> Derived& {
     --q.value_;
     return q;
   }
 
-  /// \brief Post-decrement operator
-  ///
-  /// Decrements the numerical value of a \c quantiity_value instance and
-  /// returns a copy of the \c quantity_value before it was modified.
-  ///
-  /// \param q The quantity value instance to decrement.
-  /// \return A reference to the modified \c quantity_value instance.
   friend constexpr auto operator--(Derived& q, int) -> Derived {
     auto temp{q};
     --q;
     return temp;
   }
 
-  /// \brief Addition assignment operator
-  ///
-  /// Adds the numerical value of another \c quantity_value instance to this
-  /// instance and returns a reference to the modified \c quantity_value.
-  /// Automatically converts the units of the other instance to the units of
-  /// this instance if necessary.
-  ///
-  /// The program is ill-formed if the quantities of the two instances are not
-  /// the same or if the units of the two instances have different reference
-  /// points.
-  ///
-  /// \tparam U2 The units of the other \c quantity_value instance.
-  /// \tparam T2 The type of the other \c quantity_value instance.
-  /// \param lhs The \c quantity_value instance to modify.
-  /// \param rhs The other \c quantity_value instance to add.
-  /// \return A reference to the modified \c quantity_value instance.
   template <auto U2, auto Q2, typename T2>
     requires requires(typename Derived::value_type lhs, T2 rhs) { lhs += rhs; }
   friend constexpr auto operator+=(Derived& lhs,
@@ -135,21 +79,6 @@ template <quantity_value_like Derived> class _quantity_value_operators {
     return lhs;
   }
 
-  /// \brief Addition assignment operator
-  ///
-  /// Adds the numeric value of a \c quantity_holder instance to the numerical
-  /// value of \c lhs, converting units if necessary. Returns a reference to the
-  /// modified \c quantity_value. The program is ill-formed if the quantities of
-  /// the two values being added are not convertible to each other.
-  ///
-  /// \tparam Q2 The quantity of the \c quantity_holder instance.
-  /// \tparam T2 The type of the numerical value of the \c quantity_holder
-  /// instance.
-  /// \param lhs The left-hand side of the addition.
-  /// \param rhs The right-hand side of the addition.
-  /// \return A reference to the modified \c quantity_value instance.
-  /// \throw incompatible_quantity_holder if the the units of the quantities
-  /// being added have difference reference points.
   template <auto Q2, typename T2>
   friend constexpr auto operator+=(Derived& lhs,
                                    const quantity_holder<Q2, T2>& rhs)
@@ -170,22 +99,6 @@ template <quantity_value_like Derived> class _quantity_value_operators {
     return lhs;
   }
 
-  /// \brief Subtraction assignment operator
-  ///
-  /// Subtracts the numerical value of another \c quantity_value instance from
-  /// this instance and returns a reference to the modified \c quantity_value.
-  /// Automatically converts the units of the other instance to the units of
-  /// this instance if necessary.
-  ///
-  /// The program is ill-formed if the quantities of the two instances are not
-  /// the same or if the units of the two instances have different reference
-  /// points.
-  ///
-  /// \tparam U2 The units of the other \c quantity_value instance.
-  /// \tparam T2 The type of the other \c quantity_value instance.
-  /// \param lhs The \c quantity_value instance to modify.
-  /// \param rhs The other \c quantity_value instance to subtract.
-  /// \return A reference to the modified \c quantity_value instance.
   template <auto U2, auto Q2, typename T2>
     requires requires(typename Derived::value_type lhs, T2 rhs) { lhs -= rhs; }
   friend constexpr auto operator-=(Derived& lhs,
@@ -202,22 +115,6 @@ template <quantity_value_like Derived> class _quantity_value_operators {
     return lhs;
   }
 
-  /// \brief Subtraction assignment operator
-  ///
-  /// Subtracts the numeric value of a \c quantity_holder instance from the
-  /// numerical value of \c lhs, converting units if necessary. Returns a
-  /// reference to the modified \c quantity_value. The program is ill-formed if
-  /// the quantities of the two values being added are not convertible to each
-  /// other.
-  ///
-  /// \tparam Q2 The quantity of the \c quantity_holder instance.
-  /// \tparam T2 The type of the numerical value of the \c quantity_holder
-  /// instance.
-  /// \param lhs The left-hand side of the subtraction.
-  /// \param rhs The right-hand side of the subtraction.
-  /// \return A reference to the modified \c quantity_value instance.
-  /// \throw incompatible_quantity_holder if the the units of the quantities
-  /// being added have difference reference points.
   template <auto Q2, typename T2>
   friend constexpr auto operator-=(Derived& lhs,
                                    const quantity_holder<Q2, T2>& rhs)
@@ -238,18 +135,6 @@ template <quantity_value_like Derived> class _quantity_value_operators {
     return lhs;
   }
 
-  /// \brief Addition assignment operator for numeric types
-  ///
-  /// Adds a numeric value to the numerical value of this \c quantity_value
-  /// instance and returns a reference to the modified \c quantity_value.
-  ///
-  /// This operator is only available if the units of the \c quantity_value are
-  /// unitless.
-  ///
-  /// \tparam T2 The type of the numeric value.
-  /// \param lhs The \c quantity_value instance to modify.
-  /// \param rhs The numeric value to add.
-  /// \return A reference to the modified \c quantity_value instance.
   template <typename T2>
     requires(!quantity_value_like<T2>) &&
             requires(typename Derived::value_type lhs, T2 rhs) {
@@ -436,21 +321,6 @@ template <quantity_value_like Derived> class _quantity_value_operators {
            rhs.in_base_units().get_value_unsafe();
   }
 
-  /// \brief Multiplies the units of a \c quantity_value by another unit
-  ///
-  /// Multiplies the units of a \c quantity_value by another unit, returning a
-  /// new \c quantity_value with the resulting units. Does not change the
-  /// numerical value of the \c quantity_value.
-  ///
-  /// \tparam U1 The units of the left-hand side \c quantity_value.
-  /// \tparam Q1 The quantity of the left-hand side \c quantity_value.
-  /// \tparam T The type of the numerical value of the left-hand side \c
-  /// quantity_value.
-  /// \tparam U2 The units of the right-hand side unit.
-  /// \param value The left-hand side \c quantity_value.
-  /// \param U2 The right-hand side unit.
-  /// \return A new \c quantity_value with the resulting units and the same
-  /// numerical value.
   template <unit U2> friend constexpr auto operator*(const Derived& value, U2) {
     constexpr unit auto new_units = Derived::units * U2{};
     constexpr quantity auto new_quantity = new_units.quantity;
@@ -459,21 +329,6 @@ template <quantity_value_like Derived> class _quantity_value_operators {
         value.get_value_unsafe());
   }
 
-  /// \brief Multiplies the units of a \c quantity_value by another unit
-  ///
-  /// Multiplies the units of a \c quantity_value by another unit, returning a
-  /// new \c quantity_value with the resulting units. The numerical value is
-  /// moved into the new \c quantity_value.
-  ///
-  /// \tparam U1 The units of the left-hand side \c quantity_value.
-  /// \tparam Q1 The quantity of the left-hand side \c quantity_value.
-  /// \tparam T The type of the numerical value of the left-hand side \c
-  /// quantity_value.
-  /// \tparam U2 The units of the right-hand side unit.
-  /// \param value The left-hand side \c quantity_value.
-  /// \param U2 The right-hand side unit.
-  /// \return A new \c quantity_value with the resulting units and the same
-  /// numerical value.
   template <unit U2> friend constexpr auto operator*(Derived&& value, U2) {
     constexpr unit auto new_units = Derived::units * U2{};
     constexpr quantity auto new_quantity = new_units.quantity;
@@ -510,7 +365,6 @@ template <typename Derived> struct quantity_value_output {
   }
 };
 
-/// \cond
 template <utility::ratio From, unit To>
 constexpr double chrono_conversion_factor(From, To) {
   const double from_value =
@@ -518,8 +372,8 @@ constexpr double chrono_conversion_factor(From, To) {
   double ret_val = from_value * To::multiplier;
   return ret_val;
 }
-/// \endcond
 } // namespace _detail
+/// \endcond
 
 /// \brief Class template representing the value of a quantity with a particular
 /// unit.
@@ -542,7 +396,7 @@ constexpr double chrono_conversion_factor(From, To) {
 /// Both the units and the quantity of the \c quantity_value are specified as
 /// non-type template parameters (NTTPs).
 /// Using NTTPs allows for more natural definitions of custom units and
-/// definitions.
+/// quantities.
 ///
 /// \warning Using an integral type with \c quantity_value will perform
 /// truncation when converting units and integer division when performing
@@ -611,6 +465,7 @@ public:
   /// \pre <tt>std::is_constructible_from_v<T, Up></tt> is \c true and
   ///      \c Up is not an instantiation of \c quantity_value.
   ////
+  /// \tparam Up The type of the value used to initialize the \c quantity_value.
   /// \param value The value used to initialize the \c quantity_value.
   /// \throw Any exceptions thrown by the selected constructor of \c T.
   template <typename Up = T>
@@ -816,14 +671,14 @@ public:
   ///
   /// Assigns the value of the specififed \c quantity_value to the value oc \c
   /// *this, automatically converting units where necessary. This function only
-  /// participates in overload resolution if.
+  /// participates in overload resolution if
   ///   1. <tt>std::constructible_from<T, Rep></tt> is modeled
   ///   2. \c std::swappable<T> is modeled
   ///
   /// The program is ill-formed if <tt>quantity_convertible_to<FromQuantity,
   /// Q></tt> is not modeled.
   ///
-  /// \tparam FromQuantity The quantity of the from \c quantity_value
+  /// \tparam FromQuantity The quantity of the specified \c quantity_value
   /// \tparam FromUnit The units being converted from
   /// \tparam Up The type of the numerical value being assigned to \c *this.
   /// \param other The \c quantity_value to assign to \c *this.
@@ -867,7 +722,7 @@ public:
   ///
   /// \tparam Rep The representation type of the \c std::chrono::duration
   /// \tparam Period The period type of the \c std::chrono::duration
-  /// \param d The \c std::chrono::duraation to assign to \c *this.
+  /// \param d The \c std::chrono::duration to assign to \c *this.
   /// \return A reference to \c *this.
   template <typename Rep, typename Period>
     requires std::constructible_from<T, Rep> && std::swappable<T> &&
@@ -880,8 +735,9 @@ public:
   /// Assigns the specififed value to the numerical value of \c *this. This
   /// function only participates in overload resolution if
   ///   1. \c Up is not an instantiation of \c quantity_value
-  ///   2. <tt>std::is_assignable_v<T&, Up></tt> is true
-  ///   3. \c unitless<U> is modeled.
+  ///   2. \c Up is not an instantiation of \c quantity_holder
+  ///   3. <tt>std::is_assignable_v<T&, Up></tt> is true
+  ///   4. \c unitless<U> is modeled.
   ///
   /// \tparam Up The type of the value to assign to the numerical value of \c
   /// *this.
@@ -929,10 +785,12 @@ public:
   /// \brief Conversion operator to the numerical value type
   ///
   /// Converts the \c quantity_value instance to its numerical value type.
-  /// This operator is explicit if the \c quantity_value is not unitless.
+  /// This operator only participates in overload resolution if the
+  /// \c quantity_value instance is unitless.
   ///
   /// \return The numerical value of the \c quantity_value instance.
-  constexpr explicit(!unitless<U>) operator value_type() const;
+  constexpr operator value_type() const
+    requires unitless<U>;
 
   /// \brief Returns the units of the quantity.
   ///
@@ -947,6 +805,14 @@ public:
   /// \return A quantity with the same value expressed in base units
   constexpr auto in_base_units() const -> quantity_value<U.base_units(), Q, T>;
 
+  /// \brief Returns a quantity with the same value expressed in the specified
+  /// units.
+  ///
+  /// Returns a quantity representing the same value but expressed in the
+  /// specified units.
+  ///
+  /// \tparam ToUnit The units to convert to.
+  /// \return A quantity with the same value expressed in the specified units.
   template <unit ToUnit>
   constexpr auto in(ToUnit) const -> quantity_value<ToUnit{}, Q, T>;
 

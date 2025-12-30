@@ -4,6 +4,8 @@
 #ifndef QUANTITY_HOLDER_HPP
 #define QUANTITY_HOLDER_HPP
 
+#include <functional> // hash
+
 #include "impl/quantity_holder_declaration.hpp"
 #include "impl/quantity_holder_impl.hpp"
 

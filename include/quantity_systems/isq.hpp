@@ -12,6 +12,8 @@
 #include "utility/config.hpp"
 #include "utility/type_traits.hpp"
 
+/// \namespace maxwell::isq:
+/// \brief Namespace containing definition of the ISQ system of quantities.
 namespace maxwell::isq {
 /// Type alias used to set up the ISQ system of quantities.
 MODULE_EXPORT using isq_system =

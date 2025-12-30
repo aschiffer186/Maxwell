@@ -8,6 +8,8 @@
 #include "utility/compile_time_math.hpp"
 #include "utility/config.hpp"
 
+/// \namespace maxwell::us
+/// \brief Namespace containing definition of US customary units.
 namespace maxwell::us {
 namespace _detail {
 constexpr auto meter_to_foot = value<1 / 0.3048>;
