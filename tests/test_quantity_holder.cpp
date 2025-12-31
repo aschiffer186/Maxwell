@@ -5,6 +5,7 @@
 #include <type_traits>
 
 #include "quantity_systems/isq.hpp"
+#include "quantity_systems/us.hpp"
 #include "test_types.hpp"
 
 using namespace maxwell;
@@ -194,6 +195,22 @@ TEST(TestQuantityHolder, TestInMethod) {
   temperature_holder<> t{si::kelvin_unit, 300.0};
   const double f = t.in(us::fahrenheit_unit);
   EXPECT_FLOAT_EQ(f, 80.33);
+}
+
+TEST(TestQuantityHolder, TestContainsMethod) {
+  length_holder<> l{si::meter_unit, 5000.0};
+  EXPECT_TRUE(l.contains(si::meter_unit));
+  EXPECT_FALSE(l.contains(kilo_unit<si::meter_unit>));
+
+  temperature_holder<> t{si::celsius_unit, 100.0};
+  EXPECT_TRUE(t.contains(si::celsius_unit));
+  EXPECT_FALSE(t.contains(si::kelvin_unit));
+  EXPECT_FALSE(t.contains(us::fahrenheit_unit));
+
+  temperature_holder<> t2{us::fahrenheit_unit, 212.0};
+  EXPECT_TRUE(t2.contains(us::fahrenheit_unit));
+  EXPECT_FALSE(t2.contains(si::celsius_unit));
+  EXPECT_FALSE(t2.contains(si::kelvin_unit));
 }
 
 TEST(TestQuantityHolder, TestNegation) {

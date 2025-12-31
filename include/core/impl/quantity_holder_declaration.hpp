@@ -8,7 +8,6 @@
 #endif
 
 #include <chrono>           // duration
-#include <functional>       // hash
 #include <initializer_list> // initializer_list
 #include <string>           // string
 #include <type_traits>      // false_type, remove_cvref_t, true_type
@@ -145,13 +144,15 @@ template <typename Derived> class quantity_holder_operators {
 
   template <auto Q2, typename T2>
   friend constexpr auto operator+(Derived lhs,
-                                  const quantity_holder<Q2, T2>& rhs) {
+                                  const quantity_holder<Q2, T2>& rhs)
+      -> Derived {
     return lhs += rhs;
   }
 
   template <auto U2, auto Q2, typename T2>
   friend constexpr auto operator+(Derived lhs,
-                                  const quantity_value<U2, Q2, T2>& rhs) {
+                                  const quantity_value<U2, Q2, T2>& rhs)
+      -> Derived {
     return lhs += rhs;
   }
 
@@ -173,13 +174,15 @@ template <typename Derived> class quantity_holder_operators {
 
   template <auto Q2, typename T2>
   friend constexpr auto operator-(Derived lhs,
-                                  const quantity_holder<Q2, T2>& rhs) {
+                                  const quantity_holder<Q2, T2>& rhs)
+      -> Derived {
     return lhs -= rhs;
   }
 
   template <auto U2, auto Q2, typename T2>
   friend constexpr auto operator-(Derived lhs,
-                                  const quantity_value<U2, Q2, T2>& rhs) {
+                                  const quantity_value<U2, Q2, T2>& rhs)
+      -> Derived {
     return lhs -= rhs;
   }
 
@@ -224,8 +227,8 @@ template <typename Derived> class quantity_holder_operators {
   }
 
   template <auto Q2, typename T2>
-  friend constexpr auto operator*(const Derived& lhs,
-                                  const quantity_holder<Q2, T2>& rhs) {
+  friend constexpr quantity_holder_like auto
+  operator*(const Derived& lhs, const quantity_holder<Q2, T2>& rhs) {
 
     using result_type = std::remove_cvref_t<decltype(lhs.get_value_unsafe() *
                                                      rhs.get_value_unsafe())>;
@@ -246,7 +249,8 @@ template <typename Derived> class quantity_holder_operators {
 
   template <typename T2>
     requires(!is_quantity_holder_v<T2> && !quantity_value_like<T2>)
-  friend constexpr auto operator*(const Derived& lhs, const T2& rhs) {
+  friend constexpr quantity_holder_like auto operator*(const Derived& lhs,
+                                                       const T2& rhs) {
     using result_type =
         std::remove_cvref_t<decltype(lhs.get_value_unsafe() * rhs)>;
     return quantity_holder<Derived::quantity, result_type>(
@@ -255,7 +259,8 @@ template <typename Derived> class quantity_holder_operators {
 
   template <typename T2>
     requires(!is_quantity_holder_v<T2> && !quantity_value_like<T2>)
-  friend constexpr auto operator*(const T2& lhs, const Derived& rhs) {
+  friend constexpr quantity_holder_like auto operator*(const T2& lhs,
+                                                       const Derived& rhs) {
     using result_type =
         std::remove_cvref_t<decltype(lhs * rhs.get_value_unsafe())>;
     return quantity_holder<Derived::quantity, result_type>(
@@ -263,8 +268,8 @@ template <typename Derived> class quantity_holder_operators {
   }
 
   template <auto Q2, typename T2>
-  friend constexpr auto operator/(const Derived& lhs,
-                                  const quantity_holder<Q2, T2>& rhs) {
+  friend constexpr quantity_holder_like auto
+  operator/(const Derived& lhs, const quantity_holder<Q2, T2>& rhs) {
     if (lhs.get_reference() != rhs.get_reference()) [[unlikely]] {
       throw incompatible_quantity_holder(
           "Cannot divide quantities whose units have different reference "
@@ -279,7 +284,8 @@ template <typename Derived> class quantity_holder_operators {
 
   template <typename T2>
     requires(!is_quantity_holder_v<T2> && !quantity_value_like<T2>)
-  friend constexpr auto operator/(const Derived& lhs, const T2& rhs) {
+  friend constexpr quantity_holder_like auto operator/(const Derived& lhs,
+                                                       const T2& rhs) {
     using result_type =
         std::remove_cvref_t<decltype(lhs.get_value_unsafe() / rhs)>;
     return quantity_holder<Derived::quantity, result_type>(
@@ -287,8 +293,8 @@ template <typename Derived> class quantity_holder_operators {
   }
 
   template <auto U, auto Q, typename T2>
-  friend constexpr auto operator/(const Derived& lhs,
-                                  const quantity_value<U, Q, T2>& rhs) {
+  friend constexpr quantity_holder_like auto
+  operator/(const Derived& lhs, const quantity_value<U, Q, T2>& rhs) {
     if (lhs.get_reference() != U.reference) [[unlikely]] {
       throw incompatible_quantity_holder(
           "Cannot divide quantities whose units have different reference "
@@ -303,11 +309,37 @@ template <typename Derived> class quantity_holder_operators {
   }
 
   template <auto Q2, typename T2>
+  friend constexpr quantity_holder_like auto
+  operator%(const Derived& lhs, const quantity_holder<Q2, T2>& rhs) {
+    if (Derived::units.reference != rhs.get_reference()) [[unlikely]] {
+      throw incompatible_quantity_holder(
+          "Cannot modulo quantities whose units have different reference "
+          "points.");
+    }
+    using result_type = std::remove_cvref_t<decltype(lhs.get_value_unsafe() %
+                                                     rhs.get_value_unsafe())>;
+    return quantity_holder<Derived::quantity / Q2, result_type>(
+        lhs.get_value_unsafe() % rhs.get_value_unsafe(),
+        Derived::units.multiplier / rhs.get_multiplier(), rhs.get_reference());
+  }
+
+  template <auto Q2, typename T2>
     requires std::three_way_comparable_with<typename Derived::value_type, T2>
   friend constexpr auto operator<=>(const Derived& lhs,
                                     const quantity_holder<Q2, T2>& rhs) {
     static_assert(quantity_convertible_to<Q2, Derived::quantity> &&
                       quantity_convertible_to<Derived::quantity, Q2>,
+                  "Cannot compare quantities of different kinds");
+    return lhs.in_base_units().get_value_unsafe() <=>
+           rhs.in_base_units().get_value_unsafe();
+  }
+
+  template <auto U, auto Q, typename T2>
+    requires std::three_way_comparable_with<typename Derived::value_type, T2>
+  friend constexpr auto operator<=>(const Derived& lhs,
+                                    const quantity_value<U, Q, T2>& rhs) {
+    static_assert(quantity_convertible_to<Q, Derived::quantity> &&
+                      quantity_convertible_to<Derived::quantity, Q>,
                   "Cannot compare quantities of different kinds");
     return lhs.in_base_units().get_value_unsafe() <=>
            rhs.in_base_units().get_value_unsafe();
@@ -319,6 +351,18 @@ template <typename Derived> class quantity_holder_operators {
                                    const quantity_holder<Q2, T2>& rhs) -> bool {
     static_assert(quantity_convertible_to<Q2, Derived::quantity> &&
                       quantity_convertible_to<Derived::quantity, Q2>,
+                  "Cannot compare quantities of different kinds");
+    return lhs.in_base_units().get_value_unsafe() ==
+           rhs.in_base_units().get_value_unsafe();
+  }
+
+  template <auto U, auto Q, typename T2>
+    requires std::equality_comparable_with<typename Derived::value_type, T2>
+  friend constexpr auto operator==(const Derived& lhs,
+                                   const quantity_value<U, Q, T2>& rhs)
+      -> bool {
+    static_assert(quantity_convertible_to<Q, Derived::quantity> &&
+                      quantity_convertible_to<Derived::quantity, Q>,
                   "Cannot compare quantities of different kinds");
     return lhs.in_base_units().get_value_unsafe() ==
            rhs.in_base_units().get_value_unsafe();
@@ -687,6 +731,17 @@ public:
   /// \return The numerical value of the \c quantity_holder instance.
   constexpr operator value_type() const
     requires(quantity_convertible_to<Q, number> && !Q.derived);
+
+  /// \brief Checks if the numerical value is in the specified unit.
+  ///
+  /// Checks if the quantity holder is holding a numerical value in the
+  /// specified unit.
+  ///
+  /// \tparam U The type of the unit to check for
+  /// \param unit The unit to check for
+  /// \return \c true if the quantity holder is holding a numerical value in the
+  /// specified unit, \c false otherwise.
+  template <unit U> constexpr auto contains(U unit) const noexcept -> bool;
 
 private:
   friend class std::hash<maxwell::quantity_holder<Q, T>>;

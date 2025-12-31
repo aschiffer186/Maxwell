@@ -250,4 +250,12 @@ constexpr quantity_holder<Q, T>::operator value_type() const
 {
   return value_;
 }
+
+template <auto Q, typename T>
+  requires quantity<decltype(Q)>
+template <unit U>
+constexpr auto quantity_holder<Q, T>::contains(const U /*unit*/) const noexcept
+    -> bool {
+  return (multiplier_ == U::multiplier) && (reference_ == U::reference);
+}
 } // namespace maxwell

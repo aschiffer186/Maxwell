@@ -6,7 +6,7 @@ This README focuses on how to use Maxwell. For a more detailed description, buil
 # Installation 
 The easiest way to install Maxwell is by cloning the repo and using the CMake install command. 
 Once you have cloned the repo, run the following commands inside the folder where you cloned the repo
-```
+```cmake
 mkdir build
 cd build
 cmake .. 
@@ -14,7 +14,7 @@ cmake --build . --config Release --target install
 ```
 
 Maxwell can then be found using `find_package`: 
-```
+```cmake
 find_package(Maxwell CONFIG REQUIRED)
 ```
 
@@ -36,7 +36,7 @@ Building documentation can be down using the "build-docs" workflow. Note that do
 Doxygen can be installed using your OS's package manager.
 Sphinx and other requirements can be installed using `pip` and the requirements.txt file inside the `doc` folder.
 From the main Maxwell directory run the following command: 
-```
+```cmake
 cmake --workflow --preset build-docs
 ```
 This should build all documentation and place it in the `docs/documentation` folder of your build directory. Doxygen documentation will be placed into `docs/doxygen`.

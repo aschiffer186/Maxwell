@@ -176,6 +176,8 @@ template <quantity_value_like Derived> class _quantity_value_operators {
   template <typename T>
     requires(!quantity_value_like<T> && !quantity_holder_like<T>)
   friend constexpr quantity_value_like auto operator+(Derived lhs, T&& rhs) {
+    static_assert(unitless<Derived::units>,
+                  "Can only numerical values to dimensionless quantities");
     using result_number_type =
         std::remove_cvref_t<decltype(lhs.get_value_unsafe() +
                                      std::forward<T>(rhs))>;
@@ -187,6 +189,8 @@ template <quantity_value_like Derived> class _quantity_value_operators {
   template <typename T>
     requires(!quantity_value_like<T> && !quantity_holder_like<T>)
   friend constexpr quantity_value_like auto operator+(T&& lhs, Derived rhs) {
+    static_assert(unitless<Derived::units>,
+                  "Can only numerical values to dimensionless quantities");
     using result_number_type =
         std::remove_cvref_t<decltype(std::forward<T>(lhs) +
                                      rhs.get_value_unsafe())>;
@@ -305,9 +309,24 @@ template <quantity_value_like Derived> class _quantity_value_operators {
                                                      rhs.get_value_unsafe())>;
     constexpr unit auto result_units = lhs_type::units / rhs_type::units;
     constexpr quantity auto result_quantity =
-        lhs_type::quantity_kind / rhs_type::quantity_kind;
+        lhs_type::quantity / rhs_type::quantity;
     return quantity_value<result_units, result_quantity, result_type>(
         lhs.get_value_unsafe() % rhs.get_value_unsafe());
+  }
+
+  template <auto Q, typename T>
+  friend constexpr quantity_holder_like auto
+  operator%(const Derived& lhs, const quantity_holder<Q, T>& rhs) {
+    if (Derived::units.reference != rhs.get_reference()) [[unlikely]] {
+      throw incompatible_quantity_holder(
+          "Cannot modulo quantities whose units have different reference "
+          "points.");
+    }
+    using result_type = std::remove_cvref_t<decltype(lhs.get_value_unsafe() %
+                                                     rhs.get_value_unsafe())>;
+    return quantity_holder<Derived::quantity / Q, result_type>(
+        lhs.get_value_unsafe() % rhs.get_value_unsafe(),
+        Derived::units.multiplier / rhs.get_multiplier(), rhs.get_reference());
   }
 
   template <auto U2, auto Q2, typename T2>
