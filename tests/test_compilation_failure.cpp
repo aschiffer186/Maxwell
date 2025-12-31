@@ -1,4 +1,5 @@
 #include "Maxwell.hpp"
+#include "utility/type_traits.hpp"
 
 #include <vector>
 
@@ -79,6 +80,16 @@ int main() {
 #ifdef TEST_INVALID_QUANTITY_VALUE_CONVERSION_OPERATOR_1
   const si::meter<> m{5.0};
   [[maybe_unused]] const double d = m;
+#endif
+
+#ifdef TEST_INVALID_QUANTITY_VALUE_ASSIGNMENT_1
+  si::meter<> m{5.0};
+  m = 10.0;
+#endif
+
+#ifdef TEST_INVALID_QUANTITY_VALUE_ASSIGNMENT_2
+  si::meter<> m{5.0};
+  m = std::chrono::nanoseconds{100};
 #endif
 
 #ifdef TEST_INVALID_QUANTITY_VALUE_CONVERSION_OPERATOR_2

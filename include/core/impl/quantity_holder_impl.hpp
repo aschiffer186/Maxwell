@@ -68,7 +68,11 @@ template <typename Rep, typename Period>
 constexpr quantity_holder<Q, T>::quantity_holder(
     const std::chrono::duration<Rep, Period>& d)
     : value_(d.count()), multiplier_(static_cast<double>(Period::den) /
-                                     static_cast<double>(Period::num)) {}
+                                     static_cast<double>(Period::num)) {
+  static_assert(enable_chrono_conversions_v<Q>,
+                "Attempting to construct a quantity_holder not representing "
+                "time from a std::chrono::duration type");
+}
 
 template <auto Q, typename T>
   requires quantity<decltype(Q)>

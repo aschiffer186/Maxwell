@@ -399,6 +399,11 @@ MODULE_EXPORT template <auto Q, typename T>
   requires quantity<decltype(Q)>
 class quantity_holder
     : _detail::quantity_holder_operators<quantity_holder<Q, T>> {
+private:
+  template <typename FromType>
+  constexpr static bool explicit_converting_constructor =
+      treat_as_floating_point_v<FromType> && !treat_as_floating_point_v<T>;
+
 public:
   /// The type of the numerical value of the \c quantity_holder.
   using value_type = T;
@@ -512,7 +517,8 @@ public:
   /// \throw Any exceptions thrown by the selected constructor of \c T.
   template <typename Rep, typename Period>
     requires std::constructible_from<T, Rep> && enable_chrono_conversions_v<Q>
-  constexpr quantity_holder(const std::chrono::duration<Rep, Period>& d);
+  constexpr explicit(explicit_converting_constructor<Rep>)
+      quantity_holder(const std::chrono::duration<Rep, Period>& d);
 
   /// \brief Constructor
   ///
@@ -532,7 +538,8 @@ public:
   /// \throw Any exceptions thrown by the selected constructor of \c T.
   template <auto FromQuantity, auto FromUnit, typename Up = T>
     requires std::constructible_from<T, Up>
-  constexpr quantity_holder(quantity_value<FromUnit, FromQuantity, Up> other);
+  constexpr explicit(explicit_converting_constructor<Up>)
+      quantity_holder(quantity_value<FromUnit, FromQuantity, Up> other);
 
   /// \brief Constructor
   ///
@@ -551,7 +558,8 @@ public:
   /// \throw Any exceptions thrown by the selected constructor of \c T.
   template <auto FromQuantity, typename Up = T>
     requires std::constructible_from<T, Up>
-  constexpr quantity_holder(quantity_holder<FromQuantity, Up> other);
+  constexpr explicit(explicit_converting_constructor<Up>)
+      quantity_holder(quantity_holder<FromQuantity, Up> other);
 
   /// \brief Assigns the value of the specified \c quantity_holder to the value
   /// of \c *this.

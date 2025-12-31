@@ -1,5 +1,6 @@
 #include "core/scale.hpp"
 #include "core/unit.hpp"
+#include "utility/type_traits.hpp"
 
 #ifndef QUANTITY_VALUE_HPP
 #error "Do not include this file directly; include quantity_value.hpp instead"
@@ -43,8 +44,8 @@ MAXWELL_CONSTEXPR23 quantity_value<U, Q, T>::quantity_value(
           utility::as_constant<_detail::chrono_conversion_factor(Period{}, U)> *
           d.count()) {
   static_assert(enable_chrono_conversions_v<Q>,
-                "Attempting to construct a quantity_value that does not "
-                "represent time from a std::chrono::duration instance");
+                "Attempting to construct a quantity_value not representing "
+                "time from a std::chrono::duration type");
 }
 
 template <auto U, auto Q, typename T>
@@ -173,9 +174,11 @@ template <auto U, auto Q, typename T>
                               template <typename Up>
              requires(!_detail::is_quantity_value_v<Up> &&
                       !_detail::is_quantity_holder_v<Up> &&
-                      std::is_assignable_v<T&, Up> && unitless<U>)
+                      std::is_assignable_v<T&, Up>)
 constexpr auto quantity_value<U, Q, T>::operator=(Up&& other)
     -> quantity_value& {
+  static_assert(unitless<U>,
+                "Can only assign numerical values to dimensionless quantities");
   value_ = std::forward<Up>(other);
   return *this;
 }

@@ -43,6 +43,16 @@ MODULE_EXPORT template <auto Q>
 constexpr bool enable_chrono_conversions_v =
     enable_chrono_conversions<Q>::value;
 
+/// \brief Determins if a type should be treating as a floating-point number.
+///
+/// \tparam T The type to check.
+MODULE_EXPORT template <typename T>
+struct treat_as_floating_point : std::is_floating_point<T> {};
+
+/// \brief Helper variable template for \c treat_as_floating_point.
+MODULE_EXPORT template <typename T>
+constexpr bool treat_as_floating_point_v = treat_as_floating_point<T>::value;
+
 /// \brief Trait to return the units of a quantity
 ///
 /// Returns the units of a quantity.

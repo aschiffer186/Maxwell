@@ -452,6 +452,10 @@ class quantity_value
       quantity_convertible_to<Q, U.quantity>,
       "Attempting to instantiate quantity value with incompatible units");
 
+  template <typename FromType>
+  constexpr static bool explicit_converting_constructor =
+      treat_as_floating_point_v<FromType> && !treat_as_floating_point_v<T>;
+
 public:
   /// The type of the numerical value of the \c quantity_value.
   using value_type = T;
@@ -586,8 +590,8 @@ public:
   /// <tt>std::chrono::duration<Rep, Period>::count()</tt>
   template <typename Rep, typename Period>
     requires std::constructible_from<T, Rep> && utility::ratio<Period>
-  MAXWELL_CONSTEXPR23
-  quantity_value(const std::chrono::duration<Rep, Period>& d);
+  MAXWELL_CONSTEXPR23 explicit(explicit_converting_constructor<Rep>)
+      quantity_value(const std::chrono::duration<Rep, Period>& d);
 
   /// \brief Converting constructor
   ///
@@ -615,8 +619,8 @@ public:
   template <auto FromQuantity, auto FromUnit, typename Up = T>
     requires std::constructible_from<T, Up> && unit<decltype(FromUnit)> &&
              ::maxwell::quantity<decltype(FromQuantity)>
-  constexpr quantity_value(
-      const quantity_value<FromUnit, FromQuantity, Up>& other);
+  constexpr explicit(explicit_converting_constructor<Up>)
+      quantity_value(const quantity_value<FromUnit, FromQuantity, Up>& other);
 
   /// \brief Converting constructor
   ///
@@ -644,7 +648,8 @@ public:
   template <auto FromQuantity, auto FromUnit, typename Up = T>
     requires std::constructible_from<T, Up> && unit<decltype(FromUnit)> &&
              ::maxwell::quantity<decltype(FromQuantity)>
-  constexpr quantity_value(quantity_value<FromUnit, FromQuantity, Up>&& other);
+  constexpr explicit(explicit_converting_constructor<Up>)
+      quantity_value(quantity_value<FromUnit, FromQuantity, Up>&& other);
 
   /// \brief Converting constructor
   ///
@@ -670,7 +675,8 @@ public:
   template <auto FromQuantity, typename Up = T>
     requires std::constructible_from<T, Up> &&
              ::maxwell::quantity<decltype(FromQuantity)>
-  constexpr quantity_value(const quantity_holder<FromQuantity, T>& other);
+  constexpr explicit(explicit_converting_constructor<Up>)
+      quantity_value(const quantity_holder<FromQuantity, T>& other);
 
   /// \brief Converting constructor
   ///
@@ -696,7 +702,8 @@ public:
   template <auto FromQuantity, typename Up = T>
     requires std::constructible_from<T, Up> &&
              ::maxwell::quantity<decltype(FromQuantity)>
-  constexpr quantity_value(quantity_holder<FromQuantity, T>&& other);
+  constexpr explicit(explicit_converting_constructor<Up>)
+      quantity_value(quantity_holder<FromQuantity, T>&& other);
 
   // --- Assignment Operators ---
 
@@ -779,8 +786,7 @@ public:
   /// \return A reference to \c *this.
   template <typename Up = T>
     requires(!_detail::is_quantity_value_v<Up> &&
-             !_detail::is_quantity_holder_v<Up> &&
-             std::is_assignable_v<T&, Up> && unitless<U>)
+             !_detail::is_quantity_holder_v<Up> && std::is_assignable_v<T&, Up>)
   constexpr auto operator=(Up&& other) -> quantity_value&;
 
   // --- Accessor Methods ---
@@ -843,7 +849,9 @@ public:
   /// units.
   ///
   /// Returns a quantity representing the same value but expressed in the
-  /// specified units.
+  /// specified units. The program is ill-formed if the quantity represeted by
+  /// the \c quantity_value instance is not convertible to the quantity
+  /// represented by the specified unit.
   ///
   /// \tparam ToUnit The units to convert to.
   /// \return A quantity with the same value expressed in the specified units.
