@@ -327,7 +327,11 @@ TEST(TestQuantityHolder, TestSubtraction) {
   EXPECT_FLOAT_EQ(a3.get_reference(), 0.0);
 
   temperature_holder<> t1{si::celsius_unit, 100.0};
-  EXPECT_THROW(t1 -= si::kelvin<>{173.15}, incompatible_quantity_holder);
+  EXPECT_THROW((t1 -= temperature_holder<>{si::kelvin_unit, 173.15}),
+               incompatible_quantity_holder);
+  EXPECT_THROW((temperature_holder<>{si::kelvin_unit, 173.15} -
+                temperature_holder<>{us::fahrenheit_unit, 32.0}),
+               incompatible_quantity_holder);
 
   dimensionless_holder<> d1{si::number_unit, 10.0};
   d1 -= 20.0;

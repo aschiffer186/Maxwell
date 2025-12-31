@@ -44,7 +44,7 @@ MODULE_EXPORT template <
     utility::template_string Name, quantity auto Quantity, double Multiplier,
     auto Reference = 0.0, typename Scale = linear_scale_type,
     dimension_product auto DimForMultiplier = std::conditional_t<
-        Quantity.dimensions == dimension_one,
+        Quantity.dimensions.dimension_exponent_sum() == rational<0, 1>,
         dimension_product_type<dimension_type<"[]", utility::one>>,
         dimension_product_type<>>{}>
 struct unit_type;
@@ -455,9 +455,10 @@ MODULE_EXPORT constexpr double base_to_quecto_prefix{1e30};
 namespace _detail {
 template <auto Prefix, auto U, utility::template_string Name>
 struct prefixed_unit {
-  using dim_for_multiplier =
-      std::conditional_t<U.dimension_sum() == utility::zero,
-                         decltype(rational<1, 1>), decltype(U.dimension_sum())>;
+  using dim_for_multiplier = std::conditional_t<
+      U.dimension_sum() == utility::zero,
+      decltype(U.dim_for_multiplier.dimension_exponent_sum()),
+      decltype(U.dimension_sum())>;
 
 public:
   using type = unit_type<Name, U.quantity,

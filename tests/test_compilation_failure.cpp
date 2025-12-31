@@ -1,4 +1,5 @@
 #include "Maxwell.hpp"
+#include "quantity_systems/si.hpp"
 #include "utility/type_traits.hpp"
 
 #include <vector>
@@ -77,11 +78,6 @@ int main() {
       l};
 #endif
 
-#ifdef TEST_INVALID_QUANTITY_VALUE_CONVERSION_OPERATOR_1
-  const si::meter<> m{5.0};
-  [[maybe_unused]] const double d = m;
-#endif
-
 #ifdef TEST_INVALID_QUANTITY_VALUE_ASSIGNMENT_1
   si::meter<> m{5.0};
   m = 10.0;
@@ -92,6 +88,28 @@ int main() {
   m = std::chrono::nanoseconds{100};
 #endif
 
+#ifdef TEST_INVALID_QUANTITY_VALUE_ASSIGNMENT_3
+  si::meter<> m1{10.0};
+  m1 = si::second<>{5.0};
+#endif
+
+#ifdef TEST_INVALID_QUANTITY_VALUE_ASSIGNMENT_4
+  constexpr quantity auto wavelength =
+      sub_quantity<isq::length, "wavelength">{};
+  quantity_value<si::meter_unit, wavelength> l{500.0};
+  l = quantity_value<si::kilometer_unit, isq::length>{1.0};
+#endif
+
+#ifdef TEST_INVALID_QUANTITY_VALUE_ASSIGNMENT_5
+  si::newton_meter<> q = 10.0 * newton_unit * meter_unit;
+  q = si::joule<>{20.0};
+#endif
+
+#ifdef TEST_INVALID_QUANTITY_VALUE_CONVERSION_OPERATOR_1
+  const si::meter<> m{5.0};
+  [[maybe_unused]] const double d = m;
+#endif
+
 #ifdef TEST_INVALID_QUANTITY_VALUE_CONVERSION_OPERATOR_2
   const si::radian<> angle{std::numbers::pi};
   [[maybe_unused]] const double d = angle;
@@ -100,6 +118,24 @@ int main() {
 #ifdef TEST_INVALID_QUANTITY_VALUE_IN_1
   meter<> m{5.0};
   const si::second<> q2 = m.in(si::second_unit);
+#endif
+
+#ifdef TEST_INVALID_QUANTITY_VALUE_ADDITION_1
+  si::meter<> m{5.0};
+  m += si::second<>{2.0};
+#endif
+
+#ifdef TEST_INVALID_QUANTITY_VALUE_ADDITION_2
+  const si::meter<> m = si::meter<>{5.0} + si::second<>{2.0};
+#endif
+
+#ifdef TEST_INVALID_QUANTITY_VALUE_ADDITION_3
+  si::radian<> angle{std::numbers::pi};
+  angle += 5.0;
+#endif
+
+#ifdef TEST_INVALID_QUANTITY_VALUE_ADDITION_4
+  si::radian<> angle = si::degree<>{180.0} + 5.0;
 #endif
 
   return 0;

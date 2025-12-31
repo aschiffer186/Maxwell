@@ -196,6 +196,10 @@ TEST(TestQuantityValue, TestConvertingConstructor) {
   const si::watt<> w4{1.0};
   const si::decibel_milliwatt<> p4{w4};
   EXPECT_FLOAT_EQ(p4.get_value_unsafe(), 30.0);
+
+  const quantity_value q = w4 * w4;
+  const quantity_value<centi_unit<si::watt_unit * si::watt_unit>> p5{q};
+  EXPECT_FLOAT_EQ(p5.get_value_unsafe(), 10'000.0);
 }
 
 TEST(TestQuantityValue, TestQuantityHolderConstructor) {
