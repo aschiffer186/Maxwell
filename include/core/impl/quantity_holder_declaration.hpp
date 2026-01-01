@@ -561,6 +561,38 @@ public:
   constexpr explicit(explicit_converting_constructor<Up>)
       quantity_holder(quantity_holder<FromQuantity, Up> other);
 
+  /// \brief Copy Constructor
+  ///
+  /// \param other The \c quantity_holder to copy.
+  /// \throw Any exceptions thrown by the copy constructor of \c T.
+  constexpr quantity_holder(const quantity_holder& other) = default;
+
+  /// \brief Move Constructor
+  ///
+  /// \param other The \c quantity_holder to move.
+  /// \throw Any exceptions thrown by the move constructor of \c T.
+  constexpr quantity_holder(quantity_holder&& other) = default;
+
+  /// \brief Copy Assignment Operator
+  ///
+  /// Copies the value of the specified \c quantity_holder to the value of \c
+  /// *this. Converts to the units stored in \c *this if necessary.
+  ///
+  /// \param other The \c quantity_holder whose value is being assigned to \c
+  /// *this.
+  /// \return A reference to \c *this.
+  constexpr auto operator=(const quantity_holder& other) -> quantity_holder&;
+
+  /// \brief Move Assignment Operator
+  ///
+  /// Moves the value of the specified \c quantity_holder to the value of \c
+  /// *this. Converts to the units stored in \c *this if necessary.
+  ///
+  /// \param other The \c quantity_holder whose value is being assigned to \c
+  /// *this.
+  /// \return A reference to \c *this.
+  constexpr auto operator=(quantity_holder&& other) -> quantity_holder&;
+
   /// \brief Assigns the value of the specified \c quantity_holder to the value
   /// of \c *this.
   ///
@@ -573,8 +605,8 @@ public:
   /// The program is ill-formed if <tt>quantity_convertible_to<FromQuantity,
   /// Q></tt> is not modeled.
   ///
-  /// \note This function updates the units of \c *this to the match the
-  /// units of the specified \c quantity_holder.
+  /// \note The units of the \c quantity_holder after assignment will be
+  /// unchanged.
   ///
   /// \tparam FromQuantity The quantity of the specified \c quantity_holder.
   /// \tparam Up The type of the numerical value being assigned to \c *this.
@@ -598,8 +630,8 @@ public:
   /// The program is ill-formed if <tt>quantity_convertible_to<FromQuantity,
   /// Q></tt> is not modeled.
   ///
-  /// \note This function updates the units of \c *this to the match the
-  /// units of the specified \c quantity_value.
+  /// \note The units of the \c quantity_holder after assignment will be
+  /// unchanged.
   ///
   /// \tparam FromUnit The units of the specified \c quantity_value.
   /// \tparam FromQuantity The quantity of the specified \c quantity_value.
@@ -618,19 +650,16 @@ public:
   /// Assigns the specified \c std::chrono::duration to the value of \c *this.
   /// This function only participates in overload resolution if
   ///   1. <tt>std::constructible_from<T, Rep></tt> is modeled
-  ///   2. \c std::swappable<T> is modeled
-  ///   3. \c enabe_chrono_conversions_v<Q> is true
   ///
-  ///
-  /// \note The units of the \c quantity_holder after assignment will be the
-  /// same as the units of the specified \c std:chrono::duration.
+  /// \note The units of the \c quantity_holder after assignment will be
+  /// unchanged.
   ///
   /// \tparam Rep The representation type of the \c std::chrono::duration
   /// \tparam Period The period type of the \c std::chrono::duration
   /// \param d The \c std::chrono::duration to assign to \c *this.
   /// \return A reference to \c *this.
   template <typename Rep, typename Period>
-    requires std::constructible_from<T, Rep> && enable_chrono_conversions_v<Q>
+    requires std::constructible_from<T, Rep>
   constexpr auto operator=(const std::chrono::duration<Rep, Period>& d)
       -> quantity_holder&;
 
@@ -757,8 +786,8 @@ private:
   friend class _detail::quantity_holder_operators<quantity_holder<Q, T>>;
 
   T value_{};
-  double multiplier_{1.0};
-  double reference_{0.0};
+  const double multiplier_{1.0};
+  const double reference_{0.0};
 };
 
 // --- Class Template Argument Deduction Guides ---

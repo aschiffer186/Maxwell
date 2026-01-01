@@ -102,21 +102,51 @@ constexpr quantity_holder<Q, T>::quantity_holder(
 
 template <auto Q, typename T>
   requires quantity<decltype(Q)>
+constexpr auto quantity_holder<Q, T>::operator=(const quantity_holder& other)
+    -> quantity_holder& {
+  if (this != &other) {
+    T temp = other.get_value_unsafe();
+    const double factor =
+        conversion_factor(other.get_multiplier(), multiplier_);
+    const double offset = conversion_offset(
+        other.get_multiplier(), other.get_reference(), multiplier_, reference_);
+    value_ = temp * factor + offset;
+  }
+  return *this;
+}
+
+template <auto Q, typename T>
+  requires quantity<decltype(Q)>
+constexpr auto quantity_holder<Q, T>::operator=(quantity_holder&& other)
+    -> quantity_holder& {
+  if (this != &other) {
+    T temp = std::move(other).get_value_unsafe();
+    const double factor =
+        conversion_factor(other.get_multiplier(), multiplier_);
+    const double offset = conversion_offset(
+        other.get_multiplier(), other.get_reference(), multiplier_, reference_);
+    value_ = temp * factor + offset;
+  }
+  return *this;
+}
+
+template <auto Q, typename T>
+  requires quantity<decltype(Q)>
 template <auto FromQuantity, typename Up>
   requires std::constructible_from<T, Up> && std::swappable<T>
 constexpr auto
 quantity_holder<Q, T>::operator=(quantity_holder<FromQuantity, Up> other)
     -> quantity_holder& {
 
-  static_assert(
-      quantity_convertible_to<FromQuantity, Q>,
-      "Attempting to assign quantity holder value with incompatible quantity");
+  static_assert(quantity_convertible_to<FromQuantity, Q>,
+                "Attempting to assign quantity holder value with "
+                "incompatible quantity");
 
-  using std::swap;
-  quantity_holder temp(std::move(other));
-  swap(temp.value_, value_);
-  swap(temp.multiplier_, multiplier_);
-  swap(temp.reference_, reference_);
+  T temp = std::move(other).get_value_unsafe();
+  const double factor = conversion_factor(other.get_multiplier(), multiplier_);
+  const double offset = conversion_offset(
+      other.get_multiplier(), other.get_reference(), multiplier_, reference_);
+  value_ = temp * factor + offset;
   return *this;
 }
 
@@ -126,30 +156,30 @@ template <auto FromUnits, auto FromQuantity, typename Up>
   requires std::constructible_from<T, Up>
 constexpr auto quantity_holder<Q, T>::operator=(
     quantity_value<FromUnits, FromQuantity, Up> other) -> quantity_holder& {
-  static_assert(
-      quantity_convertible_to<FromQuantity, Q>,
-      "Attempting to assign quantity holder value with incompatible quantity");
+  static_assert(quantity_convertible_to<FromQuantity, Q>,
+                "Attempting to assign quantity holder value with "
+                "incompatible quantity");
 
-  using std::swap;
-  quantity_holder temp(std::move(other));
-  swap(temp.value_, value_);
-  swap(temp.multiplier_, multiplier_);
-  swap(temp.reference_, reference_);
+  T temp = std::move(other).get_value_unsafe();
+  const double factor = conversion_factor(FromUnits.multiplier, multiplier_);
+  const double offset = conversion_offset(
+      FromUnits.multiplier, FromUnits.reference, multiplier_, reference_);
+  value_ = temp * factor + offset;
   return *this;
 }
 
 template <auto Q, typename T>
   requires quantity<decltype(Q)>
 template <typename Rep, typename Period>
-  requires std::constructible_from<T, Rep> && enable_chrono_conversions_v<Q>
+  requires std::constructible_from<T, Rep>
 constexpr auto
 quantity_holder<Q, T>::operator=(const std::chrono::duration<Rep, Period>& d)
     -> quantity_holder& {
-  using std::swap;
-  quantity_holder temp(d);
-  swap(temp.value_, value_);
-  swap(temp.multiplier_, multiplier_);
-  swap(temp.reference_, reference_);
+  static_assert(enable_chrono_conversions_v<Q>);
+  const double from_multiplier =
+      static_cast<double>(Period::den) / static_cast<double>(Period::num);
+  const double factor = conversion_factor(from_multiplier, multiplier_);
+  value_ = d.count() * factor;
   return *this;
 }
 

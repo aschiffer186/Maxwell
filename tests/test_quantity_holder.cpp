@@ -19,17 +19,13 @@ TEST(TestQuantityHolder, TestCXXProperties) {
 
   EXPECT_FALSE(std::is_default_constructible_v<test_type>);
   EXPECT_TRUE(std::is_copy_constructible_v<test_type>);
-  EXPECT_TRUE(std::is_nothrow_copy_constructible_v<test_type>);
   EXPECT_TRUE(std::is_move_constructible_v<test_type>);
   EXPECT_TRUE(std::is_nothrow_move_constructible_v<test_type>);
   EXPECT_TRUE(std::is_copy_assignable_v<test_type>);
-  EXPECT_TRUE(std::is_nothrow_copy_assignable_v<test_type>);
   EXPECT_TRUE(std::is_move_assignable_v<test_type>);
-  EXPECT_TRUE(std::is_nothrow_move_assignable_v<test_type>);
   EXPECT_TRUE(std::is_destructible_v<test_type>);
   EXPECT_TRUE(std::is_nothrow_destructible_v<test_type>);
   EXPECT_TRUE(std::is_trivially_destructible_v<test_type>);
-  EXPECT_TRUE(std::is_trivially_copyable_v<test_type>);
   EXPECT_TRUE(std::is_standard_layout_v<test_type>);
 }
 
@@ -127,23 +123,35 @@ TEST(TestQuatityHolder, TestQuantityValueConstructor) {
 }
 
 TEST(TestQuatityHolder, TestQuantityHolderAssignment) {
+  length_holder<> l1{si::meter_unit, 1'000.0};
+  length_holder<> l2{si::kilometer_unit, 2.0};
+  l1 = l2;
+  EXPECT_FLOAT_EQ(l1.get_value_unsafe(), 2'000.0);
+  EXPECT_FLOAT_EQ(l1.get_multiplier(), 1.0);
+  EXPECT_FLOAT_EQ(l1.get_reference(), 0.0);
+
+  l1 = length_holder<>{si::kilometer_unit, 3.0};
+  EXPECT_FLOAT_EQ(l1.get_value_unsafe(), 3000.0);
+  EXPECT_FLOAT_EQ(l1.get_multiplier(), 1.0);
+  EXPECT_FLOAT_EQ(l1.get_reference(), 0.0);
+
   constexpr maxwell::quantity auto wavelength =
       maxwell::sub_quantity<isq::length, "wavelength">{};
-  const quantity_holder<wavelength> l{nano_unit<si::meter_unit>, 500.0};
-  const length_holder<> l2 = l;
-  EXPECT_FLOAT_EQ(l2.get_value_unsafe(), 500.0);
-  EXPECT_FLOAT_EQ(l2.get_multiplier(), nano_unit<si::meter_unit>.multiplier);
-  EXPECT_FLOAT_EQ(l2.get_reference(), 0.0);
+  const quantity_holder<wavelength> l3{nano_unit<si::meter_unit>, 500.0};
+  const length_holder<> l4 = l3;
+  EXPECT_FLOAT_EQ(l4.get_value_unsafe(), 500.0);
+  EXPECT_FLOAT_EQ(l4.get_multiplier(), nano_unit<si::meter_unit>.multiplier);
+  EXPECT_FLOAT_EQ(l4.get_reference(), 0.0);
 }
 
 TEST(TestQuantityHolder, TestQuantityValueAssignment) {
   constexpr maxwell::quantity auto wavelength =
       maxwell::sub_quantity<isq::length, "wavelength">{};
-  const quantity_value<nano_unit<si::meter_unit>, wavelength> l{500.0};
-  const length_holder<> l2 = l;
-  EXPECT_FLOAT_EQ(l2.get_value_unsafe(), 500.0);
-  EXPECT_FLOAT_EQ(l2.get_multiplier(), nano_unit<si::meter_unit>.multiplier);
-  EXPECT_FLOAT_EQ(l2.get_reference(), 0.0);
+  const quantity_value<nano_unit<si::meter_unit>, wavelength> l3{500.0};
+  const length_holder<> l4 = l3;
+  EXPECT_FLOAT_EQ(l4.get_value_unsafe(), 500.0);
+  EXPECT_FLOAT_EQ(l4.get_multiplier(), nano_unit<si::meter_unit>.multiplier);
+  EXPECT_FLOAT_EQ(l4.get_reference(), 0.0);
 }
 
 TEST(TestQuantityHolder, TestChronoAssignment) {
@@ -152,8 +160,8 @@ TEST(TestQuantityHolder, TestChronoAssignment) {
   time_holder<> t1{si::second_unit};
   t1 = std::chrono::nanoseconds{100};
 
-  EXPECT_FLOAT_EQ(t1.get_value_unsafe(), 100.0);
-  EXPECT_FLOAT_EQ(t1.get_multiplier(), nano_unit<si::second_unit>.multiplier);
+  EXPECT_FLOAT_EQ(t1.get_value_unsafe(), 1e-7);
+  EXPECT_FLOAT_EQ(t1.get_multiplier(), 1.0);
   EXPECT_FLOAT_EQ(t1.get_reference(), 0.0);
 }
 

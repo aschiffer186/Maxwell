@@ -16,7 +16,7 @@ Example:
 
 .. code-block:: c++
 
-    #include <Maxwell/Maxwell.hpp>
+    #include <Maxwell.hpp>
 
     using namespace maxwell; 
 
@@ -106,7 +106,7 @@ Maxwell supports two modes: units specified at compile-time and units specified 
 
 In compile-time mode, the units must be specified at compile-time as template parameters. 
 This allows for unit conversions to be performed at compile-time with no additional run-time overhead. 
-The :codoe:`quantity_value` class template is the central type used in compile-time mode.
+The :code:`quantity_value` class template is the central type used in compile-time mode.
 
 The :code:`quantity_holder` class template is used for run-time mode. 
 In run-time mode, the unit is specified at run-time as a constructor parameter.
@@ -128,19 +128,23 @@ It has the following declaration:
     template <auto Units, auto Quantity = Units.quantity, typename T = double>
     class quantity_value;
 
-In this declaration, :codoe:`Units` is an object that represents the units of the quantity value. 
+In this declaration, :code:`Units` is an object that represents the units of the quantity value. 
 :code:`Quantity` is an object that represents the kind of quantity the quantity value belongs to. 
 
 Only the :code:`Units` template parameter is required; the :code:`Quantity` template parameter defaults to the quantity associated with the specified units. 
 However, the :code:`Quantity` template parameter can be used to create custom strongly-type derived quantities to more naturally represent the problem domain as described below. 
 
-Using non-type template parameters for the units and quantity values allows for a more natural syntax when working with instances of :codoe:`quantity_value`.
+Using non-type template parameters for the units and quantity values allows for a more natural syntax when working with instances of :code:`quantity_value`.
 Both units and quantities can be manipulated using standard arithmetic operators. 
 For example, a :code:`quantity_value` representing density can be declared as follows:
 
 .. code-block:: c++
 
     using density_type = maxwell::quantity_value<maxwell::si::kilogram_unit / maxwell::si::cubic_meter_unit>;
+
+.. warning::
+
+    If the underlying type is an integer type, truncation is possible when converting between quantity value instances.
 
 Constructing Quantity Values 
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -185,6 +189,7 @@ This allows for more concise construction of quantity values; the units and quan
     Maxwell does not provide user-defined literals for quantity values.
 
 :code:`quantity_value` instances can also be constructed from other compatible quantity values.
+If the underlying type of the quantity value being constructed is a floating point type, the construction is implicit. 
 In this case, the unit conversion is calculated at compile-time, providing no run-time overhead compared to using the raw numeric type. 
 The construction is checked for coherency at compile-time; an error is generated if the :code:`quantity_value` instances are not compatible.
 
@@ -217,8 +222,40 @@ Quantities representing time can also be constructed from instances of :code:`st
     const auto duration = std::chrono::seconds{120};
     const maxwell::si::second<> time{duration}; // 120 seconds
 
-Operations on :code:`quantit_value`
+Type aliases for many common units are provided in the :code:`maxwell::si`, :code:`maxwell::us`, and :code:`maxwell::other` namespaces.
+For a full list, see :doc:`predefined_units`.
+
+.. important::
+
+    When using type aliases, the :code:`<>` are required even if the default underlying type (:code:`double`) is used.
+    Specifying a template parameter changes the underlying type. 
+
+    .. code-block:: c++
+
+        const si::meter<> length1{100.0}; // 100 meters (underlying type is double)
+        const si::meter<int> length2{100}; // 100 meters (underlying type is int)
+
+Operations on :code:`quantity_value`
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ 
+
+A :code:`quantity_value` instance can be converted to another :code:`quantity_value` instance in different units using the :code:`in` function. 
+
+.. code-block:: c++ 
+
+    using namespace maxwell::si::symbols; 
+
+    const maxwell::si::meter<> length1{1'000.0}; // 1000 meters
+    const maxwell::si::kilometer<> length2 = length1.in(si::kilometer_unit); // length2 is 1 kilometer
+
+Instances of :code:`quantity_value` representing dimensionless quantities can be implicitly converted to the underlying type. 
+
+.. code-block:: c++ 
+
+    const maxwell::si::dimensionless<> d{0.5}; 
+    const double x = d; // x is 0.5 
+
+    const maxwell::si::meter<> length3{10.0};
+    const double y = length3; // Error - length is not dimensionless --- won't compile
 
 Instances of :code:`quantity_value` support all arithetic and comparison operations supported by the underlying numeric type. 
 These operations are checked at compile-time to ensure that they are only performed on compatible quantity values.
@@ -235,7 +272,7 @@ If necessary, unit conversions are performed automatically.
     const maxwell::quantity_value q = 5.0 * m + 10.0 * s // Error - length and time are not compatible --- won't compile
 
 Note that arithetic operations can only be performed on quantity values whose units have the same reference point. 
-For example, it is not permitte to mix different temperature scales such as Kelvin and Fahrenheit in arithmetic operations.
+For example, it is not permitted to mix different temperature scales such as Kelvin and Fahrenheit in arithmetic operations.
 
 .. code-block:: c++ 
     
@@ -252,6 +289,8 @@ Ratios of :code:`quantity_values` of the same units are correctly identified as 
     const maxwell::si::kilometer<> length2{1.0};
 
     const maxwell::si::dimensionless<> ratio = length1 / length2; // ratio is 0.01
+
+It is not recommended to use :code:`auto` as the result of an arithmetic expression involving :code:`quantity_value` instances as the result may be unexpected. 
 
 Most functions defined in header :code:`cmath` are also supported for :code:`quantity_value` instances.  
 These functions are defined in the :code:`maxwell::math` namespace.
@@ -276,3 +315,89 @@ These functions can only be applied to dimensionless quantity values.
 .. code-block:: c++ 
 
     const maxwell::si::dimensionless<> x = std::exp(maxwell::si::meter<>{3.0} / maxwell::si::meter<>{2.0}); // x is e^(3/2)
+
+.. warning:: 
+
+    Integer division will be performed between :code:`quantity_value` instances if the underlying type of both instances is an integral type.
+
+Instances of :code:`quantity_value` also support all comparison operators supported by the underlying numeric type.
+These operations are checked at compile-time to ensure that they are only performed on :code:`quantity_value` instances of the same kind. 
+
+.. code-block:: c++ 
+
+    using namespace maxwell::si::symbols; 
+
+    const maxwell::si::meter<> length1{100.0};
+    const maxwell::si::kilometer<> length2{0.2};
+
+    const bool b = length1 < length2; // b is true
+
+Run-Time Mode 
+------------- 
+
+Introduction 
+^^^^^^^^^^^^
+Maxwell also supports specifying units at run-time using the :code:`quantity_holder` class template.
+The :code:`quantity_holder` class template has the following declaration:
+
+.. code-block:: c++
+
+    template <auto Quantity, typename T = double>
+    class quantity_holder;
+
+In this declaration, :code:`Quantity` is an object that represents the kind of quantity the quantity holder belongs to. 
+Like the :code:`quantity_value` class template, the :code:`Quantity` template parameter is a non-type template parameter. 
+
+Constructing Quantity Holders 
+-----------------------------
+
+There are several ways to construct a :code:`quantity_holder` instance.
+Most of the constructors are similar to those of :code:`quantity_value` except that the units must be specified in the constructor.
+The units parameter is always the first parameter to the constructor. 
+  
+.. code-block:: c++ 
+
+    // Can hold a length quantity with any units
+    const maxwell::isq::length_holder<> l1{si::meter_unit, 100.0}; // 100 meters
+    const maxwell::isq::length_holder<std::complex<double>> l2{si::meter_unit, std::in_place, 3.0, 4.0}; // 3.0 + 4.0i meters
+    const maxwell::isq::length_holder<std::vector<double>> l3{si::foot_unit, std::in_place, {10.0, 20.0, 30.0}}; // vector of lengths in feet
+
+When constructing from an instance of :code:`std::chrono::duration`, the units parameter is not required.
+
+.. code-block:: c++ 
+
+    const maxwell::isq::time_holder<> t1{std::chrono::seconds{120}}; // t1 holds 120 seconds
+
+Instances of :code:`quantity_holder` can also be constructed from other compatible :code:`quantity_holder` instances.
+The units stored in the :code:`quantity_holder` will be the units of the :code:`quantity_value` used to construct the :code:`quantity_holder`.
+In this case, the units do not need to provided separately to the constructor. 
+
+.. code-block:: c++ 
+
+    const maxwell::isq::length_holder<> l4 = maxwell::si::meter<>{100.0}; // l4 holds 100 meters
+
+Many type aliases for :code:`quantity_holder` instances that can hold common quantities are provided in the :code:`maxwell::isq` namespace.
+For a complete list, see :doc:`predefined_units`.
+
+Once the units of a :code:`quantity_holder` instance are specified, they cannot be changed. 
+Assigning to a :code:`quantity_holder` instance from another :code:`quantity_holder` or :code:`quantity_value` instance does not change the units of the target instance.
+
+.. code-block:: c++ 
+
+    maxwell::isq::length_holder<> l5{si::meter_unit, 100.0}; // l5 holds 100 meters
+    l5 = maxwell::si::kilometer<>{0.2}; // l5 now holds 200 meters (units unchanged)
+
+
+:code:`quantity_holder` instances support class template argument deduction (CTAD). 
+The quantity represented by the :code:`quantity_holder` is deduced from the initialization expression.
+
+.. code-block:: c++ 
+
+    const maxwell::quantity_holder l6 = maxwell::si::foot<>{10.0}; // l6 holds 10 feet
+
+.. important:: 
+
+    Unlike :code:`quantity_value`, instances of :code:`quantity_holder` are not trivially copyable if the underlying type is not trivially copyable.
+
+Operations on :code:`quantity_holder`
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

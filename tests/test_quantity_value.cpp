@@ -5,6 +5,7 @@
 #include <sstream>
 #include <type_traits>
 
+#include "quantity_systems/us.hpp"
 #include "test_types.hpp"
 
 using namespace maxwell;
@@ -309,6 +310,12 @@ TEST(TestQuantityValue, TestInBaseUnits) {
 
   EXPECT_FLOAT_EQ(m.get_value_unsafe(), 1'000);
   EXPECT_EQ(m.get_units(), si::meter_unit);
+
+  const us::fahrenheit f{50.0};
+  const auto K = f.in_base_units();
+
+  EXPECT_FLOAT_EQ(K.get_value_unsafe(), 283.15);
+  EXPECT_EQ(K.get_units(), si::kelvin_unit);
 }
 
 TEST(TestQuantityValue, TestIn) {
