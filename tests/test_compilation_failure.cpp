@@ -2,6 +2,7 @@
 #include "quantity_systems/si.hpp"
 #include "utility/type_traits.hpp"
 
+#include <complex>
 #include <vector>
 
 int main() {
@@ -136,6 +137,33 @@ int main() {
 
 #ifdef TEST_INVALID_QUANTITY_VALUE_ADDITION_4
   si::radian<> angle = si::degree<>{180.0} + 5.0;
+#endif
+
+#ifdef TEST_INVALID_QUANTITY_HOLDER_CONSTRUCTOR_1
+  [[maybe_unused]] isq::length_holder<> l{si::ampere_uit};
+#endif
+
+#ifdef TEST_INVALID_QUANTITY_HOLDER_CONSTRUCTOR_2
+  [[maybe_unused]] isq::length_holder<> l{si::ampere_unit, 5.0};
+#endif
+
+#ifdef TEST_INVALID_QUANTITY_HOLDER_CONSTRUCTOR_3
+  [[maybe_unused]] isq::length_holder<std::complex<double>> l{
+      si::ampere_unit, std::in_place, 3.0, 4.0};
+#endif
+
+#ifdef TEST_INVALID_QUANTITY_HOLDER_CONSTRUCTOR_4
+  [[maybe_unused]] isq::length_holder<> l{si::meter_unit, 5.0, 6.0};
+#endif
+
+#ifdef TEST_INVALID_QUANTITY_HOLDER_CONSTRUCTOR_5
+  [[maybe_unused]] isq::length_holder<std::vector<double>> l{
+      si::ampere_unit, std::in_place, {1.0, 2.0, 3.0}};
+#endif
+
+#ifdef TEST_INVALID_QUANTITY_HOLDER_CONSTRUCTOR_6
+  [[maybe_unused]] isq::length_holder<std::vector<double>> l{
+      si::meter_unit, std::in_place, {1.0, 2.0, 3.0}, 1.0};
 #endif
 
   return 0;

@@ -1,4 +1,5 @@
 #include "Maxwell.hpp"
+#include "core/dimension.hpp"
 
 #include <gtest/gtest.h>
 
@@ -328,6 +329,14 @@ TEST(TestQuantityMath, TestSqrt) {
   const isq::length_holder<> length2 = sqrt(area2);
   EXPECT_FLOAT_EQ(length2.get_value_unsafe(), 4.0);
   EXPECT_EQ(length2.get_multiplier(), 1e2);
+
+  const quantity_value sqrt_length = sqrt(length);
+  EXPECT_FLOAT_EQ(sqrt_length.get_value_unsafe(), std::sqrt(3.0));
+
+  const unit auto units = sqrt_length.get_units();
+  const auto dims_tuple = units.dimensions.as_tuple();
+
+  EXPECT_EQ(std::get<0>(dims_tuple), (dimension_type<"L", rational<1, 2>>{}));
 }
 
 TEST(TestQuantityMath, TestCbrt) {

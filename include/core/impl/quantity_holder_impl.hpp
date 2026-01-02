@@ -11,7 +11,9 @@ constexpr quantity_holder<Q, T>::quantity_holder(
     const unit auto units) noexcept(std::is_nothrow_default_constructible_v<T>)
   requires std::is_default_constructible_v<T>
     : multiplier_(units.multiplier), reference_(units.reference) {
-  static_assert(quantity_convertible_to<units.quantity, Q>);
+  static_assert(
+      quantity_convertible_to<units.quantity, Q>,
+      "Cannot construct quantity_holder from units with incompatible quantity");
 }
 
 template <auto Q, typename T>
@@ -23,9 +25,9 @@ template <typename Up>
 constexpr quantity_holder<Q, T>::quantity_holder(const unit auto units, Up&& u)
     : value_(std::forward<Up>(u)), multiplier_(units.multiplier),
       reference_(units.reference) {
-  static_assert(quantity_convertible_to<Q, decltype(units)::quantity>,
-                "Cannot convert from units of other to quantity of value "
-                "being constructed");
+  static_assert(
+      quantity_convertible_to<Q, decltype(units)::quantity>,
+      "Cannot construct quantity_holder from units with incompatible quantity");
 }
 
 template <auto Q, typename T>
@@ -48,7 +50,11 @@ constexpr quantity_holder<Q, T>::quantity_holder(const unit auto units,
                                                  std::in_place_t,
                                                  Args&&... args)
     : value_(std::forward<Args>(args)...), multiplier_(units.multiplier),
-      reference_(units.reference) {}
+      reference_(units.reference) {
+  static_assert(
+      quantity_convertible_to<units.quantity, Q>,
+      "Cannot construct quantity_holder from units with incompatible quantity");
+}
 
 template <auto Q, typename T>
   requires quantity<decltype(Q)>
@@ -59,7 +65,11 @@ constexpr quantity_holder<Q, T>::quantity_holder(const unit auto units,
                                                  std::initializer_list<U> il,
                                                  Args&&... args)
     : value_(il, std::forward<Args>(args)...), multiplier_(units.multiplier),
-      reference_(units.reference) {}
+      reference_(units.reference) {
+  static_assert(
+      quantity_convertible_to<units.quantity, Q>,
+      "Cannot construct quantity_holder from units with incompatible quantity");
+}
 
 template <auto Q, typename T>
   requires quantity<decltype(Q)>
