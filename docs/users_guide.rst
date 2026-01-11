@@ -401,3 +401,56 @@ The quantity represented by the :code:`quantity_holder` is deduced from the init
 
 Operations on :code:`quantity_holder`
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+A :code:`quantity_holder` instance can be converted to a :code:`quantity_value` instance using the :code:`as` function. 
+
+.. code-block:: c++ 
+
+    const maxwell::isq::length_holder<> length1{si::meter_unit, 1'000.0}; // 1000 meters
+    const maxwell::si::kilometer<> length2 = length1.as(si::kilometer_unit); // length2 is 1 kilometer
+
+It is also possible to obtain the numeric value of a :code:`quantity_holder` instance using the :code:`in` function. 
+You must specify the units the value should be obtained in as a parameter to the function. 
+The specified units must also be compatible with the quantity represented by the :code:`quantity_holder` instance.
+
+.. code-block:: c++ 
+
+    const maxwell::isq::length_holder<> length1{si::meter_unit, 1'000.0}; // 1000 meters
+    const double value_in_km = length1.in(si::kilometer_unit); // value_in_km is 1.0
+    const double error_value = length.in(si::second_unit); // Error - length and time are not compatible --- won't compile
+
+It is possible to determine which units are stored in a :code:`quantity_holder` instance using the :code:`contains` function.
+This function checks to see if the :code:`quantity_holder` instance contains the specified units.
+
+.. code-block:: c++ 
+
+    const maxwell::isq::length_holder<> length1{si::meter_unit, 1'000.0}; // 1000 meters
+
+    const bool b1 = length1.contains(si::meter_unit); // b1 is true
+    const bool b2 = length1.contains(si::kilometer_unit); // b2 is false
+
+Like :code:`quantity_value`, instances of :code:`quantity_holder` support all arithmetic and comparison operations supported by the underlying numeric type. 
+These operations are checked at compile-time to ensure that they are only performed on compatible quantity holders.
+However, unlike :code:`quantity_value`, unit conversions are performed at run-time. 
+Additionally, if operations are performed on two :code:`quantity_holder` instances with different units, an additional run-time check is performed to ensure that the units have the same reference point.
+If they do not, a :code:`incompatible_quantity_holder` exception is thrown.
+
+.. code-block:: c++ 
+
+    using namespace maxwell::si::symbols; 
+
+    const maxwell::isq::length_holder<> length1{si::foot_unit, 5.0 * 5.0 + 100 * 100 * cm}; // length1 is 64.5835 ft^2 
+
+    const bool b = maxwell::isq::length_holder<>{si::kilometer_unit, 100 * km} > maxwell::isq::length_holder<>{si::mile_unit, 60 * mi}; // b is true
+
+    const maxwell::isq::quantity_holder length3 = maxwell::isq::length_holder<>{si::meter_unit, 5.0 * m} + maxwell::isq::time_holder<>{si::second_unit, 10.0 * s}; // Error - length and time are not compatible --- won't compile
+
+    const maxwell::isq::quantity_holder t1{si::kelvin_unit, 300.0};
+    const maxwell::isq::quantity_holder t2{si::fahrenheit_unit, 80.33};
+
+    const auto t3 = t1 + t2; // Throws incompatible_quantity_holder exception at run-time
+
+It is possible to mix :code:`quantity_holder` and :code:`quantity_value` instances in arithmetic and comparison operations.
+The result of mixed addition and subtraction operations is a :code:`quantity_value` instance whose units are those of the :code:`quantity_value` operand.
+The result of mixed multiplication and division operations is a :code:`quantity_holder` whose units are the product/quotient of the two operands.
+

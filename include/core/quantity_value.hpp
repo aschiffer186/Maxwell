@@ -283,7 +283,8 @@ struct std::hash<maxwell::quantity_value<Q, U, T>> {
   auto operator()(const maxwell::quantity_value<Q, U, T>& q) const noexcept
       -> std::size_t {
 
-    std::size_t hash_code = std::hash<T>{}(q.get_value_unsafe());
+    std::size_t hash_code =
+        std::hash<T>{}(q.in_base_units().get_value_unsafe());
     return hash_code;
   }
 };

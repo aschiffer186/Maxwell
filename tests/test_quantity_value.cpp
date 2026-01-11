@@ -551,3 +551,20 @@ TEST(TestQuantityValue, TestFormatting) {
   const std::string rep2 = ss.str();
   EXPECT_STREQ(rep2.c_str(), "1 m");
 }
+
+TEST(TestQuantityValue, TestHash) {
+  using namespace maxwell::si::symbols;
+
+  const quantity_value q1 = 1'000 * m;
+  const quantity_value q2 = 1 * km;
+  const quantity_value q3 = 1'000 * km;
+
+  const auto h1 = std::hash<std::remove_cv_t<decltype(q1)>>{}(q1);
+  const auto h2 = std::hash<std::remove_cv_t<decltype(q2)>>{}(q2);
+
+  EXPECT_EQ(h1, h2);
+
+  const auto h3 = std::hash<std::remove_cv_t<decltype(q3)>>{}(q3);
+  EXPECT_NE(h1, h3);
+  EXPECT_NE(h2, h3);
+}
